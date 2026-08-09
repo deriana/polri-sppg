@@ -211,7 +211,7 @@ export function Pill({ label, tone = 'info', icon, dot, onPress, style }: PillPr
     <View style={[styles.badge, { backgroundColor: t.bg, borderRadius: radius.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.xs }, style]}>
       {dot && <View style={[styles.dot, { backgroundColor: t.dot }]} />}
       {icon && <Feather name={icon} size={13} color={t.fg} strokeWidth={iconStrokeWidth} />}
-      <Text style={[styles.badgeText, { color: colors.text, fontSize: fontSize.xs }]}>{label}</Text>
+      <Text style={[styles.badgeText, { color: t.fg, fontSize: fontSize.xs, flexShrink: 1 }]}>{label}</Text>
     </View>
   );
 

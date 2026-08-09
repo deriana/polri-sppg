@@ -14,8 +14,8 @@ export const CCTV_FEEDS = [
   {
     id: 'cctv_1',
     label: 'Kamera 1 - Area Pemasakan Dapur Utama',
-    videoUrl: 'https://youtu.be/C_OJtQMU52Y?si=CYYSLCTY4sbjK2FE',
-    embedUrl: 'https://www.youtube-nocookie.com/embed/C_OJtQMU52Y?autoplay=1&mute=1&loop=1&playlist=C_OJtQMU52Y&playsinline=1&enablejsapi=1&origin=https://www.youtube.com',
+    videoUrl: 'https://www.youtube.com/embed/2b1IexhKPz4?si=M7_Ni-yQ8c_AbcHo',
+    embedUrl: 'https://www.youtube-nocookie.com/embed/2b1IexhKPz4?autoplay=1&mute=1&loop=1&playlist=2b1IexhKPz4&playsinline=1&enablejsapi=1&origin=https://www.youtube.com',
     mp4Url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
     thumbnail: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
@@ -24,8 +24,8 @@ export const CCTV_FEEDS = [
   {
     id: 'cctv_2',
     label: 'Kamera 2 - Gudang Penyimpanan Cold Room',
-    videoUrl: 'https://youtu.be/C_OJtQMU52Y?si=CYYSLCTY4sbjK2FE',
-    embedUrl: 'https://www.youtube-nocookie.com/embed/C_OJtQMU52Y?autoplay=1&mute=1&loop=1&playlist=C_OJtQMU52Y&playsinline=1&enablejsapi=1&origin=https://www.youtube.com',
+    videoUrl: 'https://www.youtube.com/embed/2b1IexhKPz4?si=M7_Ni-yQ8c_AbcHo',
+    embedUrl: 'https://www.youtube-nocookie.com/embed/2b1IexhKPz4?autoplay=1&mute=1&loop=1&playlist=2b1IexhKPz4&playsinline=1&enablejsapi=1&origin=https://www.youtube.com',
     mp4Url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
     thumbnail: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
@@ -34,8 +34,8 @@ export const CCTV_FEEDS = [
   {
     id: 'cctv_3',
     label: 'Kamera 3 - Area Pemorsian & Packaging',
-    videoUrl: 'https://youtu.be/C_OJtQMU52Y?si=CYYSLCTY4sbjK2FE',
-    embedUrl: 'https://www.youtube-nocookie.com/embed/C_OJtQMU52Y?autoplay=1&mute=1&loop=1&playlist=C_OJtQMU52Y&playsinline=1&enablejsapi=1&origin=https://www.youtube.com',
+    videoUrl: 'https://www.youtube.com/embed/2b1IexhKPz4?si=M7_Ni-yQ8c_AbcHo',
+    embedUrl: 'https://www.youtube-nocookie.com/embed/2b1IexhKPz4?autoplay=1&mute=1&loop=1&playlist=2b1IexhKPz4&playsinline=1&enablejsapi=1&origin=https://www.youtube.com',
     mp4Url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
     thumbnail: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
@@ -44,8 +44,8 @@ export const CCTV_FEEDS = [
   {
     id: 'cctv_4',
     label: 'Kamera 4 - Loading Dock & Washing Bay',
-    videoUrl: 'https://youtu.be/C_OJtQMU52Y?si=CYYSLCTY4sbjK2FE',
-    embedUrl: 'https://www.youtube-nocookie.com/embed/C_OJtQMU52Y?autoplay=1&mute=1&loop=1&playlist=C_OJtQMU52Y&playsinline=1&enablejsapi=1&origin=https://www.youtube.com',
+    videoUrl: 'https://www.youtube.com/embed/2b1IexhKPz4?si=M7_Ni-yQ8c_AbcHo',
+    embedUrl: 'https://www.youtube-nocookie.com/embed/2b1IexhKPz4?autoplay=1&mute=1&loop=1&playlist=2b1IexhKPz4&playsinline=1&enablejsapi=1&origin=https://www.youtube.com',
     mp4Url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
     thumbnail: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',

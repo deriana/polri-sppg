@@ -100,12 +100,12 @@ export default function PresensiScreen({ navigation }: any) {
 
                   {/* OpenStreetMap Geofence Map Visual */}
                   <View style={{ marginTop: 4, gap: 4 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <View style={{ gap: 4 }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                         <Feather name="map-pin" size={12} color={colors.primary} />
-                        <Text style={{ fontSize: 10, fontWeight: '700', color: colors.text }}>Lokasi Presensi (OpenStreetMap Geofence):</Text>
+                        <Text style={{ fontSize: 11, fontWeight: '700', color: colors.text }}>Lokasi Presensi (OpenStreetMap Geofence)</Text>
                       </View>
-                      <Pill label="RADIUS GEOFENCE 100M VALID" tone="success" icon="check-circle" />
+                      <Pill label="RADIUS GEOFENCE 100M VALID" tone="success" icon="check-circle" style={{ alignSelf: 'flex-start' }} />
                     </View>
                     <Image source={{ uri: osmMapUrl }} style={{ width: '100%', height: 100, borderRadius: radius.sm }} resizeMode="cover" />
                   </View>

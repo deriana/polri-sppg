@@ -141,9 +141,9 @@ export default function CheckInScreen({ navigation, route }: any) {
               />
             </View>
 
-            {/* GPS Detail & Geofence Validation Pill (No Overlap) */}
-            <View style={[styles.locContainer, { backgroundColor: isGeofenceValid ? colors.successBg : colors.warningBg, borderRadius: radius.md, padding: 12 }]}>
-              <View style={{ flex: 1, gap: 2 }}>
+            {/* GPS Detail & Geofence Validation Pill */}
+            <View style={{ backgroundColor: isGeofenceValid ? colors.successBg : colors.warningBg, borderRadius: radius.md, padding: 12, gap: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                   <Feather name="map-pin" size={16} color={isGeofenceValid ? colors.success : colors.warning} />
                   <Text style={{ color: colors.text, fontSize: fontSize.xs, fontWeight: '800' }}>
@@ -151,15 +151,14 @@ export default function CheckInScreen({ navigation, route }: any) {
                   </Text>
                 </View>
                 <Text style={{ color: colors.textMuted, fontSize: 11 }}>
-                  Jarak ke Dapur: <Text style={{ fontWeight: '700', color: colors.text }}>{distanceMeters} meter</Text>
+                  Jarak: <Text style={{ fontWeight: '800', color: colors.text }}>{distanceMeters}m</Text>
                 </Text>
               </View>
 
-              {/* Clean Pill Badge without text collision */}
-              <View style={{ alignSelf: 'flex-start', marginTop: 2 }}>
+              <View style={{ borderTopWidth: 1, borderTopColor: isGeofenceValid ? 'rgba(34,197,94,0.2)' : 'rgba(234,179,8,0.2)', paddingTop: 6 }}>
                 <Pill
                   tone={isGeofenceValid ? 'success' : 'warning'}
-                  label={isGeofenceValid ? 'Radius Geofence 100m Valid' : 'Diluar Radius (Peringatan)'}
+                  label={isGeofenceValid ? 'RADIUS GEOFENCE 100M VALID' : 'DILUAR RADIUS 100M (PERINGATAN)'}
                   icon={isGeofenceValid ? 'check-circle' : 'alert-circle'}
                 />
               </View>
