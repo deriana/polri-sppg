@@ -37,8 +37,9 @@ export interface Sppg {
   wilayahPolda: string;
   kapasitasProduksi: number;
   fotoDapur: string | null;
-  fotoUnit?: string | null;
   status: 'aktif' | 'nonaktif';
+  lat: number; // lokasi dapur — titik asal rute pengiriman di peta
+  lng: number;
 }
 
 export interface Sekolah {
@@ -201,6 +202,22 @@ export interface MenuHarianPlan {
   fotoMenu?: string | null;
 }
 
+export type UsulanMenuStatus = 'diajukan' | 'disetujui' | 'ditolak';
+
+// Usulan menu dari pihak sekolah ke SPPG. Sekolah tidak punya akun/login sendiri
+// di app ini (sama seperti PublicReport untuk aduan masyarakat) — usulan dicatat
+// sebagai data lalu ditinjau oleh Kepala SPPG.
+export interface UsulanMenu {
+  id: string;
+  sppgId: string;
+  sekolahId: string;
+  usulanMenu: string;
+  alasan?: string | null;
+  tanggal: string; // YYYY-MM-DD
+  status: UsulanMenuStatus;
+  tanggapan?: string | null;
+}
+
 // ==========================================
 // FASE 2 (SIMULASI) — sensor IoT, CCTV AI, rantai pasok, distribusi GPS, chat.
 // Semua fitur di bawah ini adalah data tiruan lokal (tanpa backend/perangkat
@@ -263,6 +280,8 @@ export interface Mitra {
   alamat?: string;
   rating?: number;
   kategoriPasok?: string[];
+  lat: number; // lokasi gudang/pabrik mitra — titik asal rute pengiriman bahan baku di peta
+  lng: number;
 }
 
 export interface PermintaanBahan {
@@ -284,6 +303,7 @@ export interface DistribusiRute {
   estimasiTiba: string;
   lat: number;
   lng: number;
+  buktiFoto?: string | null; // foto bukti serah terima, diambil petugas saat konfirmasi status "tiba"
 }
 
 export interface ChatMessage {

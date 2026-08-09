@@ -28,6 +28,14 @@ import RequestBahanFormScreen from '../screens/RequestBahanFormScreen';
 import RiwayatPermintaanScreen from '../screens/RiwayatPermintaanScreen';
 import QrScanScreen from '../screens/QrScanScreen';
 import DistribusiScreen from '../screens/DistribusiScreen';
+import DistribusiDetailScreen from '../screens/DistribusiDetailScreen';
+import RiwayatDistribusiScreen from '../screens/RiwayatDistribusiScreen';
+import PermintaanBahanDetailScreen from '../screens/PermintaanBahanDetailScreen';
+import UsulanMenuScreen from '../screens/UsulanMenuScreen';
+import UsulanMenuFormScreen from '../screens/UsulanMenuFormScreen';
+import PayrollScreen from '../screens/PayrollScreen';
+import PayrollDetailScreen from '../screens/PayrollDetailScreen';
+import SekolahFormScreen from '../screens/SekolahFormScreen';
 import ChatCommandCenterScreen from '../screens/ChatCommandCenterScreen';
 import MenuKalenderScreen from '../screens/MenuKalenderScreen';
 import MitraListScreen from '../screens/MitraListScreen';
@@ -70,6 +78,14 @@ const DETAIL_SCREENS: Array<{ name: string; component: React.ComponentType<any>;
   { name: 'RiwayatPermintaan', component: RiwayatPermintaanScreen, title: 'Riwayat Permintaan Bahan' },
   { name: 'QrScan', component: QrScanScreen, title: 'Pindai QR Verifikasi Stok' },
   { name: 'Distribusi', component: DistribusiScreen, title: 'Distribusi Armada GPS' },
+  { name: 'DistribusiDetail', component: DistribusiDetailScreen, title: 'Detail Pengiriman' },
+  { name: 'RiwayatDistribusi', component: RiwayatDistribusiScreen, title: 'Log Pengiriman' },
+  { name: 'PermintaanBahanDetail', component: PermintaanBahanDetailScreen, title: 'Lacak Pengiriman Bahan' },
+  { name: 'UsulanMenu', component: UsulanMenuScreen, title: 'Usulan Menu Sekolah' },
+  { name: 'UsulanMenuForm', component: UsulanMenuFormScreen, title: 'Ajukan Usulan Menu' },
+  { name: 'Payroll', component: PayrollScreen, title: 'Payroll & Slip Gaji' },
+  { name: 'PayrollDetail', component: PayrollDetailScreen, title: 'Slip Gaji Pegawai' },
+  { name: 'SekolahForm', component: SekolahFormScreen, title: 'Tambah Sekolah Afiliasi' },
   { name: 'ChatCommandCenter', component: ChatCommandCenterScreen, title: 'Chat Command Center' },
   { name: 'MenuKalender', component: MenuKalenderScreen, title: 'Kalender Menu' },
   { name: 'MasterMenu', component: MasterMenuScreen, title: 'Master Katalog & Resep Gizi' },

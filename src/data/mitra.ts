@@ -14,6 +14,8 @@ export const mitraList: Mitra[] = [
     alamat: 'Jl. Industri Roti No. 45, Cimahi, Bandung',
     rating: 4.8,
     kategoriPasok: ['Roti Tawar', 'Roti Manis', 'Gandum'],
+    lat: -6.8721,
+    lng: 107.5425,
   },
   {
     id: 'MITRA-002',
@@ -28,6 +30,8 @@ export const mitraList: Mitra[] = [
     alamat: 'Kawasan Peternakan Unggas Terpadu No. 12, Sawangan, Depok',
     rating: 4.9,
     kategoriPasok: ['Daging Ayam Fillet', 'Ayam Utuh Potong', 'Telur Ayam Grade A'],
+    lat: -6.4025,
+    lng: 106.7942,
   },
   {
     id: 'MITRA-003',
@@ -42,6 +46,8 @@ export const mitraList: Mitra[] = [
     alamat: 'Kawasan Pergudangan Logistik beras No. 88, Karawang',
     rating: 4.9,
     kategoriPasok: ['Beras Cianjur', 'Beras Pandan Wangi', 'Beras Merah Organik'],
+    lat: -6.3227,
+    lng: 107.3376,
   },
   {
     id: 'MITRA-004',
@@ -56,6 +62,8 @@ export const mitraList: Mitra[] = [
     alamat: 'Sentra Pertanian Hidroponik Blok C, Batu, Malang',
     rating: 4.5,
     kategoriPasok: ['Bayam Hidroponik', 'Kangkung Organik', 'Wortel Segar', 'Buah Pisang'],
+    lat: -7.8706,
+    lng: 112.5239,
   },
   {
     id: 'MITRA-005',
@@ -70,6 +78,8 @@ export const mitraList: Mitra[] = [
     alamat: 'Kawasan Industri Jababeka 2 Blok D, Cikarang',
     rating: 4.9,
     kategoriPasok: ['Ompreng Stainless 5 Sekat', 'Thermal Insulation Box 80L', 'Sendok Stainless'],
+    lat: -6.2585,
+    lng: 107.1521,
   },
   {
     id: 'MITRA-006',
@@ -84,6 +94,8 @@ export const mitraList: Mitra[] = [
     alamat: 'Jl. Rungkut Industri Raya No. 10, Surabaya',
     rating: 4.7,
     kategoriPasok: ['Minyak Goreng Sawit 2L', 'Garam Beryodium', 'Bumbu Rempah Racik'],
+    lat: -7.3305,
+    lng: 112.7539,
   },
   {
     id: 'MITRA-007',
@@ -98,6 +110,8 @@ export const mitraList: Mitra[] = [
     alamat: 'Jl. Raya Lembang No. 204, Bandung Barat',
     rating: 4.2,
     kategoriPasok: ['Telur Ayam Omega 3'],
+    lat: -6.8114,
+    lng: 107.6178,
   },
   {
     id: 'MITRA-008',
@@ -112,5 +126,7 @@ export const mitraList: Mitra[] = [
     alamat: 'Pasar Induk Cibitung Blok B-12, Bekasi',
     rating: 4.4,
     kategoriPasok: ['Wortel Segar', 'Buncis', 'Kentang', 'Bawang Merah & Putih'],
+    lat: -6.2477,
+    lng: 107.1244,
   },
 ];

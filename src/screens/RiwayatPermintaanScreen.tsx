@@ -110,8 +110,10 @@ export default function RiwayatPermintaanScreen({ navigation }: any) {
                   <Text style={{ color: colors.primary, fontWeight: '700', fontSize: fontSize.xs }}>
                     Jumlah Pengajuan: {p.jumlah} {bahan?.satuan ?? 'unit'}
                   </Text>
-                  {mitra && (
+                  {mitra ? (
                     <Text style={{ color: colors.textMuted, fontSize: 10 }}>Pemasok: {mitra.nama}</Text>
+                  ) : (
+                    <Text style={{ color: colors.textMuted, fontSize: 10 }}>Tujuan: BGN Pusat (belum ada mitra tetap)</Text>
                   )}
                 </View>
               </View>
@@ -143,6 +145,13 @@ export default function RiwayatPermintaanScreen({ navigation }: any) {
                   <Text style={{ color: colors.textMuted, fontSize: fontSize.xs, flex: 1 }}>Catatan: {p.catatan}</Text>
                 </View>
               )}
+
+              <PrimaryButton
+                label="Lacak Pengiriman (Peta)"
+                icon="map-pin"
+                variant="outline"
+                onPress={() => navigation.navigate('PermintaanBahanDetail', { permintaanId: p.id })}
+              />
 
               {canAdvance && nextStatus && (
                 <PrimaryButton

@@ -103,7 +103,7 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
         <PrimaryButton
           label="Lacak Posisi Armada Pengiriman (Live Tracking)"
           icon="truck"
-          onPress={() => navigation.navigate('Distribusi', { ruteId: ruteDistribusi.id })}
+          onPress={() => navigation.navigate('DistribusiDetail', { ruteId: ruteDistribusi.id })}
         />
       )}
 

@@ -18,6 +18,7 @@ import {
   mutasiStokList as initialMutasiStok,
   publicReportList as initialPublicReports,
   peralatanList as initialPeralatanList,
+  usulanMenuList as initialUsulanMenu,
   CCTV_ANOMALI_LABEL,
   findAccount,
 } from '../data';
@@ -43,6 +44,7 @@ import {
   Sppg,
   User,
   MasterMenu,
+  UsulanMenu,
 } from '../types';
 import { MASTER_MENU_CATALOG } from '../data/masterMenu';
 
@@ -85,12 +87,16 @@ interface AppContextValue {
   publicReportList: PublicReport[];
   submitPublicReport: (report: Omit<PublicReport, 'id' | 'timestamp' | 'status'>) => void;
   updatePublicReportStatus: (id: string, status: PublicReport['status'], tanggapan?: string) => void;
+  usulanMenuList: UsulanMenu[];
+  submitUsulanMenu: (usulan: Omit<UsulanMenu, 'id' | 'status' | 'tanggapan'>) => void;
+  updateUsulanMenuStatus: (id: string, status: UsulanMenu['status'], tanggapan?: string) => void;
   cctvEvents: CctvEvent[];
   bahanBakuList: BahanBaku[];
   permintaanBahanList: PermintaanBahan[];
   distribusiList: DistribusiRute[];
   chatMessages: ChatMessage[];
   sekolahList: Sekolah[];
+  addSekolah: (sekolah: Omit<Sekolah, 'id'>) => void;
   menuHarianPlanList: MenuHarianPlan[];
   setMenuForDate: (sppgId: string, tanggal: string, menu: string, kategoriGizi?: string, fotoMenu?: string) => void;
   mitraList: Mitra[];
@@ -102,7 +108,7 @@ interface AppContextValue {
   simulateCctvDetection: (sppgId: string) => void;
   ajukanPermintaanBahan: (payload: Omit<PermintaanBahan, 'id' | 'status' | 'tanggal'>) => void;
   updatePermintaanStatus: (id: string, status: PermintaanBahan['status']) => void;
-  updateDistribusiStatus: (id: string, status: DistribusiRute['status']) => void;
+  updateDistribusiStatus: (id: string, status: DistribusiRute['status'], buktiFoto?: string) => void;
   sendChatMessage: (sppgId: string, text: string) => void;
   addStaff: (user: Omit<User, 'id'>) => void;
   removeStaff: (userId: string) => void;
@@ -124,6 +130,7 @@ const AppContext = createContext<AppContextValue | null>(null);
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [progressProduksiRealtime, setProgressProduksiRealtime] = useState<number>(1240);
   const [publicReportList, setPublicReportList] = useState<PublicReport[]>(initialPublicReports);
+  const [usulanMenuList, setUsulanMenuList] = useState<UsulanMenu[]>(initialUsulanMenu);
   const [peralatanList, setPeralatanList] = useState<Peralatan[]>(initialPeralatanList);
   const [role, setRole] = useState<Role | null>(null);
   const [loggedIn, setLoggedIn] = useState(false);
@@ -199,24 +206,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  const submitUsulanMenu: AppContextValue['submitUsulanMenu'] = (usulan) => {
+    const id = `UM-${String(usulanMenuList.length + 1).padStart(3, '0')}`;
+    setUsulanMenuList((prev) => [{ ...usulan, id, status: 'diajukan', tanggapan: null }, ...prev]);
+  };
+
+  const updateUsulanMenuStatus: AppContextValue['updateUsulanMenuStatus'] = (id, status, tanggapan) => {
+    setUsulanMenuList((prev) => prev.map((u) => (u.id === id ? { ...u, status, tanggapan: tanggapan ?? u.tanggapan } : u)));
+  };
+
   useEffect(() => {
     const interval = setInterval(() => {
       // 1. Live auto-increment production counter
       setProgressProduksiRealtime((prev) => prev + Math.floor(Math.random() * 4) + 1);
 
-      // 2. Simulated GPS movement for active distribution routes
-      setDistribusiList((prev) =>
-        prev.map((d) => {
-          if (d.status === 'dalam_perjalanan') {
-            const latDelta = (Math.random() - 0.48) * 0.0002;
-            const lngDelta = (Math.random() - 0.48) * 0.0002;
-            return { ...d, lat: Number((d.lat + latDelta).toFixed(6)), lng: Number((d.lng + lngDelta).toFixed(6)) };
-          }
-          return d;
-        })
-      );
-
-      // 3. Simulated warehouse IoT sensor fluctuations
+      // 2. Simulated warehouse IoT sensor fluctuations
       setFoodSafetyList((prev) =>
         prev.map((f, idx) => {
           if (idx === 0 && f.sumberSuhu === 'sensor_iot') {
@@ -259,6 +263,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const removeStaff: AppContextValue['removeStaff'] = (userId) => {
     setUsers((prev) => prev.filter((u) => u.id !== userId));
+  };
+
+  const addSekolah: AppContextValue['addSekolah'] = (sekolah) => {
+    const id = `SKL-${String(sekolahList.length + 1).padStart(3, '0')}`;
+    setSekolahList((prev) => [...prev, { ...sekolah, id }]);
   };
 
   const checkIn: AppContextValue['checkIn'] = (userId, fotoUri, geotag) => {
@@ -452,8 +461,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Fase 2 (SIMULASI) — status distribusi armada dimajukan manual dari layar, bukan
   // dari pelacakan GPS sungguhan.
-  const updateDistribusiStatus: AppContextValue['updateDistribusiStatus'] = (id, status) => {
-    setDistribusiList((prev) => prev.map((d) => (d.id === id ? { ...d, status } : d)));
+  const updateDistribusiStatus: AppContextValue['updateDistribusiStatus'] = (id, status, buktiFoto) => {
+    setDistribusiList((prev) => prev.map((d) => (d.id === id ? { ...d, status, ...(buktiFoto ? { buktiFoto } : {}) } : d)));
   };
 
   // Menu Kalender — upsert: update the plan already at sppgId+tanggal, else insert.
@@ -523,12 +532,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       publicReportList,
       submitPublicReport,
       updatePublicReportStatus,
+      usulanMenuList,
+      submitUsulanMenu,
+      updateUsulanMenuStatus,
       cctvEvents,
       bahanBakuList,
       permintaanBahanList,
       distribusiList,
       chatMessages,
       sekolahList,
+      addSekolah,
       menuHarianPlanList,
       masterMenuList,
       addMasterMenu,
@@ -559,6 +572,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [
       progressProduksiRealtime,
       publicReportList,
+      usulanMenuList,
       role,
       loggedIn,
       currentUser,

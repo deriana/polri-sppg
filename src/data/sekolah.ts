@@ -25,7 +25,7 @@ export const sekolahList: Sekolah[] = [
     nama: 'SMPN 5 Bandung',
     alamat: 'Jl. Sumatera No. 40, Bandung',
     jumlahSiswa: 560,
-    fotoSekolah: SPPG_ASSET_MAP.sekolah_3,
+    fotoSekolah: SPPG_ASSET_MAP.sekolah_4,
   },
   {
     id: 'SKL-004',
@@ -33,7 +33,7 @@ export const sekolahList: Sekolah[] = [
     nama: 'SDN Coblong 03',
     alamat: 'Jl. Ir. H. Djuanda, Bandung',
     jumlahSiswa: 180,
-    fotoSekolah: SPPG_ASSET_MAP.sekolah_4,
+    fotoSekolah: SPPG_ASSET_MAP.sekolah_3,
   },
 
   // SPPG-002 — Jakarta Selatan

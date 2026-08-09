@@ -11,6 +11,8 @@ export const sppgList: Sppg[] = [
     kapasitasProduksi: 1500,
     fotoDapur: SPPG_ASSET_MAP.sppg_1,
     status: 'aktif',
+    lat: -6.9280,
+    lng: 107.6070,
   },
   {
     id: 'SPPG-002',
@@ -21,6 +23,8 @@ export const sppgList: Sppg[] = [
     kapasitasProduksi: 2000,
     fotoDapur: SPPG_ASSET_MAP.sppg_2,
     status: 'aktif',
+    lat: -6.2970,
+    lng: 106.7930,
   },
   {
     id: 'SPPG-003',
@@ -31,6 +35,8 @@ export const sppgList: Sppg[] = [
     kapasitasProduksi: 1200,
     fotoDapur: SPPG_ASSET_MAP.sppg_3,
     status: 'aktif',
+    lat: -7.2280,
+    lng: 112.7950,
   },
   {
     id: 'SPPG-004',
@@ -41,6 +47,8 @@ export const sppgList: Sppg[] = [
     kapasitasProduksi: 1000,
     fotoDapur: SPPG_ASSET_MAP.suasana_sppg_1,
     status: 'aktif',
+    lat: -6.2300,
+    lng: 106.9700,
   },
   {
     id: 'SPPG-005',
@@ -51,6 +59,8 @@ export const sppgList: Sppg[] = [
     kapasitasProduksi: 1800,
     fotoDapur: SPPG_ASSET_MAP.suasana_sppg_2,
     status: 'aktif',
+    lat: -6.9820,
+    lng: 110.4110,
   },
   {
     id: 'SPPG-006',
@@ -61,5 +71,7 @@ export const sppgList: Sppg[] = [
     kapasitasProduksi: 1600,
     fotoDapur: SPPG_ASSET_MAP.suasana_sppg_3,
     status: 'aktif',
+    lat: -3.5860,
+    lng: 98.6820,
   },
 ];

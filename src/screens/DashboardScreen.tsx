@@ -6,7 +6,7 @@ import { useTheme } from '../context/ThemeContext';
 import { Card, KpiCard, Pill, SectionTitle, StatusBadge, SyncStatusBadge, EmptyState } from '../components/ui';
 import { useScopedData, usePendingSyncCount } from '../hooks';
 import { AlertLog, AlertTingkat } from '../types';
-import { ROLE_LABEL, roleScopeLabel, scopePolresInPolda } from '../utils/scope';
+import { ROLE_LABEL, ROLE_PERMISSIONS, roleScopeLabel, scopePolresInPolda } from '../utils/scope';
 import { syncOfflineQueue } from '../utils/offlineQueue';
 
 function todayDate(): string {
@@ -222,8 +222,8 @@ export default function DashboardScreen({ navigation }: any) {
                 style={[styles.sppgCard, { backgroundColor: colors.background, borderRadius: radius.md, padding: 12 }]}
               >
                 <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
-                  {s.fotoUnit ? (
-                    <Image source={{ uri: s.fotoUnit }} style={{ width: 50, height: 50, borderRadius: radius.sm }} />
+                  {s.fotoDapur ? (
+                    <Image source={{ uri: s.fotoDapur }} style={{ width: 50, height: 50, borderRadius: radius.sm }} />
                   ) : (
                     <View style={{ width: 50, height: 50, borderRadius: radius.sm, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
                       <Feather name="home" size={24} color={colors.primary} />
@@ -379,9 +379,21 @@ export default function DashboardScreen({ navigation }: any) {
       </View>
 
       {/* Sekolah Afiliasi SPPG Card */}
-      {sekolahBina.length > 0 && (
+      {!!role && ROLE_PERMISSIONS[role].canManageStaff && (
         <Card style={{ gap: spacing.sm }}>
-          <SectionTitle style={{ marginBottom: 0 }}>Sekolah Afiliasi SPPG Ini ({sekolahBina.length} Sekolah)</SectionTitle>
+          <SectionTitle
+            style={{ marginBottom: 0 }}
+            action={
+              <Pressable onPress={() => navigation.navigate('SekolahForm')} hitSlop={8}>
+                <Text style={{ color: colors.primary, fontWeight: '700', fontSize: fontSize.xs }}>+ Tambah</Text>
+              </Pressable>
+            }
+          >
+            Sekolah Afiliasi SPPG Ini ({sekolahBina.length} Sekolah)
+          </SectionTitle>
+          {sekolahBina.length === 0 && (
+            <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Belum ada sekolah afiliasi. Tambahkan sekolah pertama SPPG ini.</Text>
+          )}
           {sekolahBina.map((sch) => (
             <Pressable
               key={sch.id}

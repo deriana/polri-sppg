@@ -36,10 +36,12 @@ export default function MoreMenuScreen({ navigation }: any) {
   items.push({ key: 'Presensi', icon: 'clipboard', label: 'Rekap Presensi Staf', desc: 'Pantau rekap & bukti selfie hadir seluruh staf SPPG' });
   if (permissions.canManageStaff) {
     items.push({ key: 'StaffList', icon: 'users', label: 'Data Staf Dapur', desc: 'Kelola 47-52 petugas lapangan & relawan SPPG' });
+    items.push({ key: 'Payroll', icon: 'dollar-sign', label: 'Payroll & Slip Gaji', desc: 'Gaji pokok, tunjangan, & unduh slip gaji tiap pegawai' });
   }
   items.push({ key: 'SppgProfile', icon: 'home', label: 'Profil SPPG', desc: 'Info dapur & kapasitas produksi' });
   items.push({ key: 'MenuKalender', icon: 'calendar', label: 'Kalender Menu', desc: 'Lihat & atur menu per tanggal, status kirim per sekolah' });
   items.push({ key: 'MasterMenu', icon: 'book-open', label: 'Master Katalog & Resep Gizi', desc: 'Kelola master resep makanan, gizi AKG, & porsi' });
+  items.push({ key: 'UsulanMenu', icon: 'edit-3', label: 'Usulan Menu Sekolah', desc: 'Usulan menu dari sekolah & tinjauan SPPG' });
   items.push({ key: 'AduanMasyarakat', icon: 'message-square', label: 'Aduan Masyarakat', desc: 'Laporan pengaduan publik & respon SPPG' });
   items.push({ key: 'Notifikasi', icon: 'bell', label: 'Notifikasi', desc: 'Pengingat tugas & riwayat alert' });
   items.push({ key: 'Profile', icon: 'user', label: 'Profil Saya', desc: 'Info akun & data pribadi' });
@@ -51,6 +53,7 @@ export default function MoreMenuScreen({ navigation }: any) {
     { key: 'RiwayatPermintaan', icon: 'clipboard', label: 'Riwayat Permintaan Bahan', desc: 'Riwayat pengajuan ke gudang' },
     { key: 'MitraList', icon: 'users', label: 'Mitra Pemasok', desc: 'Supplier/pabrik bahan baku per kategori' },
     { key: 'Distribusi', icon: 'truck', label: 'Distribusi Armada GPS', desc: 'Pelacakan GPS live armada pengiriman' },
+    { key: 'RiwayatDistribusi', icon: 'clipboard', label: 'Log Pengiriman Sekolah', desc: 'Riwayat semua pengiriman ke sekolah, semua tanggal' },
     { key: 'ChatCommandCenter', icon: 'message-circle', label: 'Chat Command Center', desc: 'Komunikasi langsung dengan pengawas' },
   ];
 

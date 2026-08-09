@@ -1,4 +1,5 @@
 import { LaporanProduksi } from '../types';
+import { SPPG_ASSET_MAP } from './sppgAssetMap';
 
 export const laporanList: LaporanProduksi[] = [
   {
@@ -12,7 +13,7 @@ export const laporanList: LaporanProduksi[] = [
     foto: [
       {
         id: 'FOTO-001',
-        uri: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80',
+        uri: SPPG_ASSET_MAP.paket_nasi_liwet,
         timestamp: '2026-08-03 07:45',
         lat: -6.9147,
         lng: 107.6098,
@@ -34,7 +35,7 @@ export const laporanList: LaporanProduksi[] = [
     foto: [
       {
         id: 'FOTO-002',
-        uri: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80',
+        uri: SPPG_ASSET_MAP.paket_nasi_kuning,
         timestamp: '2026-08-04 07:50',
         lat: -6.9147,
         lng: 107.6098,
@@ -56,11 +57,11 @@ export const laporanList: LaporanProduksi[] = [
     foto: [
       {
         id: 'FOTO-003',
-        uri: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&auto=format&fit=crop&q=80',
+        uri: SPPG_ASSET_MAP.paket_nasi_gurame,
         timestamp: '2026-08-05 08:10',
         lat: -6.9147,
         lng: 107.6098,
-        caption: 'Dokumentasi penyajian menu sehat Ikan Gurame Bakar',
+        caption: 'Dokumentasi penyajikan menu sehat Ikan Gurame Bakar',
       },
     ],
     status: 'terkirim',
@@ -78,7 +79,7 @@ export const laporanList: LaporanProduksi[] = [
     foto: [
       {
         id: 'FOTO-004',
-        uri: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&auto=format&fit=crop&q=80',
+        uri: SPPG_ASSET_MAP.paket_nasi_uduk,
         timestamp: '2026-08-06 07:40',
         lat: -6.9147,
         lng: 107.6098,
@@ -100,7 +101,7 @@ export const laporanList: LaporanProduksi[] = [
     foto: [
       {
         id: 'FOTO-005',
-        uri: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=800&auto=format&fit=crop&q=80',
+        uri: SPPG_ASSET_MAP.paket_nasi_ayam_woku,
         timestamp: '2026-08-07 07:55',
         lat: -6.9147,
         lng: 107.6098,
@@ -122,7 +123,7 @@ export const laporanList: LaporanProduksi[] = [
     foto: [
       {
         id: 'FOTO-006',
-        uri: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80',
+        uri: SPPG_ASSET_MAP.lh06_semur_bola_daging,
         timestamp: '2026-08-08 08:05',
         lat: -6.9147,
         lng: 107.6098,

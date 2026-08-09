@@ -1,4 +1,5 @@
 import { CctvEvent } from '../types';
+import { SPPG_ASSET_MAP } from './sppgAssetMap';
 
 export const CCTV_ANOMALI_LABEL: Record<CctvEvent['anomaliType'], string> = {
   apd_tidak_lengkap: 'APD Tidak Lengkap',
@@ -16,7 +17,7 @@ export const cctvEvents: CctvEvent[] = [
     confidence: 94,
     timestamp: '2026-08-09 06:10',
     status: 'baru',
-    fotoSnapshot: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&auto=format&fit=crop&q=80',
+    fotoSnapshot: SPPG_ASSET_MAP.suasana_sppg_1,
     deskripsiTemuan: 'Model Computer Vision AI mendeteksi 2 orang petugas memasak tidak memakai sarung tangan koki & masker pelindung mulut secara sempurna.',
   },
   {
@@ -27,7 +28,7 @@ export const cctvEvents: CctvEvent[] = [
     confidence: 88,
     timestamp: '2026-08-08 14:22',
     status: 'ditinjau',
-    fotoSnapshot: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=800&auto=format&fit=crop&q=80',
+    fotoSnapshot: SPPG_ASSET_MAP.sppg_2,
     deskripsiTemuan: 'Deteksi sampah sisa bahan baku di lantai rak B-2 gudang dingin belum dibersihkan setelah proses pemindahan barang.',
   },
   {
@@ -38,7 +39,7 @@ export const cctvEvents: CctvEvent[] = [
     confidence: 91,
     timestamp: '2026-08-09 07:05',
     status: 'baru',
-    fotoSnapshot: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80',
+    fotoSnapshot: SPPG_ASSET_MAP.suasana_sppg_2,
     deskripsiTemuan: 'Kepadatan lebih dari 8 orang staf berkumpul di dekat meja pemorsian tanpa menjaga alur kerja higienis.',
   },
   {
@@ -49,7 +50,7 @@ export const cctvEvents: CctvEvent[] = [
     confidence: 82,
     timestamp: '2026-08-07 19:40',
     status: 'ditinjau',
-    fotoSnapshot: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=800&auto=format&fit=crop&q=80',
+    fotoSnapshot: SPPG_ASSET_MAP.suasana_sppg_3,
     deskripsiTemuan: 'Seseorang tanpa ID Badge petugas terdeteksi melintas di lorong area pemorsian steril di luar jam kerja produksi.',
   },
   {
@@ -60,7 +61,7 @@ export const cctvEvents: CctvEvent[] = [
     confidence: 92,
     timestamp: '2026-08-09 05:55',
     status: 'baru',
-    fotoSnapshot: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&auto=format&fit=crop&q=80',
+    fotoSnapshot: SPPG_ASSET_MAP.suasana_sppg_4,
     deskripsiTemuan: 'Wadah ompreng kotor belum langsung dicuci setelah digunakan dan diletakkan berdekatan dengan area bahan siap saji.',
   },
 ];

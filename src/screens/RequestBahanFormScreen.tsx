@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Card, DropdownPicker, EmptyState, Input, PrimaryButton, SectionTitle, Stepper } from '../components/ui';
@@ -7,7 +8,7 @@ import { ROLE_PERMISSIONS } from '../utils/scope';
 
 export default function RequestBahanFormScreen({ navigation }: any) {
   const { role, currentUser, currentSppg, bahanBakuList, ajukanPermintaanBahan } = useApp();
-  const { colors, spacing } = useTheme();
+  const { colors, spacing, fontSize, iconStrokeWidth, radius } = useTheme();
 
   const bahanOptions = useMemo(
     () => bahanBakuList.filter((b) => b.sppgId === currentSppg?.id).map((b) => ({ label: `${b.nama} (${b.satuan})`, value: b.id })),
@@ -17,6 +18,12 @@ export default function RequestBahanFormScreen({ navigation }: any) {
   const [bahanId, setBahanId] = useState(bahanOptions[0]?.value ?? '');
   const [jumlah, setJumlah] = useState(10);
   const [catatan, setCatatan] = useState('');
+
+  // Bahan tanpa mitraId = belum ada mitra pemasok tetap (mis. belum pernah
+  // dipesan lewat rantai pasok swasta) — permintaan untuk bahan ini diteruskan
+  // ke BGN Pusat, bukan ke mitra (lihat PermintaanBahanDetailScreen).
+  const selectedBahan = bahanBakuList.find((b) => b.id === bahanId);
+  const goesToPusat = !!selectedBahan && !selectedBahan.mitraId;
 
   if (!role || !ROLE_PERMISSIONS[role].canManageGudang || !currentUser || !currentSppg) {
     return (
@@ -55,7 +62,15 @@ export default function RequestBahanFormScreen({ navigation }: any) {
               placeholder="Contoh: kebutuhan mendesak untuk menu besok"
               multiline
             />
-            <PrimaryButton label="Ajukan Permintaan" icon="send" onPress={submit} />
+            {goesToPusat && (
+              <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-start', backgroundColor: colors.primaryLight, borderRadius: radius.md, padding: 10 }}>
+                <Feather name="info" size={16} color={colors.primary} strokeWidth={iconStrokeWidth} />
+                <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>
+                  Bahan ini belum ada mitra pemasok tetap — permintaan akan diteruskan ke BGN Pusat, bukan ke mitra swasta.
+                </Text>
+              </View>
+            )}
+            <PrimaryButton label={goesToPusat ? 'Ajukan ke BGN Pusat' : 'Ajukan Permintaan'} icon="send" onPress={submit} />
           </>
         )}
       </Card>
