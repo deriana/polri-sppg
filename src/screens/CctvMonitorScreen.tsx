@@ -67,7 +67,7 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaNama: 'Zona 1: Gudang & Penerimaan',
     label: 'CAM 03 - Cold Room Freezer (-18°C) & Chiller',
     localMp4Url: localVideoUri,
-    thumbnail: 'https://images.unsplash.com/photo-1584473457406-6df376d53de0?w=600&auto=format&fit=crop&q=80',
+    thumbnail: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'Suhu -18.2°C (Aman)',
   },
