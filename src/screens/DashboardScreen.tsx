@@ -95,7 +95,7 @@ function AlertPreviewList({ alerts, onSeeAll, onOpen }: { alerts: AlertLog[]; on
 }
 
 export default function DashboardScreen({ navigation }: any) {
-  const { role, currentUser, currentSppg, sppgList, progressProduksiRealtime, publicReportList } = useApp();
+  const { role, currentUser, currentSppg, sppgList, sekolahList, progressProduksiRealtime, publicReportList } = useApp();
   const { colors, spacing, fontSize, radius, iconStrokeWidth } = useTheme();
   const { laporanInScope, presensiInScope, checklistInScope, alertInScope, usersInScope, sppgInScope } = useScopedData();
   const [pendingCount, setPendingCount] = usePendingSyncCount();
@@ -208,25 +208,45 @@ export default function DashboardScreen({ navigation }: any) {
               <Text style={{ color: colors.primary, fontWeight: '700', fontSize: fontSize.xs }}>Lihat Semua</Text>
             </Pressable>
           }>
-            Daftar SPPG di Wilayah Anda
+            Daftar SPPG di Wilayah Anda ({sppgInScope.length})
           </SectionTitle>
-          {sppgInScope.slice(0, 4).map((s) => (
-            <Pressable
-              key={s.id}
-              onPress={() => navigation.navigate('SppgDetail', { sppgId: s.id })}
-              style={[styles.sppgRow, { borderBottomColor: colors.border }]}
-            >
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.sppgName, { color: colors.text, fontSize: fontSize.sm }]} numberOfLines={1}>
-                  {s.nama}
-                </Text>
-                <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }} numberOfLines={1}>
-                  {s.alamat}
-                </Text>
-              </View>
-              <StatusBadge status={derivedStatus(s.id)} />
-            </Pressable>
-          ))}
+          {sppgInScope.slice(0, 5).map((s) => {
+            const sppgAlerts = activeAlerts.filter((a) => a.sppgId === s.id);
+            const emergencyCount = sppgAlerts.filter((a) => a.tingkat === 'emergency').length;
+            const perhatianCount = sppgAlerts.filter((a) => a.tingkat === 'perhatian').length;
+
+            return (
+              <Pressable
+                key={s.id}
+                onPress={() => navigation.navigate('SppgDetail', { sppgId: s.id })}
+                style={[styles.sppgCard, { backgroundColor: colors.background, borderRadius: radius.md, padding: 12 }]}
+              >
+                <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+                  {s.fotoUnit ? (
+                    <Image source={{ uri: s.fotoUnit }} style={{ width: 50, height: 50, borderRadius: radius.sm }} />
+                  ) : (
+                    <View style={{ width: 50, height: 50, borderRadius: radius.sm, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
+                      <Feather name="home" size={24} color={colors.primary} />
+                    </View>
+                  )}
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Text style={[styles.sppgName, { color: colors.text, fontSize: fontSize.sm }]} numberOfLines={1}>
+                      {s.nama}
+                    </Text>
+                    <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }} numberOfLines={1}>
+                      Kapasitas: {s.kapasitasProduksi.toLocaleString('id-ID')} porsi • {s.wilayahPolres}
+                    </Text>
+                    <View style={{ flexDirection: 'row', gap: 6, marginTop: 4 }}>
+                      <StatusBadge status={derivedStatus(s.id)} />
+                      {emergencyCount > 0 && <Pill label={`${emergencyCount} Darurat`} tone="danger" />}
+                      {perhatianCount > 0 && <Pill label={`${perhatianCount} Perhatian`} tone="warning" />}
+                    </View>
+                  </View>
+                  <Feather name="chevron-right" size={20} color={colors.textMuted} />
+                </View>
+              </Pressable>
+            );
+          })}
         </Card>
       </ScrollView>
     );
@@ -245,6 +265,7 @@ export default function DashboardScreen({ navigation }: any) {
   const activeAlerts = sortAlerts(alertInScope.filter((a) => a.statusTindakLanjut !== 'selesai'));
 
   const isKepala = role === 'KEPALA_SPPG';
+  const sekolahBina = currentSppg ? sekolahList.filter((s) => s.sppgId === currentSppg.id) : [];
 
   const quickActions: QuickAction[] = [
     { key: 'presensi', icon: 'user-check', title: 'Presensi', subtitle: 'Absen staf hari ini', onPress: () => navigation.navigate('Presensi') },
@@ -302,10 +323,10 @@ export default function DashboardScreen({ navigation }: any) {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#22C55E' }} />
             <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.primary }}>
-              PROGRESS PRODUKSI REAL-TIME (SENSOR HITUNG)
+              TARGET & PORSI PRODUKSI HARIAN
             </Text>
           </View>
-          <Pill label="Sensor Real-Time Live" tone="primary" icon="zap" />
+          <Pill label="Target Harian" tone="primary" />
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
           <Text style={{ fontSize: 26, fontWeight: '800', color: colors.text }}>
@@ -357,6 +378,40 @@ export default function DashboardScreen({ navigation }: any) {
         />
       </View>
 
+      {/* Sekolah Afiliasi SPPG Card */}
+      {sekolahBina.length > 0 && (
+        <Card style={{ gap: spacing.sm }}>
+          <SectionTitle style={{ marginBottom: 0 }}>Sekolah Afiliasi SPPG Ini ({sekolahBina.length} Sekolah)</SectionTitle>
+          {sekolahBina.map((sch) => (
+            <Pressable
+              key={sch.id}
+              onPress={() => navigation.navigate('SekolahDetail', { sekolahId: sch.id })}
+              style={[styles.sppgCard, { backgroundColor: colors.background, borderRadius: radius.md, padding: 10 }]}
+            >
+              <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+                {sch.fotoSekolah ? (
+                  <Image source={{ uri: sch.fotoSekolah }} style={{ width: 50, height: 50, borderRadius: radius.sm }} />
+                ) : (
+                  <View style={{ width: 50, height: 50, borderRadius: radius.sm, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
+                    <Feather name="home" size={24} color={colors.primary} />
+                  </View>
+                )}
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={{ fontSize: fontSize.sm, fontWeight: '700', color: colors.text }} numberOfLines={1}>
+                    {sch.nama}
+                  </Text>
+                  <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>
+                    Target: {sch.jumlahSiswa.toLocaleString('id-ID')} siswa • {sch.alamat}
+                  </Text>
+                  <Text style={{ fontSize: 10, color: colors.primary, fontWeight: '700' }}>Lihat Detail Pengiriman Menu ➔</Text>
+                </View>
+                <Feather name="chevron-right" size={18} color={colors.textMuted} />
+              </View>
+            </Pressable>
+          ))}
+        </Card>
+      )}
+
       <SectionTitle>Aksi Cepat</SectionTitle>
       <QuickActionGrid items={quickActions} />
 
@@ -385,4 +440,5 @@ const styles = StyleSheet.create({
   alertTitle: { fontWeight: '700' },
   sppgRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 8, borderBottomWidth: 0.5 },
   sppgName: { fontWeight: '700' },
+  sppgCard: { marginBottom: 6 },
 });

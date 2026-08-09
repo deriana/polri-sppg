@@ -34,6 +34,7 @@ import MitraListScreen from '../screens/MitraListScreen';
 import MutasiStokFormScreen from '../screens/MutasiStokFormScreen';
 import AduanMasyarakatScreen from '../screens/AduanMasyarakatScreen';
 import PeralatanScreen from '../screens/PeralatanScreen';
+import SekolahDetailScreen from '../screens/SekolahDetailScreen';
 
 const Stack = createNativeStackNavigator<any>();
 
@@ -59,6 +60,7 @@ const DETAIL_SCREENS: Array<{ name: string; component: React.ComponentType<any>;
   { name: 'SppgProfile', component: SppgProfileScreen, title: 'Profil SPPG' },
   { name: 'Profile', component: ProfileScreen, title: 'Profil Saya' },
   { name: 'SppgDetail', component: SppgDetailScreen, title: 'Detail SPPG' },
+  { name: 'SekolahDetail', component: SekolahDetailScreen, title: 'Detail Sekolah Afiliasi' },
   { name: 'AduanMasyarakat', component: AduanMasyarakatScreen, title: 'Aduan Masyarakat' },
   { name: 'Peralatan', component: PeralatanScreen, title: 'Peralatan & Aset Dapur' },
   { name: 'CctvMonitor', component: CctvMonitorScreen, title: 'Monitor CCTV AI' },

@@ -1,10 +1,11 @@
-import React from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { Card, EmptyState, IconButton, Pill, PrimaryButton, SectionTitle } from '../components/ui';
+import { Card, EmptyState, IconButton, Pill, PrimaryButton, SecondaryButton, SectionTitle } from '../components/ui';
 import { useScopedData } from '../hooks';
+import { User } from '../types';
 import { ROLE_PERMISSIONS } from '../utils/scope';
 import { JOBDESK_ICON, JOBDESK_LABEL } from '../utils/jobdesk';
 
@@ -14,9 +15,11 @@ function todayDate(): string {
 
 export default function StaffListScreen({ navigation }: any) {
   const { role, removeStaff, presensiList } = useApp();
-  const { colors, spacing, fontSize, iconStrokeWidth } = useTheme();
+  const { colors, spacing, fontSize, iconStrokeWidth, radius } = useTheme();
   const { usersInScope } = useScopedData();
   const today = todayDate();
+
+  const [selectedStaff, setSelectedStaff] = useState<User | null>(null);
 
   if (!role || !ROLE_PERMISSIONS[role].canManageStaff) {
     return (
@@ -38,7 +41,7 @@ export default function StaffListScreen({ navigation }: any) {
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       <View style={styles.headerRow}>
-        <SectionTitle style={{ marginBottom: 0 }}>Data Staf ({staff.length})</SectionTitle>
+        <SectionTitle style={{ marginBottom: 0 }}>Data Staf Dapur ({staff.length})</SectionTitle>
         <PrimaryButton label="Tambah" icon="user-plus" onPress={() => navigation.navigate('StaffForm')} fullWidth={false} />
       </View>
 
@@ -46,10 +49,12 @@ export default function StaffListScreen({ navigation }: any) {
         <EmptyState icon="users" title="Belum Ada Staf" body="Tambahkan petugas lapangan pertama Anda." />
       ) : (
         staff.map((u) => {
-          const hadirHariIni = presensiList.some((p) => p.userId === u.id && p.tanggal === today && p.status === 'hadir');
+          const presensiHariIni = presensiList.find((p) => p.userId === u.id && p.tanggal === today);
+          const hadirHariIni = presensiHariIni?.status === 'hadir';
           const jobdeskIcon = u.jobdesk ? JOBDESK_ICON[u.jobdesk] : 'user';
+
           return (
-            <Card key={u.id} style={styles.row}>
+            <Card key={u.id} style={styles.row} onPress={() => setSelectedStaff(u)}>
               {u.fotoProfil ? (
                 <Image source={{ uri: u.fotoProfil }} style={styles.avatarImg} />
               ) : (
@@ -60,10 +65,10 @@ export default function StaffListScreen({ navigation }: any) {
               <View style={{ flex: 1, gap: 2 }}>
                 <Text style={[styles.name, { color: colors.text, fontSize: fontSize.sm }]}>{u.nama}</Text>
                 <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>NIK {u.nik} • {u.noHp}</Text>
-                <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Shift {u.shift ?? '-'}</Text>
+                <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Shift {u.shift ?? 'Pagi'}</Text>
                 <View style={styles.badgeRow}>
                   {u.jobdesk && <Pill label={JOBDESK_LABEL[u.jobdesk]} tone="primary" icon={jobdeskIcon} />}
-                  <Pill label={hadirHariIni ? 'Hadir Hari Ini' : 'Belum Presensi'} tone={hadirHariIni ? 'success' : 'neutral'} />
+                  <Pill label={hadirHariIni ? 'Hadir' : 'Belum Absen'} tone={hadirHariIni ? 'success' : 'neutral'} />
                 </View>
               </View>
               <View style={{ gap: 8, alignItems: 'flex-end' }}>
@@ -74,6 +79,78 @@ export default function StaffListScreen({ navigation }: any) {
           );
         })
       )}
+
+      {/* Staff Detail Modal */}
+      <Modal visible={!!selectedStaff} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <Card style={[styles.modalCard, { backgroundColor: colors.surface }]}>
+            <View style={styles.rowBetween}>
+              <Text style={{ fontSize: fontSize.md, fontWeight: '800', color: colors.text }}>Detail Staf Petugas</Text>
+              <Pressable onPress={() => setSelectedStaff(null)}>
+                <Feather name="x" size={20} color={colors.textMuted} />
+              </Pressable>
+            </View>
+
+            {selectedStaff && (() => {
+              const presensi = presensiList.find((p) => p.userId === selectedStaff.id && p.tanggal === today);
+              const isHadir = presensi?.status === 'hadir';
+              const jobIcon = selectedStaff.jobdesk ? JOBDESK_ICON[selectedStaff.jobdesk] : 'user';
+
+              return (
+                <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
+                  <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+                    {selectedStaff.fotoProfil ? (
+                      <Image source={{ uri: selectedStaff.fotoProfil }} style={{ width: 64, height: 64, borderRadius: 32 }} />
+                    ) : (
+                      <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
+                        <Feather name={jobIcon} size={28} color={colors.primary} />
+                      </View>
+                    )}
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text style={{ fontSize: fontSize.md, fontWeight: '800', color: colors.text }}>{selectedStaff.nama}</Text>
+                      <Text style={{ fontSize: fontSize.xs, color: colors.primary, fontWeight: '700' }}>
+                        {selectedStaff.kategoriPegawai === 'inti_bgn' ? 'Pegawai Inti (ASN BGN)' : 'Tenaga Operasional / Relawan Dapur'}
+                      </Text>
+                      <View style={{ flexDirection: 'row', gap: 6, marginTop: 4 }}>
+                        {selectedStaff.jobdesk && <Pill label={JOBDESK_LABEL[selectedStaff.jobdesk]} tone="primary" />}
+                        <Pill label={isHadir ? 'Hadir Hari Ini' : 'Belum Absen'} tone={isHadir ? 'success' : 'neutral'} />
+                      </View>
+                    </View>
+                  </View>
+
+                  <View style={[styles.infoBox, { backgroundColor: colors.background, borderRadius: radius.md, padding: 12, gap: 6 }]}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>NIK Pegawai:</Text>
+                      <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>{selectedStaff.nik}</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>Nomor Kontak WA/Hp:</Text>
+                      <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>{selectedStaff.noHp}</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>Shift Kerja:</Text>
+                      <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>Shift {selectedStaff.shift ?? 'Pagi'}</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>Jam Check-In Hari Ini:</Text>
+                      <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.success }}>{presensi?.jamMasuk ?? 'Belum Check-In'}</Text>
+                    </View>
+                  </View>
+
+                  {presensi?.fotoSelfieMasuk && (
+                    <View style={{ gap: 4 }}>
+                      <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>Foto Selfie Check-In:</Text>
+                      <Image source={{ uri: presensi.fotoSelfieMasuk }} style={{ width: '100%', height: 140, borderRadius: radius.md }} resizeMode="cover" />
+                    </View>
+                  )}
+
+                  <SecondaryButton label="Tutup Detail" onPress={() => setSelectedStaff(null)} style={{ marginTop: 4 }} />
+                </View>
+              );
+            })()}
+          </Card>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -87,4 +164,8 @@ const styles = StyleSheet.create({
   avatarImg: { width: 44, height: 44, borderRadius: 22 },
   name: { fontWeight: '700' },
   badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 },
+  rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  modalCard: { borderTopLeftRadius: 16, borderTopRightRadius: 16, padding: 20 },
+  infoBox: { marginTop: 4 },
 });

@@ -22,6 +22,7 @@ export interface Sppg {
   wilayahPolda: string;
   kapasitasProduksi: number;
   fotoDapur: string | null;
+  fotoUnit?: string | null;
   status: 'aktif' | 'nonaktif';
 }
 
@@ -291,6 +292,7 @@ export interface Peralatan {
   jumlahBermasalah: number;
   status: PeralatanStatus;
   lokasi: string;
+  noPlat?: string;
   fotoPeralatan?: string | null;
   catatanKondisi: string;
   terakhirDiperiksa: string;

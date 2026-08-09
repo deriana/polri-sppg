@@ -32,8 +32,10 @@ export default function MoreMenuScreen({ navigation }: any) {
   };
 
   const items: MenuItem[] = [];
+  items.push({ key: 'CheckIn', icon: 'user-check', label: 'Presensi Kehadiran Saya', desc: 'Input foto selfie & lokasi GPS presensi akun pribadi' });
+  items.push({ key: 'Presensi', icon: 'clipboard', label: 'Rekap Presensi Staf', desc: 'Pantau rekap & bukti selfie hadir seluruh staf SPPG' });
   if (permissions.canManageStaff) {
-    items.push({ key: 'StaffList', icon: 'users', label: 'Data Staf', desc: 'Kelola petugas lapangan SPPG' });
+    items.push({ key: 'StaffList', icon: 'users', label: 'Data Staf Dapur', desc: 'Kelola 47-52 petugas lapangan & relawan SPPG' });
   }
   items.push({ key: 'SppgProfile', icon: 'home', label: 'Profil SPPG', desc: 'Info dapur & kapasitas produksi' });
   items.push({ key: 'MenuKalender', icon: 'calendar', label: 'Kalender Menu', desc: 'Lihat & atur menu per tanggal, status kirim per sekolah' });
@@ -82,8 +84,8 @@ export default function MoreMenuScreen({ navigation }: any) {
         </Pressable>
       ))}
 
-      <SectionTitle style={{ marginTop: spacing.md }} action={<Pill label="Real-Time Active" tone="primary" icon="zap" />}>
-        Monitoring & Sensor Real-Time
+      <SectionTitle style={{ marginTop: spacing.md }}>
+        Modul Operasional & Monitoring Dapur
       </SectionTitle>
       {phase2Items.map((item) => (
         <Pressable
