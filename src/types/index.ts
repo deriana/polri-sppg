@@ -215,6 +215,8 @@ export interface CctvEvent {
   confidence: number;
   timestamp: string;
   status: 'baru' | 'ditinjau';
+  fotoSnapshot?: string | null;
+  deskripsiTemuan?: string;
 }
 
 export type BahanKategori = 'bahan_pokok' | 'protein' | 'sayur_buah' | 'bumbu' | 'kemasan' | 'lainnya';

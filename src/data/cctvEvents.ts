@@ -1,6 +1,5 @@
 import { CctvEvent } from '../types';
 
-// Fase 2 SIMULASI — tidak ada kamera/model AI nyata di balik data ini.
 export const CCTV_ANOMALI_LABEL: Record<CctvEvent['anomaliType'], string> = {
   apd_tidak_lengkap: 'APD Tidak Lengkap',
   kerumunan: 'Kerumunan di Area Produksi',
@@ -9,9 +8,59 @@ export const CCTV_ANOMALI_LABEL: Record<CctvEvent['anomaliType'], string> = {
 };
 
 export const cctvEvents: CctvEvent[] = [
-  { id: 'CCTV-001', sppgId: 'SPPG-001', cameraLabel: 'Kamera 1 - Dapur Utama', anomaliType: 'apd_tidak_lengkap', confidence: 87, timestamp: '2026-08-09 06:10', status: 'baru' },
-  { id: 'CCTV-002', sppgId: 'SPPG-001', cameraLabel: 'Kamera 2 - Gudang', anomaliType: 'kebersihan', confidence: 74, timestamp: '2026-08-08 14:22', status: 'ditinjau' },
-  { id: 'CCTV-003', sppgId: 'SPPG-002', cameraLabel: 'Kamera 1 - Dapur Utama', anomaliType: 'kerumunan', confidence: 91, timestamp: '2026-08-09 07:05', status: 'baru' },
-  { id: 'CCTV-004', sppgId: 'SPPG-002', cameraLabel: 'Kamera 3 - Area Terlarang', anomaliType: 'area_terlarang', confidence: 82, timestamp: '2026-08-07 19:40', status: 'ditinjau' },
-  { id: 'CCTV-005', sppgId: 'SPPG-003', cameraLabel: 'Kamera 1 - Dapur Utama', anomaliType: 'kebersihan', confidence: 68, timestamp: '2026-08-09 05:55', status: 'baru' },
+  {
+    id: 'CCTV-001',
+    sppgId: 'SPPG-001',
+    cameraLabel: 'Kamera 1 - Dapur Utama',
+    anomaliType: 'apd_tidak_lengkap',
+    confidence: 94,
+    timestamp: '2026-08-09 06:10',
+    status: 'baru',
+    fotoSnapshot: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&auto=format&fit=crop&q=80',
+    deskripsiTemuan: 'Model Computer Vision AI mendeteksi 2 orang petugas memasak tidak memakai sarung tangan koki & masker pelindung mulut secara sempurna.',
+  },
+  {
+    id: 'CCTV-002',
+    sppgId: 'SPPG-001',
+    cameraLabel: 'Kamera 2 - Gudang Cold Room',
+    anomaliType: 'kebersihan',
+    confidence: 88,
+    timestamp: '2026-08-08 14:22',
+    status: 'ditinjau',
+    fotoSnapshot: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=800&auto=format&fit=crop&q=80',
+    deskripsiTemuan: 'Deteksi sampah sisa bahan baku di lantai rak B-2 gudang dingin belum dibersihkan setelah proses pemindahan barang.',
+  },
+  {
+    id: 'CCTV-003',
+    sppgId: 'SPPG-002',
+    cameraLabel: 'Kamera 1 - Dapur Utama',
+    anomaliType: 'kerumunan',
+    confidence: 91,
+    timestamp: '2026-08-09 07:05',
+    status: 'baru',
+    fotoSnapshot: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80',
+    deskripsiTemuan: 'Kepadatan lebih dari 8 orang staf berkumpul di dekat meja pemorsian tanpa menjaga alur kerja higienis.',
+  },
+  {
+    id: 'CCTV-004',
+    sppgId: 'SPPG-002',
+    cameraLabel: 'Kamera 3 - Area Steril Kemasan',
+    anomaliType: 'area_terlarang',
+    confidence: 82,
+    timestamp: '2026-08-07 19:40',
+    status: 'ditinjau',
+    fotoSnapshot: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=800&auto=format&fit=crop&q=80',
+    deskripsiTemuan: 'Seseorang tanpa ID Badge petugas terdeteksi melintas di lorong area pemorsian steril di luar jam kerja produksi.',
+  },
+  {
+    id: 'CCTV-005',
+    sppgId: 'SPPG-003',
+    cameraLabel: 'Kamera 1 - Dapur Utama',
+    anomaliType: 'kebersihan',
+    confidence: 92,
+    timestamp: '2026-08-09 05:55',
+    status: 'baru',
+    fotoSnapshot: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&auto=format&fit=crop&q=80',
+    deskripsiTemuan: 'Wadah ompreng kotor belum langsung dicuci setelah digunakan dan diletakkan berdekatan dengan area bahan siap saji.',
+  },
 ];

@@ -410,6 +410,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const simulateCctvDetection: AppContextValue['simulateCctvDetection'] = (sppgId) => {
     const anomaliType = CCTV_ANOMALI_TYPES[cctvEvents.length % CCTV_ANOMALI_TYPES.length];
     const confidence = 70 + ((cctvEvents.length * 7) % 26);
+    const snapshots = [
+      'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=800&auto=format&fit=crop&q=80',
+    ];
     const event: CctvEvent = {
       id: `CCTV-${String(cctvEvents.length + 1).padStart(3, '0')}`,
       sppgId,
@@ -418,6 +424,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       confidence,
       timestamp: nowTimestamp(),
       status: 'baru',
+      fotoSnapshot: snapshots[cctvEvents.length % snapshots.length],
+      deskripsiTemuan: `Hasil analisis Computer Vision AI menemukan indikasi ${CCTV_ANOMALI_LABEL[anomaliType]} dengan skor keyakinan ${confidence}%. Harap petugas penanggung jawab dapur melakukan verifikasi fisik.`,
     };
     setCctvEvents((prev) => [event, ...prev]);
     addAlert({
