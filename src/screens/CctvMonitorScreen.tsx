@@ -18,38 +18,158 @@ const localVideoUri = (() => {
   }
 })();
 
-export const CCTV_FEEDS = [
+export interface CctvFeedItem {
+  id: string;
+  zonaId: string;
+  zonaNama: string;
+  label: string;
+  localMp4Url: string;
+  thumbnail: string;
+  fps: string;
+  aiStatus: string;
+}
+
+export const ZONA_CCTV = [
+  { id: 'all', nama: 'Semua Area (12 Kamera)' },
+  { id: 'z1', nama: 'Gudang & Penerimaan' },
+  { id: 'z2', nama: 'Persiapan & Cutting' },
+  { id: 'z3', nama: 'Dapur Pemasakan' },
+  { id: 'z4', nama: 'Pemorsian & QC' },
+  { id: 'z5', nama: 'Washing Bay & Sanitasi' },
+  { id: 'z6', nama: 'Dispatch Armada' },
+];
+
+export const CCTV_FEEDS: CctvFeedItem[] = [
+  // Zona 1: Gudang & Penerimaan
   {
     id: 'cctv_1',
-    label: 'Kamera 1 - Area Pemasakan Dapur Utama',
+    zonaId: 'z1',
+    zonaNama: 'Zona 1: Gudang & Penerimaan',
+    label: 'CAM 01 - Loading Dock Penerimaan Bahan',
+    localMp4Url: localVideoUri,
+    thumbnail: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&auto=format&fit=crop&q=80',
+    fps: '30 FPS',
+    aiStatus: 'Verifikasi Timbangan OK',
+  },
+  {
+    id: 'cctv_2',
+    zonaId: 'z1',
+    zonaNama: 'Zona 1: Gudang & Penerimaan',
+    label: 'CAM 02 - Gudang Bahan Kering & Sembako',
+    localMp4Url: localVideoUri,
+    thumbnail: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&auto=format&fit=crop&q=80',
+    fps: '30 FPS',
+    aiStatus: 'Stok FIFO Terpantau',
+  },
+  {
+    id: 'cctv_3',
+    zonaId: 'z1',
+    zonaNama: 'Zona 1: Gudang & Penerimaan',
+    label: 'CAM 03 - Cold Room Freezer (-18°C) & Chiller',
+    localMp4Url: localVideoUri,
+    thumbnail: 'https://images.unsplash.com/photo-1584473457406-6df376d53de0?w=600&auto=format&fit=crop&q=80',
+    fps: '30 FPS',
+    aiStatus: 'Suhu -18.2°C (Aman)',
+  },
+
+  // Zona 2: Persiapan & Cutting
+  {
+    id: 'cctv_4',
+    zonaId: 'z2',
+    zonaNama: 'Zona 2: Persiapan & Cutting',
+    label: 'CAM 04 - Area Pemotongan Daging & Ikan',
     localMp4Url: localVideoUri,
     thumbnail: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&auto=format&fit=crop&q=80',
+    fps: '30 FPS',
+    aiStatus: 'APD Sarung Tangan 100%',
+  },
+  {
+    id: 'cctv_5',
+    zonaId: 'z2',
+    zonaNama: 'Zona 2: Persiapan & Cutting',
+    label: 'CAM 05 - Area Pencucian & Pengupasan Sayur',
+    localMp4Url: localVideoUri,
+    thumbnail: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80',
+    fps: '30 FPS',
+    aiStatus: 'Sanitasi Air Terverifikasi',
+  },
+
+  // Zona 3: Dapur Pemasakan Utama
+  {
+    id: 'cctv_6',
+    zonaId: 'z3',
+    zonaNama: 'Zona 3: Dapur Pemasakan Utama',
+    label: 'CAM 06 - Area Pemasakan Tilting Pan (Lauk)',
+    localMp4Url: localVideoUri,
+    thumbnail: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'APD Lengkap (99.4%)',
   },
   {
-    id: 'cctv_2',
-    label: 'Kamera 2 - Gudang Penyimpanan Cold Room',
+    id: 'cctv_7',
+    zonaId: 'z3',
+    zonaNama: 'Zona 3: Dapur Pemasakan Utama',
+    label: 'CAM 07 - Pengukus Nasi Raksasa B (Karbo)',
     localMp4Url: localVideoUri,
-    thumbnail: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&auto=format&fit=crop&q=80',
+    thumbnail: 'https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
-    aiStatus: 'Suhu 4.2°C (Aman)',
+    aiStatus: 'Suhu Kuali 102°C Standard',
   },
+
+  // Zona 4: Pemorsian & Packaging
   {
-    id: 'cctv_3',
-    label: 'Kamera 3 - Area Pemorsian & Packaging',
+    id: 'cctv_8',
+    zonaId: 'z4',
+    zonaNama: 'Zona 4: Pemorsian & Packaging',
+    label: 'CAM 08 - Conveyor Line Pemorsian Ompreng',
     localMp4Url: localVideoUri,
     thumbnail: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
-    aiStatus: 'Higienis Sanitasi 98%',
+    aiStatus: 'Gramasi Porsi Tepat',
   },
   {
-    id: 'cctv_4',
-    label: 'Kamera 4 - Loading Dock & Washing Bay',
+    id: 'cctv_9',
+    zonaId: 'z4',
+    zonaNama: 'Zona 4: Pemorsian & Packaging',
+    label: 'CAM 09 - Mesin Sealing & Packaging Box',
     localMp4Url: localVideoUri,
-    thumbnail: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600&auto=format&fit=crop&q=80',
+    thumbnail: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
-    aiStatus: 'Armada Ready (Ompreng In)',
+    aiStatus: 'Segel Higienis Rapat',
+  },
+
+  // Zona 5: Washing Bay & Sanitasi
+  {
+    id: 'cctv_10',
+    zonaId: 'z5',
+    zonaNama: 'Zona 5: Washing Bay & Sanitasi',
+    label: 'CAM 10 - Washing Bay & Automatic Dishwasher',
+    localMp4Url: localVideoUri,
+    thumbnail: 'https://images.unsplash.com/photo-1585837575652-267c041d77d4?w=600&auto=format&fit=crop&q=80',
+    fps: '30 FPS',
+    aiStatus: 'Sanitasi Deterjen Sesuai',
+  },
+  {
+    id: 'cctv_11',
+    zonaId: 'z5',
+    zonaNama: 'Zona 5: Washing Bay & Sanitasi',
+    label: 'CAM 11 - Sterilisasi Sinar UV & Dryer Ompreng',
+    localMp4Url: localVideoUri,
+    thumbnail: 'https://images.unsplash.com/photo-1584634731339-252c581abfc5?w=600&auto=format&fit=crop&q=80',
+    fps: '30 FPS',
+    aiStatus: 'Sinar UV Stereo 100%',
+  },
+
+  // Zona 6: Loading Gate Armada
+  {
+    id: 'cctv_12',
+    zonaId: 'z6',
+    zonaNama: 'Zona 6: Loading Gate Armada',
+    label: 'CAM 12 - Dispatch Armada Kendaraan Penyalur',
+    localMp4Url: localVideoUri,
+    thumbnail: 'https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=600&auto=format&fit=crop&q=80',
+    fps: '30 FPS',
+    aiStatus: 'Armada Ready 6 Unit',
   },
 ];
 
@@ -58,9 +178,15 @@ export default function CctvMonitorScreen() {
   const { sppgInScope } = useScopedData();
   const { colors, spacing, fontSize, iconStrokeWidth, radius } = useTheme();
 
-  const [activeFeed, setActiveFeed] = useState<typeof CCTV_FEEDS[0] | null>(null);
+  const [activeFeed, setActiveFeed] = useState<CctvFeedItem | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CctvEvent | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [selectedZona, setSelectedZona] = useState('all');
+
+  const filteredFeeds = useMemo(() => {
+    if (selectedZona === 'all') return CCTV_FEEDS;
+    return CCTV_FEEDS.filter((f) => f.zonaId === selectedZona);
+  }, [selectedZona]);
 
   const eventsInScope = useMemo(() => scopeCctvEvents(sppgInScope, cctvEvents), [sppgInScope, cctvEvents]);
   const sorted = useMemo(
@@ -75,13 +201,39 @@ export default function CctvMonitorScreen() {
       <View style={[styles.disclaimer, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
         <Feather name="video" size={16} color={colors.primary} strokeWidth={iconStrokeWidth} />
         <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>
-          Pengawasan CCTV AI Real-Time — Klik petak kamera untuk memutar video stream (dukungan **Layar Penuh / Fullscreen**), atau klik riwayat anomali untuk **Melihat Screenshot Deteksi Otomatis**.
+          Pengawasan CCTV AI Real-Time — 12 Channel Kamera terbagi dalam 6 Wilayah Operasional Dapur SPPG. Klik kamera untuk putar stream.
         </Text>
       </View>
 
-      <SectionTitle>Feed Kamera Live ({CCTV_FEEDS.length} Channel)</SectionTitle>
+      <SectionTitle>Feed Kamera Live ({filteredFeeds.length} Channel)</SectionTitle>
+
+      {/* Filter Wilayah / Zonal Dapur */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingBottom: 4 }}>
+        {ZONA_CCTV.map((z) => {
+          const active = selectedZona === z.id;
+          return (
+            <Pressable
+              key={z.id}
+              onPress={() => setSelectedZona(z.id)}
+              style={{
+                paddingHorizontal: 12,
+                paddingVertical: 6,
+                borderRadius: radius.pill,
+                backgroundColor: active ? colors.primary : colors.surface,
+                borderWidth: 1,
+                borderColor: active ? colors.primary : colors.border,
+              }}
+            >
+              <Text style={{ fontSize: 11, fontWeight: '700', color: active ? colors.textInverse : colors.text }}>
+                {z.nama}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
       <View style={styles.cameraGrid}>
-        {CCTV_FEEDS.map((feed) => (
+        {filteredFeeds.map((feed) => (
           <Pressable
             key={feed.id}
             onPress={() => {
