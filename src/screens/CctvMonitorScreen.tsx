@@ -60,6 +60,7 @@ export default function CctvMonitorScreen() {
 
   const [activeFeed, setActiveFeed] = useState<typeof CCTV_FEEDS[0] | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CctvEvent | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const eventsInScope = useMemo(() => scopeCctvEvents(sppgInScope, cctvEvents), [sppgInScope, cctvEvents]);
   const sorted = useMemo(
@@ -74,7 +75,7 @@ export default function CctvMonitorScreen() {
       <View style={[styles.disclaimer, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
         <Feather name="video" size={16} color={colors.primary} strokeWidth={iconStrokeWidth} />
         <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>
-          Pengawasan CCTV AI Real-Time — Klik petak kamera untuk memutar video stream, atau klik riwayat anomali untuk **Melihat Screenshot Deteksi Otomatis & Tinjauan**.
+          Pengawasan CCTV AI Real-Time — Klik petak kamera untuk memutar video stream (dukungan **Layar Penuh / Fullscreen**), atau klik riwayat anomali untuk **Melihat Screenshot Deteksi Otomatis**.
         </Text>
       </View>
 
@@ -83,7 +84,10 @@ export default function CctvMonitorScreen() {
         {CCTV_FEEDS.map((feed) => (
           <Pressable
             key={feed.id}
-            onPress={() => setActiveFeed(feed)}
+            onPress={() => {
+              setActiveFeed(feed);
+              setIsFullscreen(false);
+            }}
             style={[styles.cameraBox, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.md, overflow: 'hidden' }]}
           >
             <View style={{ width: '100%', height: 100, position: 'relative' }}>
@@ -138,25 +142,47 @@ export default function CctvMonitorScreen() {
         ))
       )}
 
-      {/* Live YouTube Video Player Modal */}
-      <Modal visible={!!activeFeed} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <Card style={[styles.modalCard, { backgroundColor: colors.surface }]}>
-            <View style={styles.rowBetween}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
-                <Feather name="video" size={20} color={colors.danger} />
-                <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text }} numberOfLines={1}>
-                  {activeFeed?.label}
-                </Text>
+      {/* CCTV Video Player Modal (Normal & Fullscreen) */}
+      <Modal visible={!!activeFeed} animationType="fade" transparent={!isFullscreen}>
+        <View style={isFullscreen ? styles.fullscreenOverlay : styles.modalOverlay}>
+          <Card style={isFullscreen ? styles.fullscreenCard : [styles.modalCard, { backgroundColor: colors.surface }]}>
+            {!isFullscreen && (
+              <View style={styles.rowBetween}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
+                  <Feather name="video" size={20} color={colors.danger} />
+                  <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text }} numberOfLines={1}>
+                    {activeFeed?.label}
+                  </Text>
+                </View>
+                <Pressable onPress={() => { setActiveFeed(null); setIsFullscreen(false); }}>
+                  <Feather name="x" size={22} color={colors.textMuted} />
+                </Pressable>
               </View>
-              <Pressable onPress={() => setActiveFeed(null)}>
-                <Feather name="x" size={22} color={colors.textMuted} />
-              </Pressable>
-            </View>
+            )}
 
             {activeFeed && (
-              <View style={{ gap: spacing.sm, marginTop: 10 }}>
-                <View style={{ width: '100%', height: 230, borderRadius: radius.md, overflow: 'hidden', backgroundColor: '#000' }}>
+              <View style={isFullscreen ? { flex: 1, width: '100%', position: 'relative' } : { gap: spacing.sm, marginTop: 10 }}>
+                {/* Floating Controls Overlay when Fullscreen */}
+                {isFullscreen && (
+                  <View style={{ position: 'absolute', top: 16, right: 16, zIndex: 99, flexDirection: 'row', gap: 8 }}>
+                    <Pressable
+                      onPress={() => setIsFullscreen(false)}
+                      style={{ backgroundColor: 'rgba(0,0,0,0.7)', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderColor: '#444' }}
+                    >
+                      <Feather name="minimize-2" size={16} color="#FFFFFF" />
+                      <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700' }}>Keluar Layar Penuh</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => { setActiveFeed(null); setIsFullscreen(false); }}
+                      style={{ backgroundColor: 'rgba(220,38,38,0.85)', padding: 8, borderRadius: 8 }}
+                    >
+                      <Feather name="x" size={18} color="#FFFFFF" />
+                    </Pressable>
+                  </View>
+                )}
+
+                {/* Video Player WebView */}
+                <View style={isFullscreen ? { flex: 1, width: '100%', backgroundColor: '#000' } : { width: '100%', height: 230, borderRadius: radius.md, overflow: 'hidden', backgroundColor: '#000' }}>
                   <WebView
                     source={{
                       html: `
@@ -168,21 +194,21 @@ export default function CctvMonitorScreen() {
                             body, html { margin:0; padding:0; width:100%; height:100%; background-color:#000; overflow:hidden; font-family: monospace, sans-serif; }
                             .container { position:relative; width:100%; height:100%; }
                             video { width:100%; height:100%; border:0; object-fit:cover; pointer-events:none; }
-                            .hud-top-left { position:absolute; top:10px; left:10px; color:#ef4444; font-weight:bold; font-size:12px; display:flex; align-items:center; gap:6px; text-shadow:1px 1px 3px #000; }
-                            .rec-dot { width:8px; height:8px; background-color:#ef4444; border-radius:50%; animation: blink 1s infinite; }
+                            .hud-top-left { position:absolute; top:12px; left:12px; color:#ef4444; font-weight:bold; font-size:${isFullscreen ? '15px' : '12px'}; display:flex; align-items:center; gap:8px; text-shadow:1px 1px 4px #000; z-index:10; }
+                            .rec-dot { width:${isFullscreen ? '10px' : '8px'}; height:${isFullscreen ? '10px' : '8px'}; background-color:#ef4444; border-radius:50%; animation: blink 1s infinite; }
                             @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-                            .hud-top-right { position:absolute; top:10px; right:10px; color:#00ff66; font-size:11px; font-weight:bold; text-shadow:1px 1px 3px #000; background:rgba(0,0,0,0.4); padding:2px 6px; border-radius:4px; }
-                            .hud-bottom-left { position:absolute; bottom:10px; left:10px; color:#ffffff; font-size:11px; font-weight:bold; text-shadow:1px 1px 3px #000; background:rgba(0,0,0,0.5); padding:3px 8px; border-radius:4px; }
-                            .hud-bottom-right { position:absolute; bottom:10px; right:10px; color:#00e5ff; font-size:10px; font-weight:bold; text-shadow:1px 1px 3px #000; background:rgba(0,0,0,0.5); padding:3px 8px; border-radius:4px; }
+                            .hud-top-right { position:absolute; top:12px; right:${isFullscreen ? '220px' : '12px'}; color:#00ff66; font-size:${isFullscreen ? '14px' : '11px'}; font-weight:bold; text-shadow:1px 1px 4px #000; background:rgba(0,0,0,0.5); padding:4px 8px; border-radius:4px; z-index:10; }
+                            .hud-bottom-left { position:absolute; bottom:12px; left:12px; color:#ffffff; font-size:${isFullscreen ? '14px' : '11px'}; font-weight:bold; text-shadow:1px 1px 4px #000; background:rgba(0,0,0,0.6); padding:4px 10px; border-radius:4px; z-index:10; }
+                            .hud-bottom-right { position:absolute; bottom:12px; right:12px; color:#00e5ff; font-size:${isFullscreen ? '13px' : '10px'}; font-weight:bold; text-shadow:1px 1px 4px #000; background:rgba(0,0,0,0.6); padding:4px 10px; border-radius:4px; z-index:10; }
                           </style>
                         </head>
                         <body>
                           <div class="container">
                             <video src="${activeFeed.localMp4Url}" autoplay loop playsinline></video>
-                            <div class="hud-top-left"><div class="rec-dot"></div>● REC LIVE</div>
+                            <div class="hud-top-left"><div class="rec-dot"></div>● REC LIVE CCTV MONITOR</div>
                             <div class="hud-top-right" id="clock">2026-08-09 --:--:--</div>
                             <div class="hud-bottom-left">${activeFeed.label.toUpperCase()}</div>
-                            <div class="hud-bottom-right">1080P 30FPS • AI ACTIVE</div>
+                            <div class="hud-bottom-right">1080P 60FPS • AI SENSOR FULL</div>
                           </div>
                           <script>
                             function updateClock() {
@@ -214,20 +240,35 @@ export default function CctvMonitorScreen() {
                   />
                 </View>
 
-                <View style={[styles.hudBox, { backgroundColor: colors.background, borderRadius: radius.md, padding: 12, gap: 6 }]}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <Feather name="cpu" size={14} color={colors.primary} />
-                      <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>Computer Vision AI Analytics:</Text>
+                {!isFullscreen && (
+                  <>
+                    <View style={[styles.hudBox, { backgroundColor: colors.background, borderRadius: radius.md, padding: 12, gap: 6 }]}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          <Feather name="cpu" size={14} color={colors.primary} />
+                          <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>Computer Vision AI Analytics:</Text>
+                        </View>
+                        <Pill label={activeFeed.aiStatus} tone="success" />
+                      </View>
+                      <Text style={{ fontSize: 11, color: colors.textMuted }}>
+                        Status AI: Deteksi Alat Pelindung Diri (APD Masker & Sarung Tangan) terverifikasi 99.4%. Tidak ditemukan kebocoran / anomali suhu.
+                      </Text>
                     </View>
-                    <Pill label={activeFeed.aiStatus} tone="success" />
-                  </View>
-                  <Text style={{ fontSize: 11, color: colors.textMuted }}>
-                    Status AI: Deteksi Alat Pelindung Diri (APD Masker & Sarung Tangan) terverifikasi 99.4%. Tidak ditemukan kebocoran / anomali suhu.
-                  </Text>
-                </View>
 
-                <SecondaryButton label="Tutup Video Stream" onPress={() => setActiveFeed(null)} />
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                      <PrimaryButton
+                        label="Layar Penuh (Fullscreen)"
+                        icon="maximize-2"
+                        onPress={() => setIsFullscreen(true)}
+                        style={{ flex: 1 }}
+                      />
+                      <SecondaryButton
+                        label="Tutup Stream"
+                        onPress={() => { setActiveFeed(null); setIsFullscreen(false); }}
+                      />
+                    </View>
+                  </>
+                )}
               </View>
             )}
           </Card>
@@ -348,5 +389,7 @@ const styles = StyleSheet.create({
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', padding: 16 },
   modalCard: { borderRadius: 16, padding: 16 },
+  fullscreenOverlay: { flex: 1, backgroundColor: '#000000', padding: 0 },
+  fullscreenCard: { flex: 1, borderRadius: 0, padding: 0, backgroundColor: '#000000', margin: 0 },
   hudBox: { marginTop: 4 },
 });
