@@ -268,7 +268,8 @@ export default function DashboardScreen({ navigation }: any) {
   const sekolahBina = currentSppg ? sekolahList.filter((s) => s.sppgId === currentSppg.id) : [];
 
   const quickActions: QuickAction[] = [
-    { key: 'presensi', icon: 'user-check', title: 'Presensi', subtitle: 'Absen staf hari ini', onPress: () => navigation.navigate('Presensi') },
+    { key: 'checkin', icon: 'user-check', title: 'Presensi Saya', subtitle: 'Selfie & GPS akun pribadi', onPress: () => navigation.navigate('CheckIn') },
+    { key: 'presensi', icon: 'users', title: 'Rekap Presensi Staf', subtitle: 'Rekap & foto hadir tim', onPress: () => navigation.navigate('Presensi') },
     { key: 'checklist', icon: 'check-square', title: 'Checklist', subtitle: 'Checklist harian dapur', onPress: () => navigation.navigate('Checklist') },
     {
       key: 'laporan',
@@ -282,7 +283,6 @@ export default function DashboardScreen({ navigation }: any) {
     },
     { key: 'foodsafety', icon: 'thermometer', title: 'Keamanan Pangan', subtitle: 'Catat suhu & simpan', onPress: () => navigation.navigate('FoodSafetyForm') },
     { key: 'peralatan', icon: 'truck', title: 'Aset & Armada', subtitle: 'Check ompreng & mobil', onPress: () => navigation.navigate('Peralatan') },
-    { key: 'aduan', icon: 'message-square', title: 'Aduan Publik', subtitle: `${publicReportList.length} laporan warga`, onPress: () => navigation.navigate('AduanMasyarakat') },
   ];
 
   const targetKapasitas = currentSppg?.kapasitasProduksi || 1500;

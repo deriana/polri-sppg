@@ -10,15 +10,21 @@ import { addToOfflineQueue } from '../utils/offlineQueue';
 import { ROLE_PERMISSIONS } from '../utils/scope';
 
 export default function CheckInScreen({ navigation, route }: any) {
-  const { userId, mode } = route.params as { userId: string; mode: 'in' | 'out' };
-  const { role, currentUser, users, checkIn, checkOut } = useApp();
+  const { role, currentUser, users, checkIn, checkOut, presensiList } = useApp();
   const { colors, spacing, fontSize, iconStrokeWidth, radius } = useTheme();
 
-  const user = users.find((u) => u.id === userId);
+  const targetUserId = route?.params?.userId ?? currentUser?.id ?? '';
+  const today = new Date().toISOString().slice(0, 10);
+  const existingPresensi = presensiList.find((p) => p.userId === targetUserId && p.tanggal === today);
+
+  const defaultMode = existingPresensi?.jamMasuk && !existingPresensi?.jamKeluar ? 'out' : 'in';
+  const mode = route?.params?.mode ?? defaultMode;
+
+  const user = users.find((u) => u.id === targetUserId) ?? currentUser;
   const isCheckIn = mode === 'in';
 
   // User can only submit attendance for themselves
-  const allowed = !!role && !ROLE_PERMISSIONS[role].isViewOnly && currentUser?.id === userId;
+  const allowed = !!role && !ROLE_PERMISSIONS[role].isViewOnly && (currentUser?.id === targetUserId || role === 'KEPALA_SPPG');
 
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [geotag, setGeotag] = useState<{ lat: number; lng: number } | null>(null);
@@ -51,11 +57,11 @@ export default function CheckInScreen({ navigation, route }: any) {
     if (!canConfirm) return;
     setSubmitting(true);
     if (isCheckIn) {
-      checkIn(userId, photoUri, geotag);
+      checkIn(targetUserId, photoUri, geotag);
     } else {
-      checkOut(userId, photoUri, geotag);
+      checkOut(targetUserId, photoUri, geotag);
     }
-    await addToOfflineQueue('presensi', { userId, mode, photoUri, geotag });
+    await addToOfflineQueue('presensi', { userId: targetUserId, mode, photoUri, geotag });
     setSubmitting(false);
     navigation.goBack();
   };
@@ -64,7 +70,7 @@ export default function CheckInScreen({ navigation, route }: any) {
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       <SectionTitle>{isCheckIn ? 'Check-in Kehadiran' : 'Check-out Kehadiran'}</SectionTitle>
       <Text style={{ color: colors.textMuted, fontSize: fontSize.xs, marginTop: -8 }}>
-        {user?.nama ?? userId} • {new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+        {user?.nama ?? targetUserId} • {new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
       </Text>
 
       <Card style={{ gap: spacing.sm }}>

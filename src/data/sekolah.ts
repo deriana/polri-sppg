@@ -16,7 +16,7 @@ export const sekolahList: Sekolah[] = [
     nama: 'SDN Cibeunying 02',
     alamat: 'Jl. Cibeunying Kaler, Bandung',
     jumlahSiswa: 210,
-    fotoSekolah: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&auto=format&fit=crop&q=80',
+    fotoSekolah: 'https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?w=600&auto=format&fit=crop&q=80',
   },
   {
     id: 'SKL-003',
