@@ -197,15 +197,33 @@ export default function CctvMonitorScreen() {
                             .hud-top-left { position:absolute; top:10px; left:10px; color:#ef4444; font-weight:bold; font-size:${isFullscreen ? '14px' : '11px'}; display:flex; align-items:center; gap:6px; text-shadow:1px 1px 4px #000; z-index:10; }
                             .rec-dot { width:${isFullscreen ? '10px' : '8px'}; height:${isFullscreen ? '10px' : '8px'}; background-color:#ef4444; border-radius:50%; animation: blink 1s infinite; }
                             @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-                            .hud-top-right { position:absolute; top:10px; right:${isFullscreen ? '140px' : '10px'}; color:#00ff66; font-size:${isFullscreen ? '13px' : '10px'}; font-weight:bold; text-shadow:1px 1px 4px #000; background:rgba(0,0,0,0.5); padding:3px 6px; border-radius:4px; z-index:10; }
+                            .hud-top-right { position:absolute; top:10px; right:10px; color:#00ff66; font-size:${isFullscreen ? '13px' : '10px'}; font-weight:bold; text-shadow:1px 1px 4px #000; background:rgba(0,0,0,0.5); padding:3px 6px; border-radius:4px; z-index:10; }
                             .hud-bottom-left { position:absolute; bottom:10px; left:10px; max-width:55%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#ffffff; font-size:${isFullscreen ? '13px' : '10px'}; font-weight:bold; text-shadow:1px 1px 4px #000; background:rgba(0,0,0,0.6); padding:3px 8px; border-radius:4px; z-index:10; }
                             .hud-bottom-right { position:absolute; bottom:10px; right:10px; color:#00e5ff; font-size:${isFullscreen ? '12px' : '9px'}; font-weight:bold; text-shadow:1px 1px 4px #000; background:rgba(0,0,0,0.6); padding:3px 8px; border-radius:4px; z-index:10; }
+
+                            ${
+                              isFullscreen
+                                ? `
+                                  @media (orientation: portrait) {
+                                    .container {
+                                      width: 100vh !important;
+                                      height: 100vw !important;
+                                      transform: rotate(90deg);
+                                      transform-origin: top left;
+                                      position: absolute;
+                                      top: 0;
+                                      left: 100vw;
+                                    }
+                                  }
+                                `
+                                : ''
+                            }
                           </style>
                         </head>
                         <body>
                           <div class="container">
                             <video src="${activeFeed.localMp4Url}" autoplay loop playsinline></video>
-                            <div class="hud-top-left"><div class="rec-dot"></div>● REC LIVE</div>
+                            <div class="hud-top-left"><div class="rec-dot"></div>● REC LIVE LANDSCAPE</div>
                             <div class="hud-top-right" id="clock">2026-08-09 --:--:--</div>
                             <div class="hud-bottom-left">${activeFeed.label.toUpperCase()}</div>
                             <div class="hud-bottom-right">1080P • AI ACTIVE</div>
