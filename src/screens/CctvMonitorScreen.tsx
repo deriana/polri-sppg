@@ -10,11 +10,19 @@ import { scopeCctvEvents, ROLE_PERMISSIONS } from '../utils/scope';
 import { CCTV_ANOMALI_LABEL } from '../data/cctvEvents';
 import { CctvEvent } from '../types';
 
+const localVideoUri = (() => {
+  try {
+    return Image.resolveAssetSource(require('../../assets/mock_cctv_test.mp4')).uri;
+  } catch (e) {
+    return 'file:///home/deryana/coding/sigap-sppg/assets/mock_cctv_test.mp4';
+  }
+})();
+
 export const CCTV_FEEDS = [
   {
     id: 'cctv_1',
     label: 'Kamera 1 - Area Pemasakan Dapur Utama',
-    localMp4Url: 'file:///home/deryana/coding/sigap-sppg/assets/mock_cctv_test.mp4',
+    localMp4Url: localVideoUri,
     thumbnail: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'APD Lengkap (99.4%)',
@@ -22,7 +30,7 @@ export const CCTV_FEEDS = [
   {
     id: 'cctv_2',
     label: 'Kamera 2 - Gudang Penyimpanan Cold Room',
-    localMp4Url: 'file:///home/deryana/coding/sigap-sppg/assets/mock_cctv_test.mp4',
+    localMp4Url: localVideoUri,
     thumbnail: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'Suhu 4.2°C (Aman)',
@@ -30,7 +38,7 @@ export const CCTV_FEEDS = [
   {
     id: 'cctv_3',
     label: 'Kamera 3 - Area Pemorsian & Packaging',
-    localMp4Url: 'file:///home/deryana/coding/sigap-sppg/assets/mock_cctv_test.mp4',
+    localMp4Url: localVideoUri,
     thumbnail: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'Higienis Sanitasi 98%',
@@ -38,7 +46,7 @@ export const CCTV_FEEDS = [
   {
     id: 'cctv_4',
     label: 'Kamera 4 - Loading Dock & Washing Bay',
-    localMp4Url: 'file:///home/deryana/coding/sigap-sppg/assets/mock_cctv_test.mp4',
+    localMp4Url: localVideoUri,
     thumbnail: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'Armada Ready (Ompreng In)',
