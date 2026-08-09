@@ -14,8 +14,6 @@ export const CCTV_FEEDS = [
   {
     id: 'cctv_1',
     label: 'Kamera 1 - Area Pemasakan Dapur Utama',
-    videoUrl: 'https://www.youtube.com/embed/2b1IexhKPz4?si=M7_Ni-yQ8c_AbcHo',
-    embedUrl: 'https://www.youtube-nocookie.com/embed/2b1IexhKPz4?autoplay=1&mute=1&loop=1&playlist=2b1IexhKPz4&playsinline=1&enablejsapi=1&origin=https://www.youtube.com',
     localMp4Url: 'file:///home/deryana/coding/sigap-sppg/assets/mock_cctv_test.mp4',
     thumbnail: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
@@ -24,8 +22,6 @@ export const CCTV_FEEDS = [
   {
     id: 'cctv_2',
     label: 'Kamera 2 - Gudang Penyimpanan Cold Room',
-    videoUrl: 'https://www.youtube.com/embed/2b1IexhKPz4?si=M7_Ni-yQ8c_AbcHo',
-    embedUrl: 'https://www.youtube-nocookie.com/embed/2b1IexhKPz4?autoplay=1&mute=1&loop=1&playlist=2b1IexhKPz4&playsinline=1&enablejsapi=1&origin=https://www.youtube.com',
     localMp4Url: 'file:///home/deryana/coding/sigap-sppg/assets/mock_cctv_test.mp4',
     thumbnail: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
@@ -34,8 +30,6 @@ export const CCTV_FEEDS = [
   {
     id: 'cctv_3',
     label: 'Kamera 3 - Area Pemorsian & Packaging',
-    videoUrl: 'https://www.youtube.com/embed/2b1IexhKPz4?si=M7_Ni-yQ8c_AbcHo',
-    embedUrl: 'https://www.youtube-nocookie.com/embed/2b1IexhKPz4?autoplay=1&mute=1&loop=1&playlist=2b1IexhKPz4&playsinline=1&enablejsapi=1&origin=https://www.youtube.com',
     localMp4Url: 'file:///home/deryana/coding/sigap-sppg/assets/mock_cctv_test.mp4',
     thumbnail: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
@@ -44,10 +38,8 @@ export const CCTV_FEEDS = [
   {
     id: 'cctv_4',
     label: 'Kamera 4 - Loading Dock & Washing Bay',
-    videoUrl: 'https://www.youtube.com/embed/2b1IexhKPz4?si=M7_Ni-yQ8c_AbcHo',
-    embedUrl: 'https://www.youtube-nocookie.com/embed/2b1IexhKPz4?autoplay=1&mute=1&loop=1&playlist=2b1IexhKPz4&playsinline=1&enablejsapi=1&origin=https://www.youtube.com',
     localMp4Url: 'file:///home/deryana/coding/sigap-sppg/assets/mock_cctv_test.mp4',
-    thumbnail: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&auto=format&fit=crop&q=80',
+    thumbnail: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'Armada Ready (Ompreng In)',
   },
@@ -59,7 +51,6 @@ export default function CctvMonitorScreen() {
   const { colors, spacing, fontSize, iconStrokeWidth, radius } = useTheme();
 
   const [activeFeed, setActiveFeed] = useState<typeof CCTV_FEEDS[0] | null>(null);
-  const [streamSourceMode, setStreamSourceMode] = useState<'local' | 'youtube'>('local');
 
   const eventsInScope = useMemo(() => scopeCctvEvents(sppgInScope, cctvEvents), [sppgInScope, cctvEvents]);
   const sorted = useMemo(
@@ -154,43 +145,7 @@ export default function CctvMonitorScreen() {
 
             {activeFeed && (
               <View style={{ gap: spacing.sm, marginTop: 10 }}>
-                {/* Source Mode Switcher */}
-                <View style={{ flexDirection: 'row', gap: 8 }}>
-                  <Pressable
-                    onPress={() => setStreamSourceMode('local')}
-                    style={{
-                      flex: 1,
-                      paddingVertical: 6,
-                      alignItems: 'center',
-                      borderRadius: radius.sm,
-                      backgroundColor: streamSourceMode === 'local' ? colors.primary : colors.background,
-                      borderWidth: 1,
-                      borderColor: colors.border,
-                    }}
-                  >
-                    <Text style={{ fontSize: 11, fontWeight: '700', color: streamSourceMode === 'local' ? colors.textInverse : colors.text }}>
-                      📹 Video CCTV (mock_cctv_test.mp4)
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => setStreamSourceMode('youtube')}
-                    style={{
-                      flex: 1,
-                      paddingVertical: 6,
-                      alignItems: 'center',
-                      borderRadius: radius.sm,
-                      backgroundColor: streamSourceMode === 'youtube' ? colors.primary : colors.background,
-                      borderWidth: 1,
-                      borderColor: colors.border,
-                    }}
-                  >
-                    <Text style={{ fontSize: 11, fontWeight: '700', color: streamSourceMode === 'youtube' ? colors.textInverse : colors.text }}>
-                      🔴 YouTube Stream
-                    </Text>
-                  </Pressable>
-                </View>
-
-                {/* Video Player WebView */}
+                {/* Local Video Player WebView */}
                 <View style={{ width: '100%', height: 230, borderRadius: radius.md, overflow: 'hidden', backgroundColor: '#000' }}>
                   <WebView
                     source={{
@@ -201,15 +156,11 @@ export default function CctvMonitorScreen() {
                           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
                           <style>
                             body, html { margin:0; padding:0; width:100%; height:100%; background-color:#000; overflow:hidden; }
-                            iframe, video { width:100%; height:100%; border:0; object-fit:cover; }
+                            video { width:100%; height:100%; border:0; object-fit:cover; }
                           </style>
                         </head>
                         <body>
-                          ${
-                            streamSourceMode === 'local'
-                              ? `<video src="${activeFeed.localMp4Url}" autoplay loop muted playsinline controls></video>`
-                              : `<iframe src="${activeFeed.embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%;height:100%;border:0;"></iframe>`
-                          }
+                          <video src="${activeFeed.localMp4Url}" autoplay loop muted playsinline controls></video>
                         </body>
                         </html>
                       `,
