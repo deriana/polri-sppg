@@ -74,12 +74,12 @@ export default function DistribusiScreen({ navigation, route }: any) {
               </View>
 
               {canAdvance && !isKendala && (
-                <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: 4 }}>
+                <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: 4, alignItems: 'stretch' }}>
                   {nextStatus && (
                     <PrimaryButton
                       label={`Majukan ➔ ${STEPS.find((s) => s.status === nextStatus)?.label}`}
                       variant="secondary"
-                      fullWidth={false}
+                      fullWidth
                       onPress={() => updateDistribusiStatus(rute.id, nextStatus)}
                       style={{ flex: 1 }}
                     />
@@ -88,7 +88,7 @@ export default function DistribusiScreen({ navigation, route }: any) {
                     <PrimaryButton
                       label="Tandai Kendala"
                       variant="danger"
-                      fullWidth={false}
+                      fullWidth
                       onPress={() => updateDistribusiStatus(rute.id, 'kendala')}
                       style={{ flex: 1 }}
                     />

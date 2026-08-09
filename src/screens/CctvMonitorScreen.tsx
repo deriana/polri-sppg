@@ -1,18 +1,60 @@
-import React, { useMemo } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { WebView } from 'react-native-webview';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { Card, EmptyState, Pill, PrimaryButton, SectionTitle } from '../components/ui';
+import { Card, EmptyState, Pill, PrimaryButton, SecondaryButton, SectionTitle } from '../components/ui';
 import { useScopedData } from '../hooks';
 import { scopeCctvEvents, ROLE_PERMISSIONS } from '../utils/scope';
 import { CCTV_ANOMALI_LABEL } from '../data/cctvEvents';
 import { CctvEvent } from '../types';
 
+export const CCTV_FEEDS = [
+  {
+    id: 'cctv_1',
+    label: 'Kamera 1 - Area Pemasakan Dapur Utama',
+    videoUrl: 'https://youtu.be/C_OJtQMU52Y?si=CYYSLCTY4sbjK2FE',
+    embedUrl: 'https://www.youtube.com/embed/C_OJtQMU52Y?autoplay=1&mute=1&loop=1&playlist=C_OJtQMU52Y',
+    thumbnail: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&auto=format&fit=crop&q=80',
+    fps: '30 FPS',
+    aiStatus: 'APD Lengkap (99.4%)',
+  },
+  {
+    id: 'cctv_2',
+    label: 'Kamera 2 - Gudang Penyimpanan Cold Room',
+    videoUrl: 'https://youtu.be/C_OJtQMU52Y?si=CYYSLCTY4sbjK2FE',
+    embedUrl: 'https://www.youtube.com/embed/C_OJtQMU52Y?autoplay=1&mute=1&loop=1&playlist=C_OJtQMU52Y',
+    thumbnail: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&auto=format&fit=crop&q=80',
+    fps: '30 FPS',
+    aiStatus: 'Suhu 4.2°C (Aman)',
+  },
+  {
+    id: 'cctv_3',
+    label: 'Kamera 3 - Area Pemorsian & Packaging',
+    videoUrl: 'https://youtu.be/C_OJtQMU52Y?si=CYYSLCTY4sbjK2FE',
+    embedUrl: 'https://www.youtube.com/embed/C_OJtQMU52Y?autoplay=1&mute=1&loop=1&playlist=C_OJtQMU52Y',
+    thumbnail: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format&fit=crop&q=80',
+    fps: '30 FPS',
+    aiStatus: 'Higienis Sanitasi 98%',
+  },
+  {
+    id: 'cctv_4',
+    label: 'Kamera 4 - Loading Dock & Washing Bay',
+    videoUrl: 'https://youtu.be/C_OJtQMU52Y?si=CYYSLCTY4sbjK2FE',
+    embedUrl: 'https://www.youtube.com/embed/C_OJtQMU52Y?autoplay=1&mute=1&loop=1&playlist=C_OJtQMU52Y',
+    thumbnail: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600&auto=format&fit=crop&q=80',
+    fps: '30 FPS',
+    aiStatus: 'Armada Ready (Ompreng In)',
+  },
+];
+
 export default function CctvMonitorScreen() {
   const { role, currentSppg, cctvEvents, reviewCctvEvent, simulateCctvDetection } = useApp();
   const { sppgInScope } = useScopedData();
   const { colors, spacing, fontSize, iconStrokeWidth, radius } = useTheme();
+
+  const [activeFeed, setActiveFeed] = useState<typeof CCTV_FEEDS[0] | null>(null);
 
   const eventsInScope = useMemo(() => scopeCctvEvents(sppgInScope, cctvEvents), [sppgInScope, cctvEvents]);
   const sorted = useMemo(
@@ -22,45 +64,45 @@ export default function CctvMonitorScreen() {
 
   const canWrite = !!role && !ROLE_PERMISSIONS[role].isViewOnly;
 
-  const cameraLabels = useMemo(() => {
-    const unique = Array.from(new Set(eventsInScope.map((e) => e.cameraLabel)));
-    return unique.length > 0 ? unique : ['Kamera 1 - Dapur Utama', 'Kamera 2 - Gudang Penyimpanan', 'Kamera 3 - Area Kemasan', 'Kamera 4 - Area Cuci'];
-  }, [eventsInScope]);
-
-  const cameraThumbnails = [
-    'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600&auto=format&fit=crop&q=80',
-  ];
-
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       <View style={[styles.disclaimer, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
-        <Feather name="shield" size={16} color={colors.primary} strokeWidth={iconStrokeWidth} />
+        <Feather name="video" size={16} color={colors.primary} strokeWidth={iconStrokeWidth} />
         <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>
-          Pengawasan CCTV AI Real-Time — Deteksi otomatis APD, higienis ruangan, & keamanan area dapur SPPG.
+          Pengawasan CCTV AI Real-Time — Klik pada petak kamera untuk **Memutar Live Streaming Video YouTube & Deteksi AI**.
         </Text>
       </View>
 
-      <SectionTitle>Feed Kamera Live ({cameraLabels.length})</SectionTitle>
+      <SectionTitle>Feed Kamera Live ({CCTV_FEEDS.length} Channel)</SectionTitle>
       <View style={styles.cameraGrid}>
-        {cameraLabels.map((label, idx) => (
-          <View key={label} style={[styles.cameraBox, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.md, overflow: 'hidden', padding: 0 }]}>
-            <View style={{ width: '100%', height: 90, position: 'relative' }}>
-              <Image source={{ uri: cameraThumbnails[idx % cameraThumbnails.length] }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+        {CCTV_FEEDS.map((feed) => (
+          <Pressable
+            key={feed.id}
+            onPress={() => setActiveFeed(feed)}
+            style={[styles.cameraBox, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.md, overflow: 'hidden' }]}
+          >
+            <View style={{ width: '100%', height: 100, position: 'relative' }}>
+              <Image source={{ uri: feed.thumbnail }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
               <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: 'rgba(220,38,38,0.85)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                 <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#FFFFFF' }} />
-                <Text style={{ color: '#FFFFFF', fontSize: 9, fontWeight: '800' }}>LIVE REC</Text>
+                <Text style={{ color: '#FFFFFF', fontSize: 9, fontWeight: '800' }}>LIVE STREAM</Text>
+              </View>
+              <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.25)' }}>
+                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center' }}>
+                  <Feather name="play" size={18} color="#FFFFFF" />
+                </View>
               </View>
             </View>
             <View style={{ padding: 8, gap: 2 }}>
               <Text style={{ color: colors.text, fontSize: fontSize.xs, fontWeight: '700' }} numberOfLines={1}>
-                {label}
+                {feed.label}
               </Text>
-              <Text style={{ color: colors.textMuted, fontSize: 10 }}>FHD 1080p • 30 FPS</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 2 }}>
+                <Text style={{ color: colors.primary, fontSize: 10, fontWeight: '700' }}>{feed.aiStatus}</Text>
+                <Text style={{ color: colors.textMuted, fontSize: 10 }}>Putar Video ➔</Text>
+              </View>
             </View>
-          </View>
+          </Pressable>
         ))}
       </View>
 
@@ -88,6 +130,56 @@ export default function CctvMonitorScreen() {
       ) : (
         sorted.map((e) => <CctvEventRow key={e.id} event={e} canWrite={canWrite} onReview={() => reviewCctvEvent(e.id)} />)
       )}
+
+      {/* Live YouTube Video Player Modal */}
+      <Modal visible={!!activeFeed} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <Card style={[styles.modalCard, { backgroundColor: colors.surface }]}>
+            <View style={styles.rowBetween}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
+                <Feather name="video" size={20} color={colors.danger} />
+                <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text }} numberOfLines={1}>
+                  {activeFeed?.label}
+                </Text>
+              </View>
+              <Pressable onPress={() => setActiveFeed(null)}>
+                <Feather name="x" size={22} color={colors.textMuted} />
+              </Pressable>
+            </View>
+
+            {activeFeed && (
+              <View style={{ gap: spacing.sm, marginTop: 10 }}>
+                {/* YouTube Video WebView Player */}
+                <View style={{ width: '100%', height: 230, borderRadius: radius.md, overflow: 'hidden', backgroundColor: '#000' }}>
+                  <WebView
+                    source={{ uri: activeFeed.embedUrl }}
+                    style={{ flex: 1 }}
+                    javaScriptEnabled
+                    domStorageEnabled
+                    allowsInlineMediaPlayback
+                  />
+                </View>
+
+                {/* AI HUD Overlay Metrics */}
+                <View style={[styles.hudBox, { backgroundColor: colors.background, borderRadius: radius.md, padding: 12, gap: 6 }]}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Feather name="cpu" size={14} color={colors.primary} />
+                      <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>Computer Vision AI Analytics:</Text>
+                    </View>
+                    <Pill label={activeFeed.aiStatus} tone="success" />
+                  </View>
+                  <Text style={{ fontSize: 11, color: colors.textMuted }}>
+                    Status AI: Deteksi Alat Pelindung Diri (APD Masker & Sarung Tangan) terverifikasi 99.4%. Tidak ditemukan kebocoran / anomali suhu.
+                  </Text>
+                </View>
+
+                <SecondaryButton label="Tutup Video Stream" onPress={() => setActiveFeed(null)} />
+              </View>
+            )}
+          </Card>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -121,8 +213,12 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: { padding: 16, gap: 12, paddingBottom: 32 },
   disclaimer: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 10 },
-  cameraGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  cameraBox: { width: 140, height: 100, alignItems: 'center', justifyContent: 'center', gap: 4, padding: 8 },
+  cameraGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  cameraBox: { width: '48%', gap: 4 },
   rowTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   rowBottom: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', padding: 16 },
+  modalCard: { borderRadius: 16, padding: 16 },
+  hudBox: { marginTop: 4 },
 });

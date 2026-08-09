@@ -7,6 +7,7 @@ import { Card, DropdownPicker, EmptyState, IconButton, Input, Pill, PrimaryButto
 import { useScopedData } from '../hooks';
 import { scopeDistribusi, scopeMenuHarianPlan, scopeSekolah, ROLE_PERMISSIONS } from '../utils/scope';
 import { DistribusiRute } from '../types';
+import { MASTER_MENU_CATALOG } from '../data/masterMenu';
 
 const WEEKDAY_LABELS = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 const MONTH_LABELS = [
@@ -54,6 +55,7 @@ export default function MenuKalenderScreen() {
   const [editing, setEditing] = useState(false);
   const [menuDraft, setMenuDraft] = useState('');
   const [kategoriDraft, setKategoriDraft] = useState('');
+  const [fotoDraft, setFotoDraft] = useState<string | null>(null);
 
   const year = viewDate.getFullYear();
   const monthIdx = viewDate.getMonth();
@@ -78,14 +80,11 @@ export default function MenuKalenderScreen() {
   const planForSelected = menuInScope.find((m) => m.tanggal === selectedDate);
   const distribusiForSelected = distribusiInScope.filter((d) => d.tanggal === selectedDate);
 
-  // Reset the edit draft whenever the selected date or active SPPG changes —
-  // never when menuHarianPlanList itself changes (that would clobber a draft
-  // right after handleSaveMenu commits it).
   useEffect(() => {
     setMenuDraft(planForSelected?.menu ?? '');
     setKategoriDraft(planForSelected?.kategoriGizi ?? '');
+    setFotoDraft(planForSelected?.fotoMenu ?? null);
     setEditing(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate, activeSppgId]);
 
   const cells: (string | null)[] = [];
@@ -97,7 +96,7 @@ export default function MenuKalenderScreen() {
 
   const handleSaveMenu = () => {
     if (!activeSppgId || !menuDraft.trim()) return;
-    setMenuForDate(activeSppgId, selectedDate, menuDraft.trim(), kategoriDraft.trim() || undefined);
+    setMenuForDate(activeSppgId, selectedDate, menuDraft.trim(), kategoriDraft.trim() || undefined, fotoDraft || undefined);
     setEditing(false);
   };
 
@@ -174,16 +173,42 @@ export default function MenuKalenderScreen() {
         <SectionTitle style={{ marginBottom: 0 }}>Menu — {selectedDate}</SectionTitle>
         {editing ? (
           <View style={{ gap: spacing.sm }}>
-            <Input label="Menu" value={menuDraft} onChangeText={setMenuDraft} placeholder="Tuliskan menu untuk tanggal ini" />
+            <DropdownPicker
+              label="Pilih dari Master Katalog Menu (Opsional)"
+              icon="book-open"
+              value={MASTER_MENU_CATALOG.find((m) => m.nama === menuDraft)?.id ?? ''}
+              options={[
+                { label: '-- Ketik Manual Menu Custom --', value: '' },
+                ...MASTER_MENU_CATALOG.map((m) => ({ label: m.nama, value: m.id })),
+              ]}
+              onSelect={(val) => {
+                const found = MASTER_MENU_CATALOG.find((m) => m.id === val);
+                if (found) {
+                  setMenuDraft(found.nama);
+                  setKategoriDraft(found.kategoriGizi);
+                  setFotoDraft(found.fotoMenu);
+                }
+              }}
+            />
+
+            <Input label="Nama Paket Menu" value={menuDraft} onChangeText={setMenuDraft} placeholder="Tuliskan menu untuk tanggal ini" />
             <Input
-              label="Kategori Gizi (opsional)"
+              label="Kategori Gizi & Nutrisi"
               value={kategoriDraft}
               onChangeText={setKategoriDraft}
               placeholder="Contoh: Karbohidrat, Protein, Sayur, Buah"
             />
+
+            {fotoDraft && (
+              <View style={{ gap: 4 }}>
+                <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>Pratinjau Foto Makanan Master:</Text>
+                <Image source={{ uri: fotoDraft }} style={{ width: '100%', height: 120, borderRadius: radius.md }} resizeMode="cover" />
+              </View>
+            )}
+
             <View style={{ flexDirection: 'row', gap: spacing.sm }}>
               <PrimaryButton label="Batal" variant="outline" onPress={() => setEditing(false)} style={{ flex: 1 }} />
-              <PrimaryButton label="Simpan" onPress={handleSaveMenu} disabled={!menuDraft.trim()} style={{ flex: 1 }} />
+              <PrimaryButton label="Simpan Menu" onPress={handleSaveMenu} disabled={!menuDraft.trim()} style={{ flex: 1 }} />
             </View>
           </View>
         ) : (

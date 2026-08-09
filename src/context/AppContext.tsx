@@ -90,7 +90,7 @@ interface AppContextValue {
   chatMessages: ChatMessage[];
   sekolahList: Sekolah[];
   menuHarianPlanList: MenuHarianPlan[];
-  setMenuForDate: (sppgId: string, tanggal: string, menu: string, kategoriGizi?: string) => void;
+  setMenuForDate: (sppgId: string, tanggal: string, menu: string, kategoriGizi?: string, fotoMenu?: string) => void;
   mitraList: Mitra[];
   mutasiStokList: MutasiStok[];
   catatMutasiStok: (payload: Omit<MutasiStok, 'id' | 'tanggal'>) => void;
@@ -438,17 +438,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setDistribusiList((prev) => prev.map((d) => (d.id === id ? { ...d, status } : d)));
   };
 
-  // Menu Kalender (Fase C) — upsert: update the plan already at sppgId+tanggal, else insert.
-  const setMenuForDate: AppContextValue['setMenuForDate'] = (sppgId, tanggal, menu, kategoriGizi) => {
+  // Menu Kalender — upsert: update the plan already at sppgId+tanggal, else insert.
+  const setMenuForDate: AppContextValue['setMenuForDate'] = (sppgId, tanggal, menu, kategoriGizi, fotoMenu) => {
     setMenuHarianPlanList((prev) => {
       const idx = prev.findIndex((m) => m.sppgId === sppgId && m.tanggal === tanggal);
       if (idx >= 0) {
         const updated = [...prev];
-        updated[idx] = { ...updated[idx], menu, kategoriGizi };
+        updated[idx] = {
+          ...updated[idx],
+          menu,
+          kategoriGizi: kategoriGizi ?? updated[idx].kategoriGizi,
+          fotoMenu: fotoMenu ?? updated[idx].fotoMenu,
+        };
         return updated;
       }
       const id = `MHP-${String(prev.length + 1).padStart(3, '0')}`;
-      return [...prev, { id, sppgId, tanggal, menu, kategoriGizi }];
+      return [...prev, { id, sppgId, tanggal, menu, kategoriGizi, fotoMenu }];
     });
   };
 

@@ -35,6 +35,7 @@ export default function AduanMasyarakatScreen() {
 
   const [activeTab, setActiveTab] = useState<string>('semua');
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<PublicReport | null>(null);
 
   // Form State
   const [namaPelapor, setNamaPelapor] = useState('');
@@ -163,7 +164,7 @@ export default function AduanMasyarakatScreen() {
           const isResponding = respondingId === report.id;
 
           return (
-            <Card key={report.id} style={{ gap: spacing.sm }}>
+            <Card key={report.id} style={{ gap: spacing.sm }} onPress={() => setSelectedReport(report)}>
               <View style={styles.rowBetween}>
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, fontWeight: '600' }}>
@@ -181,11 +182,11 @@ export default function AduanMasyarakatScreen() {
                 <Pill tone="primary" label={KATEGORI_LABEL[report.kategori]} />
               </View>
 
-              <Text style={{ fontSize: fontSize.sm, color: colors.text, lineHeight: 20 }}>{report.deskripsi}</Text>
+              <Text style={{ fontSize: fontSize.sm, color: colors.text, lineHeight: 20 }} numberOfLines={3}>{report.deskripsi}</Text>
 
               {report.fotoBukti && (
                 <View style={[styles.imageWrapper, { borderRadius: radius.md, overflow: 'hidden' }]}>
-                  <Image source={{ uri: report.fotoBukti }} style={{ width: '100%', height: 160 }} resizeMode="cover" />
+                  <Image source={{ uri: report.fotoBukti }} style={{ width: '100%', height: 140 }} resizeMode="cover" />
                 </View>
               )}
 
@@ -195,6 +196,7 @@ export default function AduanMasyarakatScreen() {
                   {report.namaPelapor}
                 </Text>
                 <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>({report.noHpPelapor})</Text>
+                <Text style={{ fontSize: 10, color: colors.primary, fontWeight: '700', marginLeft: 'auto' }}>Lihat Detail ➔</Text>
               </View>
 
               {/* Tanggapan Resmi */}
@@ -203,59 +205,12 @@ export default function AduanMasyarakatScreen() {
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                     <Feather name="check-circle" size={14} color={colors.primary} strokeWidth={2} />
                     <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.primary }}>
-                      Tanggapan Resmi Penanggung Jawab SPPG:
+                      Tanggapan Resmi SPPG:
                     </Text>
                   </View>
-                  <Text style={{ fontSize: fontSize.xs, color: colors.text, lineHeight: 18 }}>{report.tanggapan}</Text>
+                  <Text style={{ fontSize: fontSize.xs, color: colors.text, lineHeight: 18 }} numberOfLines={2}>{report.tanggapan}</Text>
                 </View>
               ) : null}
-
-              {/* Response Inline Form */}
-              {isResponding ? (
-                <View style={[styles.responseForm, { borderTopColor: colors.border, paddingTop: spacing.sm, gap: spacing.sm }]}>
-                  <Input
-                    label="Tanggapan / Solusi Laporan"
-                    value={tanggapanText}
-                    onChangeText={setTanggapanText}
-                    placeholder="Tuliskan tindak lanjut atau tanggapan..."
-                    multiline
-                  />
-                  <View style={{ flexDirection: 'row', gap: spacing.xs }}>
-                    {(['diproses', 'ditindaklanjuti', 'selesai'] as PublicReportStatus[]).map((st) => (
-                      <Pressable
-                        key={st}
-                        onPress={() => setNewStatus(st)}
-                        style={[
-                          styles.statusChip,
-                          {
-                            backgroundColor: newStatus === st ? colors.primary : colors.surface,
-                            borderColor: newStatus === st ? colors.primary : colors.border,
-                            borderRadius: radius.sm,
-                          },
-                        ]}
-                      >
-                        <Text style={{ fontSize: fontSize.xs, color: newStatus === st ? colors.textInverse : colors.text, fontWeight: '700' }}>
-                          {STATUS_LABEL[st]}
-                        </Text>
-                      </Pressable>
-                    ))}
-                  </View>
-                  <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                    <SecondaryButton label="Batal" onPress={() => setRespondingId(null)} style={{ flex: 1 }} />
-                    <PrimaryButton label="Simpan Tanggapan" onPress={() => handleSaveResponse(report.id)} style={{ flex: 1 }} />
-                  </View>
-                </View>
-              ) : (
-                <SecondaryButton
-                  label={report.tanggapan ? 'Perbarui Tanggapan' : 'Tindak Lanjuti Laporan'}
-                  icon="edit-3"
-                  onPress={() => {
-                    setRespondingId(report.id);
-                    setTanggapanText(report.tanggapan || '');
-                    setNewStatus(report.status);
-                  }}
-                />
-              )}
             </Card>
           );
         })}
@@ -338,6 +293,132 @@ export default function AduanMasyarakatScreen() {
               <SecondaryButton label="Batal" onPress={() => setModalVisible(false)} style={{ flex: 1 }} />
               <PrimaryButton label="Kirim Aduan" onPress={handleSubmitNewReport} style={{ flex: 1 }} />
             </View>
+          </Card>
+        </View>
+      </Modal>
+
+      {/* Modal Detail Aduan Informotif */}
+      <Modal visible={!!selectedReport} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <Card style={[styles.modalContent, { backgroundColor: colors.surface, maxHeight: '92%' }]}>
+            <View style={styles.rowBetween}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: fontSize.lg, fontWeight: '800', color: colors.text }}>Detail Aduan Publik</Text>
+                <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>ID: {selectedReport?.id}</Text>
+              </View>
+              <Pressable onPress={() => setSelectedReport(null)}>
+                <Feather name="x" size={22} color={colors.textMuted} strokeWidth={iconStrokeWidth} />
+              </Pressable>
+            </View>
+
+            {selectedReport && (() => {
+              const sppg = sppgList.find((s) => s.id === selectedReport.sppgId);
+              const isResponding = respondingId === selectedReport.id;
+
+              return (
+                <ScrollView contentContainerStyle={{ gap: spacing.sm, paddingVertical: spacing.xs }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Pill tone={STATUS_COLOR[selectedReport.status]} label={STATUS_LABEL[selectedReport.status]} />
+                    <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>{selectedReport.timestamp}</Text>
+                  </View>
+
+                  <Text style={{ fontSize: fontSize.md, fontWeight: '800', color: colors.text }}>{selectedReport.judul}</Text>
+
+                  <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
+                    <Pill tone="neutral" label={`Dapur SPPG: ${sppg?.nama ?? selectedReport.sppgId}`} />
+                    <Pill tone="primary" label={KATEGORI_LABEL[selectedReport.kategori]} />
+                  </View>
+
+                  <View style={[styles.reporterBar, { backgroundColor: colors.background, borderRadius: radius.md, padding: 12, marginTop: 4 }]}>
+                    <Feather name="user" size={16} color={colors.primary} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>
+                        Pelapor: {selectedReport.namaPelapor}
+                      </Text>
+                      <Text style={{ fontSize: 10, color: colors.textMuted }}>Kontak WhatsApp: {selectedReport.noHpPelapor}</Text>
+                    </View>
+                  </View>
+
+                  <View style={{ gap: 4, marginTop: 4 }}>
+                    <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>Uraian Lengkap Aduan:</Text>
+                    <Text style={{ fontSize: fontSize.sm, color: colors.text, lineHeight: 22 }}>{selectedReport.deskripsi}</Text>
+                  </View>
+
+                  {selectedReport.fotoBukti && (
+                    <View style={{ gap: 4, marginTop: 4 }}>
+                      <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>Foto Lampiran Bukti:</Text>
+                      <Image source={{ uri: selectedReport.fotoBukti }} style={{ width: '100%', height: 180, borderRadius: radius.md }} resizeMode="cover" />
+                    </View>
+                  )}
+
+                  {/* Tanggapan Resmi */}
+                  {selectedReport.tanggapan && (
+                    <View style={[styles.tanggapanBox, { backgroundColor: colors.primaryLight, borderRadius: radius.md, padding: 12, marginTop: 4 }]}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                        <Feather name="check-circle" size={16} color={colors.primary} />
+                        <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.primary }}>
+                          Tanggapan Penanggung Jawab SPPG:
+                        </Text>
+                      </View>
+                      <Text style={{ fontSize: fontSize.xs, color: colors.text, lineHeight: 20 }}>{selectedReport.tanggapan}</Text>
+                    </View>
+                  )}
+
+                  {/* Response Action inside Modal */}
+                  {isResponding ? (
+                    <View style={[styles.responseForm, { borderTopColor: colors.border, paddingTop: spacing.sm, gap: spacing.sm, marginTop: 6 }]}>
+                      <Input
+                        label="Balas & Beri Tanggapan Resmi"
+                        value={tanggapanText}
+                        onChangeText={setTanggapanText}
+                        placeholder="Tuliskan tindakan atau jawaban penanganan..."
+                        multiline
+                      />
+                      <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+                        {(['diproses', 'ditindaklanjuti', 'selesai'] as PublicReportStatus[]).map((st) => (
+                          <Pressable
+                            key={st}
+                            onPress={() => setNewStatus(st)}
+                            style={[
+                              styles.statusChip,
+                              {
+                                backgroundColor: newStatus === st ? colors.primary : colors.surface,
+                                borderColor: newStatus === st ? colors.primary : colors.border,
+                                borderRadius: radius.sm,
+                              },
+                            ]}
+                          >
+                            <Text style={{ fontSize: fontSize.xs, color: newStatus === st ? colors.textInverse : colors.text, fontWeight: '700' }}>
+                              {STATUS_LABEL[st]}
+                            </Text>
+                          </Pressable>
+                        ))}
+                      </View>
+                      <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                        <SecondaryButton label="Batal" onPress={() => setRespondingId(null)} style={{ flex: 1 }} />
+                        <PrimaryButton label="Simpan Tanggapan" onPress={() => {
+                          handleSaveResponse(selectedReport.id);
+                          setSelectedReport((prev) => prev ? { ...prev, status: newStatus, tanggapan: tanggapanText } : null);
+                        }} style={{ flex: 1 }} />
+                      </View>
+                    </View>
+                  ) : (
+                    <PrimaryButton
+                      label={selectedReport.tanggapan ? 'Perbarui Balasan Tanggapan' : 'Balas & Tindak Lanjuti Aduan Ini'}
+                      icon="edit-3"
+                      onPress={() => {
+                        setRespondingId(selectedReport.id);
+                        setTanggapanText(selectedReport.tanggapan || '');
+                        setNewStatus(selectedReport.status);
+                      }}
+                      style={{ marginTop: 8 }}
+                    />
+                  )}
+
+                  <SecondaryButton label="Tutup Modal" onPress={() => setSelectedReport(null)} style={{ marginTop: 4 }} />
+                </ScrollView>
+              );
+            })()}
           </Card>
         </View>
       </Modal>
