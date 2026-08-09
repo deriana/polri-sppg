@@ -42,7 +42,9 @@ import {
   Sekolah,
   Sppg,
   User,
+  MasterMenu,
 } from '../types';
+import { MASTER_MENU_CATALOG } from '../data/masterMenu';
 
 // Fase 2 (simulasi) — daftar jenis anomali CCTV yang dipakai simulateCctvDetection
 // untuk memilih anomali secara berputar (tanpa dependency random).
@@ -93,6 +95,8 @@ interface AppContextValue {
   setMenuForDate: (sppgId: string, tanggal: string, menu: string, kategoriGizi?: string, fotoMenu?: string) => void;
   mitraList: Mitra[];
   mutasiStokList: MutasiStok[];
+  masterMenuList: MasterMenu[];
+  addMasterMenu: (menu: Omit<MasterMenu, 'id'>) => void;
   catatMutasiStok: (payload: Omit<MutasiStok, 'id' | 'tanggal'>) => void;
   reviewCctvEvent: (id: string) => void;
   simulateCctvDetection: (sppgId: string) => void;
@@ -140,6 +144,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [menuHarianPlanList, setMenuHarianPlanList] = useState<MenuHarianPlan[]>(initialMenuHarianPlan);
   const [mitraList, setMitraList] = useState<Mitra[]>(initialMitra);
   const [mutasiStokList, setMutasiStokList] = useState<MutasiStok[]>(initialMutasiStok);
+  const [masterMenuList, setMasterMenuList] = useState<MasterMenu[]>(MASTER_MENU_CATALOG);
+
+  const addMasterMenu: AppContextValue['addMasterMenu'] = (menu) => {
+    const id = `MM-${String(masterMenuList.length + 1).padStart(3, '0')}`;
+    setMasterMenuList((prev) => [ { ...menu, id }, ...prev]);
+  };
 
   const updatePeralatanStatus: AppContextValue['updatePeralatanStatus'] = (id, status, catatanKondisi) => {
     setPeralatanList((prev) =>
@@ -512,6 +522,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       chatMessages,
       sekolahList,
       menuHarianPlanList,
+      masterMenuList,
+      addMasterMenu,
       mitraList,
       mutasiStokList,
       catatMutasiStok,

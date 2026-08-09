@@ -39,6 +39,7 @@ export default function MoreMenuScreen({ navigation }: any) {
   }
   items.push({ key: 'SppgProfile', icon: 'home', label: 'Profil SPPG', desc: 'Info dapur & kapasitas produksi' });
   items.push({ key: 'MenuKalender', icon: 'calendar', label: 'Kalender Menu', desc: 'Lihat & atur menu per tanggal, status kirim per sekolah' });
+  items.push({ key: 'MasterMenu', icon: 'book-open', label: 'Master Katalog & Resep Gizi', desc: 'Kelola master resep makanan, gizi AKG, & porsi' });
   items.push({ key: 'AduanMasyarakat', icon: 'message-square', label: 'Aduan Masyarakat', desc: 'Laporan pengaduan publik & respon SPPG' });
   items.push({ key: 'Notifikasi', icon: 'bell', label: 'Notifikasi', desc: 'Pengingat tugas & riwayat alert' });
   items.push({ key: 'Profile', icon: 'user', label: 'Profil Saya', desc: 'Info akun & data pribadi' });

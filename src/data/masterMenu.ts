@@ -1,14 +1,4 @@
-export interface MasterMenu {
-  id: string;
-  nama: string;
-  kategoriGizi: string;
-  fotoMenu: string;
-  kalori: number;
-  proteinGram: number;
-  karboGram: number;
-  lemakGram: number;
-  deskripsi: string;
-}
+import { MasterMenu } from '../types';
 
 export const MASTER_MENU_CATALOG: MasterMenu[] = [
   {
@@ -20,7 +10,10 @@ export const MASTER_MENU_CATALOG: MasterMenu[] = [
     proteinGram: 28,
     karboGram: 65,
     lemakGram: 18,
+    porsiGram: 380,
     deskripsi: 'Paket nasi liwet gurih dengan lauk utama dada ayam bakar madu empuk, tumis bayam bening segar, dan tempe orek manis pedas.',
+    resep: '1. Ungkep ayam dengan bumbu rempah kuning & madu murni selama 25 menit.\n2. Bakar ayam di atas grill pan hingga harum karamel.\n3. Masak nasi liwet dengan santan encer, daun salam, dan batang serai.\n4. Rebus sayur bayam segar sebentar agar nutrisi tetap terjaga.\n5. Orek tempe dipotong dadu kecil dan dimasak tumis manis.',
+    bahanUtama: ['Dada Ayam Segar (100g)', 'Beras Premium (120g)', 'Sayur Bayam Segar (50g)', 'Tempe Kedelai (40g)', 'Madu & Rempah Nusantara'],
   },
   {
     id: 'MM-002',
@@ -31,7 +24,10 @@ export const MASTER_MENU_CATALOG: MasterMenu[] = [
     proteinGram: 32,
     karboGram: 70,
     lemakGram: 22,
+    porsiGram: 410,
     deskripsi: 'Daging rendang empuk kaya rempah dengan nasi kuning wangi pandan, telur balado iris, dan sambal goreng kentang ati.',
+    resep: '1. Potong daging sapi sengkel, masak rendang santan kental api kecil selama 3 jam.\n2. Aroni nasi kuning dengan kunyit asli, daun jeruk, dan santan.\n3. Gunting kentang dadu, goreng krispi lalu tumis bumbu sambal goreng pedas manis.',
+    bahanUtama: ['Daging Sapi Sengkel (90g)', 'Beras Pandan Wangi (120g)', 'Kentang (50g)', 'Santan Kelapa Murni (40ml)'],
   },
   {
     id: 'MM-003',
@@ -42,7 +38,10 @@ export const MASTER_MENU_CATALOG: MasterMenu[] = [
     proteinGram: 30,
     karboGram: 60,
     lemakGram: 14,
+    porsiGram: 370,
     deskripsi: 'Fillet gurame segar panggang manis gurih dengan sup wortel makaroni bening kaya vitamin A dan tahu bacem khas Jawa.',
+    resep: '1. Marinasikan fillet gurame segar dengan jeruk nipis & ketumbar.\n2. Oleskan bumbu marinasi kecap manis gurih saat membakar di teflon.\n3. Masak sup bening wortel, buncis, dan makaroni jagung.\n4. Ungkep tahu bacem dengan gula merah dan air kelapa.',
+    bahanUtama: ['Fillet Gurame Segar (110g)', 'Beras Putih (120g)', 'Wortel Organik (40g)', 'Tahu Kedelai Bacem (50g)'],
   },
   {
     id: 'MM-004',
@@ -53,7 +52,10 @@ export const MASTER_MENU_CATALOG: MasterMenu[] = [
     proteinGram: 29,
     karboGram: 62,
     lemakGram: 20,
+    porsiGram: 390,
     deskripsi: 'Ayam kampung digoreng dengan serundeng lengkuas harum gurih, capcay kuah kental wortel buncis, dan telur dadar tebal.',
+    resep: '1. Parut lengkuas muda, ungkep bersama potongan paha ayam.\n2. Goreng ayam & serundeng lengkuas hingga kuning keemasan krispi.\n3. Tumis capcay sayuran segar dengan bawang putih & saus tiram.',
+    bahanUtama: ['Daging Ayam Paha (100g)', 'Lengkuas Parut (30g)', 'Wortel & Buncis (60g)', 'Telur Ayam Dadar (40g)'],
   },
   {
     id: 'MM-005',
@@ -64,7 +66,10 @@ export const MASTER_MENU_CATALOG: MasterMenu[] = [
     proteinGram: 27,
     karboGram: 64,
     lemakGram: 16,
+    porsiGram: 380,
     deskripsi: 'Ayam masak bumbu woku khas Manado berminyak kemangi wangi, cah buncis jagung manis, dan perkedel kentang lembut.',
+    resep: '1. Tumis bumbu halus woku (cabe, kunyit, jahe, kemiri) hingga harum.\n2. Masukkan potongan ayam dan irisan daun kemangi segar.\n3. Haluskan kentang kukus, bentuk perkedel lalu goreng dengan balutan telur.',
+    bahanUtama: ['Daging Ayam (100g)', 'Daun Kemangi Segar (20g)', 'Buncis & Jagung (50g)', 'Perkedel Kentang (40g)'],
   },
   {
     id: 'MM-006',
@@ -75,6 +80,9 @@ export const MASTER_MENU_CATALOG: MasterMenu[] = [
     proteinGram: 31,
     karboGram: 68,
     lemakGram: 21,
+    porsiGram: 400,
     deskripsi: 'Bola daging sapi cincang dimasak semur manis gurih, nasi uduk gurih santan, dan tumis kacang panjang tempe.',
+    resep: '1. Bulatkan daging sapi giling dengan sedikit tepung sagu & rempah pala.\n2. Masak semur bola daging dengan pala, cengkeh, dan kecap manis.\n3. Tumis kacang panjang potong dengan irisan cabai merah dan bawang.',
+    bahanUtama: ['Daging Sapi Cincang (90g)', 'Beras Uduk Gurih (120g)', 'Kacang Panjang (50g)', 'Kecap Manis Rempah'],
   },
 ];

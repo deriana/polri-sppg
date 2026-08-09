@@ -39,7 +39,7 @@ function todayDateStr(): string {
 }
 
 export default function MenuKalenderScreen() {
-  const { role, currentSppg, sekolahList, distribusiList, menuHarianPlanList, setMenuForDate } = useApp();
+  const { role, currentSppg, sekolahList, distribusiList, menuHarianPlanList, setMenuForDate, masterMenuList } = useApp();
   const { sppgInScope } = useScopedData();
   const { colors, spacing, fontSize, iconStrokeWidth, radius } = useTheme();
 
@@ -176,13 +176,13 @@ export default function MenuKalenderScreen() {
             <DropdownPicker
               label="Pilih dari Master Katalog Menu (Opsional)"
               icon="book-open"
-              value={MASTER_MENU_CATALOG.find((m) => m.nama === menuDraft)?.id ?? ''}
+              value={masterMenuList.find((m) => m.nama === menuDraft)?.id ?? ''}
               options={[
                 { label: '-- Ketik Manual Menu Custom --', value: '' },
-                ...MASTER_MENU_CATALOG.map((m) => ({ label: m.nama, value: m.id })),
+                ...masterMenuList.map((m) => ({ label: m.nama, value: m.id })),
               ]}
               onSelect={(val) => {
-                const found = MASTER_MENU_CATALOG.find((m) => m.id === val);
+                const found = masterMenuList.find((m) => m.id === val);
                 if (found) {
                   setMenuDraft(found.nama);
                   setKategoriDraft(found.kategoriGizi);

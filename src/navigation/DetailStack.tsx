@@ -35,6 +35,7 @@ import MutasiStokFormScreen from '../screens/MutasiStokFormScreen';
 import AduanMasyarakatScreen from '../screens/AduanMasyarakatScreen';
 import PeralatanScreen from '../screens/PeralatanScreen';
 import SekolahDetailScreen from '../screens/SekolahDetailScreen';
+import MasterMenuScreen from '../screens/MasterMenuScreen';
 
 const Stack = createNativeStackNavigator<any>();
 
@@ -71,6 +72,7 @@ const DETAIL_SCREENS: Array<{ name: string; component: React.ComponentType<any>;
   { name: 'Distribusi', component: DistribusiScreen, title: 'Distribusi Armada GPS' },
   { name: 'ChatCommandCenter', component: ChatCommandCenterScreen, title: 'Chat Command Center' },
   { name: 'MenuKalender', component: MenuKalenderScreen, title: 'Kalender Menu' },
+  { name: 'MasterMenu', component: MasterMenuScreen, title: 'Master Katalog & Resep Gizi' },
   { name: 'MitraList', component: MitraListScreen, title: 'Mitra Pemasok' },
   { name: 'MutasiStokForm', component: MutasiStokFormScreen, title: 'Catat Mutasi Stok' },
 ];

@@ -14,6 +14,21 @@ export type JobdeskType =
   | 'driver'
   | 'lainnya';
 
+export interface MasterMenu {
+  id: string;
+  nama: string;
+  kategoriGizi: string;
+  fotoMenu: string | null;
+  kalori: number;
+  proteinGram: number;
+  karboGram: number;
+  lemakGram: number;
+  deskripsi: string;
+  resep?: string;
+  bahanUtama?: string[];
+  porsiGram?: number;
+}
+
 export interface Sppg {
   id: string;
   nama: string;
