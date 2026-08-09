@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
@@ -49,6 +49,22 @@ export default function CheckInScreen({ navigation, route }: any) {
   const [geotag, setGeotag] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  // Auto-detect hardware GPS location on component mount without needing button clicks
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      setLocating(true);
+      const point = await getCurrentGeotag();
+      if (mounted && point) {
+        setGeotag(point);
+      }
+      if (mounted) setLocating(false);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   if (!allowed) {
     return (
