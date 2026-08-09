@@ -12,9 +12,9 @@ import { CctvEvent } from '../types';
 
 const localVideoUri = (() => {
   try {
-    return Image.resolveAssetSource(require('../../assets/mock_cctv_test.mp4')).uri;
+    return Image.resolveAssetSource(require('../../assets/sppg.mp4')).uri;
   } catch (e) {
-    return 'file:///home/deryana/coding/sigap-sppg/assets/mock_cctv_test.mp4';
+    return 'file:///home/deryana/coding/sigap-sppg/assets/sppg.mp4';
   }
 })();
 
