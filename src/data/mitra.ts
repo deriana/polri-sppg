@@ -1,0 +1,88 @@
+import { Mitra } from '../types';
+
+// Phase D — daftar mitra/pemasok rantai pasok. Data referensi bersama untuk
+// seluruh SPPG (bukan di-scope per SPPG) — mencerminkan pola pengadaan
+// terpusat/wilayah pada rantai pasok MBG sungguhan, bukan kontrak rahasia
+// per dapur.
+export const mitraList: Mitra[] = [
+  {
+    id: 'MITRA-001',
+    nama: 'PT Roti Barokah Sejahtera',
+    jenisProduk: 'Roti dan Kue',
+    kontakNama: 'Hendra Wijaya',
+    kontakHp: '0812-2233-4455',
+    wilayahLayanan: 'Kota Bandung',
+    statusKontrak: 'aktif',
+    sejakTanggal: '2023-01-15',
+  },
+  {
+    id: 'MITRA-002',
+    nama: 'CV Unggas Makmur Jaya',
+    jenisProduk: 'Ayam dan Daging',
+    kontakNama: 'Siti Rahmawati',
+    kontakHp: '0813-4455-6677',
+    wilayahLayanan: 'Jakarta Selatan',
+    statusKontrak: 'aktif',
+    sejakTanggal: '2022-06-01',
+  },
+  {
+    id: 'MITRA-003',
+    nama: 'PT Sumber Padi Nusantara',
+    jenisProduk: 'Beras dan Bahan Pokok',
+    kontakNama: 'Agus Santoso',
+    kontakHp: '0811-9988-7766',
+    wilayahLayanan: 'Jawa Barat',
+    statusKontrak: 'aktif',
+    sejakTanggal: '2021-03-10',
+  },
+  {
+    id: 'MITRA-004',
+    nama: 'CV Segar Alam Produce',
+    jenisProduk: 'Sayur dan Buah',
+    kontakNama: 'Dewi Lestari',
+    kontakHp: '0857-1122-3344',
+    wilayahLayanan: 'Kota Surabaya',
+    statusKontrak: 'tinjau_ulang',
+    sejakTanggal: '2023-09-01',
+  },
+  {
+    id: 'MITRA-005',
+    nama: 'PT Kemasan Pangan Lestari',
+    jenisProduk: 'Kemasan Makanan',
+    kontakNama: 'Budi Prakoso',
+    kontakHp: '0821-5566-7788',
+    wilayahLayanan: 'Jakarta Selatan',
+    statusKontrak: 'aktif',
+    sejakTanggal: '2022-11-20',
+  },
+  {
+    id: 'MITRA-006',
+    nama: 'CV Minyak Nusantara',
+    jenisProduk: 'Minyak Goreng dan Bumbu',
+    kontakNama: 'Rudi Hartono',
+    kontakHp: '0878-3344-5566',
+    wilayahLayanan: 'Jawa Timur',
+    statusKontrak: 'aktif',
+    sejakTanggal: '2023-02-14',
+  },
+  {
+    id: 'MITRA-007',
+    nama: 'PT Telur Segar Prima',
+    jenisProduk: 'Telur',
+    kontakNama: 'Maya Anggraini',
+    kontakHp: '0815-6677-8899',
+    wilayahLayanan: 'Kota Bandung',
+    statusKontrak: 'nonaktif',
+    sejakTanggal: '2021-08-05',
+  },
+  {
+    id: 'MITRA-008',
+    nama: 'UD Sayur Segar Bekasi',
+    jenisProduk: 'Sayur dan Buah',
+    kontakNama: 'Joko Susilo',
+    kontakHp: '0896-2233-1144',
+    wilayahLayanan: 'Kota Bekasi',
+    statusKontrak: 'tinjau_ulang',
+    sejakTanggal: '2024-01-10',
+  },
+];

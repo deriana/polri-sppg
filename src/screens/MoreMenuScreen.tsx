@@ -1,0 +1,180 @@
+import React, { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { useApp } from '../context/AppContext';
+import { useTheme } from '../context/ThemeContext';
+import { Pill, SectionTitle, SyncStatusBadge } from '../components/ui';
+import { usePendingSyncCount } from '../hooks';
+import { ROLE_PERMISSIONS, roleScopeLabel } from '../utils/scope';
+import { syncOfflineQueue } from '../utils/offlineQueue';
+
+interface MenuItem {
+  key: string;
+  icon: keyof typeof Feather.glyphMap;
+  label: string;
+  desc: string;
+}
+
+export default function MoreMenuScreen({ navigation }: any) {
+  const { role, currentUser, logout, isDemoMode, toggleDemoMode } = useApp();
+  const { colors, isDark, toggleTheme, spacing, fontSize, iconSize, iconStrokeWidth, radius, shadow } = useTheme();
+  const [pendingCount, setPendingCount] = usePendingSyncCount();
+  const [syncing, setSyncing] = useState(false);
+
+  if (!role || !currentUser) return null;
+  const permissions = ROLE_PERMISSIONS[role];
+
+  const handleSync = async () => {
+    setSyncing(true);
+    const synced = await syncOfflineQueue();
+    setSyncing(false);
+    setPendingCount(Math.max(0, pendingCount - synced));
+  };
+
+  const items: MenuItem[] = [];
+  if (permissions.canManageStaff) {
+    items.push({ key: 'StaffList', icon: 'users', label: 'Data Staf', desc: 'Kelola petugas lapangan SPPG' });
+  }
+  items.push({ key: 'SppgProfile', icon: 'home', label: 'Profil SPPG', desc: 'Info dapur & kapasitas produksi' });
+  items.push({ key: 'MenuKalender', icon: 'calendar', label: 'Kalender Menu', desc: 'Lihat & atur menu per tanggal, status kirim per sekolah' });
+  items.push({ key: 'AduanMasyarakat', icon: 'message-square', label: 'Aduan Masyarakat', desc: 'Laporan pengaduan publik & respon SPPG' });
+  items.push({ key: 'Notifikasi', icon: 'bell', label: 'Notifikasi', desc: 'Pengingat tugas & riwayat alert' });
+  items.push({ key: 'Profile', icon: 'user', label: 'Profil Saya', desc: 'Info akun & data pribadi' });
+
+  // Fase 2 (simulasi) — dipisah visual dari menu inti Fase 1 di atas agar jelas
+  // ini fitur pratinjau/demo, bukan fungsionalitas inti yang sudah tersertifikasi.
+  const phase2Items: MenuItem[] = [
+    { key: 'CctvMonitor', icon: 'video', label: 'Monitor CCTV', desc: 'Deteksi anomali AI (simulasi)' },
+    { key: 'Gudang', icon: 'package', label: 'Gudang & Stok Bahan', desc: 'Stok bahan baku SPPG' },
+    { key: 'RiwayatPermintaan', icon: 'clipboard', label: 'Riwayat Permintaan Bahan', desc: 'Riwayat pengajuan ke gudang' },
+    { key: 'MitraList', icon: 'users', label: 'Mitra Pemasok', desc: 'Supplier/pabrik bahan baku per kategori' },
+    { key: 'Distribusi', icon: 'truck', label: 'Distribusi Armada', desc: 'Pelacakan GPS (simulasi)' },
+    { key: 'ChatCommandCenter', icon: 'message-circle', label: 'Chat Command Center', desc: 'Komunikasi dengan pengawas' },
+  ];
+
+  return (
+    <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
+      <View style={[styles.headerCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <Text style={{ color: colors.text, fontWeight: '800', fontSize: fontSize.md }}>{currentUser.nama}</Text>
+        <Text style={{ color: colors.primary, fontWeight: '700', fontSize: fontSize.xs }}>{roleScopeLabel(currentUser)}</Text>
+      </View>
+
+      <SyncStatusBadge pendingCount={pendingCount} onSyncPress={handleSync} syncing={syncing} />
+
+      <SectionTitle style={{ marginTop: spacing.xs }}>Menu</SectionTitle>
+      {items.map((item) => (
+        <Pressable
+          key={item.key}
+          onPress={() => navigation.navigate(item.key)}
+          style={({ pressed }) => [
+            styles.row,
+            { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.lg, ...shadow.card },
+            pressed && { opacity: 0.8 },
+          ]}
+        >
+          <View style={[styles.iconWrap, { backgroundColor: colors.primaryLight }]}>
+            <Feather name={item.icon} size={iconSize.md} color={colors.primary} strokeWidth={iconStrokeWidth} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: colors.text, fontWeight: '700', fontSize: fontSize.sm }}>{item.label}</Text>
+            <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>{item.desc}</Text>
+          </View>
+          <Feather name="chevron-right" size={iconSize.md} color={colors.textMuted} strokeWidth={iconStrokeWidth} />
+        </Pressable>
+      ))}
+
+      <SectionTitle style={{ marginTop: spacing.md }} action={<Pill label="Simulasi" tone="warning" icon="alert-triangle" />}>
+        Fitur Fase 2 (Simulasi)
+      </SectionTitle>
+      {phase2Items.map((item) => (
+        <Pressable
+          key={item.key}
+          onPress={() => navigation.navigate(item.key)}
+          style={({ pressed }) => [
+            styles.row,
+            { backgroundColor: colors.surface, borderColor: colors.borderStrong, borderStyle: 'dashed', borderRadius: radius.lg },
+            pressed && { opacity: 0.8 },
+          ]}
+        >
+          <View style={[styles.iconWrap, { backgroundColor: colors.warningBg }]}>
+            <Feather name={item.icon} size={iconSize.md} color={colors.warning} strokeWidth={iconStrokeWidth} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: colors.text, fontWeight: '700', fontSize: fontSize.sm }}>{item.label}</Text>
+            <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>{item.desc}</Text>
+          </View>
+          <Feather name="chevron-right" size={iconSize.md} color={colors.textMuted} strokeWidth={iconStrokeWidth} />
+        </Pressable>
+      ))}
+
+      <Pressable
+        onPress={toggleDemoMode}
+        style={({ pressed }) => [
+          styles.row,
+          {
+            backgroundColor: isDemoMode ? colors.warningBg : colors.surface,
+            borderColor: isDemoMode ? colors.warning : colors.border,
+            borderRadius: radius.lg,
+            marginTop: spacing.xs,
+            ...shadow.card,
+          },
+          pressed && { opacity: 0.8 },
+        ]}
+      >
+        <View style={[styles.iconWrap, { backgroundColor: isDemoMode ? colors.warning : colors.primaryLight }]}>
+          <Feather name="zap" size={iconSize.md} color={isDemoMode ? '#FFFFFF' : colors.primary} strokeWidth={iconStrokeWidth} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: isDemoMode ? colors.warning : colors.text, fontWeight: '700', fontSize: fontSize.sm }}>
+            Global Demo Mode: {isDemoMode ? 'AKTIF (Simulasi Live)' : 'NONAKTIF (Manual Only)'}
+          </Text>
+          <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>
+            {isDemoMode ? 'Simulasi IoT, GPS, & real-time counter berjalan otomatis' : 'Input manual standar tanpa simulasi background'}
+          </Text>
+        </View>
+        <Feather name={isDemoMode ? 'check-circle' : 'circle'} size={iconSize.md} color={isDemoMode ? colors.warning : colors.textMuted} strokeWidth={iconStrokeWidth} />
+      </Pressable>
+
+      <Pressable
+        onPress={toggleTheme}
+        style={({ pressed }) => [
+          styles.row,
+          { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.lg, marginTop: spacing.xs, ...shadow.card },
+          pressed && { opacity: 0.8 },
+        ]}
+      >
+        <View style={[styles.iconWrap, { backgroundColor: colors.primaryLight }]}>
+          <Feather name={isDark ? 'sun' : 'moon'} size={iconSize.md} color={colors.primary} strokeWidth={iconStrokeWidth} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: colors.text, fontWeight: '700', fontSize: fontSize.sm }}>{isDark ? 'Mode Terang' : 'Mode Gelap'}</Text>
+          <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Ketuk untuk mengganti tampilan</Text>
+        </View>
+      </Pressable>
+
+      <Pressable
+        onPress={logout}
+        style={({ pressed }) => [
+          styles.row,
+          { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.lg, marginTop: spacing.xs, ...shadow.card },
+          pressed && { opacity: 0.8 },
+        ]}
+      >
+        <View style={[styles.iconWrap, { backgroundColor: colors.dangerBg }]}>
+          <Feather name="log-out" size={iconSize.md} color={colors.danger} strokeWidth={iconStrokeWidth} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: colors.danger, fontWeight: '700', fontSize: fontSize.sm }}>Keluar (Logout)</Text>
+        </View>
+      </Pressable>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: { flex: 1 },
+  content: { padding: 16, gap: 10, paddingBottom: 32 },
+  headerCard: { padding: 14, borderRadius: 16, borderWidth: 1, gap: 2 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, padding: 14, minHeight: 64 },
+  iconWrap: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+});

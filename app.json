@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "SIGAP SPPG",
+    "slug": "sigap-sppg",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#071e49"
+    },
+    "newArchEnabled": false,
+    "updates": {
+      "checkAutomatically": "NEVER",
+      "enabled": false
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "id.go.polri.sigapsppg",
+      "adaptiveIcon": {
+        "backgroundColor": "#071e49",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "SIGAP SPPG memerlukan akses kamera untuk foto presensi dan dokumentasi produksi."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "SIGAP SPPG memerlukan akses lokasi untuk mencatat titik geotag presensi dan produksi di dapur SPPG."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "SIGAP SPPG memerlukan akses galeri untuk mengunggah foto dokumentasi.",
+          "cameraPermission": "SIGAP SPPG memerlukan akses kamera untuk memotret dokumentasi produksi dan checklist."
+        }
+      ],
+      "expo-font"
+    ]
+  }
+}

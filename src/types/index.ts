@@ -1,0 +1,256 @@
+export type Role = 'KEPALA_SPPG' | 'PETUGAS_LAPANGAN' | 'SUPERVISOR_POLRES' | 'SUPERVISOR_POLDA';
+
+export interface Sppg {
+  id: string;
+  nama: string;
+  alamat: string;
+  wilayahPolres: string;
+  wilayahPolda: string;
+  kapasitasProduksi: number;
+  fotoDapur: string | null;
+  status: 'aktif' | 'nonaktif';
+}
+
+export interface Sekolah {
+  id: string;
+  sppgId: string;
+  nama: string;
+  alamat: string;
+  jumlahSiswa: number;
+  fotoSekolah?: string | null;
+}
+
+export interface User {
+  id: string;
+  sppgId: string; // "home"/primary SPPG for display; scoping uses assignedSppgIds for PETUGAS_LAPANGAN
+  nama: string;
+  role: Role;
+  noHp: string;
+  nik: string;
+  statusAktif: boolean;
+  shift?: string;
+  assignedSppgIds?: string[]; // PETUGAS_LAPANGAN: SPPG(s) this petugas is assigned to (falls back to [sppgId])
+  wilayahPolres?: string; // SUPERVISOR_POLRES: their home Polres wilayah
+  wilayahPolda?: string; // SUPERVISOR_POLDA: their home Polda wilayah
+  jobdesk?: 'masak' | 'cuci' | 'driver' | 'ahli_gizi' | 'lainnya'; // PETUGAS_LAPANGAN: tugas harian di dapur
+  fotoProfil?: string | null;
+}
+
+export type PublicReportStatus = 'dikirim' | 'diproses' | 'ditindaklanjuti' | 'selesai';
+export type PublicReportKategori = 'kualitas_makanan' | 'keterlambatan' | 'kebersihan' | 'kemasan' | 'layanan' | 'lainnya';
+
+export interface PublicReport {
+  id: string;
+  sppgId: string;
+  sekolahId?: string | null;
+  namaPelapor: string;
+  noHpPelapor: string;
+  kategori: PublicReportKategori;
+  judul: string;
+  deskripsi: string;
+  fotoBukti?: string | null;
+  tanggal: string;
+  timestamp: string;
+  status: PublicReportStatus;
+  tanggapan?: string | null;
+}
+
+export type LaporanStatus = 'draft' | 'terkirim' | 'diverifikasi';
+
+export interface LaporanProduksiFoto {
+  id: string;
+  uri: string;
+  timestamp: string;
+  lat: number | null;
+  lng: number | null;
+  caption: string;
+  mediaType?: 'image' | 'video'; // undefined = foto (data lama), 'video' = klip video bukti produksi
+}
+
+export interface LaporanProduksi {
+  id: string;
+  sppgId: string;
+  tanggal: string;
+  targetPorsi: number;
+  realisasiPorsi: number;
+  menu: string;
+  kategoriGizi?: string;
+  foto: LaporanProduksiFoto[];
+  status: LaporanStatus;
+  dibuatOleh: string;
+  timestamp: string;
+}
+
+export type PresensiStatus = 'hadir' | 'belum_presensi';
+
+export interface Presensi {
+  id: string;
+  userId: string;
+  tanggal: string;
+  jamMasuk: string | null;
+  jamKeluar: string | null;
+  fotoSelfieMasuk: string | null;
+  fotoSelfieKeluar: string | null;
+  geotagMasuk: { lat: number; lng: number } | null;
+  geotagKeluar: { lat: number; lng: number } | null;
+  status: PresensiStatus;
+}
+
+export type ChecklistKategori = 'kebersihan' | 'peralatan' | 'keamanan_pangan';
+
+export interface ChecklistItem {
+  id: string;
+  kategori: ChecklistKategori;
+  item: string;
+  levelKritis: boolean;
+  status: 'ya' | 'tidak' | null;
+  catatan: string | null;
+  foto: string | null;
+  fotoMediaType?: 'image' | 'video'; // undefined = foto (data lama), 'video' = klip video bukti item
+}
+
+export interface ChecklistHarian {
+  id: string;
+  sppgId: string;
+  tanggal: string;
+  items: ChecklistItem[];
+}
+
+export interface FoodSafetyLog {
+  id: string;
+  sppgId: string;
+  tanggal: string;
+  suhuPenyimpanan: number;
+  waktuUkurSuhu: string;
+  waktuProduksi: string;
+  waktuPengiriman: string | null;
+  jenisMakanan: string;
+  estimasiKadaluarsa: string;
+  statusKadaluarsa: 'aman' | 'mendekati_batas' | 'lewat_batas';
+  // Fase 2: rancang skema data agar field ini nantinya bisa diisi otomatis dari sensor
+  // IoT tanpa perlu ubah struktur data. Undefined/'manual' = diisi tangan (default saat ini).
+  sumberSuhu?: 'manual' | 'sensor_iot';
+}
+
+export type AlertJenis = 'checklist_kritis' | 'suhu_tidak_normal' | 'laporan_terlambat' | 'manual' | 'info_pusat' | 'cctv_anomali';
+export type AlertSumber = 'checklist' | 'suhu' | 'manual' | 'command_center' | 'cctv';
+export type AlertTingkat = 'normal' | 'perhatian' | 'emergency';
+
+export interface AlertLog {
+  id: string;
+  sppgId: string;
+  jenis: AlertJenis;
+  sumber: AlertSumber;
+  tingkat: AlertTingkat;
+  judul: string;
+  deskripsi: string;
+  timestamp: string;
+  statusTindakLanjut: 'baru' | 'ditindaklanjuti' | 'selesai';
+  // Supervisor Polda eskalasi flag — local/demo only, no real "pusat" backend to send to.
+  eskalasiPusat?: boolean;
+}
+
+// Picklist option for menu selection in laporan produksi forms.
+export interface MenuOption {
+  label: string;
+  kategoriGizi: string;
+}
+
+// Menu Kalender (Fase C) — a menu *planned* for a specific future/past date,
+// distinct from LaporanProduksi.menu which is the as-submitted realization for
+// a day that already happened. One plan per sppgId+tanggal (upsert via
+// AppContext.setMenuForDate).
+export interface MenuHarianPlan {
+  id: string;
+  sppgId: string;
+  tanggal: string; // YYYY-MM-DD
+  menu: string;
+  kategoriGizi?: string;
+}
+
+// ==========================================
+// FASE 2 (SIMULASI) — sensor IoT, CCTV AI, rantai pasok, distribusi GPS, chat.
+// Semua fitur di bawah ini adalah data tiruan lokal (tanpa backend/perangkat
+// nyata); layar terkait wajib menampilkan label simulasi.
+// ==========================================
+
+export interface CctvEvent {
+  id: string;
+  sppgId: string;
+  cameraLabel: string;
+  anomaliType: 'apd_tidak_lengkap' | 'kerumunan' | 'area_terlarang' | 'kebersihan';
+  confidence: number;
+  timestamp: string;
+  status: 'baru' | 'ditinjau';
+}
+
+export type BahanKategori = 'bahan_pokok' | 'protein' | 'sayur_buah' | 'bumbu' | 'kemasan' | 'lainnya';
+
+export interface BahanBaku {
+  id: string;
+  sppgId: string;
+  nama: string;
+  satuan: string;
+  stok: number;
+  ambangMinimum: number;
+  kategori: BahanKategori;
+  lokasiRak?: string; // e.g. "Rak A-3", "Freezer 1"
+  tanggalKadaluarsa?: string | null; // YYYY-MM-DD, null untuk barang non-perishable (mis. kemasan)
+  mitraId?: string | null; // FK ke Mitra — pemasok bahan ini, null bila swakelola/tanpa mitra tetap
+}
+
+// Phase D — mutasi stok (ledger pergerakan gudang). Satu-satunya jalur perubahan
+// BahanBaku.stok ke depan adalah lewat AppContext.catatMutasiStok, agar ledger ini
+// dan angka stok saat ini selalu konsisten by construction.
+export interface MutasiStok {
+  id: string;
+  bahanId: string;
+  sppgId: string;
+  tanggal: string;
+  jenis: 'masuk' | 'keluar';
+  jumlah: number;
+  keterangan: string; // e.g. "Pengiriman dari Mitra X", "Dipakai untuk produksi harian"
+}
+
+// Phase D — mitra/pemasok rantai pasok. Data referensi bersama (bukan per-SPPG):
+// kontrak pengadaan biasanya berlaku nasional/wilayah, bukan rahasia dapur masing-masing.
+export interface Mitra {
+  id: string;
+  nama: string; // nama perusahaan/brand, mis. "PT Roti Barokah Sejahtera"
+  jenisProduk: string; // apa yang dipasok, mis. "Roti dan Kue"
+  kontakNama: string;
+  kontakHp: string;
+  wilayahLayanan: string; // mis. "Kota Bandung"
+  statusKontrak: 'aktif' | 'tinjau_ulang' | 'nonaktif';
+  sejakTanggal: string; // YYYY-MM-DD, tanggal mulai kemitraan
+}
+
+export interface PermintaanBahan {
+  id: string;
+  sppgId: string;
+  bahanId: string;
+  jumlah: number;
+  catatan: string | null;
+  status: 'diajukan' | 'diproses' | 'dikirim' | 'selesai';
+  tanggal: string;
+}
+
+export interface DistribusiRute {
+  id: string;
+  sppgId: string;
+  sekolahId: string;
+  tanggal: string; // YYYY-MM-DD — delivery instance date (menu kalender joins on this)
+  status: 'menunggu' | 'dalam_perjalanan' | 'tiba' | 'kendala';
+  estimasiTiba: string;
+  lat: number;
+  lng: number;
+}
+
+export interface ChatMessage {
+  id: string;
+  sppgId: string;
+  sender: 'sppg' | 'command_center';
+  senderName: string;
+  text: string;
+  timestamp: string;
+}
