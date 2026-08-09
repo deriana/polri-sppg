@@ -1,91 +1,176 @@
 import React, { useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { Card, EmptyState, Input, PrimaryButton, SectionTitle, Stepper } from '../components/ui';
+import { Card, DropdownPicker, Input, Pill, PrimaryButton, SectionTitle } from '../components/ui';
+import { useScopedData } from '../hooks';
 import { ROLE_PERMISSIONS } from '../utils/scope';
-import { pickImage } from '../utils/pickImage';
+
+const NEARBY_SCHOOL_CANDIDATES = [
+  { nama: 'SD Negeri 3 Coblong', alamat: 'Jl. Ir. H. Juanda No. 142, Dago, Bandung', siswa: 320, jarak: 1.4 },
+  { nama: 'SMP Negeri 5 Bandung', alamat: 'Jl. Belitung No. 8, Merdeka, Sumur Bandung', siswa: 480, jarak: 2.8 },
+  { nama: 'SD IT Al-Azhar Dago', alamat: 'Jl. Dago Asri No. 15, Bandung', siswa: 350, jarak: 3.2 },
+  { nama: 'SD Negeri 1 Cisitu', alamat: 'Jl. Cisitu Indah No. 4, Coblong, Bandung', siswa: 290, jarak: 1.8 },
+  { nama: 'SMA Negeri 1 Bandung', alamat: 'Jl. Ir. H. Juanda No. 93, Dago, Bandung', siswa: 620, jarak: 4.1 },
+];
 
 export default function SekolahFormScreen({ navigation }: any) {
-  const { role, currentUser, addSekolah } = useApp();
-  const { colors, spacing } = useTheme();
+  const { role, currentUser, currentSppg, ajukanSekolah, updateStatusPengajuanSekolah } = useApp();
+  const { colors, fontSize, iconStrokeWidth, radius, spacing, isDark } = useTheme();
+  const { pengajuanInScope } = useScopedData();
 
-  const [nama, setNama] = useState('');
-  const [alamat, setAlamat] = useState('');
-  const [jumlahSiswa, setJumlahSiswa] = useState(200);
-  const [fotoSekolah, setFotoSekolah] = useState<string | null>(null);
+  const [selectedIdx, setSelectedIdx] = useState<number>(0);
+  const [alasan, setAlasan] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  if (!role || !ROLE_PERMISSIONS[role].canManageStaff || !currentUser) {
-    return (
-      <View style={[styles.screen, { backgroundColor: colors.background, padding: spacing.lg }]}>
-        <EmptyState icon="lock" title="Akses Terbatas" body="Hanya Kepala SPPG yang dapat menambah sekolah afiliasi." />
-      </View>
-    );
-  }
+  if (!role || !currentUser) return null;
+  const permissions = ROLE_PERMISSIONS[role];
+  const isSupervisor = role === 'SUPERVISOR_POLRES' || role === 'SUPERVISOR_POLDA';
 
-  const ambilFoto = async () => {
-    const uri = await pickImage('camera');
-    if (uri) setFotoSekolah(uri);
-  };
+  const selectedCandidate = NEARBY_SCHOOL_CANDIDATES[selectedIdx];
 
-  const submit = () => {
-    if (!nama.trim() || !alamat.trim()) {
-      setError('Nama dan alamat sekolah wajib diisi.');
+  const handleAjukan = () => {
+    if (!alasan.trim()) {
+      setError('Masukkan alasan pengajuan afiliasi sekolah ini.');
       return;
     }
-    addSekolah({
-      sppgId: currentUser.sppgId,
-      nama: nama.trim(),
-      alamat: alamat.trim(),
-      jumlahSiswa,
-      fotoSekolah,
+
+    ajukanSekolah({
+      sppgId: currentSppg?.id ?? currentUser.sppgId,
+      sekolahNama: selectedCandidate.nama,
+      alamat: selectedCandidate.alamat,
+      jumlahSiswa: selectedCandidate.siswa,
+      jarakKm: selectedCandidate.jarak,
+      alasan: alasan.trim(),
     });
+
+    setError(null);
+    setAlasan('');
     navigation.goBack();
   };
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
-      <SectionTitle>Tambah Sekolah Afiliasi</SectionTitle>
-      <Card style={{ gap: spacing.md }}>
-        {error && (
-          <View style={[styles.errorBanner, { backgroundColor: colors.dangerBg }]}>
-            <Feather name="alert-circle" size={16} color={colors.danger} />
-            <Text style={{ color: colors.danger, fontSize: 12, fontWeight: '600', flex: 1 }}>{error}</Text>
+      {/* 1. Header Card */}
+      <Card variant="accent" style={{ gap: spacing.xs }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Feather name="map-pin" size={18} color={isDark ? colors.gold : colors.primary} />
+            <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
+              PENGAJUAN AFILIASI SEKOLAH TERDEKAT
+            </Text>
           </View>
-        )}
-        <View style={styles.fotoRow}>
-          {fotoSekolah ? (
-            <Image source={{ uri: fotoSekolah }} style={[styles.fotoThumb, { borderRadius: 8 }]} />
-          ) : (
-            <View style={[styles.fotoPlaceholder, { backgroundColor: colors.background, borderColor: colors.border }]}>
-              <Feather name="home" size={24} color={colors.textMuted} />
+          <Pill label={isSupervisor ? 'Evaluasi Supervisor' : 'Pengajuan Dapur'} tone="primary" />
+        </View>
+        <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, marginTop: 2 }}>
+          {isSupervisor
+            ? 'Tinjau dan setujui pengajuan sekolah afiliasi terdekat dari SPPG di wilayah pengawasan Anda.'
+            : 'Pilih sekolah calon penerima manfaat MBG terdekat di wilayah dapur Anda dan ajukan ke Supervisor Polres.'}
+        </Text>
+      </Card>
+
+      {/* View for Supervisor: Approval List */}
+      {isSupervisor ? (
+        <>
+          <SectionTitle>Daftar Pengajuan Sekolah dari SPPG</SectionTitle>
+          <View style={{ gap: spacing.sm }}>
+            {pengajuanInScope.length === 0 ? (
+              <Text style={{ color: colors.textMuted, fontSize: fontSize.xs, textAlign: 'center', padding: 20 }}>
+                Belum ada pengajuan sekolah baru dari SPPG.
+              </Text>
+            ) : (
+              pengajuanInScope.map((p) => (
+                <Card key={p.id} style={{ gap: 8 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Text style={{ fontSize: fontSize.sm, fontWeight: '900', color: colors.text }}>{p.sekolahNama}</Text>
+                    <Pill
+                      label={p.status.toUpperCase()}
+                      tone={p.status === 'disetujui' ? 'success' : p.status === 'ditolak' ? 'danger' : 'warning'}
+                    />
+                  </View>
+
+                  <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>
+                    {p.alamat} • {p.jumlahSiswa} siswa • Jarak: {p.jarakKm} km dari Dapur
+                  </Text>
+                  <Text style={{ fontSize: fontSize.xs, color: colors.text, marginTop: 2 }}>
+                    <Text style={{ fontWeight: '700' }}>Alasan: </Text>
+                    {p.alasan}
+                  </Text>
+
+                  {p.status === 'diajukan' && (
+                    <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+                      <PrimaryButton
+                        label="Setujui Afiliasi"
+                        icon="check"
+                        onPress={() => updateStatusPengajuanSekolah(p.id, 'disetujui', 'Disetujui oleh Supervisor.')}
+                        style={{ flex: 1 }}
+                      />
+                      <PrimaryButton
+                        label="Tolak"
+                        icon="x"
+                        variant="danger"
+                        onPress={() => updateStatusPengajuanSekolah(p.id, 'ditolak', 'Ditolak: Kuota tidak mencukupi.')}
+                        style={{ flex: 1 }}
+                      />
+                    </View>
+                  )}
+                </Card>
+              ))
+            )}
+          </View>
+        </>
+      ) : (
+        /* View for Kepala SPPG: Form Ajukan Sekolah Terdekat */
+        <Card style={{ gap: spacing.md }}>
+          <SectionTitle style={{ marginBottom: 0 }}>Form Pengajuan Sekolah Terdekat</SectionTitle>
+
+          {error && (
+            <View style={{ backgroundColor: colors.dangerBg, padding: 10, borderRadius: radius.md }}>
+              <Text style={{ color: colors.danger, fontSize: fontSize.xs, fontWeight: '600' }}>{error}</Text>
             </View>
           )}
-          <PrimaryButton
-            label={fotoSekolah ? 'Ganti Foto Sekolah' : 'Ambil Foto Sekolah'}
-            icon="camera"
-            variant="secondary"
-            fullWidth={false}
-            onPress={ambilFoto}
-            style={{ flex: 1 }}
+
+          <DropdownPicker
+            label="Pilih Calon Sekolah di Wilayah Dapur"
+            value={String(selectedIdx)}
+            options={NEARBY_SCHOOL_CANDIDATES.map((sch, i) => ({
+              label: `${sch.nama} (${sch.jarak} km • ${sch.siswa} siswa)`,
+              value: String(i),
+            }))}
+            onSelect={(val) => setSelectedIdx(parseInt(val, 10))}
+            icon="home"
           />
-        </View>
-        <Input label="Nama Sekolah" icon="home" value={nama} onChangeText={setNama} placeholder="Contoh: SDN Coblong 04" />
-        <Input label="Alamat" icon="map-pin" value={alamat} onChangeText={setAlamat} placeholder="Alamat lengkap sekolah" multiline />
-        <Stepper label="Jumlah Siswa" value={jumlahSiswa} onChange={setJumlahSiswa} step={10} min={10} />
-        <PrimaryButton label="Simpan Sekolah" icon="save" onPress={submit} />
-      </Card>
+
+          {/* Details of Selected Candidate */}
+          <View style={[styles.candidateBox, { backgroundColor: colors.background, borderColor: colors.border, borderRadius: radius.md }]}>
+            <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text }}>{selectedCandidate.nama}</Text>
+            <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, marginTop: 2 }}>{selectedCandidate.alamat}</Text>
+            <View style={{ flexDirection: 'row', gap: 12, marginTop: 6 }}>
+              <Pill label={`Jarak: ${selectedCandidate.jarak} km`} tone="primary" />
+              <Pill label={`Jumlah: ${selectedCandidate.siswa} Siswa`} tone="info" />
+            </View>
+          </View>
+
+          <Input
+            label="Alasan & Rekomendasi Afiliasi"
+            icon="file-text"
+            value={alasan}
+            onChangeText={setAlasan}
+            placeholder="Contoh: Lokasi sangat dekat (1.4 km), armada dapat tiba dalam 10 menit..."
+            multiline
+          />
+
+          <PrimaryButton label="Kirimkan Pengajuan ke Supervisor" icon="send" onPress={handleAjukan} />
+        </Card>
+      )}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
-  errorBanner: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10, borderRadius: 10 },
-  fotoRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  fotoThumb: { width: 64, height: 64 },
-  fotoPlaceholder: { width: 64, height: 64, borderRadius: 8, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  content: { padding: 16, gap: 14, paddingBottom: 90 },
+  candidateBox: { padding: 12, borderWidth: 1 },
 });
+

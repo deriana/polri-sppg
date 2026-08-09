@@ -15,13 +15,7 @@ const MANUAL_MENU_VALUE = '__manual__';
 
 // Small seeded menu catalog for the picker — falls back to free text + kategori
 // gizi entry when the actual menu isn't one of these common combinations.
-const MENU_OPTIONS: MenuOption[] = [
-  { label: 'Nasi + Ayam Goreng + Tumis Kangkung + Pisang', kategoriGizi: 'Karbohidrat, Protein Hewani, Sayur, Buah' },
-  { label: 'Nasi + Rendang Daging + Sayur Asem + Jeruk', kategoriGizi: 'Karbohidrat, Protein Hewani, Sayur, Buah' },
-  { label: 'Nasi + Ikan Bakar + Tumis Buncis + Semangka', kategoriGizi: 'Karbohidrat, Protein Hewani, Sayur, Buah' },
-  { label: 'Nasi + Telur Balado + Sayur Bayam + Pepaya', kategoriGizi: 'Karbohidrat, Protein Hewani, Sayur, Buah' },
-  { label: 'Nasi + Perkedel Kentang + Sayur Lodeh + Jeruk', kategoriGizi: 'Karbohidrat, Protein Nabati, Sayur, Buah' },
-];
+import { MENU_OPTIONS } from '../data/laporanProduksi';
 
 function nowTimestamp(): string {
   return new Date().toISOString().slice(0, 16).replace('T', ' ');
@@ -37,13 +31,12 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
 
   const existing = params.laporanId ? laporanList.find((l) => l.id === params.laporanId) : undefined;
 
-  const { colors, spacing, fontSize, iconStrokeWidth, radius } = useTheme();
+  const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark } = useTheme();
 
   const [editId, setEditId] = useState<string | undefined>(existing?.id);
   const [tanggal] = useState(existing?.tanggal ?? params.tanggal ?? todayDate());
 
-  // Nice-to-have: prefill from a Menu Kalender plan for this SPPG+tanggal when
-  // creating a brand-new laporan (never overrides an already-submitted one).
+  // Prefill from plan if available
   const planForDate = !existing ? menuHarianPlanList.find((m) => m.sppgId === currentSppg?.id && m.tanggal === tanggal) : undefined;
 
   const [targetPorsi, setTargetPorsi] = useState(existing?.targetPorsi ?? currentSppg?.kapasitasProduksi ?? 0);
@@ -58,10 +51,6 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
   const [foto, setFoto] = useState<LaporanProduksiFoto[]>(existing?.foto ?? []);
   const [saved, setSaved] = useState(false);
 
-  // ponytail: saveLaporanDraft has no return value, and AppContext only inserts
-  // a *new* row when called without an id (an id that doesn't exist yet is
-  // silently dropped). So for a brand-new laporan we save without an id, then
-  // watch laporanList for the row that appears — that's our real id.
   const prevIdsRef = useRef<Set<string>>(new Set(laporanList.map((l) => l.id)));
   useEffect(() => {
     if (!editId) {
@@ -76,6 +65,7 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
     ? !canEditLaporan(role, sppgInScope.map((s) => s.id), existing)
     : ROLE_PERMISSIONS[role].isViewOnly;
   const menu = menuSelection === MANUAL_MENU_VALUE ? manualMenu : menuSelection;
+  const selectedOption = MENU_OPTIONS.find((m) => m.label === menuSelection);
 
   const onSelectMenu = (value: string) => {
     setMenuSelection(value);
@@ -143,11 +133,57 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
     navigation.goBack();
   };
 
+  const attachSamplePhoto = () => {
+    const geotag = { lat: -6.9147, lng: 107.6098 };
+    setFoto((prev) => [
+      ...prev,
+      {
+        id: `FOTO-SIM-${Date.now()}`,
+        uri: selectedOption?.fotoMenu ?? 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500',
+        timestamp: nowTimestamp(),
+        lat: geotag.lat,
+        lng: geotag.lng,
+        caption: 'Dokumentasi Foto Produksi Makanan MBG',
+        mediaType: 'image',
+      },
+    ]);
+  };
+
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
-      <SectionTitle action={existing ? <Pill label={existing.status} tone={existing.status === 'draft' ? 'neutral' : existing.status === 'terkirim' ? 'info' : 'success'} /> : undefined}>
+      {/* Enhanced Status Header */}
+      <SectionTitle
+        action={
+          existing ? (
+            existing.status === 'draft' ? (
+              <View style={[styles.draftBadge, { backgroundColor: colors.warningBg, borderColor: colors.warning }]}>
+                <Feather name="edit-3" size={12} color={colors.warning} />
+                <Text style={{ fontSize: 11, fontWeight: '800', color: colors.warning }}>DRAFT (BELUM TERKIRIM)</Text>
+              </View>
+            ) : (
+              <Pill label={existing.status === 'diverifikasi' ? 'DIVERIFIKASI SELESAI' : 'TERKIRIM'} tone={existing.status === 'diverifikasi' ? 'success' : 'info'} />
+            )
+          ) : (
+            <View style={[styles.draftBadge, { backgroundColor: colors.warningBg, borderColor: colors.warning }]}>
+              <Feather name="file-text" size={12} color={colors.warning} />
+              <Text style={{ fontSize: 11, fontWeight: '800', color: colors.warning }}>LAPORAN BARU</Text>
+            </View>
+          )
+        }
+      >
         Laporan Produksi — {tanggal}
       </SectionTitle>
+
+      {readOnly && existing && (
+        <View style={[styles.warnBanner, { backgroundColor: colors.infoBg, borderRadius: radius.md }]}>
+          <Feather name="lock" size={16} color={colors.info} strokeWidth={iconStrokeWidth} />
+          <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>
+            {existing.status === 'diverifikasi'
+              ? 'Laporan ini telah Diverifikasi Selesai oleh Pengawas SPPG sehingga berstatus Terkunci (Read-Only). Buat laporan baru jika ingin mengunggah foto hari ini.'
+              : 'Peran Anda saat ini dalam mode Lihat (View-Only).'}
+          </Text>
+        </View>
+      )}
 
       <Card style={{ gap: spacing.md }}>
         <View style={styles.stepperRow}>
@@ -164,19 +200,36 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
         )}
       </Card>
 
+      {/* Menu Selection Card with Photo Preview */}
       <Card style={{ gap: spacing.md }}>
-        <SectionTitle style={{ marginBottom: 0 }}>Menu</SectionTitle>
+        <SectionTitle style={{ marginBottom: 0 }}>Menu Makanan SPPG</SectionTitle>
         <DropdownPicker
-          label="Pilih Menu"
+          label="Pilih Katalog Menu"
           icon="coffee"
           value={menuSelection}
           onSelect={onSelectMenu}
           disabled={readOnly}
-          options={[...MENU_OPTIONS.map((m) => ({ label: m.label, value: m.label })), { label: 'Lainnya (isi manual)', value: MANUAL_MENU_VALUE }]}
+          options={[...MENU_OPTIONS.map((m) => ({ label: m.label, value: m.label })), { label: 'Lainnya (Isi Manual)', value: MANUAL_MENU_VALUE }]}
         />
+
+        {/* Selected Menu Photo Preview */}
+        {selectedOption?.fotoMenu && (
+          <View style={[styles.menuPreviewBox, { backgroundColor: colors.background, borderColor: colors.border, borderRadius: radius.md }]}>
+            <Image source={{ uri: selectedOption.fotoMenu }} style={styles.menuPreviewImg} resizeMode="cover" />
+            <View style={{ flex: 1, gap: 4 }}>
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
+                Preview Visual Paket Menu:
+              </Text>
+              <Text style={{ fontSize: 11, color: colors.textMuted }}>
+                {selectedOption.kategoriGizi}
+              </Text>
+            </View>
+          </View>
+        )}
+
         {menuSelection === MANUAL_MENU_VALUE && (
           <>
-            <Input label="Menu (manual)" value={manualMenu} onChangeText={setManualMenu} placeholder="Tuliskan menu hari ini" editable={!readOnly} />
+            <Input label="Nama Menu (Manual)" value={manualMenu} onChangeText={setManualMenu} placeholder="Tuliskan nama menu hari ini" editable={!readOnly} />
             <Input label="Kategori Gizi" value={kategoriGizi} onChangeText={setKategoriGizi} placeholder="Contoh: Karbohidrat, Protein, Sayur, Buah" editable={!readOnly} />
           </>
         )}
@@ -196,6 +249,12 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
               <PrimaryButton label="Ambil Video" icon="video" variant="outline" onPress={() => attachPhoto('camera', ['videos'])} style={{ flex: 1 }} />
               <PrimaryButton label="Pilih Video Galeri" icon="film" variant="outline" onPress={() => attachPhoto('library', ['videos'])} style={{ flex: 1 }} />
             </View>
+            <PrimaryButton
+              label="+ Tambah Foto Presets (Simulasi)"
+              icon="plus-circle"
+              variant="outline"
+              onPress={attachSamplePhoto}
+            />
           </>
         )}
         <View style={styles.photoGrid}>
@@ -245,7 +304,10 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 16, paddingBottom: 32 },
+  content: { padding: 16, gap: 16, paddingBottom: 120 },
+  draftBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, borderWidth: 1 },
+  menuPreviewBox: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderWidth: 1 },
+  menuPreviewImg: { width: 64, height: 64, borderRadius: 8 },
   stepperRow: { flexDirection: 'row', gap: 12 },
   warnBanner: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 10 },
   photoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },

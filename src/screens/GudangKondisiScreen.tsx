@@ -8,6 +8,7 @@ import { useScopedData } from '../hooks';
 import { scopeBahanBaku } from '../utils/scope';
 import CctvPlayer from '../components/CctvPlayer';
 import { CCTV_FEEDS } from './CctvMonitorScreen';
+import { useLocalVideoUri } from '../utils/localVideoAsset';
 
 const SUHU_AMAN_MAX = 8; // sama dengan ambang di AppContext — di atas ini dianggap tidak aman
 const EXPIRY_WARNING_DAYS = 3;
@@ -31,6 +32,7 @@ export default function GudangKondisiScreen() {
   const akanKadaluarsa = bahanInScope.filter((b) => b.tanggalKadaluarsa && daysUntil(b.tanggalKadaluarsa) <= EXPIRY_WARNING_DAYS);
 
   const gudangFeed = CCTV_FEEDS.find((f) => f.zonaId === 'z1');
+  const videoUri = useLocalVideoUri(require('../../assets/sppg.mp4'));
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
@@ -92,7 +94,7 @@ export default function GudangKondisiScreen() {
 
       <SectionTitle>CCTV Area Gudang</SectionTitle>
       {gudangFeed ? (
-        <CctvPlayer videoUri={gudangFeed.localMp4Url} label={gudangFeed.label} height={220} />
+        <CctvPlayer videoUri={videoUri} label={gudangFeed.label} height={220} />
       ) : (
         <EmptyState icon="video-off" title="Kamera Tidak Tersedia" body="Belum ada feed CCTV untuk area gudang." />
       )}

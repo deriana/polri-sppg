@@ -1,12 +1,11 @@
-import React, { useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, StyleSheet, Image, Pressable, Text, Modal as RNModal } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { Feather } from '@expo/vector-icons';
+import { BRAND_ASSETS } from '../data/images';
 
-// Generic trip status — decoupled from any one domain's status enum so both
-// school food distribution (DistribusiRute) and raw-material shipments from a
-// Mitra supplier (PermintaanBahan) can drive the same map: 'idle' (not yet
-// moving), 'moving' (in transit — animates), 'arrived', 'problem' (stalled).
 export type RouteTripStatus = 'idle' | 'moving' | 'arrived' | 'problem';
+const TICK_MS = 600;
 
 export interface RouteMapViewProps {
   originLat: number;
@@ -23,24 +22,14 @@ export interface RouteMapViewProps {
   problemGlyph?: string;
   colors: {
     primary: string;
-    surface: string;
-    text: string;
-    textMuted: string;
-    success: string;
-    warning: string;
     danger: string;
+    textMuted: string;
+    surface: string;
     border: string;
+    text: string;
+    success?: string;
   };
 }
-
-// Simulated live-tracking map (Shopee/Google-Maps style): OpenStreetMap tiles via
-// Leaflet, real road route from the public OSRM demo router, a vehicle icon
-// that glides continuously along that route (small position ticks + a CSS
-// transform transition so there's no visible jump between them, like a
-// loading bar filling), and a bottom progress bar synced to the same tick
-// rate — all inside one self-contained WebView HTML string (same pattern as
-// CctvMonitorScreen's player).
-const TICK_MS = 600;
 
 export default function RouteMapView({
   originLat,
@@ -50,43 +39,42 @@ export default function RouteMapView({
   destLng,
   destLabel,
   status,
-  height = 220,
-  originGlyph = '🍳',
+  height = 300,
+  originGlyph = '🏢',
   destGlyph = '🏫',
   vehicleGlyph = '🚚',
   problemGlyph = '⚠️',
   colors,
 }: RouteMapViewProps) {
-  // Memoized so unrelated re-renders elsewhere in the app (e.g. the 4s
-  // production-counter tick in AppContext) don't hand the WebView a new
-  // source object — that would reload the page and restart the trip
-  // animation from scratch instead of letting it run to arrival.
-  const html = useMemo(() => `
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const truckImgUri = Image.resolveAssetSource(BRAND_ASSETS.truckMbg).uri;
+
+  const html = useMemo(
+    () => `
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    html, body, #map { margin:0; padding:0; width:100%; height:100%; background:${colors.surface}; font-family: sans-serif; }
-    #hud { position:absolute; left:0; right:0; bottom:0; background:${colors.surface}; padding:8px 10px 10px; box-shadow:0 -2px 8px rgba(0,0,0,0.15); z-index:1000; }
-    #hud-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
-    #hud-icon { display:flex; align-items:center; }
-    #hud-text { flex:1; color:${colors.text}; font-size:12px; font-weight:700; }
-    #hud-eta { color:${colors.textMuted}; font-size:10px; }
-    #bar-track { height:5px; border-radius:3px; background:${colors.border}; overflow:hidden; }
-    #bar-fill { height:100%; width:0%; background:${colors.primary}; transition:width ${TICK_MS}ms linear; }
-    .leaflet-control-attribution { font-size:8px !important; }
-    .leaflet-marker-icon { transition: transform ${TICK_MS}ms linear; }
-    .pin-badge { display:flex; align-items:center; justify-content:center; border-radius:50%; border:2px solid #fff; box-shadow:0 2px 5px rgba(0,0,0,0.4); }
+    html, body, #map { width: 100%; height: 100%; margin: 0; padding: 0; background: ${colors.surface}; font-family: -apple-system, Roboto, sans-serif; }
+    .pin-badge { border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 2px solid #ffffff; }
+    #hud { position: absolute; top: 12px; left: 12px; max-width: calc(100% - 210px); z-index: 1000; background: ${colors.surface}; border: 1px solid ${colors.border}; color: ${colors.text}; padding: 10px 14px; border-radius: 16px; font-size: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.18); display: flex; flex-direction: column; gap: 4px; }
+    #hud-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    #hud-title { font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; font-size: 11px; color: ${colors.textMuted}; }
+    #hud-status { font-weight: 800; color: ${colors.primary}; font-size: 12px; }
+    #hud-eta { font-weight: 800; color: ${colors.text}; font-size: 13px; margin-top: 2px; }
+    #bar-track { width: 100%; height: 6px; background: ${colors.border}; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+    #bar-fill { width: 0%; height: 100%; background: ${colors.primary}; transition: width 0.4s ease; }
   </style>
 </head>
 <body>
   <div id="map"></div>
   <div id="hud">
     <div id="hud-row">
-      <span id="hud-icon" style="font-size:16px">${vehicleGlyph}</span>
-      <span id="hud-text">Memuat rute...</span>
+      <div id="hud-title">LIVE ROUTE TRACKING</div>
+      <div id="hud-status">MENUNGGU SINKRON</div>
     </div>
     <div id="bar-track"><div id="bar-fill"></div></div>
     <div id="hud-eta"></div>
@@ -99,15 +87,14 @@ export default function RouteMapView({
     var destLabel = ${JSON.stringify(destLabel)};
     var originLabel = ${JSON.stringify(originLabel)};
 
-    // Focus on the delivery icon itself (not a wide fit of both endpoints) —
-    // starts centered on the vehicle's current position; each status branch
-    // below re-centers once the real position is known, and the moving-trip
-    // branch keeps panning to follow the icon as it steps along the route.
     var map = L.map('map', { zoomControl:false, attributionControl:true }).setView(origin, 15);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19 }).addTo(map);
 
-    function makeIcon(glyph, bgColor, size) {
-      var html = '<div class="pin-badge" style="width:' + size + 'px;height:' + size + 'px;background:' + bgColor + ';font-size:' + Math.round(size*0.55) + 'px">' + glyph + '</div>';
+    function makeIcon(glyph, bgColor, size, isVehicle) {
+      var inner = isVehicle 
+        ? '<img src="${truckImgUri}" style="width:34px;height:34px;object-fit:contain" />' 
+        : glyph;
+      var html = '<div class="pin-badge" style="width:' + size + 'px;height:' + size + 'px;background:' + bgColor + ';font-size:' + Math.round(size*0.55) + 'px;box-shadow:0 3px 8px rgba(0,0,0,0.35);border:2px solid #fff;overflow:hidden;display:flex;align-items:center;justify-content:center">' + inner + '</div>';
       return L.divIcon({ html: html, className:'', iconSize:[size,size], iconAnchor:[size/2, size/2] });
     }
 
@@ -116,14 +103,17 @@ export default function RouteMapView({
     var glyphVehicle = ${JSON.stringify(vehicleGlyph)};
     var glyphProblem = ${JSON.stringify(problemGlyph)};
 
-    L.marker(origin, { icon: makeIcon(glyphOrigin, '${colors.textMuted}', 32) }).addTo(map).bindTooltip(originLabel);
-    L.marker(dest, { icon: makeIcon(glyphDest, '${colors.primary}', 36) }).addTo(map).bindTooltip(destLabel);
+    // Origin: Dapur SPPG (Gedung Unit SPPG 🏢)
+    L.marker(origin, { icon: makeIcon(glyphOrigin, '${colors.primary}', 36, false) }).addTo(map).bindTooltip('<b>Dapur SPPG:</b> ' + originLabel, { permanent: false, direction: 'top' });
+    
+    // Dest: Sekolah Tujuan (Gedung Sekolah 🏫)
+    L.marker(dest, { icon: makeIcon(glyphDest, '${colors.success ?? "#10b981"}', 38, false) }).addTo(map).bindTooltip('<b>Sekolah Tujuan:</b> ' + destLabel, { permanent: false, direction: 'top' });
 
     var vehicleIconGlyph = status === 'problem' ? glyphProblem : glyphVehicle;
     var vehicleColor = status === 'problem' ? '${colors.danger}' : '${colors.primary}';
-    var vehicleMarker = L.marker(origin, { icon: makeIcon(vehicleIconGlyph, vehicleColor, 36) }).addTo(map);
+    var vehicleMarker = L.marker(origin, { icon: makeIcon(vehicleIconGlyph, vehicleColor, 44, true) }).addTo(map);
 
-    var hudText = document.getElementById('hud-text');
+    var hudText = document.getElementById('hud-status');
     var hudEta = document.getElementById('hud-eta');
     var barFill = document.getElementById('bar-fill');
 
@@ -140,62 +130,67 @@ export default function RouteMapView({
     }
 
     function runWithPath(latlngs, distanceKm, durationMin) {
-      L.polyline(latlngs, { color: '#2563eb', weight:4, opacity:0.85 }).addTo(map);
+      // Draw double-cased electric blue navigation route line (Google Maps / Grab style)
+      L.polyline(latlngs, { color: '#ffffff', weight: 8, opacity: 0.9 }).addTo(map);
+      L.polyline(latlngs, { color: '#2563eb', weight: 5, opacity: 0.95 }).addTo(map);
+      if (status === 'problem') {
+        hudText.textContent = 'KENDALA RUTE: DIHENTIKAN sementara';
+        hudEta.textContent = distanceKm.toFixed(1) + ' km dari tujuan • Bantuan Komando dikirim';
+        barFill.style.background = '${colors.danger}';
+        barFill.style.width = '40%';
+        var mid = latlngs[Math.floor(latlngs.length / 2)] || origin;
+        vehicleMarker.setLatLng(mid);
+        map.setView(mid, 16);
+        return;
+      }
 
       if (status === 'idle') {
-        map.setView(origin, 16);
-        hudText.textContent = 'Menunggu keberangkatan → ' + destLabel;
+        hudText.textContent = 'Menunggu Keberangkatan';
         setProgress(0, distanceKm, durationMin);
-        return;
-      }
-      if (status === 'arrived') {
-        vehicleMarker.setLatLng(dest);
-        map.setView(dest, 16);
-        hudText.textContent = 'Tiba di ' + destLabel;
-        setProgress(1, distanceKm, 0);
-        return;
-      }
-      if (status === 'problem') {
-        var idx = Math.floor(latlngs.length * 0.45);
-        vehicleMarker.setLatLng(latlngs[idx]);
-        map.setView(latlngs[idx], 16);
-        hudText.textContent = 'Kendala di perjalanan → ' + destLabel;
-        setProgress(0.45, distanceKm, durationMin * 0.55);
+        vehicleMarker.setLatLng(origin);
+        map.setView(origin, 15);
         return;
       }
 
-      // moving — step the vehicle icon along the road route every few
-      // small, frequent ticks + the CSS transform transition on the marker
-      // (see .leaflet-marker-icon above) turn every tick into a smooth glide
-      // instead of a jump — a single one-way trip from origin to destination.
-      // It parks at the destination and stops once it arrives — it does NOT
-      // loop back to origin; the status only changes to "arrived" when a
-      // petugas manually advances it.
-      hudText.textContent = 'Menuju ' + destLabel;
-      map.setView(origin, 16);
-      // Simulated trip duration scales with the real ETA (1 real minute = 6
-      // simulated seconds) so a quick 18-menit school hop plays noticeably
-      // faster than an hours-long cross-province bahan-baku run — clamped so
-      // it never feels instant or drags past a couple of minutes on screen.
-      var TRIP_MS = Math.max(30000, Math.min(120000, durationMin * 6000));
-      var TICK_MS = ${TICK_MS};
-      var start = Date.now();
+      if (status === 'arrived') {
+        hudText.textContent = 'Tiba di ' + destLabel;
+        setProgress(1, 0, 0);
+        vehicleMarker.setLatLng(dest);
+        map.setView(dest, 16);
+        return;
+      }
+
+      var totalSteps = Math.max(1, Math.round((durationMin * 60 * 1000) / ${TICK_MS}));
+      var step = 0;
+
       function tick() {
-        var frac = Math.min(1, (Date.now() - start) / TRIP_MS);
-        var pos = frac * (latlngs.length - 1);
-        var i = Math.floor(pos), t = pos - i;
-        var a = latlngs[i], b = latlngs[Math.min(i+1, latlngs.length-1)];
-        var vehiclePos = [a[0] + (b[0]-a[0])*t, a[1] + (b[1]-a[1])*t];
-        vehicleMarker.setLatLng(vehiclePos);
-        map.panTo(vehiclePos, { animate: true, duration: TICK_MS / 1000 });
-        setProgress(frac, distanceKm, durationMin * (1 - frac));
+        step++;
+        var frac = Math.min(1, step / totalSteps);
+        var idxFloat = frac * (latlngs.length - 1);
+        var i1 = Math.floor(idxFloat);
+        var i2 = Math.min(latlngs.length - 1, i1 + 1);
+        var rem = idxFloat - i1;
+
+        var curLat = latlngs[i1][0] + (latlngs[i2][0] - latlngs[i1][0]) * rem;
+        var curLng = latlngs[i1][1] + (latlngs[i2][1] - latlngs[i1][1]) * rem;
+        var pos = [curLat, curLng];
+
+        vehicleMarker.setLatLng(pos);
+        map.panTo(pos, { animate: true, duration: 0.5 });
+
+        var remainKm = distanceKm * (1 - frac);
+        var remainMin = durationMin * (1 - frac);
+        setProgress(frac, remainKm, remainMin);
+
+        hudText.textContent = 'Dalam Perjalanan ➔ ' + destLabel;
+
         if (frac >= 1) {
           clearInterval(timer);
-          hudText.textContent = 'Sampai di ' + destLabel + ' — menunggu konfirmasi petugas';
+          hudText.textContent = 'Sampai di ' + destLabel + ' — menunggu konfirmasi';
         }
       }
       tick();
-      var timer = setInterval(tick, TICK_MS);
+      var timer = setInterval(tick, ${TICK_MS});
     }
 
     fetch('https://router.project-osrm.org/route/v1/driving/' + origin[1] + ',' + origin[0] + ';' + dest[1] + ',' + dest[0] + '?overview=full&geometries=geojson')
@@ -207,14 +202,13 @@ export default function RouteMapView({
         runWithPath(latlngs, route.distance / 1000, route.duration / 60);
       })
       .catch(function() {
-        // Offline/CORS fallback — straight line, speed assumed 30 km/h.
         var distanceKm = haversineKm(origin, dest);
         runWithPath([origin, dest], distanceKm, (distanceKm / 30) * 60);
       });
   </script>
 </body>
 </html>`,
-    [originLat, originLng, originLabel, destLat, destLng, destLabel, status, colors, originGlyph, destGlyph, vehicleGlyph, problemGlyph],
+    [originLat, originLng, originLabel, destLat, destLng, destLabel, status, colors, originGlyph, destGlyph, vehicleGlyph, problemGlyph, truckImgUri],
   );
 
   const source = useMemo(() => ({ html }), [html]);
@@ -222,11 +216,67 @@ export default function RouteMapView({
   return (
     <View style={[styles.wrap, { height }]}>
       <WebView source={source} style={styles.webview} originWhitelist={['*']} javaScriptEnabled />
+
+      <Pressable
+        onPress={() => setIsFullscreen(true)}
+        style={({ pressed }) => [
+          styles.fullscreenBtn,
+          { backgroundColor: colors.surface, borderColor: colors.border },
+          pressed && { opacity: 0.8 },
+        ]}
+      >
+        <Feather name="maximize" size={14} color={colors.primary} />
+        <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }}>Landscape Fullscreen</Text>
+      </Pressable>
+
+      <RNModal visible={isFullscreen} animationType="fade" onRequestClose={() => setIsFullscreen(false)}>
+        <View style={[styles.fullContainer, { backgroundColor: colors.surface }]}>
+          <WebView source={source} style={styles.webview} originWhitelist={['*']} javaScriptEnabled />
+
+          <Pressable
+            onPress={() => setIsFullscreen(false)}
+            style={({ pressed }) => [
+              styles.exitFullscreenBtn,
+              { backgroundColor: colors.danger },
+              pressed && { opacity: 0.8 },
+            ]}
+          >
+            <Feather name="minimize-2" size={16} color="#FFFFFF" />
+            <Text style={{ fontSize: 12, fontWeight: '800', color: '#FFFFFF' }}>Tutup Landscape</Text>
+          </Pressable>
+        </View>
+      </RNModal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { width: '100%', borderRadius: 12, overflow: 'hidden' },
+  wrap: { width: '100%', borderRadius: 12, overflow: 'hidden', position: 'relative' },
   webview: { flex: 1, backgroundColor: 'transparent' },
+  fullscreenBtn: {
+    position: 'absolute',
+    bottom: 12,
+    right: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
+    zIndex: 10,
+  },
+  fullContainer: { flex: 1, backgroundColor: '#000', position: 'relative' },
+  exitFullscreenBtn: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 24,
+    zIndex: 9999,
+  },
 });

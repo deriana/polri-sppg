@@ -3,7 +3,7 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { Card, KpiCard, Pill, SectionTitle, StatusBadge, SyncStatusBadge, EmptyState } from '../components/ui';
+import { Card, KpiCard, Pill, PrimaryButton, SectionTitle, StatusBadge, SyncStatusBadge, EmptyState } from '../components/ui';
 import { useScopedData, usePendingSyncCount } from '../hooks';
 import { AlertLog, AlertTingkat } from '../types';
 import { ROLE_LABEL, ROLE_PERMISSIONS, roleScopeLabel, scopePolresInPolda } from '../utils/scope';
@@ -28,7 +28,7 @@ interface QuickAction {
 }
 
 function QuickActionGrid({ items }: { items: QuickAction[] }) {
-  const { colors, spacing, radius, fontSize, shadow, iconStrokeWidth } = useTheme();
+  const { colors, spacing, radius, fontSize, shadow, iconStrokeWidth, isDark } = useTheme();
   return (
     <View style={styles.grid}>
       {items.map((item) => (
@@ -37,12 +37,17 @@ function QuickActionGrid({ items }: { items: QuickAction[] }) {
           onPress={item.onPress}
           style={({ pressed }) => [
             styles.gridCard,
-            { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.lg, ...shadow.card },
-            pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+              borderRadius: radius.lg,
+              ...shadow.card,
+            },
+            pressed && { opacity: 0.85, transform: [{ scale: 0.975 }] },
           ]}
         >
           <View style={[styles.gridIconWrap, { backgroundColor: colors.primaryLight }]}>
-            <Feather name={item.icon} size={22} color={colors.primary} strokeWidth={iconStrokeWidth} />
+            <Feather name={item.icon} size={20} color={isDark ? colors.gold : colors.primary} strokeWidth={iconStrokeWidth} />
           </View>
           <Text style={[styles.gridTitle, { color: colors.text, fontSize: fontSize.sm }]} numberOfLines={1}>
             {item.title}
@@ -94,10 +99,139 @@ function AlertPreviewList({ alerts, onSeeAll, onOpen }: { alerts: AlertLog[]; on
   );
 }
 
+function CommandHeroHeader({ currentUser, role, sppgName, sppgScopeCount, onNotifPress, activeAlertCount }: any) {
+  const { colors, fontSize, radius, spacing, isDark } = useTheme();
+
+  return (
+    <View
+      style={[
+        styles.commandHero,
+        {
+          backgroundColor: isDark ? colors.surface : colors.primary,
+          borderRadius: radius.xl,
+          borderColor: isDark ? colors.border : colors.primaryDark,
+        },
+      ]}
+    >
+      <View style={styles.commandHeroTopRow}>
+        <View style={styles.commandHeroBadge}>
+          <View style={[styles.commandHeroPulseDot, { backgroundColor: colors.gold }]} />
+          <Text style={[styles.commandHeroBadgeText, { color: colors.gold }]}>PUSAT KOMANDO OPERASIONAL</Text>
+        </View>
+        <Pressable
+          hitSlop={8}
+          onPress={onNotifPress}
+          style={({ pressed }) => [
+            styles.notifBtn,
+            { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.15)' },
+            pressed && { opacity: 0.7 },
+          ]}
+        >
+          <Feather name="bell" size={18} color="#FFFFFF" strokeWidth={2} />
+          {activeAlertCount > 0 && (
+            <View style={[styles.notifBadgeDot, { backgroundColor: colors.danger }]} />
+          )}
+        </Pressable>
+      </View>
+
+      <View style={styles.commandHeroMainRow}>
+        {currentUser.fotoProfil ? (
+          <Image source={{ uri: currentUser.fotoProfil }} style={styles.heroAvatar} />
+        ) : (
+          <View style={[styles.heroAvatarPlaceholder, { backgroundColor: colors.gold }]}>
+            <Feather name="user" size={22} color={colors.primary} />
+          </View>
+        )}
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={[styles.heroGreeting, { color: '#FFFFFF', fontSize: fontSize.lg }]}>
+            {currentUser.nama}
+          </Text>
+          <Text style={{ color: isDark ? colors.textMuted : 'rgba(255,255,255,0.85)', fontSize: fontSize.xs, fontWeight: '600' }}>
+            {ROLE_LABEL[role as keyof typeof ROLE_LABEL] ?? role} • {sppgName}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function ProductionStageBar({ progress, target }: { progress: number; target: number }) {
+  const { colors, fontSize, radius } = useTheme();
+  const pct = Math.min(100, Math.round((progress / target) * 100));
+
+  const stages = [
+    { label: 'Bahan', done: pct >= 20 },
+    { label: 'Masak', done: pct >= 40 },
+    { label: 'QC Gizi', done: pct >= 65 },
+    { label: 'Packing', done: pct >= 85 },
+    { label: 'Kirim', done: pct >= 100 },
+  ];
+
+  return (
+    <Card variant="accent" style={{ gap: 12 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Feather name="activity" size={16} color={colors.primary} />
+          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.primary, letterSpacing: 0.4 }}>
+            PROGRESS DOKUMENTASI PRODUKSI
+          </Text>
+        </View>
+        <Pill label={`${pct}% Selesai`} tone={pct >= 100 ? 'success' : 'primary'} />
+      </View>
+
+      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
+        <Text style={{ fontSize: 28, fontWeight: '900', color: colors.text }}>
+          {progress.toLocaleString('id-ID')}
+        </Text>
+        <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, fontWeight: '600' }}>
+          / {target.toLocaleString('id-ID')} porsi target
+        </Text>
+      </View>
+      <Text style={{ fontSize: 10, color: colors.textMuted, marginTop: -6 }}>
+        * Fluktuatif real-time (terpengaruh penyesuaian QC, sampling, & batch pemorsian)
+      </Text>
+
+      {/* Progress Track */}
+      <View style={{ height: 8, backgroundColor: colors.background, borderRadius: radius.pill, overflow: 'hidden' }}>
+        <View style={{ height: '100%', width: `${pct}%`, backgroundColor: colors.gold || colors.primary, borderRadius: radius.pill }} />
+      </View>
+
+      {/* Stages Row */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingTop: 4 }}>
+        {stages.map((stg, i) => (
+          <View key={i} style={{ alignItems: 'center', gap: 4 }}>
+            <View
+              style={{
+                width: 18,
+                height: 18,
+                borderRadius: 9,
+                backgroundColor: stg.done ? colors.success : colors.background,
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderWidth: 1,
+                borderColor: stg.done ? colors.success : colors.border,
+              }}
+            >
+              {stg.done ? (
+                <Feather name="check" size={11} color="#FFFFFF" strokeWidth={3} />
+              ) : (
+                <Text style={{ fontSize: 9, color: colors.textMuted, fontWeight: '700' }}>{i + 1}</Text>
+              )}
+            </View>
+            <Text style={{ fontSize: 10, fontWeight: '700', color: stg.done ? colors.text : colors.textMuted }}>
+              {stg.label}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </Card>
+  );
+}
+
 export default function DashboardScreen({ navigation }: any) {
-  const { role, currentUser, currentSppg, sppgList, sekolahList, progressProduksiRealtime, publicReportList } = useApp();
-  const { colors, spacing, fontSize, radius, iconStrokeWidth } = useTheme();
-  const { laporanInScope, presensiInScope, checklistInScope, alertInScope, usersInScope, sppgInScope } = useScopedData();
+  const { role, currentUser, currentSppg, sppgList, sekolahList, progressProduksiRealtime } = useApp();
+  const { colors, spacing, fontSize, radius, iconStrokeWidth, isDark } = useTheme();
+  const { laporanInScope, presensiInScope, checklistInScope, alertInScope, usersInScope, sppgInScope, broadcastInScope } = useScopedData();
   const [pendingCount, setPendingCount] = usePendingSyncCount();
   const [syncing, setSyncing] = React.useState(false);
   const today = todayDate();
@@ -151,27 +285,22 @@ export default function DashboardScreen({ navigation }: any) {
 
     return (
       <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
-        <View style={[styles.heroCard, { backgroundColor: colors.surface, borderColor: colors.border, flexDirection: 'row', alignItems: 'center', gap: 12 }]}>
-          {currentUser.fotoProfil ? (
-            <Image source={{ uri: currentUser.fotoProfil }} style={{ width: 50, height: 50, borderRadius: 25 }} />
-          ) : (
-            <View style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
-              <Feather name="user" size={24} color={colors.primary} />
-            </View>
-          )}
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.heroTitle, { color: colors.text, fontSize: fontSize.lg }]}>Halo, {currentUser.nama}</Text>
-            <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>{roleScopeLabel(currentUser)} — Pemantauan {sppgInScope.length} SPPG</Text>
-          </View>
-        </View>
+        <CommandHeroHeader
+          currentUser={currentUser}
+          role={role}
+          sppgName={roleScopeLabel(currentUser)}
+          sppgScopeCount={sppgInScope.length}
+          onNotifPress={() => navigation.navigate('Notifikasi')}
+          activeAlertCount={activeAlerts.length}
+        />
 
         <SyncStatusBadge pendingCount={pendingCount} onSyncPress={handleSync} syncing={syncing} />
 
-        <SectionTitle>Ringkasan Status SPPG</SectionTitle>
-        <View style={styles.statGrid}>
-          <KpiCard label="Normal" value={counts.normal} tone={colors.success} icon="check-circle" style={styles.statGridItem} />
-          <KpiCard label="Perlu Perhatian" value={counts.perhatian} tone={colors.warning} icon="alert-circle" style={styles.statGridItem} />
-          <KpiCard label="Darurat" value={counts.emergency} tone={colors.danger} icon="alert-triangle" style={styles.statGridItem} />
+        <SectionTitle>Ringkasan Status SPPG Wilayah</SectionTitle>
+        <View style={styles.statRowThree}>
+          <KpiCard label="Normal" value={counts.normal} tone={colors.success} icon="check-circle" />
+          <KpiCard label="Perhatian" value={counts.perhatian} tone={colors.warning} icon="alert-circle" />
+          <KpiCard label="Darurat" value={counts.emergency} tone={colors.danger} icon="alert-triangle" />
         </View>
 
         <AlertPreviewList
@@ -193,21 +322,21 @@ export default function DashboardScreen({ navigation }: any) {
                     {p.jumlahSppg} SPPG • {p.persenLaporan}% lapor hari ini
                   </Text>
                 </View>
-                <Pill
-                  label={`${p.alertAktif} alert`}
-                  tone={p.alertAktif > 0 ? 'danger' : 'success'}
-                />
+                <Pill label={`${p.alertAktif} alert`} tone={p.alertAktif > 0 ? 'danger' : 'success'} />
               </View>
             ))}
           </Card>
         )}
 
         <Card style={{ gap: spacing.sm }}>
-          <SectionTitle style={{ marginBottom: 0 }} action={
-            <Pressable onPress={() => navigation.navigate('DaftarSPPG')} hitSlop={8}>
-              <Text style={{ color: colors.primary, fontWeight: '700', fontSize: fontSize.xs }}>Lihat Semua</Text>
-            </Pressable>
-          }>
+          <SectionTitle
+            style={{ marginBottom: 0 }}
+            action={
+              <Pressable onPress={() => navigation.navigate('DaftarSPPG')} hitSlop={8}>
+                <Text style={{ color: colors.primary, fontWeight: '700', fontSize: fontSize.xs }}>Lihat Semua ➔</Text>
+              </Pressable>
+            }
+          >
             Daftar SPPG di Wilayah Anda ({sppgInScope.length})
           </SectionTitle>
           {sppgInScope.slice(0, 5).map((s) => {
@@ -223,10 +352,10 @@ export default function DashboardScreen({ navigation }: any) {
               >
                 <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
                   {s.fotoDapur ? (
-                    <Image source={{ uri: s.fotoDapur }} style={{ width: 50, height: 50, borderRadius: radius.sm }} />
+                    <Image source={{ uri: s.fotoDapur }} style={{ width: 48, height: 48, borderRadius: radius.sm }} />
                   ) : (
-                    <View style={{ width: 50, height: 50, borderRadius: radius.sm, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
-                      <Feather name="home" size={24} color={colors.primary} />
+                    <View style={{ width: 48, height: 48, borderRadius: radius.sm, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
+                      <Feather name="home" size={22} color={colors.primary} />
                     </View>
                   )}
                   <View style={{ flex: 1, gap: 2 }}>
@@ -253,7 +382,7 @@ export default function DashboardScreen({ navigation }: any) {
   }
 
   // -------------------------------------------------------------
-  // KEPALA_SPPG / PETUGAS_LAPANGAN — today's status at a glance
+  // KEPALA_SPPG / PETUGAS_LAPANGAN — Executive operational overview
   // -------------------------------------------------------------
   const laporanHariIni = laporanInScope.find((l) => l.tanggal === today);
   const staffAktif = usersInScope.filter((u) => u.role === 'PETUGAS_LAPANGAN' && u.statusAktif);
@@ -268,128 +397,131 @@ export default function DashboardScreen({ navigation }: any) {
   const sekolahBina = currentSppg ? sekolahList.filter((s) => s.sppgId === currentSppg.id) : [];
 
   const quickActions: QuickAction[] = [
-    { key: 'checkin', icon: 'user-check', title: 'Presensi Saya', subtitle: 'Selfie & GPS akun pribadi', onPress: () => navigation.navigate('CheckIn') },
-    { key: 'presensi', icon: 'users', title: 'Rekap Presensi Staf', subtitle: 'Rekap & foto hadir tim', onPress: () => navigation.navigate('Presensi') },
-    { key: 'checklist', icon: 'check-square', title: 'Checklist', subtitle: 'Checklist harian dapur', onPress: () => navigation.navigate('Checklist') },
+    { key: 'checkin', icon: 'user-check', title: 'Presensi Saya', subtitle: 'Selfie & GPS akun', onPress: () => navigation.navigate('CheckIn') },
+    { key: 'presensi', icon: 'users', title: 'Rekap Presensi Staf', subtitle: 'Rekap & selfie tim', onPress: () => navigation.navigate('Presensi') },
+    { key: 'checklist', icon: 'check-square', title: 'Checklist Harian', subtitle: 'Checklist harian dapur', onPress: () => navigation.navigate('Checklist') },
     {
       key: 'laporan',
       icon: 'file-text',
       title: isKepala ? 'Laporan' : 'Dokumentasi Laporan',
-      subtitle: isKepala ? 'Kelola laporan produksi' : 'Bantu isi dokumentasi',
+      subtitle: isKepala ? 'Kelola laporan produksi' : 'Isi dokumentasi',
       onPress: () =>
         isKepala
           ? navigation.navigate('Laporan')
           : navigation.navigate('LaporanForm', { laporanId: laporanHariIni?.id, tanggal: today }),
     },
-    { key: 'foodsafety', icon: 'thermometer', title: 'Keamanan Pangan', subtitle: 'Catat suhu & simpan', onPress: () => navigation.navigate('FoodSafetyForm') },
+    { key: 'foodsafety', icon: 'thermometer', title: 'Keamanan Pangan', subtitle: 'Catat suhu & uji', onPress: () => navigation.navigate('FoodSafetyForm') },
     { key: 'peralatan', icon: 'truck', title: 'Aset & Armada', subtitle: 'Check ompreng & mobil', onPress: () => navigation.navigate('Peralatan') },
   ];
 
   const targetKapasitas = currentSppg?.kapasitasProduksi || 1500;
+  const currentSppgName = currentSppg?.nama ?? sppgList.find((s) => s.id === currentUser.sppgId)?.nama ?? 'SPPG Unit';
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
-      <View style={[styles.heroCard, { backgroundColor: colors.surface, borderColor: colors.border, flexDirection: 'row', alignItems: 'center', gap: 12 }]}>
-        {currentUser.fotoProfil ? (
-          <Image source={{ uri: currentUser.fotoProfil }} style={{ width: 48, height: 48, borderRadius: 24 }} />
-        ) : (
-          <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
-            <Feather name="user" size={22} color={colors.primary} />
-          </View>
-        )}
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.heroTitle, { color: colors.text, fontSize: fontSize.lg }]}>Halo, {currentUser.nama}</Text>
-          <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>
-            {ROLE_LABEL[role]} — {currentSppg?.nama ?? sppgList.find((s) => s.id === currentUser.sppgId)?.nama}
-          </Text>
-        </View>
-        <Pressable
-          hitSlop={8}
-          onPress={() => navigation.navigate('Notifikasi')}
-          style={({ pressed }) => [
-            { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center', position: 'relative' },
-            pressed && { opacity: 0.7 },
-          ]}
-        >
-          <Feather name="bell" size={20} color={colors.primary} strokeWidth={2} />
-          {activeAlerts.length > 0 && (
-            <View style={{ position: 'absolute', top: 4, right: 4, width: 10, height: 10, borderRadius: 5, backgroundColor: colors.danger, borderWidth: 1.5, borderColor: colors.surface }} />
-          )}
-        </Pressable>
-      </View>
+      {/* 1. Command Header Shield */}
+      <CommandHeroHeader
+        currentUser={currentUser}
+        role={role}
+        sppgName={currentSppgName}
+        sppgScopeCount={1}
+        onNotifPress={() => navigation.navigate('Notifikasi')}
+        activeAlertCount={activeAlerts.length}
+      />
 
-      <Card style={{ backgroundColor: colors.surface, borderColor: colors.primary, borderWidth: 1, gap: spacing.xs }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+      {/* 2. Production Stage Progress Hub */}
+      <ProductionStageBar progress={progressProduksiRealtime} target={targetKapasitas} />
+
+      {/* Broadcast Alert Banner */}
+      {broadcastInScope.length > 0 && (
+        <Card style={{ backgroundColor: isDark ? 'rgba(217,119,6,0.15)' : '#FFFBEB', borderColor: colors.warning, gap: 6 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#22C55E' }} />
-            <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.primary }}>
-              TARGET & PORSI PRODUKSI HARIAN
+            <Feather name="radio" size={16} color={colors.warning} />
+            <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.warning, flex: 1 }}>
+              BROADCAST INSTRUKSI PENGUMUMAN
             </Text>
+            <Pill label={broadcastInScope[0].tingkat.toUpperCase()} tone="warning" />
           </View>
-          <Pill label="Target Harian" tone="primary" />
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
-          <Text style={{ fontSize: 26, fontWeight: '800', color: colors.text }}>
-            {progressProduksiRealtime.toLocaleString('id-ID')}
+          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
+            {broadcastInScope[0].judul}
           </Text>
-          <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, fontWeight: '600' }}>
-            / {targetKapasitas.toLocaleString('id-ID')} porsi terhitung ({Math.round((progressProduksiRealtime / targetKapasitas) * 100)}%)
+          <Text style={{ fontSize: 11, color: colors.textMuted }}>
+            {broadcastInScope[0].isi}
           </Text>
-        </View>
-        <View style={{ height: 6, backgroundColor: colors.background, borderRadius: radius.pill, overflow: 'hidden', marginTop: 4 }}>
-          <View style={{ height: '100%', width: `${Math.min(100, Math.round((progressProduksiRealtime / targetKapasitas) * 100))}%`, backgroundColor: colors.primary, borderRadius: radius.pill }} />
-        </View>
-      </Card>
+        </Card>
+      )}
 
-      <SectionTitle>Status Hari Ini</SectionTitle>
-      <View style={styles.statGrid}>
-        <KpiCard
-          label="Laporan Hari Ini"
-          value={laporanHariIni ? (laporanHariIni.status === 'draft' ? 'Draft' : laporanHariIni.status === 'terkirim' ? 'Terkirim' : 'Diverifikasi') : 'Belum Diisi'}
-          tone={laporanHariIni && laporanHariIni.status !== 'draft' ? colors.success : colors.warning}
-          icon="file-text"
-          style={styles.statGridItem}
-          onPress={() => navigation.navigate('LaporanForm', { laporanId: laporanHariIni?.id, tanggal: today })}
-        />
-        <KpiCard
-          label="Presensi Staf"
-          value={`${hadirCount}/${staffAktif.length}`}
-          tone={hadirCount >= staffAktif.length ? colors.success : colors.warning}
-          icon="users"
-          style={styles.statGridItem}
-          onPress={() => navigation.navigate('Presensi')}
-        />
-        <KpiCard
-          label="Checklist Harian"
-          value={checklistSelesai ? 'Selesai' : 'Belum Selesai'}
-          tone={checklistKritisGagal ? colors.danger : checklistSelesai ? colors.success : colors.warning}
-          icon="check-square"
-          badge={checklistKritisGagal ? 'Kritis!' : undefined}
-          style={styles.statGridItem}
-          onPress={() => navigation.navigate('Checklist')}
-        />
-        <KpiCard
-          label="Alert Aktif"
-          value={activeAlerts.length}
-          tone={activeAlerts.some((a) => a.tingkat === 'emergency') ? colors.danger : activeAlerts.length > 0 ? colors.warning : colors.success}
-          icon="alert-triangle"
-          style={styles.statGridItem}
-          onPress={() => navigation.navigate('Alert')}
-        />
-      </View>
+      {/* Driver Task Card if role === DRIVER */}
+      {role === 'DRIVER' && (
+        <Card variant="accent" style={{ gap: spacing.xs }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Feather name="truck" size={18} color={isDark ? colors.gold : colors.primary} />
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
+                TUGAS PENGIRIMAN ARMADA HARI INI
+              </Text>
+            </View>
+            <Pill label="3 Rute Sekolah" tone="primary" />
+          </View>
+          <Text style={{ fontSize: fontSize.xs, color: colors.text, fontWeight: '700', marginTop: 4 }}>
+            SDN 1 Bandung ➔ SMPN 5 Bandung ➔ SD IT Al-Azhar
+          </Text>
+          <Text style={{ fontSize: 11, color: colors.textMuted }}>
+            Total 1.150 porsi ompreng makanan MBG dalam Thermal Box.
+          </Text>
+          <PrimaryButton
+            label="Buka Live GPS & Upload Bukti Tiba"
+            icon="navigation"
+            onPress={() => navigation.navigate('Distribusi')}
+            style={{ marginTop: 8 }}
+          />
+        </Card>
+      )}
 
-      {/* Sekolah Afiliasi SPPG Card */}
+      {/* 3. Executive Metrics Grid — Horizontal Scrollable */}
+      <SectionTitle>Ringkasan Status Hari Ini</SectionTitle>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingBottom: 4 }}>
+        <View style={{ width: 136 }}>
+          <KpiCard
+            label="Laporan Produksi"
+            value={laporanHariIni ? (laporanHariIni.status === 'draft' ? 'Draft' : 'Selesai') : 'Belum'}
+            tone={laporanHariIni && laporanHariIni.status !== 'draft' ? colors.success : colors.warning}
+            icon="file-text"
+            onPress={() => navigation.navigate('LaporanForm', { laporanId: laporanHariIni?.id, tanggal: today })}
+          />
+        </View>
+        <View style={{ width: 136 }}>
+          <KpiCard
+            label="Presensi Staf"
+            value={`${hadirCount}/${staffAktif.length}`}
+            tone={hadirCount >= staffAktif.length ? colors.success : colors.warning}
+            icon="users"
+            onPress={() => navigation.navigate('Presensi')}
+          />
+        </View>
+        <View style={{ width: 136 }}>
+          <KpiCard
+            label="Checklist Dapur"
+            value={checklistSelesai ? 'Selesai' : 'Belum'}
+            tone={checklistSelesai ? colors.success : colors.warning}
+            icon="check-square"
+            onPress={() => navigation.navigate('Checklist')}
+          />
+        </View>
+      </ScrollView>
+
+      {/* 4. Sekolah Afiliasi SPPG Card */}
       {!!role && ROLE_PERMISSIONS[role].canManageStaff && (
         <Card style={{ gap: spacing.sm }}>
           <SectionTitle
             style={{ marginBottom: 0 }}
             action={
               <Pressable onPress={() => navigation.navigate('SekolahForm')} hitSlop={8}>
-                <Text style={{ color: colors.primary, fontWeight: '700', fontSize: fontSize.xs }}>+ Tambah</Text>
+                <Text style={{ color: colors.primary, fontWeight: '700', fontSize: fontSize.xs }}>+ Tambah Sekolah</Text>
               </Pressable>
             }
           >
-            Sekolah Afiliasi SPPG Ini ({sekolahBina.length} Sekolah)
+            Sekolah Afiliasi SPPG ({sekolahBina.length} Sekolah)
           </SectionTitle>
           {sekolahBina.length === 0 && (
             <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Belum ada sekolah afiliasi. Tambahkan sekolah pertama SPPG ini.</Text>
@@ -402,10 +534,10 @@ export default function DashboardScreen({ navigation }: any) {
             >
               <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
                 {sch.fotoSekolah ? (
-                  <Image source={{ uri: sch.fotoSekolah }} style={{ width: 50, height: 50, borderRadius: radius.sm }} />
+                  <Image source={{ uri: sch.fotoSekolah }} style={{ width: 44, height: 44, borderRadius: radius.sm }} />
                 ) : (
-                  <View style={{ width: 50, height: 50, borderRadius: radius.sm, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
-                    <Feather name="home" size={24} color={colors.primary} />
+                  <View style={{ width: 44, height: 44, borderRadius: radius.sm, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
+                    <Feather name="home" size={20} color={colors.primary} />
                   </View>
                 )}
                 <View style={{ flex: 1, gap: 2 }}>
@@ -415,7 +547,7 @@ export default function DashboardScreen({ navigation }: any) {
                   <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>
                     Target: {sch.jumlahSiswa.toLocaleString('id-ID')} siswa • {sch.alamat}
                   </Text>
-                  <Text style={{ fontSize: 10, color: colors.primary, fontWeight: '700' }}>Lihat Detail Pengiriman Menu ➔</Text>
+                  <Text style={{ fontSize: 10, color: colors.primary, fontWeight: '700' }}>Lihat Detail Pengiriman ➔</Text>
                 </View>
                 <Feather name="chevron-right" size={18} color={colors.textMuted} />
               </View>
@@ -424,9 +556,11 @@ export default function DashboardScreen({ navigation }: any) {
         </Card>
       )}
 
-      <SectionTitle>Aksi Cepat</SectionTitle>
+      {/* 5. Aksi Cepat Hub */}
+      <SectionTitle>Aksi Cepat Operasional</SectionTitle>
       <QuickActionGrid items={quickActions} />
 
+      {/* 6. Alert Preview List */}
       <AlertPreviewList
         alerts={activeAlerts}
         onSeeAll={() => navigation.navigate('Alert')}
@@ -438,14 +572,75 @@ export default function DashboardScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 16, paddingBottom: 32 },
-  heroCard: { padding: 16, borderRadius: 16, borderWidth: 1, gap: 4 },
-  heroTitle: { fontWeight: '800' },
-  statGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  statGridItem: { minWidth: '46%' },
+  content: { padding: 16, gap: 16, paddingBottom: 90 },
+  commandHero: {
+    padding: 16,
+    borderWidth: 1,
+    gap: 12,
+  },
+  commandHeroTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  commandHeroBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  commandHeroPulseDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  commandHeroBadgeText: {
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 0.6,
+  },
+  notifBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  notifBadgeDot: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  commandHeroMainRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  heroAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+  heroAvatarPlaceholder: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroGreeting: {
+    fontWeight: '900',
+  },
+  statRowThree: {
+    flexDirection: 'row',
+    gap: 8,
+  },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   gridCard: { width: '48%', padding: 14, borderWidth: 1, gap: 6, minHeight: 100, justifyContent: 'flex-start' },
-  gridIconWrap: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  gridIconWrap: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
   gridTitle: { fontWeight: '800' },
   gridSubtitle: { fontSize: 11, lineHeight: 14 },
   alertRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, borderBottomWidth: 0.5 },

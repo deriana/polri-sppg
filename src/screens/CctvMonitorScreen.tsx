@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
 import { useApp } from '../context/AppContext';
@@ -9,15 +9,11 @@ import { useScopedData } from '../hooks';
 import { scopeCctvEvents, ROLE_PERMISSIONS } from '../utils/scope';
 import { CCTV_ANOMALI_LABEL } from '../data/cctvEvents';
 import { CctvEvent } from '../types';
+import { useLocalVideoUri } from '../utils/localVideoAsset';
 
-const localVideoUri = (() => {
-  try {
-    return Image.resolveAssetSource(require('../../assets/sppg.mp4')).uri;
-  } catch (e) {
-    return 'file:///home/deryana/coding/sigap-sppg/assets/sppg.mp4';
-  }
-})();
-
+// localMp4Url below is a dead placeholder — every feed shares one physical
+// video, resolved at render time via useLocalVideoUri() (see that file for
+// why require()+resolveAssetSource breaks video playback in release builds).
 export interface CctvFeedItem {
   id: string;
   zonaId: string;
@@ -46,7 +42,7 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z1',
     zonaNama: 'Zona 1: Gudang & Penerimaan',
     label: 'CAM 01 - Loading Dock Penerimaan Bahan',
-    localMp4Url: localVideoUri,
+    localMp4Url: '',
     thumbnail: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'Verifikasi Timbangan OK',
@@ -56,7 +52,7 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z1',
     zonaNama: 'Zona 1: Gudang & Penerimaan',
     label: 'CAM 02 - Gudang Bahan Kering & Sembako',
-    localMp4Url: localVideoUri,
+    localMp4Url: '',
     thumbnail: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'Stok FIFO Terpantau',
@@ -66,7 +62,7 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z1',
     zonaNama: 'Zona 1: Gudang & Penerimaan',
     label: 'CAM 03 - Cold Room Freezer (-18°C) & Chiller',
-    localMp4Url: localVideoUri,
+    localMp4Url: '',
     thumbnail: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'Suhu -18.2°C (Aman)',
@@ -78,7 +74,7 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z2',
     zonaNama: 'Zona 2: Persiapan & Cutting',
     label: 'CAM 04 - Area Pemotongan Daging & Ikan',
-    localMp4Url: localVideoUri,
+    localMp4Url: '',
     thumbnail: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'APD Sarung Tangan 100%',
@@ -88,7 +84,7 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z2',
     zonaNama: 'Zona 2: Persiapan & Cutting',
     label: 'CAM 05 - Area Pencucian & Pengupasan Sayur',
-    localMp4Url: localVideoUri,
+    localMp4Url: '',
     thumbnail: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'Sanitasi Air Terverifikasi',
@@ -100,7 +96,7 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z3',
     zonaNama: 'Zona 3: Dapur Pemasakan Utama',
     label: 'CAM 06 - Area Pemasakan Tilting Pan (Lauk)',
-    localMp4Url: localVideoUri,
+    localMp4Url: '',
     thumbnail: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'APD Lengkap (99.4%)',
@@ -110,7 +106,7 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z3',
     zonaNama: 'Zona 3: Dapur Pemasakan Utama',
     label: 'CAM 07 - Pengukus Nasi Raksasa B (Karbo)',
-    localMp4Url: localVideoUri,
+    localMp4Url: '',
     thumbnail: 'https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'Suhu Kuali 102°C Standard',
@@ -122,7 +118,7 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z4',
     zonaNama: 'Zona 4: Pemorsian & Packaging',
     label: 'CAM 08 - Conveyor Line Pemorsian Ompreng',
-    localMp4Url: localVideoUri,
+    localMp4Url: '',
     thumbnail: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'Gramasi Porsi Tepat',
@@ -132,7 +128,7 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z4',
     zonaNama: 'Zona 4: Pemorsian & Packaging',
     label: 'CAM 09 - Mesin Sealing & Packaging Box',
-    localMp4Url: localVideoUri,
+    localMp4Url: '',
     thumbnail: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'Segel Higienis Rapat',
@@ -144,7 +140,7 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z5',
     zonaNama: 'Zona 5: Washing Bay & Sanitasi',
     label: 'CAM 10 - Washing Bay & Automatic Dishwasher',
-    localMp4Url: localVideoUri,
+    localMp4Url: '',
     thumbnail: 'https://images.unsplash.com/photo-1585837575652-267c041d77d4?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'Sanitasi Deterjen Sesuai',
@@ -154,7 +150,7 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z5',
     zonaNama: 'Zona 5: Washing Bay & Sanitasi',
     label: 'CAM 11 - Sterilisasi Sinar UV & Dryer Ompreng',
-    localMp4Url: localVideoUri,
+    localMp4Url: '',
     thumbnail: 'https://images.unsplash.com/photo-1584634731339-252c581abfc5?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'Sinar UV Stereo 100%',
@@ -166,7 +162,7 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z6',
     zonaNama: 'Zona 6: Loading Gate Armada',
     label: 'CAM 12 - Dispatch Armada Kendaraan Penyalur',
-    localMp4Url: localVideoUri,
+    localMp4Url: '',
     thumbnail: 'https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'Armada Ready 6 Unit',
@@ -182,6 +178,7 @@ export default function CctvMonitorScreen() {
   const [selectedEvent, setSelectedEvent] = useState<CctvEvent | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [selectedZona, setSelectedZona] = useState('all');
+  const videoUri = useLocalVideoUri(require('../../assets/sppg.mp4'));
 
   const filteredFeeds = useMemo(() => {
     if (selectedZona === 'all') return CCTV_FEEDS;
@@ -335,6 +332,11 @@ export default function CctvMonitorScreen() {
 
                 {/* Video Player WebView */}
                 <View style={isFullscreen ? { flex: 1, width: '100%', backgroundColor: '#000' } : { width: '100%', height: 230, borderRadius: radius.md, overflow: 'hidden', backgroundColor: '#000' }}>
+                  {!videoUri ? (
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                      <ActivityIndicator color="#fff" />
+                    </View>
+                  ) : (
                   <WebView
                     source={{
                       html: `
@@ -374,7 +376,7 @@ export default function CctvMonitorScreen() {
                         </head>
                         <body>
                           <div class="container">
-                            <video src="${activeFeed.localMp4Url}" autoplay loop playsinline></video>
+                            <video src="${videoUri}" autoplay loop playsinline></video>
                             <div class="hud-top-left"><div class="rec-dot"></div>● REC LIVE LANDSCAPE</div>
                             <div class="hud-top-right" id="clock">2026-08-09 --:--:--</div>
                             <div class="hud-bottom-left">${activeFeed.label.toUpperCase()}</div>
@@ -408,6 +410,7 @@ export default function CctvMonitorScreen() {
                     allowUniversalAccessFromFileURLs
                     originWhitelist={['*']}
                   />
+                  )}
                 </View>
 
                 {!isFullscreen && (

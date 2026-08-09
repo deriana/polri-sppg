@@ -62,7 +62,7 @@ export interface CardProps {
   style?: StyleProp<ViewStyle>;
   onPress?: () => void;
   disabled?: boolean;
-  variant?: 'default' | 'outlined' | 'elevated' | 'glass';
+  variant?: 'default' | 'outlined' | 'elevated' | 'glass' | 'accent';
   activeOpacity?: number;
 }
 
@@ -88,21 +88,30 @@ export function Card({
         return {
           backgroundColor: colors.surface,
           borderWidth: 1,
-          borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
-          ...shadow.card,
+          borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(15, 23, 42, 0.05)',
+          ...shadow.md,
         };
       case 'glass':
         return {
-          backgroundColor: isDark ? 'rgba(26, 26, 33, 0.75)' : 'rgba(255, 255, 255, 0.85)',
+          backgroundColor: colors.glassBackground,
           borderWidth: 1,
-          borderColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.6)',
+          borderColor: colors.glassBorder,
+        };
+      case 'accent':
+        return {
+          backgroundColor: colors.surface,
+          borderWidth: 1,
+          borderColor: colors.border,
+          borderLeftWidth: 4,
+          borderLeftColor: colors.gold || colors.primary,
+          ...shadow.card,
         };
       case 'default':
       default:
         return {
           backgroundColor: colors.surface,
           borderWidth: 1,
-          borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+          borderColor: colors.border,
           ...shadow.card,
         };
     }
@@ -147,10 +156,13 @@ export function SectionTitle({ children, style, action }: SectionTitleProps) {
   const { colors, fontSize, spacing } = useTheme();
 
   return (
-    <View style={[styles.sectionHeader, { marginBottom: spacing.md }]}>
-      <Text style={[styles.sectionTitleText, { color: colors.text, fontSize: fontSize.lg, flexShrink: 1 }, style]}>
-        {children}
-      </Text>
+    <View style={[styles.sectionHeader, { marginBottom: spacing.sm + 2 }]}>
+      <View style={styles.sectionTitleWrap}>
+        <View style={[styles.sectionAccentBar, { backgroundColor: colors.gold || colors.primary }]} />
+        <Text style={[styles.sectionTitleText, { color: colors.text, fontSize: fontSize.lg, flexShrink: 1 }, style]}>
+          {children}
+        </Text>
+      </View>
       {action && <View style={{ marginLeft: spacing.xs }}>{action}</View>}
     </View>
   );
@@ -172,8 +184,10 @@ export function StatusBadge({ status, style }: StatusBadgeProps) {
   const labelText = statusLabel[status] || status;
 
   return (
-    <View style={[styles.badge, { backgroundColor: bg, borderRadius: radius.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.xs }, style]}>
-      <View style={[styles.dot, { backgroundColor: dotColor }]} />
+    <View style={[styles.badge, { backgroundColor: bg, borderRadius: radius.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.xs + 1 }, style]}>
+      <View style={[styles.dotContainer, { backgroundColor: `${dotColor}25` }]}>
+        <View style={[styles.dot, { backgroundColor: dotColor }]} />
+      </View>
       <Text style={[styles.badgeText, { color: colors.text, fontSize: fontSize.xs }]}>
         {labelText}
       </Text>
@@ -815,12 +829,30 @@ export interface StepperProps {
 
 export function Stepper({ label, value, onChange, step = 1, min = 0, max, unit, disabled, style }: StepperProps) {
   const { colors, fontSize, radius, spacing } = useTheme();
+  const [inputText, setInputText] = useState<string>(value.toString());
+
+  React.useEffect(() => {
+    setInputText(value.toString());
+  }, [value]);
 
   const clamp = (v: number) => {
     let next = v;
     if (min !== undefined) next = Math.max(min, next);
     if (max !== undefined) next = Math.min(max, next);
     return next;
+  };
+
+  const handleTextChange = (text: string) => {
+    const cleaned = text.replace(/[^0-9]/g, '');
+    setInputText(cleaned);
+    if (cleaned !== '') {
+      const num = parseInt(cleaned, 10);
+      if (!isNaN(num)) {
+        onChange(clamp(num));
+      }
+    } else {
+      onChange(min ?? 0);
+    }
   };
 
   return (
@@ -833,10 +865,17 @@ export function Stepper({ label, value, onChange, step = 1, min = 0, max, unit, 
           disabled={disabled || (min !== undefined && value <= min)}
           tone="neutral"
         />
-        <Text style={[styles.stepperValue, { color: colors.text, fontSize: fontSize.lg }]}>
-          {value}
-          {unit ? <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}> {unit}</Text> : null}
-        </Text>
+        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+          <TextInput
+            value={inputText}
+            onChangeText={handleTextChange}
+            keyboardType="number-pad"
+            editable={!disabled}
+            selectTextOnFocus
+            style={[styles.stepperValue, { color: colors.text, fontSize: fontSize.lg, minWidth: 60, textAlign: 'center', paddingVertical: 4 }]}
+          />
+          {unit ? <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>{unit}</Text> : null}
+        </View>
         <IconButton
           icon="plus"
           onPress={() => onChange(clamp(value + step))}
@@ -915,14 +954,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  sectionTitleWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexShrink: 1,
+  },
+  sectionAccentBar: {
+    width: 3.5,
+    height: 16,
+    borderRadius: 2,
+  },
   sectionTitleText: {
-    fontWeight: '700',
+    fontWeight: '800',
+    letterSpacing: 0.2,
   },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
     gap: 6,
+  },
+  dotContainer: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dot: {
     width: 6,

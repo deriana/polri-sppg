@@ -18,3 +18,4 @@ export * from './mutasiStok';
 export * from './publicReports';
 export * from './peralatan';
 export * from './usulanMenu';
+export * from './additionalFeatures';

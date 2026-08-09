@@ -3,7 +3,7 @@ import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'rea
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { Card, EmptyState, Input, Pill, PrimaryButton, SectionTitle } from '../components/ui';
+import { Card, DropdownPicker, EmptyState, Input, Modal, Pill, PrimaryButton, SectionTitle } from '../components/ui';
 import { useScopedData } from '../hooks';
 import { CHECKLIST_CATALOG } from '../data/checklistHarian';
 import { ChecklistItem, ChecklistKategori } from '../types';
@@ -12,9 +12,9 @@ import { pickMedia } from '../utils/pickImage';
 import { addToOfflineQueue } from '../utils/offlineQueue';
 
 const KATEGORI_LABEL: Record<ChecklistKategori, string> = {
-  kebersihan: 'Kebersihan',
-  peralatan: 'Peralatan',
-  keamanan_pangan: 'Keamanan Pangan',
+  kebersihan: 'Kebersihan & Sanitasi',
+  peralatan: 'Peralatan & Container',
+  keamanan_pangan: 'Keamanan Pangan & Suhu',
 };
 const KATEGORI_ORDER: ChecklistKategori[] = ['kebersihan', 'peralatan', 'keamanan_pangan'];
 
@@ -29,12 +29,12 @@ function freshItems(): ChecklistItem[] {
 export default function ChecklistHarianScreen() {
   const { role, currentUser, currentSppg, submitChecklist } = useApp();
   const { checklistInScope } = useScopedData();
-  const { colors, spacing, fontSize, iconStrokeWidth, radius } = useTheme();
+  const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark } = useTheme();
 
   const today = todayDate();
   const [selectedDate, setSelectedDate] = useState<string>(today);
 
-  // Generate 5 days range (today and 4 days ago)
+  // Generate 5 days range
   const dateOptions = useMemo(() => {
     const dates: { dateStr: string; label: string }[] = [];
     for (let i = 0; i < 5; i++) {
@@ -51,7 +51,12 @@ export default function ChecklistHarianScreen() {
   const [items, setItems] = useState<ChecklistItem[]>(existing ? existing.items : freshItems());
   const [submitted, setSubmitted] = useState(false);
 
-  // Re-sync items when date changes
+  // Modal State for Adding Custom Checklist Item
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newItemText, setNewItemText] = useState('');
+  const [newItemKategori, setNewItemKategori] = useState<ChecklistKategori>('kebersihan');
+  const [newItemKritis, setNewItemKritis] = useState(false);
+
   React.useEffect(() => {
     const found = checklistInScope.find((c) => c.tanggal === selectedDate);
     setItems(found ? found.items : freshItems());
@@ -74,8 +79,26 @@ export default function ChecklistHarianScreen() {
     if (picked) updateItem(id, { foto: picked.uri, fotoMediaType: picked.mediaType });
   };
 
+  const handleAddCustomItem = () => {
+    if (!newItemText.trim()) return;
+    const newItem: ChecklistItem = {
+      id: `CHK-CUSTOM-${Date.now()}`,
+      kategori: newItemKategori,
+      item: newItemText.trim(),
+      levelKritis: newItemKritis,
+      status: null,
+      catatan: null,
+      foto: null,
+    };
+    setItems((prev) => [...prev, newItem]);
+    setNewItemText('');
+    setNewItemKritis(false);
+    setShowAddModal(false);
+  };
+
   const invalidItems = items.filter((i) => i.status === 'tidak' && !i.catatan?.trim());
   const allAnswered = items.every((i) => i.status !== null);
+  const completedCount = items.filter((i) => i.status === 'ya').length;
 
   const handleSubmit = async () => {
     if (invalidItems.length > 0) {
@@ -99,13 +122,21 @@ export default function ChecklistHarianScreen() {
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
-      <SectionTitle
-        action={
-          allAnswered ? <Pill label="Lengkap" tone="success" /> : <Pill label={`${items.filter((i) => i.status !== null).length}/${items.length}`} tone="warning" />
-        }
-      >
-        Checklist Harian Dapur
-      </SectionTitle>
+      {/* 1. Header Hero Card */}
+      <Card variant="accent" style={{ gap: spacing.xs }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Feather name="check-square" size={18} color={isDark ? colors.gold : colors.primary} />
+            <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
+              CHECKLIST HARIAN KEBERSIHAN & HIGIENE
+            </Text>
+          </View>
+          <Pill label={`${completedCount}/${items.length} Selesai`} tone={allAnswered ? 'success' : 'warning'} />
+        </View>
+        <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, marginTop: 2 }}>
+          Panduan pemeriksaan higiene personel, sanitasi dapur, & sterilitas ompreng sebelum distribusi.
+        </Text>
+      </Card>
 
       {/* Date History Selector */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.xs, marginVertical: 2 }}>
@@ -133,96 +164,99 @@ export default function ChecklistHarianScreen() {
         })}
       </ScrollView>
 
-      {isPastDate && (
-        <View style={[styles.historyBanner, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
-          <Feather name="clock" size={16} color={colors.primary} />
-          <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>
-            Melihat riwayat checklist tanggal {selectedDate} (Mode Lihat).
-          </Text>
-        </View>
+      {!readOnly && (
+        <PrimaryButton
+          label="+ Tambah Item Checklist Baru"
+          icon="plus-circle"
+          variant="secondary"
+          onPress={() => setShowAddModal(true)}
+        />
       )}
 
       {KATEGORI_ORDER.map((kategori) => {
         const kategoriItems = items.filter((i) => i.kategori === kategori);
+        if (kategoriItems.length === 0) return null;
+
         return (
           <View key={kategori} style={{ gap: spacing.sm }}>
-            <Text style={[styles.kategoriTitle, { color: colors.text, fontSize: fontSize.md }]}>{KATEGORI_LABEL[kategori]}</Text>
+            <SectionTitle style={{ marginBottom: 0 }}>{KATEGORI_LABEL[kategori]}</SectionTitle>
             {kategoriItems.map((item) => {
-              const invalid = item.status === 'tidak' && !item.catatan?.trim();
+              const isDone = item.status === 'ya';
+              const isFailed = item.status === 'tidak';
+              const invalid = isFailed && !item.catatan?.trim();
+
               return (
-                <Card key={item.id} style={{ gap: spacing.sm }}>
-                  <View style={styles.itemHeader}>
-                    <Text style={[styles.itemLabel, { color: colors.text, fontSize: fontSize.sm }]}>{item.item}</Text>
-                    {item.levelKritis && <Pill label="Kritis" tone="danger" />}
-                  </View>
-
-                  <View style={styles.toggleRow}>
+                <Card
+                  key={item.id}
+                  style={[
+                    styles.todoCard,
+                    isDone && { borderColor: colors.success, backgroundColor: isDark ? 'rgba(13,148,136,0.08)' : '#F0FDF4' },
+                    isFailed && { borderColor: colors.danger, backgroundColor: isDark ? 'rgba(225,29,72,0.08)' : '#FFF1F2' },
+                  ]}
+                >
+                  <View style={styles.todoRow}>
+                    {/* Interactive Checkbox */}
                     <Pressable
                       disabled={readOnly}
-                      onPress={() => updateItem(item.id, { status: 'ya' })}
+                      onPress={() => updateItem(item.id, { status: isDone ? null : 'ya' })}
                       style={[
-                        styles.toggleBtn,
-                        { borderColor: colors.border, borderRadius: radius.md },
-                        item.status === 'ya' && { backgroundColor: colors.successBg, borderColor: colors.success },
+                        styles.checkbox,
+                        { borderColor: isDone ? colors.success : isFailed ? colors.danger : colors.border },
+                        isDone && { backgroundColor: colors.success },
+                        isFailed && { backgroundColor: colors.danger },
                       ]}
                     >
-                      <Feather name="check" size={18} color={item.status === 'ya' ? colors.success : colors.textMuted} strokeWidth={iconStrokeWidth} />
-                      <Text style={{ color: item.status === 'ya' ? colors.success : colors.textMuted, fontWeight: '700' }}>Ya</Text>
+                      {isDone && <Feather name="check" size={14} color="#FFFFFF" strokeWidth={3} />}
+                      {isFailed && <Feather name="x" size={14} color="#FFFFFF" strokeWidth={3} />}
                     </Pressable>
-                    <Pressable
-                      disabled={readOnly}
-                      onPress={() => updateItem(item.id, { status: 'tidak' })}
-                      style={[
-                        styles.toggleBtn,
-                        { borderColor: colors.border, borderRadius: radius.md },
-                        item.status === 'tidak' && { backgroundColor: colors.dangerBg, borderColor: colors.danger },
-                      ]}
-                    >
-                      <Feather name="x" size={18} color={item.status === 'tidak' ? colors.danger : colors.textMuted} strokeWidth={iconStrokeWidth} />
-                      <Text style={{ color: item.status === 'tidak' ? colors.danger : colors.textMuted, fontWeight: '700' }}>Tidak</Text>
-                    </Pressable>
+
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text
+                        style={[
+                          styles.todoText,
+                          { color: colors.text, fontSize: fontSize.sm },
+                          isDone && styles.todoDoneText,
+                        ]}
+                      >
+                        {item.item}
+                      </Text>
+                      {item.levelKritis && (
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                          <Feather name="alert-triangle" size={11} color={colors.warning} />
+                          <Text style={{ fontSize: 10, fontWeight: '800', color: colors.warning }}>ITEM KRITIS FOOD SAFETY</Text>
+                        </View>
+                      )}
+                    </View>
+
+                    {/* Quick Toggle Buttons */}
+                    {!readOnly && (
+                      <View style={{ flexDirection: 'row', gap: 6 }}>
+                        <Pressable
+                          onPress={() => updateItem(item.id, { status: 'ya' })}
+                          style={[styles.smallBtn, { backgroundColor: isDone ? colors.success : colors.background, borderColor: colors.border }]}
+                        >
+                          <Feather name="check" size={14} color={isDone ? '#fff' : colors.textMuted} />
+                        </Pressable>
+                        <Pressable
+                          onPress={() => updateItem(item.id, { status: 'tidak' })}
+                          style={[styles.smallBtn, { backgroundColor: isFailed ? colors.danger : colors.background, borderColor: colors.border }]}
+                        >
+                          <Feather name="x" size={14} color={isFailed ? '#fff' : colors.textMuted} />
+                        </Pressable>
+                      </View>
+                    )}
                   </View>
 
-                  {item.status === 'tidak' && (
+                  {/* Mandatory Note when "Tidak" */}
+                  {isFailed && (
                     <Input
-                      label="Catatan (wajib)"
+                      label="Catatan Kondisi (Wajib diisi bila Tidak)"
                       value={item.catatan ?? ''}
                       onChangeText={(t) => updateItem(item.id, { catatan: t })}
-                      placeholder="Jelaskan kondisi yang ditemukan..."
+                      placeholder="Jelaskan kendala/temuan..."
                       editable={!readOnly}
                       error={invalid ? 'Catatan wajib diisi' : undefined}
                     />
-                  )}
-
-                  {!readOnly && (
-                    <View style={styles.photoRow}>
-                      {item.foto ? (
-                        item.fotoMediaType === 'video' ? (
-                          <View style={[styles.photoThumb, styles.videoPlaceholder, { borderRadius: radius.sm, borderColor: colors.border }]}>
-                            <Feather name="video" size={18} color={colors.textMuted} strokeWidth={iconStrokeWidth} />
-                          </View>
-                        ) : (
-                          <Image source={{ uri: item.foto }} style={[styles.photoThumb, { borderRadius: radius.sm }]} />
-                        )
-                      ) : (
-                        <>
-                          <Pressable
-                            onPress={() => attachPhoto(item.id, ['images'])}
-                            style={[styles.photoAddBtn, { borderColor: colors.border, borderRadius: radius.sm }]}
-                          >
-                            <Feather name="camera" size={16} color={colors.textMuted} strokeWidth={iconStrokeWidth} />
-                            <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Foto (opsional)</Text>
-                          </Pressable>
-                          <Pressable
-                            onPress={() => attachPhoto(item.id, ['videos'])}
-                            style={[styles.photoAddBtn, { borderColor: colors.border, borderRadius: radius.sm }]}
-                          >
-                            <Feather name="video" size={16} color={colors.textMuted} strokeWidth={iconStrokeWidth} />
-                            <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Video (opsional)</Text>
-                          </Pressable>
-                        </>
-                      )}
-                    </View>
                   )}
                 </Card>
               );
@@ -231,30 +265,58 @@ export default function ChecklistHarianScreen() {
         );
       })}
 
-      {!readOnly && <PrimaryButton label="Kirim Checklist" icon="send" onPress={handleSubmit} />}
-      {submitted && (
-        <View style={[styles.successBanner, { backgroundColor: colors.successBg }]}>
-          <Feather name="check-circle" size={16} color={colors.success} />
-          <Text style={{ color: colors.success, fontSize: fontSize.xs, fontWeight: '700' }}>Tersimpan lokal — menunggu sinkron</Text>
-        </View>
-      )}
+      {!readOnly && <PrimaryButton label="Kirim Checklist Harian" icon="send" onPress={handleSubmit} />}
+
+      {/* Modal Add Custom Item */}
+      <Modal visible={showAddModal} onClose={() => setShowAddModal(false)} title="Tambah Item Checklist Baru">
+        <ScrollView style={{ gap: spacing.md }} keyboardShouldPersistTaps="handled">
+          <DropdownPicker
+            label="Kategori Checklist"
+            value={newItemKategori}
+            options={[
+              { label: 'Kebersihan & Sanitasi', value: 'kebersihan' },
+              { label: 'Peralatan & Container', value: 'peralatan' },
+              { label: 'Keamanan Pangan & Suhu', value: 'keamanan_pangan' },
+            ]}
+            onSelect={(val) => setNewItemKategori(val as any)}
+            icon="folder"
+          />
+
+          <Input
+            label="Nama Item Pemeriksaan"
+            icon="check-square"
+            value={newItemText}
+            onChangeText={setNewItemText}
+            placeholder="Contoh: Pemeriksaan Kebersihan Lampu Perangkap Lalat"
+          />
+
+          <Pressable
+            onPress={() => setNewItemKritis(!newItemKritis)}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8 }}
+          >
+            <View style={[styles.checkbox, { borderColor: newItemKritis ? colors.warning : colors.border }, newItemKritis && { backgroundColor: colors.warning }]}>
+              {newItemKritis && <Feather name="check" size={14} color="#fff" />}
+            </View>
+            <Text style={{ fontSize: fontSize.xs, color: colors.text, fontWeight: '700' }}>
+              Tandai sebagai Item Kritis (Critical Control Point)
+            </Text>
+          </Pressable>
+
+          <PrimaryButton label="Tambahkan ke Checklist" icon="plus" onPress={handleAddCustomItem} style={{ marginTop: 12 }} />
+        </ScrollView>
+      </Modal>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 16, paddingBottom: 32 },
-  kategoriTitle: { fontWeight: '800' },
-  itemHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  itemLabel: { fontWeight: '600', flex: 1 },
-  toggleRow: { flexDirection: 'row', gap: 8 },
-  toggleBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1.5, minHeight: 48 },
-  photoRow: { flexDirection: 'row', gap: 8 },
-  photoThumb: { width: 64, height: 64 },
-  videoPlaceholder: { alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
-  photoAddBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderStyle: 'dashed', padding: 10 },
-  successBanner: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10, borderRadius: 10 },
+  content: { padding: 16, gap: 14, paddingBottom: 120 },
   dateChip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1 },
-  historyBanner: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12 },
+  todoCard: { padding: 12, borderWidth: 1, gap: 8 },
+  todoRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  todoText: { fontWeight: '700', flex: 1 },
+  todoDoneText: { textDecorationLine: 'line-through', opacity: 0.75 },
+  checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+  smallBtn: { width: 30, height: 30, borderRadius: 15, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
 });

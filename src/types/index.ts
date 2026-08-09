@@ -1,4 +1,4 @@
-export type Role = 'KEPALA_SPPG' | 'PETUGAS_LAPANGAN' | 'SUPERVISOR_POLRES' | 'SUPERVISOR_POLDA';
+export type Role = 'KEPALA_SPPG' | 'PETUGAS_LAPANGAN' | 'DRIVER' | 'SUPERVISOR_POLRES' | 'SUPERVISOR_POLDA';
 
 export type JobdeskType =
   | 'ahli_gizi'
@@ -13,6 +13,56 @@ export type JobdeskType =
   | 'cuci'
   | 'driver'
   | 'lainnya';
+
+export type BroadcastTingkat = 'info' | 'penting' | 'darurat';
+
+export interface BroadcastMessage {
+  id: string;
+  pengirimNama: string;
+  pengirimRole: Role;
+  judul: string;
+  isi: string;
+  tingkat: BroadcastTingkat;
+  targetRole?: Role | 'semua';
+  sppgId?: string;
+  timestamp: string;
+}
+
+export type AnggaranKategori =
+  | 'alokasi_pusat'
+  | 'bahan_baku'
+  | 'operasional_armada'
+  | 'gaji_insentif'
+  | 'peralatan_dapur'
+  | 'kebersihan_apd'
+  | 'lainnya';
+
+export interface AnggaranLog {
+  id: string;
+  sppgId: string;
+  tanggal: string;
+  jenis: 'penerimaan' | 'pengeluaran';
+  kategori: AnggaranKategori;
+  nominal: number;
+  keterangan: string;
+  buktiNota?: string | null;
+  dibuatOleh: string;
+}
+
+export type StatusPengajuanSekolah = 'diajukan' | 'disetujui' | 'ditolak';
+
+export interface PengajuanSekolah {
+  id: string;
+  sppgId: string;
+  sekolahNama: string;
+  alamat: string;
+  jumlahSiswa: number;
+  jarakKm: number;
+  alasan: string;
+  tanggal: string;
+  status: StatusPengajuanSekolah;
+  tanggapan?: string;
+}
 
 export interface MasterMenu {
   id: string;

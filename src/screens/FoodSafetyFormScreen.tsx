@@ -3,7 +3,7 @@ import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { Card, DropdownPicker, EmptyState, Input, PrimaryButton, SectionTitle, StatusBadge, Stepper } from '../components/ui';
+import { Card, DropdownPicker, EmptyState, Input, Pill, PrimaryButton, SectionTitle, StatusBadge, Stepper } from '../components/ui';
 import { AlertTingkat } from '../types';
 import { JENIS_MAKANAN_MASA_SIMPAN } from '../data/foodSafetyLog';
 import { estimateKadaluarsa } from '../utils/foodSafety';
@@ -95,6 +95,22 @@ export default function FoodSafetyFormScreen({ navigation }: any) {
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
+      {/* Purpose Explanation Card */}
+      <Card variant="accent" style={{ gap: spacing.xs }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Feather name="shield" size={18} color={colors.primary} />
+            <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
+              SERTIFIKASI KEAMANAN PANGAN (FOOD SAFETY)
+            </Text>
+          </View>
+          <Pill label="Pengujian Siap Saji" tone="primary" />
+        </View>
+        <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, marginTop: 2 }}>
+          Berbeda dari Gudang (bahan mentah), modul ini khusus sertifikasi & pengujian makanan matang sebelum pengiriman (Suhu Thermal Box &gt;60°C, Uji Organoleptik Rasa/Aroma, & Sampel Retensi 24 jam).
+        </Text>
+      </Card>
+
       <SectionTitle>Catat Keamanan Pangan</SectionTitle>
 
       <Card style={{ gap: spacing.md }}>

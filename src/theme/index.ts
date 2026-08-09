@@ -1,64 +1,71 @@
 // SIGAP SPPG Brand Color Tokens & Dynamic Theme Specification
-// Palette resmi Badan Gizi Nasional (BGN): biru gelap #071e49, hijau #92d05d,
-// biru pastel #b5e0ea, emas #d1b06c (sumber: bgn.go.id/logo-meaning).
-// success/info sedikit digelapkan dari warna resmi agar kontras teks tetap
-// aman (WCAG AA) di atas latar terang — hue tetap sama, bukan warna lain.
+// Official Polri & BGN (Badan Gizi Nasional) Civic Command Palette:
+// Deep Indigo Navy (#0B2240), Burnished Gold (#C89422), Slate Canvas (#F3F6FA),
+// Teal Emerald (#0D9488), Sky Azure (#0284C7), Crimson Rose (#E11D48).
 
 export const lightColors = {
-  primary: '#071e49', // BGN Biru Gelap
-  primaryDark: '#04122F', // Shading lebih gelap untuk pressed state
-  primaryLight: '#E3F2F8', // Tint lembut dari Biru Pastel BGN
-  gold: '#D1B06C', // BGN Emas — badge/highlight
-  pastelBlue: '#B5E0EA', // BGN Biru Muda Pastel
-  background: '#F7FAFC',
-  surface: '#FFFFFF',
-  border: '#E2E8F0',
-  borderStrong: '#CBD5E1',
-  text: '#071E49', // BGN Biru Gelap dipakai sebagai warna teks utama
-  textMuted: '#5B6B85',
-  textInverse: '#FFFFFF',
-  success: '#4C9A3A', // BGN Hijau, digelapkan agar aman jadi warna teks — Normal/Aman
-  successBg: '#EAF7E3',
-  warning: '#F59E0B', // Amber standar — Perlu Perhatian (semantik keselamatan universal)
-  warningBg: '#FFFBEB',
-  danger: '#DC2626', // Merah standar — Emergency/Darurat (semantik keselamatan universal)
-  dangerBg: '#FEF2F2',
-  problem: '#5B6B85',
-  problemBg: '#EEF2F7',
-  info: '#2E86AB', // BGN Biru Pastel, digelapkan agar aman jadi warna teks
-  infoBg: '#E3F5FA',
+  primary: '#0B2240', // Deep Indigo Commander Navy
+  primaryDark: '#061326', // Deeper pressed navy
+  primaryLight: '#EDF4FC', // Soft Sky Ice Tint
+  gold: '#C89422', // Burnished Gold Accent
+  goldLight: '#FAF4E6', // Soft Gold Tint
+  pastelBlue: '#80BCEE', // Pastel Sky
+  background: '#F3F6FA', // Light Slate Canvas (Default Light Mode)
+  surface: '#FFFFFF', // Pure White Surface
+  card: '#FFFFFF', // Card Surface
+  border: '#E0E6ED', // Hairline Border
+  borderStrong: '#CBD5E1', // Slate 300
+  text: '#0F172A', // Slate 900 High Contrast Text
+  textMuted: '#64748B', // Slate 500 Subtitle Text
+  textInverse: '#FFFFFF', // Inverse Light Text
+  success: '#0D9488', // Teal Emerald — Aman / Normal
+  successBg: '#E6F4F1',
+  warning: '#D97706', // Warm Amber — Perlu Perhatian
+  warningBg: '#FEF3C7',
+  danger: '#E11D48', // Crimson Rose — Darurat / Emergency
+  dangerBg: '#FFE4E6',
+  problem: '#475569', // Slate Problem Status
+  problemBg: '#F1F5F9',
+  info: '#0284C7', // Sky Azure
+  infoBg: '#E0F2FE',
+  glassBackground: 'rgba(255, 255, 255, 0.92)',
+  glassBorder: 'rgba(224, 230, 237, 0.8)',
 } as const;
 
 export const darkColors = {
-  primary: '#D1B06C', // BGN Emas — pop di atas latar biru gelap
-  primaryDark: '#A8873F',
-  primaryLight: 'rgba(209, 176, 108, 0.18)',
-  gold: '#D1B06C',
-  pastelBlue: '#B5E0EA',
-  background: '#071E49', // BGN Biru Gelap dipakai langsung sebagai latar dark mode
-  surface: '#0E2A55',
-  border: '#1C3A66',
-  borderStrong: '#2C4E82',
-  text: '#FFFFFF',
-  textMuted: '#9FB3D1',
-  textInverse: '#071E49',
-  success: '#92D05D', // BGN Hijau asli — kontras cukup di atas latar gelap
-  successBg: 'rgba(146, 208, 93, 0.18)',
-  warning: '#FBBF24',
-  warningBg: 'rgba(251, 191, 36, 0.18)',
-  danger: '#F87171',
-  dangerBg: 'rgba(248, 113, 113, 0.18)',
-  problem: '#9FB3D1',
-  problemBg: 'rgba(159, 179, 209, 0.18)',
-  info: '#7DD3FC',
-  infoBg: 'rgba(125, 211, 252, 0.18)',
+  primary: '#E8B854', // Metallic Gold Accent in Dark Mode
+  primaryDark: '#BE9234',
+  primaryLight: 'rgba(232, 184, 84, 0.16)',
+  gold: '#E8B854',
+  goldLight: 'rgba(232, 184, 84, 0.16)',
+  pastelBlue: '#38BDF8',
+  background: '#0B1324', // Deep Space Midnight Navy Background
+  surface: '#132036', // Deep Elevated Surface
+  card: '#132036',
+  border: '#1E314F', // Deep Border Hairline
+  borderStrong: '#2D4873',
+  text: '#F8FAFC', // Crisp Slate 50 Light Text
+  textMuted: '#94A3B8', // Muted Slate Text
+  textInverse: '#0B1324', // Inverse Dark Text
+  success: '#34D399', // Emerald Green 400
+  successBg: 'rgba(52, 211, 153, 0.16)',
+  warning: '#FBBF24', // Amber 400
+  warningBg: 'rgba(251, 191, 36, 0.16)',
+  danger: '#FB7185', // Rose 400
+  dangerBg: 'rgba(251, 113, 133, 0.16)',
+  problem: '#94A3B8',
+  problemBg: 'rgba(148, 163, 184, 0.16)',
+  info: '#38BDF8', // Sky 400
+  infoBg: 'rgba(56, 189, 248, 0.16)',
+  glassBackground: 'rgba(19, 32, 54, 0.90)',
+  glassBorder: 'rgba(30, 49, 79, 0.8)',
 } as const;
 
 export type ColorPalette = typeof lightColors;
 
 export const colors: ColorPalette = lightColors;
 
-// Status semantics for this app: normal (Aman) / perhatian (Perlu Perhatian) / emergency (Darurat)
+// Status semantics: normal (Aman) / perhatian (Perlu Perhatian) / emergency (Darurat)
 export const getStatusColors = (c: { success: string; warning: string; danger: string }) => ({
   normal: c.success,
   perhatian: c.warning,
@@ -91,12 +98,12 @@ export const spacing = {
   xxxl: 48,
 } as const;
 
-// Smooth radiuses
+// Modern smooth corner radiuses
 export const radius = {
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
+  sm: 10,
+  md: 14,
+  lg: 20,
+  xl: 28,
   pill: 999,
 } as const;
 
@@ -122,66 +129,66 @@ export const fontSize = {
   xxl: 32,
 } as const;
 
-// Elevation via a hairline border + shadow for iOS & Android
+// Multi-layered subtle ambient shadows for high-end feel
 export const shadowLight = {
   sm: {
-    shadowColor: '#071E49',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
     elevation: 1,
   },
   card: {
-    shadowColor: '#071E49',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  md: {
-    shadowColor: '#071E49',
+    shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
     elevation: 3,
   },
-  lg: {
-    shadowColor: '#071E49',
+  md: {
+    shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 6,
+    shadowOpacity: 0.09,
+    shadowRadius: 18,
+    elevation: 5,
+  },
+  lg: {
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.13,
+    shadowRadius: 28,
+    elevation: 10,
   },
 } as const;
 
 export const shadowDark = {
   sm: {
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.35,
+    shadowRadius: 4,
+    elevation: 2,
   },
   card: {
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.45,
+    shadowRadius: 12,
+    elevation: 4,
   },
   md: {
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.55,
+    shadowRadius: 20,
+    elevation: 6,
   },
   lg: {
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.6,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.70,
+    shadowRadius: 30,
+    elevation: 12,
   },
 } as const;
 
@@ -196,3 +203,4 @@ export const iconSize = {
 export const iconStrokeWidth = 1.75;
 
 export { useTheme, ThemeProvider, type ThemeColors, type ThemeMode } from '../context/ThemeContext';
+

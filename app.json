@@ -52,7 +52,8 @@
           "cameraPermission": "SIGAP SPPG memerlukan akses kamera untuk memotret dokumentasi produksi dan checklist."
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-asset"
     ]
   }
 }

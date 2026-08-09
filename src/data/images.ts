@@ -4,4 +4,5 @@
 export const BRAND_ASSETS = {
   polriEmblem: require('../../assets/brand/polri_logo.png'),
   bgnLogo: require('../../assets/brand/bgn_logo.png'),
+  truckMbg: require('../../assets/truck_mbg.png'),
 };

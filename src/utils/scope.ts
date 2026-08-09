@@ -21,6 +21,7 @@ import {
 export const ROLE_LABEL: Record<Role, string> = {
   KEPALA_SPPG: 'Kepala SPPG',
   PETUGAS_LAPANGAN: 'Petugas Lapangan',
+  DRIVER: 'Driver & Kurir Armada',
   SUPERVISOR_POLRES: 'Supervisor Polres',
   SUPERVISOR_POLDA: 'Supervisor Polda',
 };
@@ -40,15 +41,16 @@ export interface RolePermission {
   canDelete: boolean; // always false in this app — no delete flow exists anywhere
   canManageStaff: boolean; // add/remove petugas accounts within own SPPG
   canVerifyLaporan: boolean; // mark a LaporanProduksi as diverifikasi
-  // Fase 2 (simulasi): only Kepala SPPG may ajukan permintaan bahan / advance
-  // status gudang & distribusi armada for their own SPPG.
   canManageGudang: boolean;
   canManageDistribusi: boolean;
   canManageMenu: boolean; // Menu Kalender: ubah menu terencana untuk tanggal tertentu (Kepala SPPG saja)
+  canManageAnggaran: boolean; // Fitur Log Anggaran & Pengeluaran
+  canManageBroadcast: boolean; // Fitur Broadcast Pengumuman Resmi
   canFollowUpAlert: boolean; // Supervisor Polres: baru -> ditindaklanjuti
   canResolveAlert: boolean; // Kepala SPPG: -> selesai (their own SPPG's alert)
   canEskalasiAlert: boolean; // Supervisor Polda: toggle AlertLog.eskalasiPusat
   canExportLaporan: boolean; // Supervisor Polres/Polda: export ringkasan wilayah (PDF)
+  isDriver: boolean; // driver khusus armada pengiriman
   isViewOnly: boolean; // no write access to operational data (both supervisor roles)
   scopeLevel: 'sppg' | 'assigned' | 'polres' | 'polda';
 }
@@ -63,10 +65,13 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canManageGudang: true,
     canManageDistribusi: true,
     canManageMenu: true,
+    canManageAnggaran: true,
+    canManageBroadcast: true,
     canFollowUpAlert: false,
     canResolveAlert: true,
     canEskalasiAlert: false,
     canExportLaporan: false,
+    isDriver: false,
     isViewOnly: false,
     scopeLevel: 'sppg',
   },
@@ -79,10 +84,32 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canManageGudang: false,
     canManageDistribusi: false,
     canManageMenu: false,
+    canManageAnggaran: false,
+    canManageBroadcast: false,
     canFollowUpAlert: false,
     canResolveAlert: false,
     canEskalasiAlert: false,
     canExportLaporan: false,
+    isDriver: false,
+    isViewOnly: false,
+    scopeLevel: 'assigned',
+  },
+  DRIVER: {
+    canCreate: true,
+    canUpdateOwn: true,
+    canDelete: false,
+    canManageStaff: false,
+    canVerifyLaporan: false,
+    canManageGudang: false,
+    canManageDistribusi: true,
+    canManageMenu: false,
+    canManageAnggaran: false,
+    canManageBroadcast: false,
+    canFollowUpAlert: false,
+    canResolveAlert: false,
+    canEskalasiAlert: false,
+    canExportLaporan: false,
+    isDriver: true,
     isViewOnly: false,
     scopeLevel: 'assigned',
   },
@@ -95,10 +122,13 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canManageGudang: false,
     canManageDistribusi: false,
     canManageMenu: false,
+    canManageAnggaran: true,
+    canManageBroadcast: true,
     canFollowUpAlert: true,
     canResolveAlert: false,
     canEskalasiAlert: false,
     canExportLaporan: true,
+    isDriver: false,
     isViewOnly: true,
     scopeLevel: 'polres',
   },
@@ -111,10 +141,13 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canManageGudang: false,
     canManageDistribusi: false,
     canManageMenu: false,
+    canManageAnggaran: true,
+    canManageBroadcast: true,
     canFollowUpAlert: false,
     canResolveAlert: false,
     canEskalasiAlert: true,
     canExportLaporan: true,
+    isDriver: false,
     isViewOnly: true,
     scopeLevel: 'polda',
   },
@@ -131,7 +164,8 @@ export function scopeSppgForUser(user: User, allSppg: Sppg[]): Sppg[] {
   switch (user.role) {
     case 'KEPALA_SPPG':
       return allSppg.filter((s) => s.id === user.sppgId);
-    case 'PETUGAS_LAPANGAN': {
+    case 'PETUGAS_LAPANGAN':
+    case 'DRIVER': {
       const ids = user.assignedSppgIds && user.assignedSppgIds.length > 0 ? user.assignedSppgIds : [user.sppgId];
       return allSppg.filter((s) => ids.includes(s.id));
     }

@@ -19,7 +19,7 @@ const STATUS_LABEL: Record<LaporanStatus, string> = {
   diverifikasi: 'Diverifikasi',
 };
 
-type Filter = 'minggu' | 'bulan' | 'semua';
+type Filter = 'hari' | 'minggu' | 'bulan' | 'semua';
 
 function inLastNDays(tanggal: string, n: number): boolean {
   const d = new Date(tanggal);
@@ -41,6 +41,7 @@ export default function LaporanProduksiListScreen({ navigation }: any) {
   const sorted = useMemo(() => [...laporanInScope].sort((a, b) => (a.tanggal < b.tanggal ? 1 : -1)), [laporanInScope]);
 
   const filtered = sorted.filter((l) => {
+    if (filter === 'hari') return l.tanggal === new Date().toISOString().slice(0, 10);
     if (filter === 'minggu') return inLastNDays(l.tanggal, 7);
     if (filter === 'bulan') return inCurrentMonth(l.tanggal);
     return true;
@@ -54,21 +55,21 @@ export default function LaporanProduksiListScreen({ navigation }: any) {
           <PrimaryButton label="Baru" icon="plus" fullWidth={false} onPress={() => navigation.navigate('LaporanForm', {})} />
         </View>
         <View style={[styles.segment, { borderColor: colors.border, borderRadius: radius.md }]}>
-          {(['minggu', 'bulan', 'semua'] as Filter[]).map((f) => (
+          {(['hari', 'minggu', 'bulan', 'semua'] as Filter[]).map((f) => (
             <Pressable
               key={f}
               onPress={() => setFilter(f)}
               style={[styles.segmentItem, { borderRadius: radius.sm }, filter === f && { backgroundColor: colors.primary }]}
             >
               <Text style={{ color: filter === f ? colors.textInverse : colors.text, fontWeight: '700', fontSize: fontSize.xs }}>
-                {f === 'minggu' ? 'Minggu Ini' : f === 'bulan' ? 'Bulan Ini' : 'Semua'}
+                {f === 'hari' ? 'Hari Ini' : f === 'minggu' ? 'Minggu Ini' : f === 'bulan' ? 'Bulan Ini' : 'Semua'}
               </Text>
             </Pressable>
           ))}
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={[styles.content, { padding: spacing.lg }]}>
+      <ScrollView contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: 120 }]}>
         {filtered.length === 0 ? (
           <EmptyState icon="file-text" title="Belum Ada Laporan" body="Tidak ada laporan produksi pada rentang ini." />
         ) : (
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   segment: { flexDirection: 'row', borderWidth: 1, padding: 4, gap: 4 },
   segmentItem: { flex: 1, alignItems: 'center', paddingVertical: 8 },
-  content: { gap: 12, paddingBottom: 32 },
+  content: { gap: 12, paddingBottom: 120 },
   rowTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   rowBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 },
 });

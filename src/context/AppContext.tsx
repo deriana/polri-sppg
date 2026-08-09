@@ -19,12 +19,17 @@ import {
   publicReportList as initialPublicReports,
   peralatanList as initialPeralatanList,
   usulanMenuList as initialUsulanMenu,
+  initialBroadcastList,
+  initialAnggaranLogs,
+  initialPengajuanSekolahList,
   CCTV_ANOMALI_LABEL,
   findAccount,
 } from '../data';
 import {
   AlertLog,
+  AnggaranLog,
   BahanBaku,
+  BroadcastMessage,
   CctvEvent,
   ChatMessage,
   ChecklistHarian,
@@ -36,12 +41,14 @@ import {
   Mitra,
   MutasiStok,
   Peralatan,
+  PengajuanSekolah,
   PermintaanBahan,
   Presensi,
   PublicReport,
   Role,
   Sekolah,
   Sppg,
+  StatusPengajuanSekolah,
   User,
   MasterMenu,
   UsulanMenu,
@@ -90,6 +97,13 @@ interface AppContextValue {
   usulanMenuList: UsulanMenu[];
   submitUsulanMenu: (usulan: Omit<UsulanMenu, 'id' | 'status' | 'tanggapan'>) => void;
   updateUsulanMenuStatus: (id: string, status: UsulanMenu['status'], tanggapan?: string) => void;
+  broadcastList: BroadcastMessage[];
+  sendBroadcast: (msg: Omit<BroadcastMessage, 'id' | 'timestamp'>) => void;
+  anggaranLogs: AnggaranLog[];
+  addAnggaranLog: (log: Omit<AnggaranLog, 'id' | 'tanggal'>) => void;
+  pengajuanSekolahList: PengajuanSekolah[];
+  ajukanSekolah: (pengajuan: Omit<PengajuanSekolah, 'id' | 'tanggal' | 'status' | 'tanggapan'>) => void;
+  updateStatusPengajuanSekolah: (id: string, status: StatusPengajuanSekolah, tanggapan?: string) => void;
   cctvEvents: CctvEvent[];
   bahanBakuList: BahanBaku[];
   permintaanBahanList: PermintaanBahan[];
@@ -152,6 +166,50 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [mitraList, setMitraList] = useState<Mitra[]>(initialMitra);
   const [mutasiStokList, setMutasiStokList] = useState<MutasiStok[]>(initialMutasiStok);
   const [masterMenuList, setMasterMenuList] = useState<MasterMenu[]>(MASTER_MENU_CATALOG);
+  const [broadcastList, setBroadcastList] = useState<BroadcastMessage[]>(initialBroadcastList);
+  const [anggaranLogs, setAnggaranLogs] = useState<AnggaranLog[]>(initialAnggaranLogs);
+  const [pengajuanSekolahList, setPengajuanSekolahList] = useState<PengajuanSekolah[]>(initialPengajuanSekolahList);
+
+  const sendBroadcast: AppContextValue['sendBroadcast'] = (msg) => {
+    const id = `BC-${String(broadcastList.length + 1).padStart(3, '0')}`;
+    const timestamp = nowTimestamp();
+    setBroadcastList((prev) => [{ ...msg, id, timestamp }, ...prev]);
+  };
+
+  const addAnggaranLog: AppContextValue['addAnggaranLog'] = (log) => {
+    const id = `ANG-${String(anggaranLogs.length + 1).padStart(3, '0')}`;
+    const tanggal = todayDate();
+    setAnggaranLogs((prev) => [{ ...log, id, tanggal }, ...prev]);
+  };
+
+  const ajukanSekolah: AppContextValue['ajukanSekolah'] = (pengajuan) => {
+    const id = `PGJ-${String(pengajuanSekolahList.length + 1).padStart(3, '0')}`;
+    const tanggal = todayDate();
+    setPengajuanSekolahList((prev) => [
+      { ...pengajuan, id, tanggal, status: 'diajukan' },
+      ...prev,
+    ]);
+  };
+
+  const updateStatusPengajuanSekolah: AppContextValue['updateStatusPengajuanSekolah'] = (id, status, tanggapan) => {
+    setPengajuanSekolahList((prev) =>
+      prev.map((item) => {
+        if (item.id !== id) return item;
+        const updated = { ...item, status, tanggapan: tanggapan ?? item.tanggapan };
+        if (status === 'disetujui') {
+          const newSchool: Sekolah = {
+            id: `SCH-${String(sekolahList.length + 1).padStart(3, '0')}`,
+            sppgId: item.sppgId,
+            nama: item.sekolahNama,
+            alamat: item.alamat,
+            jumlahSiswa: item.jumlahSiswa,
+          };
+          setSekolahList((cur) => [...cur, newSchool]);
+        }
+        return updated;
+      }),
+    );
+  };
 
   const addMasterMenu: AppContextValue['addMasterMenu'] = (menu) => {
     const id = `MM-${String(masterMenuList.length + 1).padStart(3, '0')}`;
@@ -217,8 +275,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      // 1. Live auto-increment production counter
-      setProgressProduksiRealtime((prev) => prev + Math.floor(Math.random() * 4) + 1);
+      // 1. Live fluctuating production counter (naik & turun akibat penyesuaian QC, sampling, atau batch baru)
+      setProgressProduksiRealtime((prev) => {
+        // ~35% chance to dip slightly (-1 to -3 portions), ~65% chance to increase (+1 to +5 portions)
+        const isDip = Math.random() < 0.35;
+        const delta = isDip ? -(Math.floor(Math.random() * 3) + 1) : Math.floor(Math.random() * 5) + 1;
+        return Math.max(900, Math.min(1500, prev + delta));
+      });
 
       // 2. Simulated warehouse IoT sensor fluctuations
       setFoodSafetyList((prev) =>
@@ -535,6 +598,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       usulanMenuList,
       submitUsulanMenu,
       updateUsulanMenuStatus,
+      broadcastList,
+      sendBroadcast,
+      anggaranLogs,
+      addAnggaranLog,
+      pengajuanSekolahList,
+      ajukanSekolah,
+      updateStatusPengajuanSekolah,
       cctvEvents,
       bahanBakuList,
       permintaanBahanList,
@@ -573,6 +643,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       progressProduksiRealtime,
       publicReportList,
       usulanMenuList,
+      broadcastList,
+      anggaranLogs,
+      pengajuanSekolahList,
       role,
       loggedIn,
       currentUser,

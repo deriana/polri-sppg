@@ -124,6 +124,20 @@ export const users: User[] = [
     fotoProfil: SPPG_ASSET_MAP.profil_wanita_dewasa,
   },
 
+  {
+    id: 'USR-005',
+    sppgId: 'SPPG-001',
+    nama: 'Bripda Agus Prasetyo',
+    role: 'DRIVER',
+    noHp: '0812-1000-0005',
+    nik: '3273010101900005',
+    statusAktif: true,
+    shift: 'Pagi',
+    jobdesk: 'driver_distribusi',
+    kategoriPegawai: 'inti_bgn',
+    fotoProfil: SPPG_ASSET_MAP.polri_1,
+  },
+
   // ==========================================
   // SPPG-002 — Jakarta Selatan (50 Orang Standard BGN)
   // ==========================================

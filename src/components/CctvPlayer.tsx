@@ -1,17 +1,27 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { WebView } from 'react-native-webview';
 
 export interface CctvPlayerProps {
-  videoUri: string;
+  videoUri: string | null;
   label: string;
   height?: number;
 }
 
 // Compact inline CCTV feed — same REC/HUD-styled WebView video player as
 // CctvMonitorScreen's modal, minus the fullscreen toggle, so it can sit
-// embedded directly inside another panel (e.g. Kondisi Gudang).
+// embedded directly inside another panel (e.g. Kondisi Gudang). videoUri is
+// null while useLocalVideoUri() is still resolving the asset to a real
+// file:// path (see src/utils/localVideoAsset.ts for why that step matters).
 export default function CctvPlayer({ videoUri, label, height = 200 }: CctvPlayerProps) {
+  if (!videoUri) {
+    return (
+      <View style={[styles.wrap, styles.loading, { height }]}>
+        <ActivityIndicator color="#fff" />
+      </View>
+    );
+  }
+
   const html = `
 <!DOCTYPE html>
 <html>
@@ -57,4 +67,5 @@ export default function CctvPlayer({ videoUri, label, height = 200 }: CctvPlayer
 const styles = StyleSheet.create({
   wrap: { width: '100%', borderRadius: 12, overflow: 'hidden', backgroundColor: '#000' },
   webview: { flex: 1 },
+  loading: { alignItems: 'center', justifyContent: 'center' },
 });

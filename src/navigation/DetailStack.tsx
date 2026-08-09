@@ -45,6 +45,8 @@ import AduanMasyarakatScreen from '../screens/AduanMasyarakatScreen';
 import PeralatanScreen from '../screens/PeralatanScreen';
 import SekolahDetailScreen from '../screens/SekolahDetailScreen';
 import MasterMenuScreen from '../screens/MasterMenuScreen';
+import AnggaranScreen from '../screens/AnggaranScreen';
+import BroadcastScreen from '../screens/BroadcastScreen';
 
 const Stack = createNativeStackNavigator<any>();
 
@@ -86,32 +88,48 @@ const DETAIL_SCREENS: Array<{ name: string; component: React.ComponentType<any>;
   { name: 'UsulanMenuForm', component: UsulanMenuFormScreen, title: 'Ajukan Usulan Menu' },
   { name: 'Payroll', component: PayrollScreen, title: 'Payroll & Slip Gaji' },
   { name: 'PayrollDetail', component: PayrollDetailScreen, title: 'Slip Gaji Pegawai' },
-  { name: 'SekolahForm', component: SekolahFormScreen, title: 'Tambah Sekolah Afiliasi' },
+  { name: 'SekolahForm', component: SekolahFormScreen, title: 'Pengajuan Sekolah Afiliasi' },
   { name: 'GudangKondisi', component: GudangKondisiScreen, title: 'Kondisi Gudang' },
   { name: 'ChatCommandCenter', component: ChatCommandCenterScreen, title: 'Chat Command Center' },
   { name: 'MenuKalender', component: MenuKalenderScreen, title: 'Kalender Menu' },
   { name: 'MasterMenu', component: MasterMenuScreen, title: 'Master Katalog & Resep Gizi' },
   { name: 'MitraList', component: MitraListScreen, title: 'Mitra Pemasok' },
   { name: 'MutasiStokForm', component: MutasiStokFormScreen, title: 'Catat Mutasi Stok' },
+  { name: 'Anggaran', component: AnggaranScreen, title: 'Log Anggaran & Pengeluaran' },
+  { name: 'Broadcast', component: BroadcastScreen, title: 'Pusat Broadcast Pengumuman' },
 ];
 
 export function buildDetailStack(homeName: string, HomeComponent: React.ComponentType<any>, homeTitle: string) {
   return function Navigator() {
-    const { colors, isDark, toggleTheme } = useTheme();
+    const { colors, isDark, toggleTheme, radius } = useTheme();
 
     const screenOptions = {
-      headerStyle: { backgroundColor: colors.surface },
+      headerStyle: {
+        backgroundColor: colors.surface,
+      },
       headerTintColor: colors.text,
-      headerTitleStyle: { fontWeight: '700' as const, color: colors.text },
-      headerShadowVisible: false,
+      headerTitleStyle: { fontWeight: '800' as const, color: colors.text },
+      headerShadowVisible: true,
       contentStyle: { backgroundColor: colors.background },
       headerRight: () => (
         <Pressable
           hitSlop={8}
           onPress={toggleTheme}
-          style={({ pressed }) => [{ paddingHorizontal: 8, paddingVertical: 4 }, pressed && { opacity: 0.7 }]}
+          style={({ pressed }) => [
+            {
+              width: 34,
+              height: 34,
+              borderRadius: 17,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: colors.primaryLight,
+              borderWidth: 1,
+              borderColor: colors.border,
+            },
+            pressed && { opacity: 0.75, transform: [{ scale: 0.95 }] },
+          ]}
         >
-          <Feather name={isDark ? 'sun' : 'moon'} size={20} color={colors.primary} strokeWidth={2} />
+          <Feather name={isDark ? 'sun' : 'moon'} size={17} color={isDark ? colors.gold : colors.primary} strokeWidth={2.2} />
         </Pressable>
       ),
     };
@@ -124,11 +142,25 @@ export function buildDetailStack(homeName: string, HomeComponent: React.Componen
           options={{
             headerTitle: () => (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <View style={{ width: 26, height: 26, borderRadius: 6, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', padding: 3 }}>
+                <View
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 8,
+                    backgroundColor: colors.primary,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 3,
+                    borderWidth: 1,
+                    borderColor: colors.gold || colors.primary,
+                  }}
+                >
                   <Image source={BRAND_ASSETS.polriEmblem} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
                 </View>
-                <Text style={{ fontSize: 16, fontWeight: '800', color: colors.primary }}>SIGAP SPPG</Text>
-                <Text style={{ fontSize: 12, fontWeight: '600', color: colors.textMuted }}>· {homeTitle}</Text>
+                <Text style={{ fontSize: 15, fontWeight: '900', color: isDark ? colors.gold : colors.primary, letterSpacing: 0.5 }}>
+                  SIGAP SPPG
+                </Text>
+                <Text style={{ fontSize: 11.5, fontWeight: '600', color: colors.textMuted }}>· {homeTitle}</Text>
               </View>
             ),
           }}

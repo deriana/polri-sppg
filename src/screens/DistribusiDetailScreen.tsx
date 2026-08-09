@@ -3,12 +3,13 @@ import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { Card, EmptyState, PrimaryButton, SecondaryButton } from '../components/ui';
+import { Card, EmptyState, Pill, PrimaryButton, SecondaryButton } from '../components/ui';
 import { useScopedData } from '../hooks';
 import { ROLE_PERMISSIONS } from '../utils/scope';
 import { pickImage } from '../utils/pickImage';
 import RouteMapView, { RouteTripStatus } from '../components/RouteMapView';
 import { DistribusiRute } from '../types';
+import { BRAND_ASSETS } from '../data/images';
 
 const TRIP_STATUS: Record<DistribusiRute['status'], RouteTripStatus> = {
   menunggu: 'idle',
@@ -25,23 +26,28 @@ const NEXT_STATUS: Record<DistribusiRute['status'], DistribusiRute['status'] | n
 };
 
 const NEXT_LABEL: Record<DistribusiRute['status'], string> = {
-  menunggu: 'Dalam Pengiriman',
-  dalam_perjalanan: 'Selesai Terkirim',
+  menunggu: 'Dalam Pengiriman (Berangkat)',
+  dalam_perjalanan: 'Tiba & Serahkan Makanan',
   tiba: '',
-  kendala: 'Dalam Pengiriman',
+  kendala: 'Lanjutkan Pengiriman',
 };
+
+import { Modal, Input } from '../components/ui';
 
 export default function DistribusiDetailScreen({ navigation, route }: any) {
   const { ruteId } = route.params as { ruteId: string };
   const { role, sppgList, sekolahList, distribusiList, users, peralatanList, updateDistribusiStatus } = useApp();
   const { sppgInScope } = useScopedData();
-  const { colors, spacing, fontSize, radius } = useTheme();
+  const { colors, spacing, fontSize, radius, isDark } = useTheme();
+
   const [buktiFoto, setBuktiFoto] = useState<string | null>(null);
+  const [showKendalaModal, setShowKendalaModal] = useState(false);
+  const [rincianKendala, setRincianKendala] = useState('');
 
   const rute = distribusiList.find((r) => r.id === ruteId);
   const sppg = sppgList.find((s) => s.id === rute?.sppgId);
   const sekolah = sekolahList.find((s) => s.id === rute?.sekolahId);
-  const driver = users.find((u) => u.jobdesk === 'driver_distribusi' || u.role === 'PETUGAS_LAPANGAN');
+  const driver = users.find((u) => u.role === 'DRIVER' || u.jobdesk === 'driver_distribusi' || u.role === 'PETUGAS_LAPANGAN');
   const mobilBox = peralatanList.find((p) => p.kategori === 'kendaraan');
 
   const canAdvance =
@@ -55,11 +61,25 @@ export default function DistribusiDetailScreen({ navigation, route }: any) {
     );
   }
 
+  const handleSimpanKendala = () => {
+    updateDistribusiStatus(rute.id, 'kendala');
+    setShowKendalaModal(false);
+  };
+
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
-      {/* Live OSM Map — vehicle icon steps along the real road route */}
-      <View style={{ gap: 4 }}>
-        <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>Peta Live Pelacakan (OpenStreetMap):</Text>
+      {/* Live Map with OSM OSRM Routing */}
+      <View style={{ gap: 6 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
+            Live GPS Tracking Pengiriman MBG:
+          </Text>
+          <Pill
+            label={rute.status.toUpperCase().replace('_', ' ')}
+            tone={rute.status === 'tiba' ? 'success' : rute.status === 'dalam_perjalanan' ? 'primary' : 'danger'}
+          />
+        </View>
+
         <RouteMapView
           originLat={sppg.lat}
           originLng={sppg.lng}
@@ -69,95 +89,102 @@ export default function DistribusiDetailScreen({ navigation, route }: any) {
           destLabel={sekolah?.nama ?? rute.sekolahId}
           status={TRIP_STATUS[rute.status]}
           colors={colors}
-          height={380}
+          height={320}
         />
       </View>
 
-      {/* Driver & Vehicle Box */}
-      <View style={[styles.driverBox, { backgroundColor: colors.surface, borderRadius: radius.md, padding: 12 }]}>
-        <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
-          {driver?.fotoProfil ? (
-            <Image source={{ uri: driver.fotoProfil }} style={{ width: 40, height: 40, borderRadius: 20 }} />
-          ) : (
-            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
-              <Feather name="user" size={20} color={colors.primary} />
-            </View>
-          )}
+      {/* Warning Card for Detailed Kendala */}
+      {rute.status === 'kendala' && (
+        <Card style={{ backgroundColor: colors.dangerBg, borderColor: colors.danger, gap: 6 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Feather name="alert-triangle" size={18} color={colors.danger} />
+            <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.danger, flex: 1 }}>
+              KENDALA PENGIRIMAN TERDETEKSI
+            </Text>
+            <Pill label="TINDAKAN DIPERLUKAN" tone="danger" />
+          </View>
+          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
+            Rincian Masalah: {rincianKendala.trim() || 'Kendala lalu lintas / hambatan rute darurat'}
+          </Text>
+          <Text style={{ fontSize: 11, color: colors.textMuted }}>
+            Tim Command Center Polres/Polda telah diberi tahu untuk penanganan bantuan rute darurat.
+          </Text>
+        </Card>
+      )}
+
+      {/* Gojek/Grab Style Driver & Vehicle Badge Card */}
+      <Card variant="accent" style={{ gap: 10 }}>
+        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+          <Image source={BRAND_ASSETS.truckMbg} style={styles.truckImg} resizeMode="contain" />
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: fontSize.sm, fontWeight: '700', color: colors.text }}>Driver: {driver?.nama ?? 'Bripda Rina Marlina'}</Text>
-            <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>Armada: {mobilBox?.nama ?? 'Mobil Box Insulasi Hino'} ({mobilBox?.noPlat ?? 'B 9812 BGN'})</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Text style={{ fontSize: fontSize.sm, fontWeight: '900', color: colors.text }}>
+                {driver?.nama ?? 'Bripda Agus Prasetyo'}
+              </Text>
+              <Text style={{ fontSize: 11, fontWeight: '800', color: colors.gold }}>★ 4.9</Text>
+            </View>
+            <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, marginTop: 1 }}>
+              Armada: {mobilBox?.nama ?? 'Mobil Box Thermal MBG'} • Plat: {mobilBox?.noPlat ?? 'D-8801-SPP'}
+            </Text>
+            <Text style={{ fontSize: 11, color: colors.primary, fontWeight: '700', marginTop: 2 }}>
+              HP: {driver?.noHp ?? '0812-1000-0005'}
+            </Text>
           </View>
         </View>
-      </View>
+      </Card>
 
       {/* Tracking History Log Timeline */}
-      <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text, marginTop: 4 }}>Riwayat Lacak Pengiriman Paket (Log Timeline):</Text>
+      <Card style={{ gap: spacing.sm }}>
+        <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.text }}>
+          Timeline Status Pengiriman Paket Makanan
+        </Text>
 
-      <View style={styles.trackingTimeline}>
-        <View style={styles.trackItem}>
-          <View style={[styles.trackDot, { backgroundColor: colors.success }]}>
-            <Feather name="check" size={10} color="#fff" />
+        <View style={styles.trackingTimeline}>
+          <View style={styles.trackItem}>
+            <View style={[styles.trackDot, { backgroundColor: rute.status === 'tiba' ? colors.success : colors.border }]}>
+              <Feather name="check" size={10} color="#fff" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>07:15 WIB — Paket Tiba di Sekolah</Text>
+              <Text style={{ fontSize: 10, color: colors.textMuted }}>Diserahterimakan ke Guru/Kepala Sekolah & Ompreng siap disajikan.</Text>
+            </View>
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>07:15 WIB — Paket Tiba di Sekolah</Text>
-            <Text style={{ fontSize: 10, color: colors.textMuted }}>Diserahterimakan kepada Guru Piket Kebersihan SD & Ompreng siap disantap.</Text>
+
+          <View style={styles.trackItem}>
+            <View style={[styles.trackDot, { backgroundColor: rute.status === 'dalam_perjalanan' ? colors.primary : colors.success }]}>
+              <Feather name="navigation" size={10} color="#fff" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>06:30 WIB — Armada Dalam Perjalanan (Live GPS)</Text>
+              <Text style={{ fontSize: 10, color: colors.textMuted }}>Driver melintasi rute utama komando menuju lokasi sekolah tujuan.</Text>
+            </View>
           </View>
         </View>
+      </Card>
 
-        <View style={styles.trackItem}>
-          <View style={[styles.trackDot, { backgroundColor: rute.status === 'dalam_perjalanan' ? colors.primary : colors.success }]}>
-            <Feather name="truck" size={10} color="#fff" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>06:30 WIB — Armada Dalam Perjalanan</Text>
-            <Text style={{ fontSize: 10, color: colors.textMuted }}>Kurir melewati Checkpoint Jalan Raya (Kurang 1.2 KM dari lokasi sekolah tujuan).</Text>
-          </View>
-        </View>
-
-        <View style={styles.trackItem}>
-          <View style={[styles.trackDot, { backgroundColor: colors.success }]}>
-            <Feather name="package" size={10} color="#fff" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>06:00 WIB — Loading Barang ke Mobil Box</Text>
-            <Text style={{ fontSize: 10, color: colors.textMuted }}>Ompreng makanan berkuah dimuat ke Insulated Thermal Box dan tersegel rapat.</Text>
-          </View>
-        </View>
-
-        <View style={styles.trackItem}>
-          <View style={[styles.trackDot, { backgroundColor: colors.success }]}>
-            <Feather name="clipboard" size={10} color="#fff" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>05:30 WIB — Selesai Pemasakan & Pemorsian</Text>
-            <Text style={{ fontSize: 10, color: colors.textMuted }}>Tim Pemorsi Dapur SPPG menyelesaikan 450 porsi sesuai standar gizi.</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Bukti Serah Terima — dokumentasi transparansi begitu paket dinyatakan tiba */}
+      {/* Bukti Serah Terima foto */}
       {rute.status === 'tiba' && (
         <Card style={{ gap: spacing.xs }}>
-          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>Bukti Serah Terima</Text>
+          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>Foto Bukti Serah Terima Fisik</Text>
           {rute.buktiFoto ? (
             <Image source={{ uri: rute.buktiFoto }} style={{ width: '100%', height: 200, borderRadius: radius.md }} resizeMode="cover" />
           ) : (
-            <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>Belum ada foto dokumentasi untuk pengiriman ini.</Text>
+            <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>Belum ada foto bukti serah terima terlampir.</Text>
           )}
         </Card>
       )}
 
-      {/* Aksi Status — konfirmasi wajib pakai foto bukti sebelum masuk status "tiba" */}
+      {/* Action Controls for Driver/Staff */}
       {canAdvance && rute.status !== 'tiba' && (
         <Card style={{ gap: spacing.sm }}>
           <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
-            {rute.status === 'dalam_perjalanan' ? 'Konfirmasi Serah Terima' : 'Ubah Status Pengiriman'}
+            {rute.status === 'dalam_perjalanan' ? 'Upload Bukti Serah Terima Sekolah' : 'Kontrol Pengiriman Driver'}
           </Text>
 
           {rute.status === 'dalam_perjalanan' && (
             <>
               <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>
-                Ambil foto bukti paket sudah diserahkan ke sekolah sebelum konfirmasi diterima.
+                Driver wajib mengambil foto bukti serah terima bersama pihak sekolah sebelum menyelesaikan pengiriman.
               </Text>
               {buktiFoto ? (
                 <Image source={{ uri: buktiFoto }} style={{ width: '100%', height: 180, borderRadius: radius.md }} resizeMode="cover" />
@@ -167,7 +194,7 @@ export default function DistribusiDetailScreen({ navigation, route }: any) {
                 </View>
               )}
               <PrimaryButton
-                label={buktiFoto ? 'Ambil Ulang Foto' : 'Ambil Foto Bukti'}
+                label={buktiFoto ? 'Ganti Foto Serah Terima' : 'Ambil Foto Serah Terima'}
                 icon="camera"
                 variant={buktiFoto ? 'secondary' : 'primary'}
                 onPress={async () => {
@@ -179,8 +206,7 @@ export default function DistribusiDetailScreen({ navigation, route }: any) {
           )}
 
           <PrimaryButton
-            label={rute.status === 'dalam_perjalanan' ? 'Konfirmasi Diterima' : `Majukan ➔ ${NEXT_LABEL[rute.status]}`}
-            variant="secondary"
+            label={rute.status === 'dalam_perjalanan' ? 'Selesaikan & Konfirmasi Tiba' : `Majukan ➔ ${NEXT_LABEL[rute.status]}`}
             disabled={rute.status === 'dalam_perjalanan' && !buktiFoto}
             onPress={() => {
               const next = NEXT_STATUS[rute.status];
@@ -189,28 +215,43 @@ export default function DistribusiDetailScreen({ navigation, route }: any) {
           />
 
           {rute.status !== 'kendala' && (
-            <PrimaryButton label="Tandai Kendala" variant="danger" onPress={() => updateDistribusiStatus(rute.id, 'kendala')} />
+            <PrimaryButton label="Laporkan Kendala Rute (Lengkap)" variant="danger" onPress={() => setShowKendalaModal(true)} />
           )}
         </Card>
       )}
 
       {sekolah && (
         <PrimaryButton
-          label={`Buka Detail ${sekolah.nama}`}
+          label={`Lihat Data Sekolah ${sekolah.nama}`}
           icon="home"
           variant="outline"
           onPress={() => navigation.navigate('SekolahDetail', { sekolahId: sekolah.id })}
         />
       )}
-      <SecondaryButton label="Kembali" onPress={() => navigation.goBack()} />
+      <SecondaryButton label="Kembali ke Daftar Rute" onPress={() => navigation.goBack()} />
+
+      {/* Modal Kendala Rute */}
+      <Modal visible={showKendalaModal} onClose={() => setShowKendalaModal(false)} title="Laporkan Rincian Kendala Rute">
+        <ScrollView style={{ gap: spacing.md }} keyboardShouldPersistTaps="handled">
+          <Input
+            label="Penjelasan Kendala Pengiriman"
+            icon="alert-circle"
+            value={rincianKendala}
+            onChangeText={setRincianKendala}
+            placeholder="Contoh: Ban mobil pecah di Km 12 / Macet total akibat kecelakaan..."
+            multiline
+          />
+          <PrimaryButton label="Simpan & Laporkan Kendala" icon="check" variant="danger" onPress={handleSimpanKendala} style={{ marginTop: 12 }} />
+        </ScrollView>
+      </Modal>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
-  driverBox: { marginTop: 4 },
+  content: { padding: 16, gap: 14, paddingBottom: 90 },
+  truckImg: { width: 56, height: 56 },
   trackingTimeline: { gap: 12, paddingLeft: 6, marginVertical: 4 },
   trackItem: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   trackDot: { width: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center', marginTop: 2 },

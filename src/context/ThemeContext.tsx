@@ -19,6 +19,7 @@ export interface ThemeColors {
   primaryDark: string;
   primaryLight: string;
   gold: string;
+  goldLight: string;
   pastelBlue: string;
   background: string;
   surface: string;
@@ -45,15 +46,15 @@ export interface ThemeColors {
 export const lightThemeColors: ThemeColors = {
   ...lightColors,
   card: lightColors.surface,
-  glassBackground: 'rgba(255, 255, 255, 0.92)',
-  glassBorder: 'rgba(226, 232, 240, 0.8)',
+  glassBackground: 'rgba(255, 255, 255, 0.94)',
+  glassBorder: 'rgba(224, 230, 237, 0.85)',
 };
 
 export const darkThemeColors: ThemeColors = {
   ...darkColors,
   card: darkColors.surface,
-  glassBackground: 'rgba(14, 42, 85, 0.92)',
-  glassBorder: 'rgba(44, 78, 130, 0.8)',
+  glassBackground: 'rgba(19, 32, 54, 0.92)',
+  glassBorder: 'rgba(30, 49, 79, 0.85)',
 };
 
 export interface ThemeContextType {

@@ -14,10 +14,30 @@ import {
 } from '../utils/scope';
 
 export function useScopedData() {
-  const { currentUser, sppgList, users, laporanList, presensiList, checklistList, foodSafetyList, alertList, peralatanList } = useApp();
+  const {
+    currentUser,
+    sppgList,
+    users,
+    laporanList,
+    presensiList,
+    checklistList,
+    foodSafetyList,
+    alertList,
+    peralatanList,
+    anggaranLogs,
+    pengajuanSekolahList,
+    broadcastList,
+  } = useApp();
 
   const sppgInScope = currentUser ? scopeSppgForUser(currentUser, sppgList) : [];
   const usersInScope = scopeUsers(sppgInScope, users);
+  const sppgIds = new Set(sppgInScope.map((s) => s.id));
+
+  const anggaranInScope = anggaranLogs.filter((a) => sppgIds.has(a.sppgId));
+  const pengajuanInScope = pengajuanSekolahList.filter((p) => sppgIds.has(p.sppgId));
+  const broadcastInScope = broadcastList.filter(
+    (b) => !b.sppgId || sppgIds.has(b.sppgId) || b.targetRole === 'semua' || (currentUser && b.targetRole === currentUser.role),
+  );
 
   return {
     sppgInScope,
@@ -28,6 +48,9 @@ export function useScopedData() {
     alertInScope: scopeAlert(sppgInScope, alertList),
     presensiInScope: scopePresensi(usersInScope, presensiList),
     peralatanInScope: scopePeralatan(sppgInScope, peralatanList),
+    anggaranInScope,
+    pengajuanInScope,
+    broadcastInScope,
   };
 }
 

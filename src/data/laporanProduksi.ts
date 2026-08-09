@@ -148,3 +148,46 @@ export const laporanList: LaporanProduksi[] = [
     timestamp: '2026-08-09 06:30',
   },
 ];
+
+export const MENU_OPTIONS = [
+  {
+    label: 'Nasi Liwet + Ayam Bakar Madu + Sayur Bayam & Tempe Orek',
+    kategoriGizi: 'Karbohidrat Kompleks, Protein Hewani, Serat & Buah',
+    fotoMenu: SPPG_ASSET_MAP.paket_nasi_liwet,
+  },
+  {
+    label: 'Nasi Kuning Rames + Daging Rendang Empuk & Sambal Goreng',
+    kategoriGizi: 'Karbohidrat, Protein Daging Sapi, Mineral & Vitamin',
+    fotoMenu: SPPG_ASSET_MAP.paket_nasi_kuning,
+  },
+  {
+    label: 'Sandwich Daging Asap, Keju Melt & Sayur Selada Organik',
+    kategoriGizi: 'Roti Gandum, Protein Sapi Asap, Kalsium Keju, Sayur',
+    fotoMenu: SPPG_ASSET_MAP.paket_nasi_liwet,
+  },
+  {
+    label: 'Nasi Bento Chicken Teriyaki, Egg Roll & Sup Miso Tahu',
+    kategoriGizi: 'Karbohidrat, Protein Ayam Teriyaki, Sup Miso Nutrisi',
+    fotoMenu: SPPG_ASSET_MAP.paket_nasi_ayam_goreng,
+  },
+  {
+    label: 'Nasi Gurame Bakar Kecap + Sup Sayur Wortel & Tahu Bacem',
+    kategoriGizi: 'Karbohidrat, Protein Ikan Segar, Sayuran Kompleks',
+    fotoMenu: SPPG_ASSET_MAP.paket_nasi_gurame,
+  },
+  {
+    label: 'Nasi Ayam Goreng Lengkuas + Capcay Sayur & Telur Dadar',
+    kategoriGizi: 'Karbohidrat, Double Protein Hewani, Sayur Segar',
+    fotoMenu: SPPG_ASSET_MAP.paket_nasi_ayam_goreng,
+  },
+  {
+    label: 'Nasi Ayam Woku Belanga + Cah Buncis Jagung & Perkedel',
+    kategoriGizi: 'Karbohidrat, Protein Woku Kemangi, Sayuran',
+    fotoMenu: SPPG_ASSET_MAP.paket_nasi_ayam_woku,
+  },
+  {
+    label: 'Nasi Uduk Komplit + Semur Bola Daging & Tumis Kacang Panjang',
+    kategoriGizi: 'Karbohidrat Santan, Protein Sapi, Sayuran',
+    fotoMenu: SPPG_ASSET_MAP.paket_nasi_uduk,
+  },
+];
