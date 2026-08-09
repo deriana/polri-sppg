@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
@@ -30,18 +30,42 @@ export default function ChecklistHarianScreen() {
   const { role, currentUser, currentSppg, submitChecklist } = useApp();
   const { checklistInScope } = useScopedData();
   const { colors, spacing, fontSize, iconStrokeWidth, radius } = useTheme();
-  const today = todayDate();
 
-  const existing = checklistInScope.find((c) => c.tanggal === today);
+  const today = todayDate();
+  const [selectedDate, setSelectedDate] = useState<string>(today);
+
+  // Generate 5 days range (today and 4 days ago)
+  const dateOptions = useMemo(() => {
+    const dates: { dateStr: string; label: string }[] = [];
+    for (let i = 0; i < 5; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().slice(0, 10);
+      const label = i === 0 ? 'Hari Ini' : i === 1 ? 'Kemarin' : d.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric' });
+      dates.push({ dateStr, label });
+    }
+    return dates;
+  }, []);
+
+  const existing = checklistInScope.find((c) => c.tanggal === selectedDate);
   const [items, setItems] = useState<ChecklistItem[]>(existing ? existing.items : freshItems());
   const [submitted, setSubmitted] = useState(false);
 
+  // Re-sync items when date changes
+  React.useEffect(() => {
+    const found = checklistInScope.find((c) => c.tanggal === selectedDate);
+    setItems(found ? found.items : freshItems());
+    setSubmitted(false);
+  }, [selectedDate, checklistInScope]);
+
   if (!role || !currentUser || !currentSppg) return null;
 
-  const readOnly = ROLE_PERMISSIONS[role].isViewOnly;
-  const checklistId = existing?.id ?? `CHK-${currentSppg.id}-${today}`;
+  const isPastDate = selectedDate !== today;
+  const readOnly = ROLE_PERMISSIONS[role].isViewOnly || isPastDate;
+  const checklistId = existing?.id ?? `CHK-${currentSppg.id}-${selectedDate}`;
 
   const updateItem = (id: string, patch: Partial<ChecklistItem>) => {
+    if (readOnly) return;
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));
   };
 
@@ -59,7 +83,7 @@ export default function ChecklistHarianScreen() {
       return;
     }
     const kritisGagal = items.filter((i) => i.levelKritis && i.status === 'tidak');
-    const checklist = { id: checklistId, sppgId: currentSppg.id, tanggal: today, items };
+    const checklist = { id: checklistId, sppgId: currentSppg.id, tanggal: selectedDate, items };
     submitChecklist(checklist);
     await addToOfflineQueue('checklist_harian', checklist);
     setSubmitted(true);
@@ -73,14 +97,6 @@ export default function ChecklistHarianScreen() {
     }
   };
 
-  if (readOnly && !existing) {
-    return (
-      <View style={[styles.screen, { backgroundColor: colors.background, padding: spacing.lg }]}>
-        <EmptyState icon="check-square" title="Belum Ada Checklist" body="Checklist harian untuk SPPG ini belum diisi hari ini." />
-      </View>
-    );
-  }
-
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       <SectionTitle
@@ -88,11 +104,43 @@ export default function ChecklistHarianScreen() {
           allAnswered ? <Pill label="Lengkap" tone="success" /> : <Pill label={`${items.filter((i) => i.status !== null).length}/${items.length}`} tone="warning" />
         }
       >
-        Checklist Harian
+        Checklist Harian Dapur
       </SectionTitle>
-      <Text style={{ color: colors.textMuted, fontSize: fontSize.xs, marginTop: -8 }}>
-        {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
-      </Text>
+
+      {/* Date History Selector */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.xs, marginVertical: 2 }}>
+        {dateOptions.map((opt) => {
+          const isSelected = selectedDate === opt.dateStr;
+          return (
+            <Pressable
+              key={opt.dateStr}
+              onPress={() => setSelectedDate(opt.dateStr)}
+              style={[
+                styles.dateChip,
+                {
+                  backgroundColor: isSelected ? colors.primary : colors.surface,
+                  borderColor: isSelected ? colors.primary : colors.border,
+                  borderRadius: radius.pill,
+                },
+              ]}
+            >
+              <Feather name="calendar" size={13} color={isSelected ? colors.textInverse : colors.textMuted} />
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: isSelected ? colors.textInverse : colors.text }}>
+                {opt.label} ({opt.dateStr.slice(8)})
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
+      {isPastDate && (
+        <View style={[styles.historyBanner, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
+          <Feather name="clock" size={16} color={colors.primary} />
+          <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>
+            Melihat riwayat checklist tanggal {selectedDate} (Mode Lihat).
+          </Text>
+        </View>
+      )}
 
       {KATEGORI_ORDER.map((kategori) => {
         const kategoriItems = items.filter((i) => i.kategori === kategori);
@@ -207,4 +255,6 @@ const styles = StyleSheet.create({
   videoPlaceholder: { alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
   photoAddBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderStyle: 'dashed', padding: 10 },
   successBanner: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10, borderRadius: 10 },
+  dateChip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1 },
+  historyBanner: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12 },
 });

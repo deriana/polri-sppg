@@ -1,24 +1,35 @@
 import { Feather } from '@expo/vector-icons';
-import { User } from '../types';
+import { JobdeskType } from '../types';
 
-// Single source of truth for jobdesk labels/icons — used by StaffFormScreen
-// (picker) and StaffListScreen (profile card badge + icon placeholder).
-export type Jobdesk = NonNullable<User['jobdesk']>;
+export type Jobdesk = JobdeskType;
 
 export const JOBDESK_LABEL: Record<Jobdesk, string> = {
+  ahli_gizi: 'Ahli Gizi (Pegawai Inti)',
+  akuntan: 'Akuntan / Keuangan (Pegawai Inti)',
+  chef_utama: 'Chef Utama & Juru Masak',
+  asisten_masak: 'Asisten Cook & Tim Persiapan',
+  pemorsi_packing: 'Petugas Pemorsi (Packing Ompreng)',
+  petugas_logistik: 'Petugas Logistik & Supplier',
+  petugas_sanitasi: 'Petugas Sanitasi & Kebersihan',
+  driver_distribusi: 'Tenaga Distribusi / Supir Armada',
   masak: 'Juru Masak',
   cuci: 'Petugas Kebersihan',
   driver: 'Pengemudi Distribusi',
-  ahli_gizi: 'Ahli Gizi',
-  lainnya: 'Lainnya',
+  lainnya: 'Lainnya / Staf Operasional',
 };
 
-// Feather doesn't ship a literal chef-hat icon — closest sensible stand-ins per jobdesk.
 export const JOBDESK_ICON: Record<Jobdesk, keyof typeof Feather.glyphMap> = {
+  ahli_gizi: 'activity',
+  akuntan: 'dollar-sign',
+  chef_utama: 'coffee',
+  asisten_masak: 'sliders',
+  pemorsi_packing: 'package',
+  petugas_logistik: 'archive',
+  petugas_sanitasi: 'droplet',
+  driver_distribusi: 'truck',
   masak: 'coffee',
   cuci: 'droplet',
   driver: 'truck',
-  ahli_gizi: 'activity',
   lainnya: 'user',
 };
 

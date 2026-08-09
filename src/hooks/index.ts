@@ -7,17 +7,14 @@ import {
   scopeChecklist,
   scopeFoodSafety,
   scopeLaporan,
+  scopePeralatan,
   scopePresensi,
   scopeSppgForUser,
   scopeUsers,
 } from '../utils/scope';
 
-// Shared RBAC-scoping boilerplate reused by every screen that lists SPPG-scoped
-// data. scopeSppgForUser is the single source of truth for "which SPPG does this
-// user see" (own SPPG for KEPALA_SPPG, assigned SPPGs for PETUGAS_LAPANGAN, whole
-// Polres/Polda for the two supervisor roles) — everything else filters by it.
 export function useScopedData() {
-  const { currentUser, sppgList, users, laporanList, presensiList, checklistList, foodSafetyList, alertList } = useApp();
+  const { currentUser, sppgList, users, laporanList, presensiList, checklistList, foodSafetyList, alertList, peralatanList } = useApp();
 
   const sppgInScope = currentUser ? scopeSppgForUser(currentUser, sppgList) : [];
   const usersInScope = scopeUsers(sppgInScope, users);
@@ -30,6 +27,7 @@ export function useScopedData() {
     foodSafetyInScope: scopeFoodSafety(sppgInScope, foodSafetyList),
     alertInScope: scopeAlert(sppgInScope, alertList),
     presensiInScope: scopePresensi(usersInScope, presensiList),
+    peralatanInScope: scopePeralatan(sppgInScope, peralatanList),
   };
 }
 

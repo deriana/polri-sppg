@@ -8,6 +8,8 @@ import {
   FoodSafetyLog,
   LaporanProduksi,
   MenuHarianPlan,
+  MutasiStok,
+  Peralatan,
   PermintaanBahan,
   Presensi,
   Role,
@@ -204,6 +206,10 @@ export function scopeMenuHarianPlan(sppgInScope: Sppg[], allPlan: MenuHarianPlan
 
 export function scopeChatMessages(sppgInScope: Sppg[], allChat: ChatMessage[]): ChatMessage[] {
   return bySppgIds(sppgInScope, allChat);
+}
+
+export function scopePeralatan(sppgInScope: Sppg[], allPeralatan: Peralatan[]): Peralatan[] {
+  return bySppgIds(sppgInScope, allPeralatan);
 }
 
 // Presensi is keyed by userId, not sppgId, so scope via the users already resolved in-scope.

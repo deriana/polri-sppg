@@ -1,5 +1,19 @@
 export type Role = 'KEPALA_SPPG' | 'PETUGAS_LAPANGAN' | 'SUPERVISOR_POLRES' | 'SUPERVISOR_POLDA';
 
+export type JobdeskType =
+  | 'ahli_gizi'
+  | 'akuntan'
+  | 'chef_utama'
+  | 'asisten_masak'
+  | 'pemorsi_packing'
+  | 'petugas_logistik'
+  | 'petugas_sanitasi'
+  | 'driver_distribusi'
+  | 'masak'
+  | 'cuci'
+  | 'driver'
+  | 'lainnya';
+
 export interface Sppg {
   id: string;
   nama: string;
@@ -32,7 +46,8 @@ export interface User {
   assignedSppgIds?: string[]; // PETUGAS_LAPANGAN: SPPG(s) this petugas is assigned to (falls back to [sppgId])
   wilayahPolres?: string; // SUPERVISOR_POLRES: their home Polres wilayah
   wilayahPolda?: string; // SUPERVISOR_POLDA: their home Polda wilayah
-  jobdesk?: 'masak' | 'cuci' | 'driver' | 'ahli_gizi' | 'lainnya'; // PETUGAS_LAPANGAN: tugas harian di dapur
+  jobdesk?: JobdeskType; // PETUGAS_LAPANGAN: tugas harian di dapur
+  kategoriPegawai?: 'inti_bgn' | 'relawan_lokal';
   fotoProfil?: string | null;
 }
 
@@ -132,8 +147,8 @@ export interface FoodSafetyLog {
   sumberSuhu?: 'manual' | 'sensor_iot';
 }
 
-export type AlertJenis = 'checklist_kritis' | 'suhu_tidak_normal' | 'laporan_terlambat' | 'manual' | 'info_pusat' | 'cctv_anomali';
-export type AlertSumber = 'checklist' | 'suhu' | 'manual' | 'command_center' | 'cctv';
+export type AlertJenis = 'checklist_kritis' | 'suhu_tidak_normal' | 'laporan_terlambat' | 'manual' | 'info_pusat' | 'cctv_anomali' | 'aduan_warga';
+export type AlertSumber = 'checklist' | 'suhu' | 'manual' | 'command_center' | 'cctv' | 'aduan';
 export type AlertTingkat = 'normal' | 'perhatian' | 'emergency';
 
 export interface AlertLog {
@@ -154,6 +169,7 @@ export interface AlertLog {
 export interface MenuOption {
   label: string;
   kategoriGizi: string;
+  fotoMenu?: string | null;
 }
 
 // Menu Kalender (Fase C) — a menu *planned* for a specific future/past date,
@@ -166,6 +182,7 @@ export interface MenuHarianPlan {
   tanggal: string; // YYYY-MM-DD
   menu: string;
   kategoriGizi?: string;
+  fotoMenu?: string | null;
 }
 
 // ==========================================
@@ -197,6 +214,7 @@ export interface BahanBaku {
   lokasiRak?: string; // e.g. "Rak A-3", "Freezer 1"
   tanggalKadaluarsa?: string | null; // YYYY-MM-DD, null untuk barang non-perishable (mis. kemasan)
   mitraId?: string | null; // FK ke Mitra — pemasok bahan ini, null bila swakelola/tanpa mitra tetap
+  fotoBahan?: string | null;
 }
 
 // Phase D — mutasi stok (ledger pergerakan gudang). Satu-satunya jalur perubahan
@@ -223,6 +241,10 @@ export interface Mitra {
   wilayahLayanan: string; // mis. "Kota Bandung"
   statusKontrak: 'aktif' | 'tinjau_ulang' | 'nonaktif';
   sejakTanggal: string; // YYYY-MM-DD, tanggal mulai kemitraan
+  fotoLogo?: string | null;
+  alamat?: string;
+  rating?: number;
+  kategoriPasok?: string[];
 }
 
 export interface PermintaanBahan {
@@ -253,4 +275,23 @@ export interface ChatMessage {
   senderName: string;
   text: string;
   timestamp: string;
+}
+
+export type PeralatanKategori = 'kendaraan' | 'ompreng_tray' | 'kontainer_suhu' | 'alat_masak' | 'sealing_packaging' | 'kebersihan_apd';
+export type PeralatanStatus = 'ready' | 'digunakan' | 'maintenance' | 'perlu_perbaikan' | 'rusak';
+
+export interface Peralatan {
+  id: string;
+  sppgId: string;
+  nama: string;
+  kodeUnit: string;
+  kategori: PeralatanKategori;
+  jumlahTotal: number;
+  jumlahReady: number;
+  jumlahBermasalah: number;
+  status: PeralatanStatus;
+  lokasi: string;
+  fotoPeralatan?: string | null;
+  catatanKondisi: string;
+  terakhirDiperiksa: string;
 }

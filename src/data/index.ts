@@ -16,3 +16,4 @@ export * from './menuHarianPlan';
 export * from './mitra';
 export * from './mutasiStok';
 export * from './publicReports';
+export * from './peralatan';

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Card, DropdownPicker, EmptyState, IconButton, Input, Pill, PrimaryButton, SectionTitle } from '../components/ui';
@@ -188,12 +189,15 @@ export default function MenuKalenderScreen() {
         ) : (
           <>
             {planForSelected ? (
-              <>
+              <View style={{ gap: spacing.xs }}>
+                {planForSelected.fotoMenu && (
+                  <Image source={{ uri: planForSelected.fotoMenu }} style={{ width: '100%', height: 160, borderRadius: radius.md }} resizeMode="cover" />
+                )}
                 <Text style={{ color: colors.text, fontSize: fontSize.sm, fontWeight: '700' }}>{planForSelected.menu}</Text>
                 {planForSelected.kategoriGizi && (
                   <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>{planForSelected.kategoriGizi}</Text>
                 )}
-              </>
+              </View>
             ) : (
               <Text style={{ color: colors.textMuted, fontSize: fontSize.sm }}>Belum ada menu direncanakan.</Text>
             )}
@@ -205,23 +209,47 @@ export default function MenuKalenderScreen() {
       </Card>
 
       <Card style={{ gap: spacing.sm }}>
-        <SectionTitle style={{ marginBottom: 0 }}>Status Pengiriman per Sekolah</SectionTitle>
+        <SectionTitle style={{ marginBottom: 0 }}>Sekolah Afiliasi & Pengiriman Menu</SectionTitle>
         {sekolahInScope.length === 0 ? (
           <EmptyState icon="home" title="Belum Ada Sekolah" body="Belum ada sekolah terdaftar untuk SPPG ini." />
         ) : (
           sekolahInScope.map((sekolah) => {
             const rute = distribusiForSelected.find((d) => d.sekolahId === sekolah.id);
             return (
-              <View key={sekolah.id} style={[styles.sekolahRow, { borderBottomColor: colors.border }]}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: colors.text, fontWeight: '700', fontSize: fontSize.sm }} numberOfLines={1}>
-                    {sekolah.nama}
-                  </Text>
-                  <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }} numberOfLines={1}>
-                    {sekolah.jumlahSiswa} siswa
-                  </Text>
+              <View key={sekolah.id} style={[styles.sekolahCard, { backgroundColor: colors.background, borderRadius: radius.md, padding: 10 }]}>
+                <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+                  {sekolah.fotoSekolah ? (
+                    <Image source={{ uri: sekolah.fotoSekolah }} style={{ width: 56, height: 56, borderRadius: radius.sm }} />
+                  ) : (
+                    <View style={{ width: 56, height: 56, borderRadius: radius.sm, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
+                      <Feather name="home" size={24} color={colors.primary} />
+                    </View>
+                  )}
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Text style={{ color: colors.text, fontWeight: '700', fontSize: fontSize.sm }} numberOfLines={1}>
+                      {sekolah.nama}
+                    </Text>
+                    <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>
+                      Target: {sekolah.jumlahSiswa.toLocaleString('id-ID')} siswa penerima
+                    </Text>
+                    <Text style={{ color: colors.textMuted, fontSize: 10 }} numberOfLines={1}>
+                      {sekolah.alamat}
+                    </Text>
+                  </View>
+                  <Pill label={rute ? STATUS_LABEL[rute.status] : 'Belum Dijadwalkan'} tone={rute ? STATUS_TONE[rute.status] : 'neutral'} />
                 </View>
-                <Pill label={rute ? STATUS_LABEL[rute.status] : 'Belum Dijadwalkan'} tone={rute ? STATUS_TONE[rute.status] : 'neutral'} />
+
+                {planForSelected?.fotoMenu && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.border }}>
+                    <Image source={{ uri: planForSelected.fotoMenu }} style={{ width: 36, height: 36, borderRadius: 6 }} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontSize: 10, color: colors.textMuted }}>Menu Paket Dikirim:</Text>
+                      <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }} numberOfLines={1}>
+                        {planForSelected.menu}
+                      </Text>
+                    </View>
+                  </View>
+                )}
               </View>
             );
           })
@@ -242,4 +270,5 @@ const styles = StyleSheet.create({
   cellInner: { flex: 1, width: '100%', alignItems: 'center', justifyContent: 'center', gap: 2 },
   menuDot: { width: 5, height: 5, borderRadius: 2.5 },
   sekolahRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 8, borderBottomWidth: 0.5 },
+  sekolahCard: { marginBottom: 6 },
 });

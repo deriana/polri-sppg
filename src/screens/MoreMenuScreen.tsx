@@ -42,6 +42,7 @@ export default function MoreMenuScreen({ navigation }: any) {
   items.push({ key: 'Profile', icon: 'user', label: 'Profil Saya', desc: 'Info akun & data pribadi' });
 
   const phase2Items: MenuItem[] = [
+    { key: 'Peralatan', icon: 'truck', label: 'Peralatan & Aset Dapur', desc: 'Armada mobil, ompreng stainless, & thermal box' },
     { key: 'CctvMonitor', icon: 'video', label: 'Monitor CCTV AI', desc: 'Analisis AI & deteksi anomali real-time' },
     { key: 'Gudang', icon: 'package', label: 'Gudang & Stok Bahan', desc: 'Stok bahan baku SPPG & sensor gudang' },
     { key: 'RiwayatPermintaan', icon: 'clipboard', label: 'Riwayat Permintaan Bahan', desc: 'Riwayat pengajuan ke gudang' },

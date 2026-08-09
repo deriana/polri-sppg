@@ -17,9 +17,8 @@ export default function CheckInScreen({ navigation, route }: any) {
   const user = users.find((u) => u.id === userId);
   const isCheckIn = mode === 'in';
 
-  // Defense-in-depth: even though no UI entry point routes a view-only role or
-  // a petugas checking in someone else here, guard the mutating actions too.
-  const allowed = !!role && !ROLE_PERMISSIONS[role].isViewOnly && (role === 'KEPALA_SPPG' || currentUser?.id === userId);
+  // User can only submit attendance for themselves
+  const allowed = !!role && !ROLE_PERMISSIONS[role].isViewOnly && currentUser?.id === userId;
 
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [geotag, setGeotag] = useState<{ lat: number; lng: number } | null>(null);

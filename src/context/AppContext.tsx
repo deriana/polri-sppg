@@ -17,6 +17,7 @@ import {
   mitraList as initialMitra,
   mutasiStokList as initialMutasiStok,
   publicReportList as initialPublicReports,
+  peralatanList as initialPeralatanList,
   CCTV_ANOMALI_LABEL,
   findAccount,
 } from '../data';
@@ -33,6 +34,7 @@ import {
   MenuHarianPlan,
   Mitra,
   MutasiStok,
+  Peralatan,
   PermintaanBahan,
   Presensi,
   PublicReport,
@@ -76,6 +78,8 @@ interface AppContextValue {
   checklistList: ChecklistHarian[];
   foodSafetyList: FoodSafetyLog[];
   alertList: AlertLog[];
+  peralatanList: Peralatan[];
+  updatePeralatanStatus: (id: string, status: Peralatan['status'], catatanKondisi?: string) => void;
   publicReportList: PublicReport[];
   submitPublicReport: (report: Omit<PublicReport, 'id' | 'timestamp' | 'status'>) => void;
   updatePublicReportStatus: (id: string, status: PublicReport['status'], tanggapan?: string) => void;
@@ -116,6 +120,7 @@ const AppContext = createContext<AppContextValue | null>(null);
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [progressProduksiRealtime, setProgressProduksiRealtime] = useState<number>(1240);
   const [publicReportList, setPublicReportList] = useState<PublicReport[]>(initialPublicReports);
+  const [peralatanList, setPeralatanList] = useState<Peralatan[]>(initialPeralatanList);
   const [role, setRole] = useState<Role | null>(null);
   const [loggedIn, setLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -136,17 +141,46 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [mitraList, setMitraList] = useState<Mitra[]>(initialMitra);
   const [mutasiStokList, setMutasiStokList] = useState<MutasiStok[]>(initialMutasiStok);
 
+  const updatePeralatanStatus: AppContextValue['updatePeralatanStatus'] = (id, status, catatanKondisi) => {
+    setPeralatanList((prev) =>
+      prev.map((eq) =>
+        eq.id === id
+          ? {
+              ...eq,
+              status,
+              catatanKondisi: catatanKondisi ?? eq.catatanKondisi,
+              terakhirDiperiksa: todayDate(),
+              jumlahBermasalah: status === 'ready' ? 0 : eq.jumlahBermasalah || 1,
+            }
+          : eq,
+      ),
+    );
+  };
+
   const submitPublicReport: AppContextValue['submitPublicReport'] = (report) => {
     const id = `REP-${String(publicReportList.length + 1).padStart(3, '0')}`;
-    setPublicReportList((prev) => [
-      {
-        ...report,
-        id,
-        timestamp: nowTimestamp(),
-        status: 'dikirim',
-      },
-      ...prev,
-    ]);
+    const newReport: PublicReport = {
+      ...report,
+      id,
+      timestamp: nowTimestamp(),
+      status: 'dikirim',
+    };
+    setPublicReportList((prev) => [newReport, ...prev]);
+
+    // Auto-raise internal AlertLog for citizen complaints
+    const alertId = `ALT-REP-${String(alertList.length + 1).padStart(3, '0')}`;
+    const newAlert: AlertLog = {
+      id: alertId,
+      sppgId: report.sppgId,
+      jenis: 'aduan_warga',
+      sumber: 'aduan',
+      tingkat: report.kategori === 'kualitas_makanan' ? 'emergency' : 'perhatian',
+      judul: `Aduan Warga (${report.kategori.replace('_', ' ').toUpperCase()}): ${report.judul}`,
+      deskripsi: `Laporan publik dari ${report.namaPelapor} (${report.noHpPelapor}): ${report.deskripsi}`,
+      timestamp: nowTimestamp(),
+      statusTindakLanjut: 'baru',
+    };
+    setAlertList((prev) => [newAlert, ...prev]);
   };
 
   const updatePublicReportStatus: AppContextValue['updatePublicReportStatus'] = (id, status, tanggapan) => {
@@ -461,6 +495,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       checklistList,
       foodSafetyList,
       alertList,
+      peralatanList,
+      updatePeralatanStatus,
       publicReportList,
       submitPublicReport,
       updatePublicReportStatus,

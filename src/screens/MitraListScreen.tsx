@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Card, EmptyState, IconButton, Pill, SectionTitle } from '../components/ui';
@@ -47,28 +48,71 @@ export default function MitraListScreen({ route }: any) {
         </View>
 
         <Card style={{ gap: spacing.xs }}>
-          <View style={styles.rowTop}>
-            <Text style={{ color: colors.text, fontWeight: '700', fontSize: fontSize.sm }}>{selected.jenisProduk}</Text>
-            <Pill label={STATUS_LABEL[selected.statusKontrak]} tone={STATUS_TONE[selected.statusKontrak]} />
+          <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+            {selected.fotoLogo ? (
+              <Image source={{ uri: selected.fotoLogo }} style={{ width: 64, height: 64, borderRadius: radius.md }} />
+            ) : (
+              <View style={{ width: 64, height: 64, borderRadius: radius.md, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
+                <Feather name="briefcase" size={28} color={colors.primary} />
+              </View>
+            )}
+            <View style={{ flex: 1, gap: 2 }}>
+              <View style={styles.rowTop}>
+                <Text style={{ color: colors.text, fontWeight: '800', fontSize: fontSize.md }}>{selected.nama}</Text>
+                <Pill label={STATUS_LABEL[selected.statusKontrak]} tone={STATUS_TONE[selected.statusKontrak]} />
+              </View>
+              <Text style={{ color: colors.primary, fontWeight: '700', fontSize: fontSize.xs }}>{selected.jenisProduk}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                <Feather name="star" size={14} color="#EAB308" />
+                <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>{selected.rating ?? 4.8}</Text>
+                <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>• Terverifikasi BGN</Text>
+              </View>
+            </View>
           </View>
-          <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Wilayah layanan: {selected.wilayahLayanan}</Text>
-          <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Kontak: {selected.kontakNama} · {selected.kontakHp}</Text>
-          <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Mitra sejak: {selected.sejakTanggal}</Text>
+
+          <View style={{ gap: 4, marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.border }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Feather name="map-pin" size={14} color={colors.textMuted} />
+              <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>{selected.alamat ?? selected.wilayahLayanan}</Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Feather name="user" size={14} color={colors.textMuted} />
+              <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>PIC: {selected.kontakNama} ({selected.kontakHp})</Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Feather name="calendar" size={14} color={colors.textMuted} />
+              <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Kontrak Berjalan Sejak: {selected.sejakTanggal}</Text>
+            </View>
+          </View>
+
+          {selected.kategoriPasok && selected.kategoriPasok.length > 0 && (
+            <View style={{ gap: 4, marginTop: 4 }}>
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>Kategori Bahan Dipasok:</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                {selected.kategoriPasok.map((kat) => (
+                  <Pill key={kat} label={kat} tone="info" />
+                ))}
+              </View>
+            </View>
+          )}
         </Card>
 
-        <SectionTitle style={{ marginTop: spacing.xs }}>Memasok Ke</SectionTitle>
+        <SectionTitle style={{ marginTop: spacing.xs }}>Memasok Ke SPPG ({memasok.length})</SectionTitle>
         {memasok.length === 0 ? (
-          <EmptyState icon="package" title="Belum Ada Data" body="Belum ada bahan baku yang tercatat dari mitra ini pada SPPG yang Anda lihat." />
+          <EmptyState icon="package" title="Belum Ada Data Stok" body="Belum ada bahan baku yang tercatat dari mitra ini pada SPPG yang Anda lihat." />
         ) : (
           memasok.map((b) => {
             const sppgName = sppgInScope.find((s) => s.id === b.sppgId)?.nama;
             return (
               <Card key={b.id} style={styles.row}>
+                {b.fotoBahan && (
+                  <Image source={{ uri: b.fotoBahan }} style={{ width: 44, height: 44, borderRadius: radius.sm }} />
+                )}
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: colors.text, fontWeight: '700', fontSize: fontSize.sm }}>{b.nama}</Text>
                   {sppgName && <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>{sppgName}</Text>}
                 </View>
-                <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>{b.stok} {b.satuan}</Text>
+                <Text style={{ color: colors.text, fontWeight: '800', fontSize: fontSize.sm }}>{b.stok} {b.satuan}</Text>
               </Card>
             );
           })
@@ -79,7 +123,7 @@ export default function MitraListScreen({ route }: any) {
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
-      <SectionTitle>Mitra Pemasok</SectionTitle>
+      <SectionTitle>Mitra Pemasok BGN ({filtered.length})</SectionTitle>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
         {kategoriOptions.map((k) => (
@@ -101,9 +145,20 @@ export default function MitraListScreen({ route }: any) {
       ) : (
         filtered.map((m) => (
           <Card key={m.id} onPress={() => setSelectedId(m.id)} style={styles.row}>
-            <View style={{ flex: 1 }}>
+            {m.fotoLogo ? (
+              <Image source={{ uri: m.fotoLogo }} style={{ width: 48, height: 48, borderRadius: radius.sm }} />
+            ) : (
+              <View style={{ width: 48, height: 48, borderRadius: radius.sm, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
+                <Feather name="briefcase" size={22} color={colors.primary} />
+              </View>
+            )}
+            <View style={{ flex: 1, gap: 2 }}>
               <Text style={{ color: colors.text, fontWeight: '700', fontSize: fontSize.sm }}>{m.nama}</Text>
-              <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>{m.jenisProduk} · {m.wilayahLayanan}</Text>
+              <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>{m.jenisProduk} • {m.wilayahLayanan}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Feather name="star" size={12} color="#EAB308" />
+                <Text style={{ fontSize: 10, fontWeight: '700', color: colors.text }}>{m.rating ?? 4.8}</Text>
+              </View>
             </View>
             <Pill label={STATUS_LABEL[m.statusKontrak]} tone={STATUS_TONE[m.statusKontrak]} />
           </Card>

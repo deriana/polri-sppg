@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
@@ -90,9 +90,13 @@ export default function GudangScreen({ navigation }: any) {
           return (
             <Card key={b.id} style={{ gap: spacing.xs }}>
               <View style={styles.row}>
-                <View style={[styles.iconWrap, { backgroundColor: isLow ? colors.dangerBg : colors.primaryLight }]}>
-                  <Feather name="package" size={18} color={isLow ? colors.danger : colors.primary} strokeWidth={iconStrokeWidth} />
-                </View>
+                {b.fotoBahan ? (
+                  <Image source={{ uri: b.fotoBahan }} style={{ width: 48, height: 48, borderRadius: radius.sm }} />
+                ) : (
+                  <View style={[styles.iconWrap, { backgroundColor: isLow ? colors.dangerBg : colors.primaryLight }]}>
+                    <Feather name="package" size={18} color={isLow ? colors.danger : colors.primary} strokeWidth={iconStrokeWidth} />
+                  </View>
+                )}
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: colors.text, fontWeight: '700', fontSize: fontSize.sm }}>{b.nama}</Text>
                   {sppgName && <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>{sppgName}</Text>}

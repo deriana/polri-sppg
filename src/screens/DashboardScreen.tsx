@@ -260,6 +260,7 @@ export default function DashboardScreen({ navigation }: any) {
           : navigation.navigate('LaporanForm', { laporanId: laporanHariIni?.id, tanggal: today }),
     },
     { key: 'foodsafety', icon: 'thermometer', title: 'Keamanan Pangan', subtitle: 'Catat suhu & simpan', onPress: () => navigation.navigate('FoodSafetyForm') },
+    { key: 'peralatan', icon: 'truck', title: 'Aset & Armada', subtitle: 'Check ompreng & mobil', onPress: () => navigation.navigate('Peralatan') },
     { key: 'aduan', icon: 'message-square', title: 'Aduan Publik', subtitle: `${publicReportList.length} laporan warga`, onPress: () => navigation.navigate('AduanMasyarakat') },
   ];
 
@@ -281,6 +282,19 @@ export default function DashboardScreen({ navigation }: any) {
             {ROLE_LABEL[role]} — {currentSppg?.nama ?? sppgList.find((s) => s.id === currentUser.sppgId)?.nama}
           </Text>
         </View>
+        <Pressable
+          hitSlop={8}
+          onPress={() => navigation.navigate('Notifikasi')}
+          style={({ pressed }) => [
+            { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center', position: 'relative' },
+            pressed && { opacity: 0.7 },
+          ]}
+        >
+          <Feather name="bell" size={20} color={colors.primary} strokeWidth={2} />
+          {activeAlerts.length > 0 && (
+            <View style={{ position: 'absolute', top: 4, right: 4, width: 10, height: 10, borderRadius: 5, backgroundColor: colors.danger, borderWidth: 1.5, borderColor: colors.surface }} />
+          )}
+        </Pressable>
       </View>
 
       <Card style={{ backgroundColor: colors.surface, borderColor: colors.primary, borderWidth: 1, gap: spacing.xs }}>

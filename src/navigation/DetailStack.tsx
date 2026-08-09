@@ -33,6 +33,7 @@ import MenuKalenderScreen from '../screens/MenuKalenderScreen';
 import MitraListScreen from '../screens/MitraListScreen';
 import MutasiStokFormScreen from '../screens/MutasiStokFormScreen';
 import AduanMasyarakatScreen from '../screens/AduanMasyarakatScreen';
+import PeralatanScreen from '../screens/PeralatanScreen';
 
 const Stack = createNativeStackNavigator<any>();
 
@@ -59,6 +60,7 @@ const DETAIL_SCREENS: Array<{ name: string; component: React.ComponentType<any>;
   { name: 'Profile', component: ProfileScreen, title: 'Profil Saya' },
   { name: 'SppgDetail', component: SppgDetailScreen, title: 'Detail SPPG' },
   { name: 'AduanMasyarakat', component: AduanMasyarakatScreen, title: 'Aduan Masyarakat' },
+  { name: 'Peralatan', component: PeralatanScreen, title: 'Peralatan & Aset Dapur' },
   { name: 'CctvMonitor', component: CctvMonitorScreen, title: 'Monitor CCTV AI' },
   { name: 'Gudang', component: GudangScreen, title: 'Gudang & Stok Bahan' },
   { name: 'RequestBahanForm', component: RequestBahanFormScreen, title: 'Ajukan Permintaan Bahan' },
