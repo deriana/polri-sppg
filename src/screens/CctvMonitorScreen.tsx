@@ -178,7 +178,7 @@ export default function CctvMonitorScreen() {
                         </head>
                         <body>
                           <div class="container">
-                            <video src="${activeFeed.localMp4Url}" autoplay loop muted playsinline></video>
+                            <video src="${activeFeed.localMp4Url}" autoplay loop playsinline></video>
                             <div class="hud-top-left"><div class="rec-dot"></div>● REC LIVE</div>
                             <div class="hud-top-right" id="clock">2026-08-09 --:--:--</div>
                             <div class="hud-bottom-left">${activeFeed.label.toUpperCase()}</div>
