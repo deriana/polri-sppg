@@ -1,4 +1,5 @@
 import { User } from '../types';
+import { SPPG_ASSET_MAP } from './sppgAssetMap';
 
 export const users: User[] = [
   // ==========================================
@@ -14,7 +15,7 @@ export const users: User[] = [
     nik: '3273010101900001',
     statusAktif: true,
     kategoriPegawai: 'inti_bgn',
-    fotoProfil: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.polri_1,
   },
   {
     id: 'USR-015',
@@ -27,7 +28,7 @@ export const users: User[] = [
     shift: 'Pagi',
     jobdesk: 'ahli_gizi',
     kategoriPegawai: 'inti_bgn',
-    fotoProfil: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.profil_wanita_dewasa,
   },
   {
     id: 'USR-017',
@@ -40,7 +41,7 @@ export const users: User[] = [
     shift: 'Pagi',
     jobdesk: 'akuntan',
     kategoriPegawai: 'inti_bgn',
-    fotoProfil: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.profil_pria_dewasa,
   },
 
   // 2. Tenaga Operasional / Relawan Dapur (Lokal Bandung)
@@ -55,7 +56,7 @@ export const users: User[] = [
     shift: 'Pagi',
     jobdesk: 'chef_utama',
     kategoriPegawai: 'relawan_lokal',
-    fotoProfil: 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.profil_pria_paruh_baya,
   },
   {
     id: 'USR-018',
@@ -68,7 +69,7 @@ export const users: User[] = [
     shift: 'Pagi',
     jobdesk: 'asisten_masak',
     kategoriPegawai: 'relawan_lokal',
-    fotoProfil: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.profil_pria_dewasa,
   },
   {
     id: 'USR-019',
@@ -81,7 +82,7 @@ export const users: User[] = [
     shift: 'Pagi',
     jobdesk: 'pemorsi_packing',
     kategoriPegawai: 'relawan_lokal',
-    fotoProfil: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.profil_wanita_paruh_baya,
   },
   {
     id: 'USR-020',
@@ -94,7 +95,7 @@ export const users: User[] = [
     shift: 'Pagi',
     jobdesk: 'petugas_logistik',
     kategoriPegawai: 'relawan_lokal',
-    fotoProfil: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.profil_pria_paruh_baya,
   },
   {
     id: 'USR-003',
@@ -107,7 +108,7 @@ export const users: User[] = [
     shift: 'Siang',
     jobdesk: 'petugas_sanitasi',
     kategoriPegawai: 'relawan_lokal',
-    fotoProfil: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.profil_pria_dewasa,
   },
   {
     id: 'USR-004',
@@ -120,7 +121,7 @@ export const users: User[] = [
     shift: 'Pagi',
     jobdesk: 'driver_distribusi',
     kategoriPegawai: 'relawan_lokal',
-    fotoProfil: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.profil_wanita_dewasa,
   },
 
   // ==========================================
@@ -135,7 +136,7 @@ export const users: User[] = [
     nik: '3171010101900005',
     statusAktif: true,
     kategoriPegawai: 'inti_bgn',
-    fotoProfil: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.polri_2,
   },
   {
     id: 'USR-007',
@@ -148,7 +149,7 @@ export const users: User[] = [
     shift: 'Pagi',
     jobdesk: 'ahli_gizi',
     kategoriPegawai: 'inti_bgn',
-    fotoProfil: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.profil_wanita_dewasa,
   },
   {
     id: 'USR-021',
@@ -161,7 +162,7 @@ export const users: User[] = [
     shift: 'Pagi',
     jobdesk: 'akuntan',
     kategoriPegawai: 'inti_bgn',
-    fotoProfil: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.profil_pria_dewasa,
   },
   {
     id: 'USR-006',
@@ -175,7 +176,7 @@ export const users: User[] = [
     assignedSppgIds: ['SPPG-002', 'SPPG-004'],
     jobdesk: 'chef_utama',
     kategoriPegawai: 'relawan_lokal',
-    fotoProfil: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.profil_pria_paruh_baya,
   },
   {
     id: 'USR-016',
@@ -188,7 +189,7 @@ export const users: User[] = [
     shift: 'Pagi',
     jobdesk: 'driver_distribusi',
     kategoriPegawai: 'relawan_lokal',
-    fotoProfil: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.profil_pria_dewasa,
   },
 
   // ==========================================
@@ -203,7 +204,7 @@ export const users: User[] = [
     nik: '3578010101900008',
     statusAktif: true,
     kategoriPegawai: 'inti_bgn',
-    fotoProfil: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.polri_1,
   },
   {
     id: 'USR-009',
@@ -216,7 +217,7 @@ export const users: User[] = [
     shift: 'Pagi',
     jobdesk: 'petugas_sanitasi',
     kategoriPegawai: 'relawan_lokal',
-    fotoProfil: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.profil_pria_dewasa,
   },
   {
     id: 'USR-010',
@@ -229,7 +230,7 @@ export const users: User[] = [
     shift: 'Pagi',
     jobdesk: 'ahli_gizi',
     kategoriPegawai: 'inti_bgn',
-    fotoProfil: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.profil_wanita_dewasa,
   },
 
   // ==========================================
@@ -244,7 +245,7 @@ export const users: User[] = [
     nik: '3275010101900011',
     statusAktif: true,
     kategoriPegawai: 'inti_bgn',
-    fotoProfil: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.polri_2,
   },
   {
     id: 'USR-012',
@@ -257,7 +258,7 @@ export const users: User[] = [
     shift: 'Pagi',
     jobdesk: 'driver_distribusi',
     kategoriPegawai: 'relawan_lokal',
-    fotoProfil: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.profil_pria_dewasa,
   },
 
   // Supervisor Polres & Polda
@@ -270,7 +271,7 @@ export const users: User[] = [
     nik: '3273010101900013',
     statusAktif: true,
     wilayahPolres: 'Polres Metro Bekasi',
-    fotoProfil: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.polri_1,
   },
   {
     id: 'USR-014',
@@ -281,6 +282,6 @@ export const users: User[] = [
     nik: '3171010101900014',
     statusAktif: true,
     wilayahPolda: 'Polda Metro Jaya',
-    fotoProfil: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&auto=format&fit=crop&q=80',
+    fotoProfil: SPPG_ASSET_MAP.profil_wanita_paruh_baya,
   },
 ];

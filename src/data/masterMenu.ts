@@ -1,11 +1,12 @@
 import { MasterMenu } from '../types';
+import { SPPG_ASSET_MAP } from './sppgAssetMap';
 
 export const MASTER_MENU_CATALOG: MasterMenu[] = [
   {
     id: 'MM-001',
     nama: 'Nasi Liwet, Ayam Bakar Madu, Sayur Bayam & Tempe Orek',
     kategoriGizi: 'Karbohidrat + Protein Hewani + Sayuran + Protein Nabati',
-    fotoMenu: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80',
+    fotoMenu: SPPG_ASSET_MAP.paket_nasi_liwet,
     kalori: 580,
     proteinGram: 28,
     karboGram: 65,
@@ -19,7 +20,7 @@ export const MASTER_MENU_CATALOG: MasterMenu[] = [
     id: 'MM-002',
     nama: 'Nasi Kuning Rames, Daging Rendang Empuk & Sambal Goreng Kentang',
     kategoriGizi: 'Karbohidrat + Protein Daging Sapi + Protein Nabati',
-    fotoMenu: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80',
+    fotoMenu: SPPG_ASSET_MAP.paket_nasi_kuning,
     kalori: 620,
     proteinGram: 32,
     karboGram: 70,
@@ -33,7 +34,7 @@ export const MASTER_MENU_CATALOG: MasterMenu[] = [
     id: 'MM-003',
     nama: 'Nasi Gurame Bakar Kecap, Sup Sayur Wortel & Tahu Bacem',
     kategoriGizi: 'Karbohidrat + Protein Ikan + Sayuran Kompleks',
-    fotoMenu: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&auto=format&fit=crop&q=80',
+    fotoMenu: SPPG_ASSET_MAP.paket_nasi_gurame,
     kalori: 540,
     proteinGram: 30,
     karboGram: 60,
@@ -47,7 +48,7 @@ export const MASTER_MENU_CATALOG: MasterMenu[] = [
     id: 'MM-004',
     nama: 'Nasi Ayam Goreng Lengkuas, Capcay Sayur & Telur Dadar',
     kategoriGizi: 'Karbohidrat + Double Protein + Sayur Segar',
-    fotoMenu: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=600&auto=format&fit=crop&q=80',
+    fotoMenu: SPPG_ASSET_MAP.paket_nasi_ayam_goreng,
     kalori: 590,
     proteinGram: 29,
     karboGram: 62,
@@ -61,7 +62,7 @@ export const MASTER_MENU_CATALOG: MasterMenu[] = [
     id: 'MM-005',
     nama: 'Nasi Ayam Woku Belanga, Cah Buncis Jagung & Perkedel',
     kategoriGizi: 'Karbohidrat + Protein Pedas Segar + Sayuran',
-    fotoMenu: 'https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=600&auto=format&fit=crop&q=80',
+    fotoMenu: SPPG_ASSET_MAP.paket_nasi_ayam_woku,
     kalori: 560,
     proteinGram: 27,
     karboGram: 64,
@@ -75,7 +76,7 @@ export const MASTER_MENU_CATALOG: MasterMenu[] = [
     id: 'MM-006',
     nama: 'Nasi Uduk Komplit, Semur Bola Daging & Tumis Kacang Panjang',
     kategoriGizi: 'Karbohidrat Santan + Protein Sapi + Sayuran',
-    fotoMenu: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80',
+    fotoMenu: SPPG_ASSET_MAP.paket_nasi_uduk,
     kalori: 610,
     proteinGram: 31,
     karboGram: 68,

@@ -1,4 +1,5 @@
 import { PublicReport } from '../types';
+import { SPPG_ASSET_MAP } from './sppgAssetMap';
 
 export const publicReportList: PublicReport[] = [
   {
@@ -10,7 +11,7 @@ export const publicReportList: PublicReport[] = [
     kategori: 'keterlambatan',
     judul: 'Keterlambatan Pengiriman Makanan di SDN Cibeunying 01',
     deskripsi: 'Pengiriman makanan siang untuk kelas 4 dan 5 baru tiba jam 12.45 WIB, padahal jam istirahat dimulai jam 12.00 WIB.',
-    fotoBukti: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=600&auto=format&fit=crop&q=80',
+    fotoBukti: SPPG_ASSET_MAP.aduan_1,
     tanggal: '2026-08-08',
     timestamp: '2026-08-08 13:10',
     status: 'ditindaklanjuti',
@@ -25,7 +26,7 @@ export const publicReportList: PublicReport[] = [
     kategori: 'kemasan',
     judul: 'Kemasan Makanan Penyok dan Seal Terbuka',
     deskripsi: 'Ditemukan 3 box makanan penyet dan plastik sealnya sedikit terkelupas saat pembagian di ruang kelas 2B.',
-    fotoBukti: 'https://images.unsplash.com/photo-1615719413546-198b25453f85?w=600&auto=format&fit=crop&q=80',
+    fotoBukti: SPPG_ASSET_MAP.tray_2,
     tanggal: '2026-08-08',
     timestamp: '2026-08-08 11:45',
     status: 'diproses',
@@ -40,7 +41,7 @@ export const publicReportList: PublicReport[] = [
     kategori: 'kualitas_makanan',
     judul: 'Menu Sayuran Kurang Garam dan Porsi Nasi Melimpah',
     deskripsi: 'Secara umum rasa makanan sangat higienis, namun untuk sayur bayam masakan hari ini rasanya sedikit hambar.',
-    fotoBukti: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80',
+    fotoBukti: SPPG_ASSET_MAP.paket_nasi_liwet,
     tanggal: '2026-08-07',
     timestamp: '2026-08-07 13:00',
     status: 'selesai',
@@ -55,7 +56,7 @@ export const publicReportList: PublicReport[] = [
     kategori: 'kebersihan',
     judul: 'Mobil Kendaraan Pengirim Sangat Bersih dan Rapi',
     deskripsi: 'Apresiasi kepada tim pengantar makanan SPPG Surabaya Timur, armada tampak sangat bersih dan petugas menggunakan APD lengkap.',
-    fotoBukti: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&auto=format&fit=crop&q=80',
+    fotoBukti: SPPG_ASSET_MAP.mobil_1,
     tanggal: '2026-08-07',
     timestamp: '2026-08-07 10:20',
     status: 'selesai',
@@ -70,7 +71,7 @@ export const publicReportList: PublicReport[] = [
     kategori: 'layanan',
     judul: 'Pengingat Alergi Telur untuk Siswa Terdaftar',
     deskripsi: 'Mohon konfirmasi bahwa anak saya terdaftar alergi telur di sistem sekolah agar penggantian menu substitusi selalu tepat.',
-    fotoBukti: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=600&auto=format&fit=crop&q=80',
+    fotoBukti: SPPG_ASSET_MAP.tray_1,
     tanggal: '2026-08-09',
     timestamp: '2026-08-09 08:00',
     status: 'dikirim',

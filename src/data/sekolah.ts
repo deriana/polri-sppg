@@ -1,4 +1,5 @@
 import { Sekolah } from '../types';
+import { SPPG_ASSET_MAP } from './sppgAssetMap';
 
 export const sekolahList: Sekolah[] = [
   // SPPG-001 — Bandung
@@ -8,7 +9,7 @@ export const sekolahList: Sekolah[] = [
     nama: 'SDN Cibeunying 01',
     alamat: 'Jl. Cibeunying Kolot, Bandung',
     jumlahSiswa: 240,
-    fotoSekolah: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=600&auto=format&fit=crop&q=80',
+    fotoSekolah: SPPG_ASSET_MAP.sekolah_1,
   },
   {
     id: 'SKL-002',
@@ -16,7 +17,7 @@ export const sekolahList: Sekolah[] = [
     nama: 'SDN Cibeunying 02',
     alamat: 'Jl. Cibeunying Kaler, Bandung',
     jumlahSiswa: 210,
-    fotoSekolah: 'https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?w=600&auto=format&fit=crop&q=80',
+    fotoSekolah: SPPG_ASSET_MAP.sekolah_2,
   },
   {
     id: 'SKL-003',
@@ -24,7 +25,7 @@ export const sekolahList: Sekolah[] = [
     nama: 'SMPN 5 Bandung',
     alamat: 'Jl. Sumatera No. 40, Bandung',
     jumlahSiswa: 560,
-    fotoSekolah: 'https://images.unsplash.com/photo-1562774053-701939374585?w=600&auto=format&fit=crop&q=80',
+    fotoSekolah: SPPG_ASSET_MAP.sekolah_3,
   },
   {
     id: 'SKL-004',
@@ -32,7 +33,7 @@ export const sekolahList: Sekolah[] = [
     nama: 'SDN Coblong 03',
     alamat: 'Jl. Ir. H. Djuanda, Bandung',
     jumlahSiswa: 180,
-    fotoSekolah: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&auto=format&fit=crop&q=80',
+    fotoSekolah: SPPG_ASSET_MAP.sekolah_4,
   },
 
   // SPPG-002 — Jakarta Selatan
@@ -42,7 +43,7 @@ export const sekolahList: Sekolah[] = [
     nama: 'SDN Fatmawati 03',
     alamat: 'Jl. Fatmawati Raya, Jakarta Selatan',
     jumlahSiswa: 260,
-    fotoSekolah: 'https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?w=600&auto=format&fit=crop&q=80',
+    fotoSekolah: SPPG_ASSET_MAP.sekolah_5,
   },
   {
     id: 'SKL-006',
@@ -50,7 +51,7 @@ export const sekolahList: Sekolah[] = [
     nama: 'SDN Cipete 01',
     alamat: 'Jl. Cipete Raya, Jakarta Selatan',
     jumlahSiswa: 220,
-    fotoSekolah: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&auto=format&fit=crop&q=80',
+    fotoSekolah: SPPG_ASSET_MAP.sekolah_1,
   },
   {
     id: 'SKL-007',
@@ -58,7 +59,7 @@ export const sekolahList: Sekolah[] = [
     nama: 'SMPN 68 Jakarta',
     alamat: 'Jl. Mahakam, Jakarta Selatan',
     jumlahSiswa: 540,
-    fotoSekolah: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600&auto=format&fit=crop&q=80',
+    fotoSekolah: SPPG_ASSET_MAP.sekolah_2,
   },
   {
     id: 'SKL-008',
@@ -66,7 +67,7 @@ export const sekolahList: Sekolah[] = [
     nama: 'SDN Gandaria 02',
     alamat: 'Jl. Gandaria Tengah, Jakarta Selatan',
     jumlahSiswa: 200,
-    fotoSekolah: 'https://images.unsplash.com/photo-1588072432836-e10032774350?w=600&auto=format&fit=crop&q=80',
+    fotoSekolah: SPPG_ASSET_MAP.sekolah_3,
   },
 
   // SPPG-003 — Surabaya
@@ -76,7 +77,7 @@ export const sekolahList: Sekolah[] = [
     nama: 'SDN Kenjeran 01',
     alamat: 'Jl. Kenjeran No. 88, Surabaya',
     jumlahSiswa: 230,
-    fotoSekolah: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=600&auto=format&fit=crop&q=80',
+    fotoSekolah: SPPG_ASSET_MAP.sekolah_4,
   },
   {
     id: 'SKL-010',
@@ -84,7 +85,7 @@ export const sekolahList: Sekolah[] = [
     nama: 'SDN Kenjeran 02',
     alamat: 'Jl. Kenjeran No. 102, Surabaya',
     jumlahSiswa: 195,
-    fotoSekolah: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=600&auto=format&fit=crop&q=80',
+    fotoSekolah: SPPG_ASSET_MAP.sekolah_5,
   },
   {
     id: 'SKL-011',
@@ -92,7 +93,7 @@ export const sekolahList: Sekolah[] = [
     nama: 'SMPN 12 Surabaya',
     alamat: 'Jl. Tambak Rejo, Surabaya',
     jumlahSiswa: 510,
-    fotoSekolah: 'https://images.unsplash.com/photo-1562774053-701939374585?w=600&auto=format&fit=crop&q=80',
+    fotoSekolah: SPPG_ASSET_MAP.sekolah_1,
   },
   {
     id: 'SKL-012',
@@ -100,7 +101,7 @@ export const sekolahList: Sekolah[] = [
     nama: 'SDN Tambaksari 04',
     alamat: 'Jl. Tambaksari, Surabaya',
     jumlahSiswa: 175,
-    fotoSekolah: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&auto=format&fit=crop&q=80',
+    fotoSekolah: SPPG_ASSET_MAP.sekolah_2,
   },
 
   // SPPG-004 — Bekasi
@@ -110,7 +111,7 @@ export const sekolahList: Sekolah[] = [
     nama: 'SDN Margahayu 01',
     alamat: 'Jl. Margahayu Raya, Bekasi',
     jumlahSiswa: 250,
-    fotoSekolah: 'https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?w=600&auto=format&fit=crop&q=80',
+    fotoSekolah: SPPG_ASSET_MAP.sekolah_3,
   },
   {
     id: 'SKL-014',
@@ -118,7 +119,7 @@ export const sekolahList: Sekolah[] = [
     nama: 'SDN Margahayu 02',
     alamat: 'Jl. Margahayu Tengah, Bekasi',
     jumlahSiswa: 205,
-    fotoSekolah: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&auto=format&fit=crop&q=80',
+    fotoSekolah: SPPG_ASSET_MAP.sekolah_4,
   },
   {
     id: 'SKL-015',
@@ -126,7 +127,7 @@ export const sekolahList: Sekolah[] = [
     nama: 'SMPN 3 Bekasi',
     alamat: 'Jl. Ahmad Yani, Bekasi',
     jumlahSiswa: 480,
-    fotoSekolah: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600&auto=format&fit=crop&q=80',
+    fotoSekolah: SPPG_ASSET_MAP.sekolah_5,
   },
   {
     id: 'SKL-016',
@@ -134,6 +135,6 @@ export const sekolahList: Sekolah[] = [
     nama: 'SDN Bekasi Jaya 05',
     alamat: 'Jl. Bekasi Jaya, Bekasi',
     jumlahSiswa: 190,
-    fotoSekolah: 'https://images.unsplash.com/photo-1588072432836-e10032774350?w=600&auto=format&fit=crop&q=80',
+    fotoSekolah: SPPG_ASSET_MAP.sekolah_1,
   },
 ];

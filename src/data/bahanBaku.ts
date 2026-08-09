@@ -1,4 +1,5 @@
 import { BahanBaku } from '../types';
+import { SPPG_ASSET_MAP } from './sppgAssetMap';
 
 export const bahanBakuList: BahanBaku[] = [
   {
@@ -12,7 +13,7 @@ export const bahanBakuList: BahanBaku[] = [
     lokasiRak: 'Rak A-1',
     tanggalKadaluarsa: '2026-12-01',
     mitraId: 'MITRA-003',
-    fotoBahan: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&auto=format&fit=crop&q=80',
+    fotoBahan: SPPG_ASSET_MAP.paket_nasi_liwet,
   },
   {
     id: 'BHN-002',
@@ -25,7 +26,7 @@ export const bahanBakuList: BahanBaku[] = [
     lokasiRak: 'Freezer 1',
     tanggalKadaluarsa: '2026-08-11',
     mitraId: 'MITRA-002',
-    fotoBahan: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=600&auto=format&fit=crop&q=80',
+    fotoBahan: SPPG_ASSET_MAP.lh01_ayam_bakar,
   },
   {
     id: 'BHN-003',
@@ -38,7 +39,7 @@ export const bahanBakuList: BahanBaku[] = [
     lokasiRak: 'Kulkas Sayur',
     tanggalKadaluarsa: '2026-08-10',
     mitraId: 'MITRA-004',
-    fotoBahan: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=600&auto=format&fit=crop&q=80',
+    fotoBahan: SPPG_ASSET_MAP.sy01_bayam,
   },
   {
     id: 'BHN-004',
@@ -51,7 +52,7 @@ export const bahanBakuList: BahanBaku[] = [
     lokasiRak: 'Rak B-2',
     tanggalKadaluarsa: '2027-01-15',
     mitraId: 'MITRA-006',
-    fotoBahan: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=600&auto=format&fit=crop&q=80',
+    fotoBahan: SPPG_ASSET_MAP.np01_tempe_orek,
   },
   {
     id: 'BHN-005',
@@ -64,7 +65,7 @@ export const bahanBakuList: BahanBaku[] = [
     lokasiRak: 'Rak C-1',
     tanggalKadaluarsa: '2026-08-20',
     mitraId: 'MITRA-007',
-    fotoBahan: 'https://images.unsplash.com/photo-1506976785307-8732e854ad03?w=600&auto=format&fit=crop&q=80',
+    fotoBahan: SPPG_ASSET_MAP.lh07_telur_balado,
   },
   {
     id: 'BHN-006',
@@ -77,7 +78,7 @@ export const bahanBakuList: BahanBaku[] = [
     lokasiRak: 'Rak A-1',
     tanggalKadaluarsa: '2026-11-01',
     mitraId: 'MITRA-003',
-    fotoBahan: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&auto=format&fit=crop&q=80',
+    fotoBahan: SPPG_ASSET_MAP.paket_nasi_kuning,
   },
   {
     id: 'BHN-007',
@@ -90,7 +91,7 @@ export const bahanBakuList: BahanBaku[] = [
     lokasiRak: 'Freezer 1',
     tanggalKadaluarsa: '2026-08-12',
     mitraId: 'MITRA-002',
-    fotoBahan: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=600&auto=format&fit=crop&q=80',
+    fotoBahan: SPPG_ASSET_MAP.lh04_ayam_goreng,
   },
   {
     id: 'BHN-008',
@@ -103,7 +104,7 @@ export const bahanBakuList: BahanBaku[] = [
     lokasiRak: 'Kulkas Sayur',
     tanggalKadaluarsa: '2026-08-09',
     mitraId: 'MITRA-008',
-    fotoBahan: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=600&auto=format&fit=crop&q=80',
+    fotoBahan: SPPG_ASSET_MAP.sy02_sup_wortel,
   },
   {
     id: 'BHN-009',
@@ -116,7 +117,7 @@ export const bahanBakuList: BahanBaku[] = [
     lokasiRak: 'Rak A-2',
     tanggalKadaluarsa: '2026-10-15',
     mitraId: 'MITRA-003',
-    fotoBahan: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&auto=format&fit=crop&q=80',
+    fotoBahan: SPPG_ASSET_MAP.paket_nasi_uduk,
   },
   {
     id: 'BHN-010',
@@ -129,33 +130,33 @@ export const bahanBakuList: BahanBaku[] = [
     lokasiRak: 'Rak B-1',
     tanggalKadaluarsa: '2027-02-01',
     mitraId: null,
-    fotoBahan: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=600&auto=format&fit=crop&q=80',
+    fotoBahan: SPPG_ASSET_MAP.np04_sambal_goreng,
   },
   {
     id: 'BHN-011',
     sppgId: 'SPPG-001',
-    nama: 'Roti Tawar Khas Nusantara',
+    nama: 'Susu UHT Segar MBG',
     satuan: 'pack',
-    stok: 45,
-    ambangMinimum: 20,
+    stok: 450,
+    ambangMinimum: 100,
     kategori: 'lainnya',
     lokasiRak: 'Rak D-1',
-    tanggalKadaluarsa: '2026-08-11',
+    tanggalKadaluarsa: '2026-08-30',
     mitraId: 'MITRA-001',
-    fotoBahan: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop&q=80',
+    fotoBahan: SPPG_ASSET_MAP.susu_uht,
   },
   {
     id: 'BHN-012',
     sppgId: 'SPPG-002',
-    nama: 'Roti Tawar Gandum Utuh',
-    satuan: 'pack',
-    stok: 30,
-    ambangMinimum: 15,
-    kategori: 'lainnya',
+    nama: 'Buah Pisang Ambon Manis',
+    satuan: 'sisir',
+    stok: 80,
+    ambangMinimum: 30,
+    kategori: 'sayur_buah',
     lokasiRak: 'Rak D-1',
     tanggalKadaluarsa: '2026-08-13',
     mitraId: 'MITRA-001',
-    fotoBahan: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop&q=80',
+    fotoBahan: SPPG_ASSET_MAP.buah_pisang,
   },
   {
     id: 'BHN-013',
@@ -168,6 +169,6 @@ export const bahanBakuList: BahanBaku[] = [
     lokasiRak: 'Gudang Kemasan',
     tanggalKadaluarsa: null,
     mitraId: 'MITRA-005',
-    fotoBahan: 'https://images.unsplash.com/photo-1615719413546-198b25453f85?w=600&auto=format&fit=crop&q=80',
+    fotoBahan: SPPG_ASSET_MAP.tray_1,
   },
 ];

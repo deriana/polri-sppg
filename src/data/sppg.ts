@@ -1,4 +1,5 @@
 import { Sppg } from '../types';
+import { SPPG_ASSET_MAP } from './sppgAssetMap';
 
 export const sppgList: Sppg[] = [
   {
@@ -8,7 +9,7 @@ export const sppgList: Sppg[] = [
     wilayahPolres: 'Polrestabes Bandung',
     wilayahPolda: 'Polda Jawa Barat',
     kapasitasProduksi: 1500,
-    fotoDapur: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&auto=format&fit=crop&q=80',
+    fotoDapur: SPPG_ASSET_MAP.sppg_1,
     status: 'aktif',
   },
   {
@@ -18,7 +19,7 @@ export const sppgList: Sppg[] = [
     wilayahPolres: 'Polres Metro Jakarta Selatan',
     wilayahPolda: 'Polda Metro Jaya',
     kapasitasProduksi: 2000,
-    fotoDapur: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=800&auto=format&fit=crop&q=80',
+    fotoDapur: SPPG_ASSET_MAP.sppg_2,
     status: 'aktif',
   },
   {
@@ -28,7 +29,7 @@ export const sppgList: Sppg[] = [
     wilayahPolres: 'Polrestabes Surabaya',
     wilayahPolda: 'Polda Jawa Timur',
     kapasitasProduksi: 1200,
-    fotoDapur: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80',
+    fotoDapur: SPPG_ASSET_MAP.sppg_3,
     status: 'aktif',
   },
   {
@@ -38,7 +39,7 @@ export const sppgList: Sppg[] = [
     wilayahPolres: 'Polres Metro Bekasi',
     wilayahPolda: 'Polda Metro Jaya',
     kapasitasProduksi: 1000,
-    fotoDapur: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=800&auto=format&fit=crop&q=80',
+    fotoDapur: SPPG_ASSET_MAP.suasana_sppg_1,
     status: 'aktif',
   },
   {
@@ -48,7 +49,7 @@ export const sppgList: Sppg[] = [
     wilayahPolres: 'Polrestabes Semarang',
     wilayahPolda: 'Polda Jawa Tengah',
     kapasitasProduksi: 1800,
-    fotoDapur: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&auto=format&fit=crop&q=80',
+    fotoDapur: SPPG_ASSET_MAP.suasana_sppg_2,
     status: 'aktif',
   },
   {
@@ -58,7 +59,7 @@ export const sppgList: Sppg[] = [
     wilayahPolres: 'Polrestabes Medan',
     wilayahPolda: 'Polda Sumatera Utara',
     kapasitasProduksi: 1600,
-    fotoDapur: 'https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=800&auto=format&fit=crop&q=80',
+    fotoDapur: SPPG_ASSET_MAP.suasana_sppg_3,
     status: 'aktif',
   },
 ];
