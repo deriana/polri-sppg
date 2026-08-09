@@ -15,7 +15,8 @@ export const CCTV_FEEDS = [
     id: 'cctv_1',
     label: 'Kamera 1 - Area Pemasakan Dapur Utama',
     videoUrl: 'https://youtu.be/C_OJtQMU52Y?si=CYYSLCTY4sbjK2FE',
-    embedUrl: 'https://www.youtube.com/embed/C_OJtQMU52Y?autoplay=1&mute=1&loop=1&playlist=C_OJtQMU52Y',
+    embedUrl: 'https://www.youtube-nocookie.com/embed/C_OJtQMU52Y?autoplay=1&mute=1&loop=1&playlist=C_OJtQMU52Y&playsinline=1&enablejsapi=1&origin=https://www.youtube.com',
+    mp4Url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
     thumbnail: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'APD Lengkap (99.4%)',
@@ -24,7 +25,8 @@ export const CCTV_FEEDS = [
     id: 'cctv_2',
     label: 'Kamera 2 - Gudang Penyimpanan Cold Room',
     videoUrl: 'https://youtu.be/C_OJtQMU52Y?si=CYYSLCTY4sbjK2FE',
-    embedUrl: 'https://www.youtube.com/embed/C_OJtQMU52Y?autoplay=1&mute=1&loop=1&playlist=C_OJtQMU52Y',
+    embedUrl: 'https://www.youtube-nocookie.com/embed/C_OJtQMU52Y?autoplay=1&mute=1&loop=1&playlist=C_OJtQMU52Y&playsinline=1&enablejsapi=1&origin=https://www.youtube.com',
+    mp4Url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
     thumbnail: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'Suhu 4.2°C (Aman)',
@@ -33,7 +35,8 @@ export const CCTV_FEEDS = [
     id: 'cctv_3',
     label: 'Kamera 3 - Area Pemorsian & Packaging',
     videoUrl: 'https://youtu.be/C_OJtQMU52Y?si=CYYSLCTY4sbjK2FE',
-    embedUrl: 'https://www.youtube.com/embed/C_OJtQMU52Y?autoplay=1&mute=1&loop=1&playlist=C_OJtQMU52Y',
+    embedUrl: 'https://www.youtube-nocookie.com/embed/C_OJtQMU52Y?autoplay=1&mute=1&loop=1&playlist=C_OJtQMU52Y&playsinline=1&enablejsapi=1&origin=https://www.youtube.com',
+    mp4Url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
     thumbnail: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'Higienis Sanitasi 98%',
@@ -42,7 +45,8 @@ export const CCTV_FEEDS = [
     id: 'cctv_4',
     label: 'Kamera 4 - Loading Dock & Washing Bay',
     videoUrl: 'https://youtu.be/C_OJtQMU52Y?si=CYYSLCTY4sbjK2FE',
-    embedUrl: 'https://www.youtube.com/embed/C_OJtQMU52Y?autoplay=1&mute=1&loop=1&playlist=C_OJtQMU52Y',
+    embedUrl: 'https://www.youtube-nocookie.com/embed/C_OJtQMU52Y?autoplay=1&mute=1&loop=1&playlist=C_OJtQMU52Y&playsinline=1&enablejsapi=1&origin=https://www.youtube.com',
+    mp4Url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
     thumbnail: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600&auto=format&fit=crop&q=80',
     fps: '30 FPS',
     aiStatus: 'Armada Ready (Ompreng In)',
@@ -55,6 +59,7 @@ export default function CctvMonitorScreen() {
   const { colors, spacing, fontSize, iconStrokeWidth, radius } = useTheme();
 
   const [activeFeed, setActiveFeed] = useState<typeof CCTV_FEEDS[0] | null>(null);
+  const [streamSourceMode, setStreamSourceMode] = useState<'youtube' | 'mp4'>('youtube');
 
   const eventsInScope = useMemo(() => scopeCctvEvents(sppgInScope, cctvEvents), [sppgInScope, cctvEvents]);
   const sorted = useMemo(
@@ -149,14 +154,72 @@ export default function CctvMonitorScreen() {
 
             {activeFeed && (
               <View style={{ gap: spacing.sm, marginTop: 10 }}>
-                {/* YouTube Video WebView Player */}
+                {/* Source Mode Switcher */}
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <Pressable
+                    onPress={() => setStreamSourceMode('youtube')}
+                    style={{
+                      flex: 1,
+                      paddingVertical: 6,
+                      alignItems: 'center',
+                      borderRadius: radius.sm,
+                      backgroundColor: streamSourceMode === 'youtube' ? colors.primary : colors.background,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                    }}
+                  >
+                    <Text style={{ fontSize: 11, fontWeight: '700', color: streamSourceMode === 'youtube' ? colors.textInverse : colors.text }}>
+                      🔴 YouTube Live
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => setStreamSourceMode('mp4')}
+                    style={{
+                      flex: 1,
+                      paddingVertical: 6,
+                      alignItems: 'center',
+                      borderRadius: radius.sm,
+                      backgroundColor: streamSourceMode === 'mp4' ? colors.primary : colors.background,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                    }}
+                  >
+                    <Text style={{ fontSize: 11, fontWeight: '700', color: streamSourceMode === 'mp4' ? colors.textInverse : colors.text }}>
+                      📹 IP Cam Direct Stream
+                    </Text>
+                  </Pressable>
+                </View>
+
+                {/* Video Player WebView */}
                 <View style={{ width: '100%', height: 230, borderRadius: radius.md, overflow: 'hidden', backgroundColor: '#000' }}>
                   <WebView
-                    source={{ uri: activeFeed.embedUrl }}
+                    source={{
+                      html: `
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+                          <style>
+                            body, html { margin:0; padding:0; width:100%; height:100%; background-color:#000; overflow:hidden; }
+                            iframe, video { width:100%; height:100%; border:0; object-fit:cover; }
+                          </style>
+                        </head>
+                        <body>
+                          ${
+                            streamSourceMode === 'youtube'
+                              ? `<iframe src="${activeFeed.embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`
+                              : `<video src="${activeFeed.mp4Url}" autoplay loop muted playsinline controls></video>`
+                          }
+                        </body>
+                        </html>
+                      `,
+                    }}
                     style={{ flex: 1 }}
                     javaScriptEnabled
                     domStorageEnabled
                     allowsInlineMediaPlayback
+                    mediaPlaybackRequiresUserAction={false}
+                    originWhitelist={['*']}
                   />
                 </View>
 
