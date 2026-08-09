@@ -165,12 +165,39 @@ export default function CctvMonitorScreen() {
                         <head>
                           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
                           <style>
-                            body, html { margin:0; padding:0; width:100%; height:100%; background-color:#000; overflow:hidden; }
-                            video { width:100%; height:100%; border:0; object-fit:cover; }
+                            body, html { margin:0; padding:0; width:100%; height:100%; background-color:#000; overflow:hidden; font-family: monospace, sans-serif; }
+                            .container { position:relative; width:100%; height:100%; }
+                            video { width:100%; height:100%; border:0; object-fit:cover; pointer-events:none; }
+                            .hud-top-left { position:absolute; top:10px; left:10px; color:#ef4444; font-weight:bold; font-size:12px; display:flex; align-items:center; gap:6px; text-shadow:1px 1px 3px #000; }
+                            .rec-dot { width:8px; height:8px; background-color:#ef4444; border-radius:50%; animation: blink 1s infinite; }
+                            @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+                            .hud-top-right { position:absolute; top:10px; right:10px; color:#00ff66; font-size:11px; font-weight:bold; text-shadow:1px 1px 3px #000; background:rgba(0,0,0,0.4); padding:2px 6px; border-radius:4px; }
+                            .hud-bottom-left { position:absolute; bottom:10px; left:10px; color:#ffffff; font-size:11px; font-weight:bold; text-shadow:1px 1px 3px #000; background:rgba(0,0,0,0.5); padding:3px 8px; border-radius:4px; }
+                            .hud-bottom-right { position:absolute; bottom:10px; right:10px; color:#00e5ff; font-size:10px; font-weight:bold; text-shadow:1px 1px 3px #000; background:rgba(0,0,0,0.5); padding:3px 8px; border-radius:4px; }
                           </style>
                         </head>
                         <body>
-                          <video src="${activeFeed.localMp4Url}" autoplay loop muted playsinline controls></video>
+                          <div class="container">
+                            <video src="${activeFeed.localMp4Url}" autoplay loop muted playsinline></video>
+                            <div class="hud-top-left"><div class="rec-dot"></div>● REC LIVE</div>
+                            <div class="hud-top-right" id="clock">2026-08-09 --:--:--</div>
+                            <div class="hud-bottom-left">${activeFeed.label.toUpperCase()}</div>
+                            <div class="hud-bottom-right">1080P 30FPS • AI ACTIVE</div>
+                          </div>
+                          <script>
+                            function updateClock() {
+                              const now = new Date();
+                              const y = now.getFullYear();
+                              const m = String(now.getMonth()+1).padStart(2,'0');
+                              const d = String(now.getDate()).padStart(2,'0');
+                              const hh = String(now.getHours()).padStart(2,'0');
+                              const mm = String(now.getMinutes()).padStart(2,'0');
+                              const ss = String(now.getSeconds()).padStart(2,'0');
+                              document.getElementById('clock').innerText = y + '-' + m + '-' + d + ' ' + hh + ':' + mm + ':' + ss;
+                            }
+                            setInterval(updateClock, 1000);
+                            updateClock();
+                          </script>
                         </body>
                         </html>
                       `,
