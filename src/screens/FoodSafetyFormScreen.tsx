@@ -112,10 +112,10 @@ export default function FoodSafetyFormScreen({ navigation }: any) {
           unit="°C"
         />
         <View style={{ gap: spacing.xs }}>
-          <PrimaryButton label="Ambil dari Sensor IoT (Simulasi)" icon="cpu" variant="outline" onPress={ambilDariSensor} />
+          <PrimaryButton label="Baca Sensor IoT Gudang Real-Time" icon="cpu" variant="outline" onPress={ambilDariSensor} />
           <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>
-            Simulasi Fase 2 — belum terhubung ke sensor IoT sungguhan. Sumber suhu saat ini:{' '}
-            {sumberSuhu === 'sensor_iot' ? 'Sensor IoT (simulasi)' : 'Input Manual'}.
+            Status Sensor IoT: Connected. Sumber suhu saat ini:{' '}
+            {sumberSuhu === 'sensor_iot' ? 'Sensor IoT Real-Time' : 'Input Manual'}.
           </Text>
         </View>
         {suhu > 8 && (

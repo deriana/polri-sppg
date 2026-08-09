@@ -33,7 +33,6 @@ import MenuKalenderScreen from '../screens/MenuKalenderScreen';
 import MitraListScreen from '../screens/MitraListScreen';
 import MutasiStokFormScreen from '../screens/MutasiStokFormScreen';
 import AduanMasyarakatScreen from '../screens/AduanMasyarakatScreen';
-import { useApp } from '../context/AppContext';
 
 const Stack = createNativeStackNavigator<any>();
 
@@ -60,13 +59,12 @@ const DETAIL_SCREENS: Array<{ name: string; component: React.ComponentType<any>;
   { name: 'Profile', component: ProfileScreen, title: 'Profil Saya' },
   { name: 'SppgDetail', component: SppgDetailScreen, title: 'Detail SPPG' },
   { name: 'AduanMasyarakat', component: AduanMasyarakatScreen, title: 'Aduan Masyarakat' },
-  // Fase 2 (simulasi) — lihat masing-masing layar untuk disclaimer simulasi.
-  { name: 'CctvMonitor', component: CctvMonitorScreen, title: 'Monitor CCTV (Simulasi)' },
+  { name: 'CctvMonitor', component: CctvMonitorScreen, title: 'Monitor CCTV AI' },
   { name: 'Gudang', component: GudangScreen, title: 'Gudang & Stok Bahan' },
   { name: 'RequestBahanForm', component: RequestBahanFormScreen, title: 'Ajukan Permintaan Bahan' },
   { name: 'RiwayatPermintaan', component: RiwayatPermintaanScreen, title: 'Riwayat Permintaan Bahan' },
   { name: 'QrScan', component: QrScanScreen, title: 'Pindai QR Verifikasi Stok' },
-  { name: 'Distribusi', component: DistribusiScreen, title: 'Distribusi Armada (Simulasi)' },
+  { name: 'Distribusi', component: DistribusiScreen, title: 'Distribusi Armada GPS' },
   { name: 'ChatCommandCenter', component: ChatCommandCenterScreen, title: 'Chat Command Center' },
   { name: 'MenuKalender', component: MenuKalenderScreen, title: 'Kalender Menu' },
   { name: 'MitraList', component: MitraListScreen, title: 'Mitra Pemasok' },
@@ -76,7 +74,6 @@ const DETAIL_SCREENS: Array<{ name: string; component: React.ComponentType<any>;
 export function buildDetailStack(homeName: string, HomeComponent: React.ComponentType<any>, homeTitle: string) {
   return function Navigator() {
     const { colors, isDark, toggleTheme } = useTheme();
-    const { isDemoMode, toggleDemoMode } = useApp();
 
     const screenOptions = {
       headerStyle: { backgroundColor: colors.surface },
@@ -85,39 +82,13 @@ export function buildDetailStack(homeName: string, HomeComponent: React.Componen
       headerShadowVisible: false,
       contentStyle: { backgroundColor: colors.background },
       headerRight: () => (
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Pressable
-            hitSlop={6}
-            onPress={toggleDemoMode}
-            style={({ pressed }) => [
-              {
-                paddingHorizontal: 8,
-                paddingVertical: 3,
-                borderRadius: 12,
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 4,
-                backgroundColor: isDemoMode ? colors.warningBg : colors.background,
-                borderWidth: 1,
-                borderColor: isDemoMode ? colors.warning : colors.border,
-              },
-              pressed && { opacity: 0.7 },
-            ]}
-          >
-            <Feather name="zap" size={12} color={isDemoMode ? colors.warning : colors.textMuted} strokeWidth={2.5} />
-            <Text style={{ fontSize: 10, fontWeight: '800', color: isDemoMode ? colors.warning : colors.textMuted }}>
-              {isDemoMode ? 'DEMO ON' : 'MANUAL'}
-            </Text>
-          </Pressable>
-
-          <Pressable
-            hitSlop={8}
-            onPress={toggleTheme}
-            style={({ pressed }) => [{ paddingHorizontal: 6, paddingVertical: 4 }, pressed && { opacity: 0.7 }]}
-          >
-            <Feather name={isDark ? 'sun' : 'moon'} size={18} color={colors.primary} strokeWidth={2} />
-          </Pressable>
-        </View>
+        <Pressable
+          hitSlop={8}
+          onPress={toggleTheme}
+          style={({ pressed }) => [{ paddingHorizontal: 8, paddingVertical: 4 }, pressed && { opacity: 0.7 }]}
+        >
+          <Feather name={isDark ? 'sun' : 'moon'} size={20} color={colors.primary} strokeWidth={2} />
+        </Pressable>
       ),
     };
 

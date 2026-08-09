@@ -95,7 +95,7 @@ function AlertPreviewList({ alerts, onSeeAll, onOpen }: { alerts: AlertLog[]; on
 }
 
 export default function DashboardScreen({ navigation }: any) {
-  const { role, currentUser, currentSppg, sppgList, isDemoMode, progressProduksiRealtime, publicReportList } = useApp();
+  const { role, currentUser, currentSppg, sppgList, progressProduksiRealtime, publicReportList } = useApp();
   const { colors, spacing, fontSize, radius, iconStrokeWidth } = useTheme();
   const { laporanInScope, presensiInScope, checklistInScope, alertInScope, usersInScope, sppgInScope } = useScopedData();
   const [pendingCount, setPendingCount] = usePendingSyncCount();
@@ -283,33 +283,28 @@ export default function DashboardScreen({ navigation }: any) {
         </View>
       </View>
 
-      <SyncStatusBadge pendingCount={pendingCount} onSyncPress={handleSync} syncing={syncing} />
-
-      {/* Real-time Production Progress Banner (Feature 13) */}
-      {isDemoMode && (
-        <Card style={{ backgroundColor: colors.surface, borderColor: colors.primary, borderWidth: 1, gap: spacing.xs }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#22C55E' }} />
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.primary }}>
-                PROGRESS PRODUKSI REAL-TIME (SENSOR HITUNG)
-              </Text>
-            </View>
-            <Pill label="Simulasi IoT" tone="primary" icon="zap" />
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
-            <Text style={{ fontSize: 26, fontWeight: '800', color: colors.text }}>
-              {progressProduksiRealtime.toLocaleString('id-ID')}
-            </Text>
-            <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, fontWeight: '600' }}>
-              / {targetKapasitas.toLocaleString('id-ID')} porsi terhitung ({Math.round((progressProduksiRealtime / targetKapasitas) * 100)}%)
+      <Card style={{ backgroundColor: colors.surface, borderColor: colors.primary, borderWidth: 1, gap: spacing.xs }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#22C55E' }} />
+            <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.primary }}>
+              PROGRESS PRODUKSI REAL-TIME (SENSOR HITUNG)
             </Text>
           </View>
-          <View style={{ height: 6, backgroundColor: colors.background, borderRadius: radius.pill, overflow: 'hidden', marginTop: 4 }}>
-            <View style={{ height: '100%', width: `${Math.min(100, Math.round((progressProduksiRealtime / targetKapasitas) * 100))}%`, backgroundColor: colors.primary, borderRadius: radius.pill }} />
-          </View>
-        </Card>
-      )}
+          <Pill label="Sensor Real-Time Live" tone="primary" icon="zap" />
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
+          <Text style={{ fontSize: 26, fontWeight: '800', color: colors.text }}>
+            {progressProduksiRealtime.toLocaleString('id-ID')}
+          </Text>
+          <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, fontWeight: '600' }}>
+            / {targetKapasitas.toLocaleString('id-ID')} porsi terhitung ({Math.round((progressProduksiRealtime / targetKapasitas) * 100)}%)
+          </Text>
+        </View>
+        <View style={{ height: 6, backgroundColor: colors.background, borderRadius: radius.pill, overflow: 'hidden', marginTop: 4 }}>
+          <View style={{ height: '100%', width: `${Math.min(100, Math.round((progressProduksiRealtime / targetKapasitas) * 100))}%`, backgroundColor: colors.primary, borderRadius: radius.pill }} />
+        </View>
+      </Card>
 
       <SectionTitle>Status Hari Ini</SectionTitle>
       <View style={styles.statGrid}>

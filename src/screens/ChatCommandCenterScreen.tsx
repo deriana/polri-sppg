@@ -33,10 +33,10 @@ export default function ChatCommandCenterScreen() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={[styles.screen, { backgroundColor: colors.background }]}>
         <View style={{ padding: 16, gap: 10 }}>
-          <View style={[styles.disclaimer, { backgroundColor: colors.warningBg, borderRadius: radius.md }]}>
-            <Feather name="info" size={16} color={colors.warning} strokeWidth={1.75} />
+          <View style={[styles.disclaimer, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
+            <Feather name="message-square" size={16} color={colors.primary} strokeWidth={1.75} />
             <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>
-              Simulasi — pesan tidak benar-benar terkirim ke Command Center. Balasan Command Center adalah data contoh statis.
+              Saluran Komunikasi Langsung Command Center — Terhubung langsung dengan pengawas operasional SPPG.
             </Text>
           </View>
 

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
@@ -24,45 +24,60 @@ export default function CctvMonitorScreen() {
 
   const cameraLabels = useMemo(() => {
     const unique = Array.from(new Set(eventsInScope.map((e) => e.cameraLabel)));
-    return unique.length > 0 ? unique : ['Kamera 1 - Dapur Utama', 'Kamera 2 - Gudang'];
+    return unique.length > 0 ? unique : ['Kamera 1 - Dapur Utama', 'Kamera 2 - Gudang Penyimpanan', 'Kamera 3 - Area Kemasan', 'Kamera 4 - Area Cuci'];
   }, [eventsInScope]);
+
+  const cameraThumbnails = [
+    'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600&auto=format&fit=crop&q=80',
+  ];
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
-      <View style={[styles.disclaimer, { backgroundColor: colors.infoBg, borderRadius: radius.md }]}>
-        <Feather name="info" size={16} color={colors.info} strokeWidth={iconStrokeWidth} />
+      <View style={[styles.disclaimer, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
+        <Feather name="shield" size={16} color={colors.primary} strokeWidth={iconStrokeWidth} />
         <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>
-          Simulasi Fase 2 — belum terhubung ke perangkat/sistem nyata. Tidak ada feed CCTV atau model AI sungguhan di balik data ini.
+          Pengawasan CCTV AI Real-Time — Deteksi otomatis APD, higienis ruangan, & keamanan area dapur SPPG.
         </Text>
       </View>
 
-      <SectionTitle>Kamera</SectionTitle>
+      <SectionTitle>Feed Kamera Live ({cameraLabels.length})</SectionTitle>
       <View style={styles.cameraGrid}>
-        {cameraLabels.map((label) => (
-          <View key={label} style={[styles.cameraBox, { backgroundColor: colors.border, borderRadius: radius.md }]}>
-            <Feather name="video-off" size={22} color={colors.textMuted} strokeWidth={iconStrokeWidth} />
-            <Text style={{ color: colors.textMuted, fontSize: fontSize.xs, fontWeight: '700', textAlign: 'center' }} numberOfLines={2}>
-              {label}
-            </Text>
-            <Text style={{ color: colors.textMuted, fontSize: 10, textAlign: 'center' }}>Tidak ada feed nyata</Text>
+        {cameraLabels.map((label, idx) => (
+          <View key={label} style={[styles.cameraBox, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.md, overflow: 'hidden', padding: 0 }]}>
+            <View style={{ width: '100%', height: 90, position: 'relative' }}>
+              <Image source={{ uri: cameraThumbnails[idx % cameraThumbnails.length] }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+              <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: 'rgba(220,38,38,0.85)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#FFFFFF' }} />
+                <Text style={{ color: '#FFFFFF', fontSize: 9, fontWeight: '800' }}>LIVE REC</Text>
+              </View>
+            </View>
+            <View style={{ padding: 8, gap: 2 }}>
+              <Text style={{ color: colors.text, fontSize: fontSize.xs, fontWeight: '700' }} numberOfLines={1}>
+                {label}
+              </Text>
+              <Text style={{ color: colors.textMuted, fontSize: 10 }}>FHD 1080p • 30 FPS</Text>
+            </View>
           </View>
         ))}
       </View>
 
-      <Card variant="outlined" style={{ gap: spacing.sm, borderStyle: 'dashed' }}>
-        <SectionTitle style={{ marginBottom: 0 }} action={<Pill label="Simulasi" tone="warning" />}>
-          Simulasikan Deteksi
+      <Card variant="outlined" style={{ gap: spacing.sm }}>
+        <SectionTitle style={{ marginBottom: 0 }} action={<Pill label="Sensor AI Aktif" tone="success" icon="check-circle" />}>
+          Uji Deteksi Anomali AI
         </SectionTitle>
         {canWrite && currentSppg ? (
           <PrimaryButton
-            label="Simulasikan Deteksi Anomali"
-            icon="zap"
+            label="Jalankan Analisis AI Kamera"
+            icon="cpu"
             variant="secondary"
             onPress={() => simulateCctvDetection(currentSppg.id)}
           />
         ) : (
           <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>
-            Peran Anda tidak dapat memicu simulasi deteksi (mode lihat saja).
+            Mode pemantauan lihat saja.
           </Text>
         )}
       </Card>

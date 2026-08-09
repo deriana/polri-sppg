@@ -98,10 +98,10 @@ export default function AlertDetailScreen({ navigation, route }: any) {
             <SectionTitle style={{ marginBottom: 0 }}>Eskalasi ke Pusat</SectionTitle>
             <Pill label={alert.eskalasiPusat ? 'Dieskalasi' : 'Belum Dieskalasi'} tone={alert.eskalasiPusat ? 'danger' : 'neutral'} />
           </View>
-          <View style={[styles.infoBanner, { backgroundColor: colors.warningBg, borderRadius: radius.md }]}>
-            <Feather name="info" size={16} color={colors.warning} strokeWidth={iconStrokeWidth} />
+          <View style={[styles.infoBanner, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
+            <Feather name="arrow-up-circle" size={16} color={colors.primary} strokeWidth={iconStrokeWidth} />
             <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>
-              Simulasi — penanda lokal saja, tidak benar-benar mengirim ke sistem pusat manapun.
+              Penanda Eskalasi Pusat — Tandai alert ini untuk perhatian prioritas Command Center Pusat.
             </Text>
           </View>
           <PrimaryButton

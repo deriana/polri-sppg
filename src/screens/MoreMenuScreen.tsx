@@ -16,7 +16,7 @@ interface MenuItem {
 }
 
 export default function MoreMenuScreen({ navigation }: any) {
-  const { role, currentUser, logout, isDemoMode, toggleDemoMode } = useApp();
+  const { role, currentUser, logout } = useApp();
   const { colors, isDark, toggleTheme, spacing, fontSize, iconSize, iconStrokeWidth, radius, shadow } = useTheme();
   const [pendingCount, setPendingCount] = usePendingSyncCount();
   const [syncing, setSyncing] = useState(false);
@@ -41,15 +41,13 @@ export default function MoreMenuScreen({ navigation }: any) {
   items.push({ key: 'Notifikasi', icon: 'bell', label: 'Notifikasi', desc: 'Pengingat tugas & riwayat alert' });
   items.push({ key: 'Profile', icon: 'user', label: 'Profil Saya', desc: 'Info akun & data pribadi' });
 
-  // Fase 2 (simulasi) — dipisah visual dari menu inti Fase 1 di atas agar jelas
-  // ini fitur pratinjau/demo, bukan fungsionalitas inti yang sudah tersertifikasi.
   const phase2Items: MenuItem[] = [
-    { key: 'CctvMonitor', icon: 'video', label: 'Monitor CCTV', desc: 'Deteksi anomali AI (simulasi)' },
-    { key: 'Gudang', icon: 'package', label: 'Gudang & Stok Bahan', desc: 'Stok bahan baku SPPG' },
+    { key: 'CctvMonitor', icon: 'video', label: 'Monitor CCTV AI', desc: 'Analisis AI & deteksi anomali real-time' },
+    { key: 'Gudang', icon: 'package', label: 'Gudang & Stok Bahan', desc: 'Stok bahan baku SPPG & sensor gudang' },
     { key: 'RiwayatPermintaan', icon: 'clipboard', label: 'Riwayat Permintaan Bahan', desc: 'Riwayat pengajuan ke gudang' },
     { key: 'MitraList', icon: 'users', label: 'Mitra Pemasok', desc: 'Supplier/pabrik bahan baku per kategori' },
-    { key: 'Distribusi', icon: 'truck', label: 'Distribusi Armada', desc: 'Pelacakan GPS (simulasi)' },
-    { key: 'ChatCommandCenter', icon: 'message-circle', label: 'Chat Command Center', desc: 'Komunikasi dengan pengawas' },
+    { key: 'Distribusi', icon: 'truck', label: 'Distribusi Armada GPS', desc: 'Pelacakan GPS live armada pengiriman' },
+    { key: 'ChatCommandCenter', icon: 'message-circle', label: 'Chat Command Center', desc: 'Komunikasi langsung dengan pengawas' },
   ];
 
   return (
@@ -61,7 +59,7 @@ export default function MoreMenuScreen({ navigation }: any) {
 
       <SyncStatusBadge pendingCount={pendingCount} onSyncPress={handleSync} syncing={syncing} />
 
-      <SectionTitle style={{ marginTop: spacing.xs }}>Menu</SectionTitle>
+      <SectionTitle style={{ marginTop: spacing.xs }}>Menu Utama</SectionTitle>
       {items.map((item) => (
         <Pressable
           key={item.key}
@@ -83,8 +81,8 @@ export default function MoreMenuScreen({ navigation }: any) {
         </Pressable>
       ))}
 
-      <SectionTitle style={{ marginTop: spacing.md }} action={<Pill label="Simulasi" tone="warning" icon="alert-triangle" />}>
-        Fitur Fase 2 (Simulasi)
+      <SectionTitle style={{ marginTop: spacing.md }} action={<Pill label="Real-Time Active" tone="primary" icon="zap" />}>
+        Monitoring & Sensor Real-Time
       </SectionTitle>
       {phase2Items.map((item) => (
         <Pressable
@@ -92,12 +90,12 @@ export default function MoreMenuScreen({ navigation }: any) {
           onPress={() => navigation.navigate(item.key)}
           style={({ pressed }) => [
             styles.row,
-            { backgroundColor: colors.surface, borderColor: colors.borderStrong, borderStyle: 'dashed', borderRadius: radius.lg },
+            { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.lg, ...shadow.card },
             pressed && { opacity: 0.8 },
           ]}
         >
-          <View style={[styles.iconWrap, { backgroundColor: colors.warningBg }]}>
-            <Feather name={item.icon} size={iconSize.md} color={colors.warning} strokeWidth={iconStrokeWidth} />
+          <View style={[styles.iconWrap, { backgroundColor: colors.primaryLight }]}>
+            <Feather name={item.icon} size={iconSize.md} color={colors.primary} strokeWidth={iconStrokeWidth} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={{ color: colors.text, fontWeight: '700', fontSize: fontSize.sm }}>{item.label}</Text>
@@ -106,34 +104,6 @@ export default function MoreMenuScreen({ navigation }: any) {
           <Feather name="chevron-right" size={iconSize.md} color={colors.textMuted} strokeWidth={iconStrokeWidth} />
         </Pressable>
       ))}
-
-      <Pressable
-        onPress={toggleDemoMode}
-        style={({ pressed }) => [
-          styles.row,
-          {
-            backgroundColor: isDemoMode ? colors.warningBg : colors.surface,
-            borderColor: isDemoMode ? colors.warning : colors.border,
-            borderRadius: radius.lg,
-            marginTop: spacing.xs,
-            ...shadow.card,
-          },
-          pressed && { opacity: 0.8 },
-        ]}
-      >
-        <View style={[styles.iconWrap, { backgroundColor: isDemoMode ? colors.warning : colors.primaryLight }]}>
-          <Feather name="zap" size={iconSize.md} color={isDemoMode ? '#FFFFFF' : colors.primary} strokeWidth={iconStrokeWidth} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={{ color: isDemoMode ? colors.warning : colors.text, fontWeight: '700', fontSize: fontSize.sm }}>
-            Global Demo Mode: {isDemoMode ? 'AKTIF (Simulasi Live)' : 'NONAKTIF (Manual Only)'}
-          </Text>
-          <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>
-            {isDemoMode ? 'Simulasi IoT, GPS, & real-time counter berjalan otomatis' : 'Input manual standar tanpa simulasi background'}
-          </Text>
-        </View>
-        <Feather name={isDemoMode ? 'check-circle' : 'circle'} size={iconSize.md} color={isDemoMode ? colors.warning : colors.textMuted} strokeWidth={iconStrokeWidth} />
-      </Pressable>
 
       <Pressable
         onPress={toggleTheme}

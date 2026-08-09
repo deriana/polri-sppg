@@ -30,7 +30,7 @@ const STATUS_LABEL: Record<PublicReportStatus, string> = {
 };
 
 export default function AduanMasyarakatScreen() {
-  const { publicReportList, sppgList, submitPublicReport, updatePublicReportStatus, currentSppg, isDemoMode } = useApp();
+  const { publicReportList, sppgList, submitPublicReport, updatePublicReportStatus, currentSppg } = useApp();
   const { colors, fontSize, iconStrokeWidth, radius, spacing } = useTheme();
 
   const [activeTab, setActiveTab] = useState<string>('semua');
@@ -105,14 +105,12 @@ export default function AduanMasyarakatScreen() {
             </View>
           </View>
 
-          {isDemoMode && (
-            <View style={[styles.demoBadge, { backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: radius.sm }]}>
-              <Feather name="zap" size={12} color="#FDE047" strokeWidth={2} />
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.textInverse }}>
-                DEMO SIMULASI ACTIVE — Form Publik Real-Time Connected
-              </Text>
-            </View>
-          )}
+          <View style={[styles.demoBadge, { backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: radius.sm }]}>
+            <Feather name="check-circle" size={12} color="#FDE047" strokeWidth={2} />
+            <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.textInverse }}>
+              Portal Pengaduan Publik Real-Time Connected
+            </Text>
+          </View>
         </Card>
 
         {/* Action Bar */}

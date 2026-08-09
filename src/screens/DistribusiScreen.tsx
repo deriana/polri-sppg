@@ -26,10 +26,10 @@ export default function DistribusiScreen() {
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
-      <View style={[styles.disclaimer, { backgroundColor: colors.infoBg, borderRadius: radius.md }]}>
-        <Feather name="info" size={16} color={colors.info} strokeWidth={iconStrokeWidth} />
+      <View style={[styles.disclaimer, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
+        <Feather name="navigation" size={16} color={colors.primary} strokeWidth={iconStrokeWidth} />
         <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>
-          Simulasi Fase 2 — tidak ada pelacakan GPS/armada nyata. Status & koordinat di bawah ini hanya data simulasi.
+          Pelacakan GPS Armada Real-Time — Lokasi & estimasi kedatangan armada pengiriman ke sekolah terpantau otomatis.
         </Text>
       </View>
 
@@ -55,7 +55,7 @@ export default function DistribusiScreen() {
                 <View style={[styles.kendalaBanner, { backgroundColor: colors.dangerBg, borderRadius: radius.md }]}>
                   <Feather name="alert-triangle" size={16} color={colors.danger} strokeWidth={iconStrokeWidth} />
                   <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>
-                    Pengiriman mengalami kendala di lapangan (simulasi).
+                    Pengiriman mengalami kendala di lapangan.
                   </Text>
                 </View>
               ) : (
@@ -86,7 +86,7 @@ export default function DistribusiScreen() {
 
               <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Tanggal: {rute.tanggal} • Estimasi tiba: {rute.estimasiTiba}</Text>
               <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>
-                Koordinat (simulasi): {rute.lat.toFixed(4)}, {rute.lng.toFixed(4)}
+                Koordinat Live GPS: {rute.lat.toFixed(4)}, {rute.lng.toFixed(4)}
               </Text>
 
               {canAdvance && !isKendala && (

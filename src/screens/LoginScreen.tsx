@@ -132,7 +132,7 @@ export default function LoginScreen() {
         </Card>
 
         <Text style={[styles.footnote, { color: colors.textMuted, fontSize: fontSize.xs }]}>
-          Prototipe SIGAP SPPG — data & akun demo bersifat simulasi lokal.
+          SIGAP SPPG — Sistem Informasi & Pengawasan Dapur Satuan Pemenuhan Gizi Polri
         </Text>
       </ScrollView>
 

@@ -62,9 +62,6 @@ function nowTime(): string {
 }
 
 interface AppContextValue {
-  isDemoMode: boolean;
-  toggleDemoMode: () => void;
-  setDemoMode: (val: boolean) => void;
   progressProduksiRealtime: number;
   role: Role | null;
   loggedIn: boolean;
@@ -82,17 +79,14 @@ interface AppContextValue {
   publicReportList: PublicReport[];
   submitPublicReport: (report: Omit<PublicReport, 'id' | 'timestamp' | 'status'>) => void;
   updatePublicReportStatus: (id: string, status: PublicReport['status'], tanggapan?: string) => void;
-  // Fase 2 (simulasi) — lihat catatan di masing-masing action di bawah.
   cctvEvents: CctvEvent[];
   bahanBakuList: BahanBaku[];
   permintaanBahanList: PermintaanBahan[];
   distribusiList: DistribusiRute[];
   chatMessages: ChatMessage[];
-  // Menu Kalender (Fase C)
   sekolahList: Sekolah[];
   menuHarianPlanList: MenuHarianPlan[];
   setMenuForDate: (sppgId: string, tanggal: string, menu: string, kategoriGizi?: string) => void;
-  // Phase D — mitra/pemasok (referensi bersama, tidak di-scope per SPPG) & ledger mutasi stok.
   mitraList: Mitra[];
   mutasiStokList: MutasiStok[];
   catatMutasiStok: (payload: Omit<MutasiStok, 'id' | 'tanggal'>) => void;
@@ -120,7 +114,6 @@ interface AppContextValue {
 const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [isDemoMode, setIsDemoMode] = useState<boolean>(true);
   const [progressProduksiRealtime, setProgressProduksiRealtime] = useState<number>(1240);
   const [publicReportList, setPublicReportList] = useState<PublicReport[]>(initialPublicReports);
   const [role, setRole] = useState<Role | null>(null);
@@ -143,9 +136,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [mitraList, setMitraList] = useState<Mitra[]>(initialMitra);
   const [mutasiStokList, setMutasiStokList] = useState<MutasiStok[]>(initialMutasiStok);
 
-  const toggleDemoMode = () => setIsDemoMode((v) => !v);
-  const setDemoMode = (val: boolean) => setIsDemoMode(val);
-
   const submitPublicReport: AppContextValue['submitPublicReport'] = (report) => {
     const id = `REP-${String(publicReportList.length + 1).padStart(3, '0')}`;
     setPublicReportList((prev) => [
@@ -166,7 +156,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    if (!isDemoMode) return;
     const interval = setInterval(() => {
       // 1. Live auto-increment production counter
       setProgressProduksiRealtime((prev) => prev + Math.floor(Math.random() * 4) + 1);
@@ -197,7 +186,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [isDemoMode]);
+  }, []);
 
   const currentSppg = useMemo(
     () => sppgList.find((s) => s.id === currentUser?.sppgId) ?? null,
@@ -458,9 +447,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo(
     () => ({
-      isDemoMode,
-      toggleDemoMode,
-      setDemoMode,
       progressProduksiRealtime,
       role,
       loggedIn,
@@ -510,7 +496,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       eskalasiAlert,
     }),
     [
-      isDemoMode,
       progressProduksiRealtime,
       publicReportList,
       role,
