@@ -36,6 +36,7 @@ import UsulanMenuFormScreen from '../screens/UsulanMenuFormScreen';
 import PayrollScreen from '../screens/PayrollScreen';
 import PayrollDetailScreen from '../screens/PayrollDetailScreen';
 import SekolahFormScreen from '../screens/SekolahFormScreen';
+import GudangKondisiScreen from '../screens/GudangKondisiScreen';
 import ChatCommandCenterScreen from '../screens/ChatCommandCenterScreen';
 import MenuKalenderScreen from '../screens/MenuKalenderScreen';
 import MitraListScreen from '../screens/MitraListScreen';
@@ -86,6 +87,7 @@ const DETAIL_SCREENS: Array<{ name: string; component: React.ComponentType<any>;
   { name: 'Payroll', component: PayrollScreen, title: 'Payroll & Slip Gaji' },
   { name: 'PayrollDetail', component: PayrollDetailScreen, title: 'Slip Gaji Pegawai' },
   { name: 'SekolahForm', component: SekolahFormScreen, title: 'Tambah Sekolah Afiliasi' },
+  { name: 'GudangKondisi', component: GudangKondisiScreen, title: 'Kondisi Gudang' },
   { name: 'ChatCommandCenter', component: ChatCommandCenterScreen, title: 'Chat Command Center' },
   { name: 'MenuKalender', component: MenuKalenderScreen, title: 'Kalender Menu' },
   { name: 'MasterMenu', component: MasterMenuScreen, title: 'Master Katalog & Resep Gizi' },

@@ -50,6 +50,7 @@ export default function MoreMenuScreen({ navigation }: any) {
     { key: 'Peralatan', icon: 'truck', label: 'Peralatan & Aset Dapur', desc: 'Armada mobil, ompreng stainless, & thermal box' },
     { key: 'CctvMonitor', icon: 'video', label: 'Monitor CCTV AI', desc: 'Analisis AI & deteksi anomali real-time' },
     { key: 'Gudang', icon: 'package', label: 'Gudang & Stok Bahan', desc: 'Stok bahan baku SPPG & sensor gudang' },
+    { key: 'GudangKondisi', icon: 'thermometer', label: 'Kondisi Gudang', desc: 'Suhu cold storage, ringkasan stok, & CCTV area gudang' },
     { key: 'RiwayatPermintaan', icon: 'clipboard', label: 'Riwayat Permintaan Bahan', desc: 'Riwayat pengajuan ke gudang' },
     { key: 'MitraList', icon: 'users', label: 'Mitra Pemasok', desc: 'Supplier/pabrik bahan baku per kategori' },
     { key: 'Distribusi', icon: 'truck', label: 'Distribusi Armada GPS', desc: 'Pelacakan GPS live armada pengiriman' },

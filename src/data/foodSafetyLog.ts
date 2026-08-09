@@ -22,6 +22,7 @@ export const foodSafetyList: FoodSafetyLog[] = [
     jenisMakanan: 'nasi',
     estimasiKadaluarsa: '2026-08-08 10:00',
     statusKadaluarsa: 'aman',
+    sumberSuhu: 'sensor_iot',
   },
   {
     id: 'FSL-002',
