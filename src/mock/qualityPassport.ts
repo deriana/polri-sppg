@@ -7,7 +7,7 @@ export const INITIAL_QUALITY_PASSPORTS: FoodQualityPassport[] = [
     sppgId: 'SPPG-001',
     tanggal: '2026-08-15',
     menuNama: 'Nasi Pulen, Ayam Kecap Gurih, Sayur Sop Segar, & Semangka',
-    score: 96,
+    score: 98,
     grade: 'A+',
     verifierName: 'Dr. Tri Wibowo, S.Gz',
     verifierRole: 'Ahli Gizi SPPG',

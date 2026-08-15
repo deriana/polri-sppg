@@ -142,6 +142,59 @@ export default function KandunganGiziHarianScreen({ navigation }: any) {
           </Text>
         </View>
 
+        {/* Quick QC & Passport Gate Hub */}
+        <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
+          <Pressable
+            onPress={() => navigation.navigate('FoodQualityPassport')}
+            style={({ pressed }) => [
+              {
+                flex: 1,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 8,
+                padding: 10,
+                backgroundColor: isDark ? 'rgba(16,185,129,0.15)' : '#ECFDF5',
+                borderRadius: radius.md,
+                borderWidth: 1,
+                borderColor: colors.success,
+              },
+              pressed && { opacity: 0.8 },
+            ]}
+          >
+            <Feather name="award" size={16} color={colors.success} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 11, fontWeight: '900', color: colors.success }}>Paspor Mutu Porsi</Text>
+              <Text style={{ fontSize: 9.5, color: colors.textMuted }}>Sertifikat 6 Parameter (98/100)</Text>
+            </View>
+            <Feather name="chevron-right" size={14} color={colors.success} />
+          </Pressable>
+
+          <Pressable
+            onPress={() => navigation.navigate('ProduksiList')}
+            style={({ pressed }) => [
+              {
+                flex: 1,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 8,
+                padding: 10,
+                backgroundColor: isDark ? 'rgba(59,130,246,0.15)' : '#EFF6FF',
+                borderRadius: radius.md,
+                borderWidth: 1,
+                borderColor: colors.primary,
+              },
+              pressed && { opacity: 0.8 },
+            ]}
+          >
+            <Feather name="shield" size={16} color={colors.primary} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 11, fontWeight: '900', color: colors.primary }}>Uji QC Masakan</Text>
+              <Text style={{ fontSize: 9.5, color: colors.textMuted }}>Approval Gate Batch 1 & 2</Text>
+            </View>
+            <Feather name="chevron-right" size={14} color={colors.primary} />
+          </Pressable>
+        </View>
+
         {/* Tab Segment Controls */}
         <View style={[styles.segmentContainer, { backgroundColor: colors.surface, borderRadius: radius.md }]}>
           <Pressable

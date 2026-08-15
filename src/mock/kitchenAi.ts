@@ -1,7 +1,7 @@
 import { AiKitchenEarlyWarning, CostPerMealBreakdown, KitchenReadinessScore } from '../types';
 
 export const INITIAL_KITCHEN_READINESS: KitchenReadinessScore = {
-  score: 97.4,
+  score: 98.4,
   grade: 'SANGAT PRIMA',
   subScores: {
     presensiTim: 100,

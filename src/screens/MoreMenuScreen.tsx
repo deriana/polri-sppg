@@ -74,6 +74,8 @@ export default function MoreMenuScreen({ navigation }: any) {
     phase2Items.push({ key: 'ChatCommandCenter', icon: 'message-circle', label: 'Chat Command Center', desc: 'Komunikasi langsung dengan pengawas' });
   } else if (role === 'AHLI_GIZI') {
     operasionalItems.push({ key: 'KandunganGiziHarian', icon: 'activity', label: 'Evaluasi Kandungan Gizi (AKG BGN)', desc: 'Input kandungan energi pokok, makronutrien, & sertifikasi gizi harian' });
+    operasionalItems.push({ key: 'FoodQualityPassport', icon: 'award', label: 'Paspor Mutu Porsi (Quality Passport)', desc: 'Sertifikasi mutu 6 parameter: organoleptik, suhu, gramasi, & segel' });
+    operasionalItems.push({ key: 'ProduksiList', icon: 'shield', label: 'Uji Kelayakan Masak & Approval QC', desc: 'Verifikasi status QC masakan batch 1 & 2 sebelum pemorsian' });
     operasionalItems.push({ key: 'MasterMenu', icon: 'book-open', label: 'Master Katalog & Resep Gizi', desc: 'Kelola master resep makanan, standar AKG, & porsi' });
     operasionalItems.push({ key: 'MenuKalender', icon: 'calendar', label: 'Kalender Menu Harian', desc: 'Tinjau kalender menu terencana per tanggal' });
     operasionalItems.push({ key: 'UsulanMenu', icon: 'edit-3', label: 'Usulan Menu Sekolah', desc: 'Evaluasi usulan menu bergizi dari pihak sekolah' });
@@ -81,6 +83,7 @@ export default function MoreMenuScreen({ navigation }: any) {
     operasionalItems.push({ key: 'IncidentList', icon: 'alert-octagon', label: 'Manajemen Insiden Lapangan', desc: 'Lapor & pantau insiden kelayakan pangan' });
     operasionalItems.push({ key: 'Notifikasi', icon: 'bell', label: 'Notifikasi & Alarm', desc: 'Pengingat tugas & info gizi' });
 
+    phase2Items.push({ key: 'BatchTraceability', icon: 'archive', label: 'Lacak Rantai Pangan (Traceability)', desc: 'Pelacakan asal-usul bahan baku hingga porsi meja siswa' });
     phase2Items.push({ key: 'GudangKondisi', icon: 'thermometer', label: 'Kondisi Cold Storage IoT', desc: 'Pantau suhu cold storage bahan segar' });
     phase2Items.push({ key: 'ChatCommandCenter', icon: 'message-circle', label: 'Chat Tim Gizi & Komando', desc: 'Koordinasi internal tim dapur' });
   } else if (role === 'CHEF_UTAMA') {
