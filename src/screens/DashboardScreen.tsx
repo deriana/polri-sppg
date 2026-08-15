@@ -1573,13 +1573,15 @@ export default function DashboardScreen({ navigation }: any) {
             borderColor: colors.primary,
             borderWidth: 1.2,
             borderRadius: radius.xl,
-            gap: 8,
+            gap: 10,
           }}
         >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Feather name="cpu" size={15} color={colors.primary} />
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary }}>
+              <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: isDark ? 'rgba(59,130,246,0.25)' : '#DBEAFE', alignItems: 'center', justifyContent: 'center' }}>
+                <Feather name="cpu" size={14} color={colors.primary} />
+              </View>
+              <Text style={{ fontSize: 11, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
                 AI KITCHEN TACTICAL ADVISOR
               </Text>
             </View>
@@ -1594,39 +1596,63 @@ export default function DashboardScreen({ navigation }: any) {
                 key={warn.id}
                 style={{
                   backgroundColor: colors.surface,
-                  borderRadius: radius.md,
-                  padding: 10,
-                  gap: 4,
-                  borderLeftWidth: 3,
+                  borderRadius: radius.lg,
+                  padding: 12,
+                  gap: 8,
+                  borderLeftWidth: 3.5,
                   borderLeftColor: warn.tingkat === 'warning' ? colors.warning : colors.primary,
                   borderWidth: 1,
                   borderColor: colors.border,
                 }}
               >
+                {/* Header row with category pill and timestamp chip */}
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }}>
-                    {warn.pesan}
-                  </Text>
-                  <Text style={{ fontSize: 10, color: colors.textMuted }}>{warn.timestamp}</Text>
+                  <Pill
+                    label={warn.kategori.replace('_', ' ').toUpperCase()}
+                    tone={warn.tingkat === 'warning' ? 'warning' : 'primary'}
+                  />
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.pill }}>
+                    <Feather name="clock" size={10.5} color={colors.textMuted} />
+                    <Text style={{ fontSize: 10.5, fontWeight: '700', color: colors.textMuted }}>
+                      {warn.timestamp}
+                    </Text>
+                  </View>
                 </View>
-                <Text style={{ fontSize: 10.5, color: colors.textMuted, lineHeight: 15 }}>
-                  💡 Rekomendasi: {warn.rekomendasiAksi}
+
+                {/* Main message text */}
+                <Text style={{ fontSize: 12, fontWeight: '800', color: colors.text, lineHeight: 18 }}>
+                  {warn.pesan}
                 </Text>
+
+                {/* Recommendation box */}
+                <View style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : colors.background, padding: 8, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border }}>
+                  <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
+                    💡 <Text style={{ fontWeight: '800', color: colors.text }}>Rekomendasi AI:</Text> {warn.rekomendasiAksi}
+                  </Text>
+                </View>
+
+                {/* Action button */}
                 {warn.actionRoute && warn.actionLabel && (
                   <Pressable
                     onPress={() => navigation.navigate(warn.actionRoute)}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 4,
-                      alignSelf: 'flex-start',
-                      marginTop: 2,
-                    }}
+                    style={({ pressed }) => [
+                      {
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        paddingVertical: 6,
+                        paddingHorizontal: 10,
+                        backgroundColor: isDark ? 'rgba(59,130,246,0.15)' : '#EFF6FF',
+                        borderRadius: radius.md,
+                        marginTop: 2,
+                      },
+                      pressed && { opacity: 0.75 },
+                    ]}
                   >
-                    <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.primary }}>
+                    <Text style={{ fontSize: 11, fontWeight: '800', color: colors.primary }}>
                       {warn.actionLabel}
                     </Text>
-                    <Feather name="arrow-right" size={12} color={colors.primary} />
+                    <Feather name="arrow-right" size={13} color={colors.primary} />
                   </Pressable>
                 )}
               </View>
