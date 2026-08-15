@@ -16,7 +16,10 @@ fi
 echo "Meng-generate proyek native Android..."
 npx expo prebuild --platform android
 
-# 3. Jalankan Gradle assembleRelease
+# 3. Bersihkan aset release lama dan jalankan Gradle assembleRelease
+echo "Membersihkan cache aset bundle release..."
+rm -rf android/app/build/generated/res/createBundleReleaseJsAndAssets android/app/build/intermediates/merged_res/release
+
 echo "Kompilasi biner APK dengan Gradle..."
 cd android
 ./gradlew assembleRelease
