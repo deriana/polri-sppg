@@ -1607,6 +1607,7 @@ export default function DashboardScreen({ navigation }: any) {
   const currentSppgName = currentSppg?.nama ?? sppgList.find((s) => s.id === currentUser.sppgId)?.nama ?? 'SPPG Unit';
   const [isBroadcastHidden, setIsBroadcastHidden] = useState(false);
   const [isWorkflowExpanded, setIsWorkflowExpanded] = useState(false);
+  const [dashboardTab, setDashboardTab] = useState<'operasional' | 'analisis' | 'pemantauan'>('operasional');
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
@@ -1623,192 +1624,540 @@ export default function DashboardScreen({ navigation }: any) {
 
       <SyncStatusBadge pendingCount={pendingCount} onSyncPress={handleSync} syncing={syncing} />
 
-      {/* 2. BROADCAST KOMANDO MABES / BGN (PALING ATAS & BISA DI-HIDE) */}
-      {broadcastInScope.length > 0 && !isBroadcastHidden && (
-        <Card style={{ backgroundColor: isDark ? 'rgba(217,119,6,0.15)' : '#FFFBEB', borderColor: colors.warning, gap: 8, borderWidth: 1.5 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
-              <Feather name="radio" size={16} color={colors.warning} />
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.warning }}>
-                ARAHAN KOMANDO PUSAT (MABES/BGN)
-              </Text>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Pill label={broadcastInScope[0].tingkat.toUpperCase()} tone="warning" />
-              <Pressable
-                onPress={() => setIsBroadcastHidden(true)}
-                hitSlop={8}
-                style={{ padding: 4, borderRadius: 12, backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)' }}
-              >
-                <Feather name="x" size={14} color={colors.textMuted} />
-              </Pressable>
-            </View>
-          </View>
-          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
-            {broadcastInScope[0].judul}
-          </Text>
-          <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
-            {broadcastInScope[0].isi}
-          </Text>
-        </Card>
-      )}
-
-      {broadcastInScope.length > 0 && isBroadcastHidden && (
+      {/* 2. Segmented Navigation Tabs (Menghindari Informasi Berjejal Menumpuk) */}
+      <View
+        style={[
+          styles.dashTabRow,
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+            borderRadius: radius.xl,
+          },
+        ]}
+      >
         <Pressable
-          onPress={() => setIsBroadcastHidden(false)}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4, paddingHorizontal: 6 }}
+          onPress={() => setDashboardTab('operasional')}
+          style={[
+            styles.dashTabBtn,
+            dashboardTab === 'operasional' && {
+              backgroundColor: colors.primary,
+              borderRadius: radius.lg,
+            },
+          ]}
         >
-          <Feather name="radio" size={12} color={colors.warning} />
-          <Text style={{ fontSize: 11, fontWeight: '700', color: colors.warning }}>
-            1 Arahan Mabes Disembunyikan • <Text style={{ textDecorationLine: 'underline' }}>Tampilkan Pengumuman</Text>
+          <Feather
+            name="activity"
+            size={13}
+            color={dashboardTab === 'operasional' ? '#FFF' : colors.textMuted}
+          />
+          <Text
+            style={{
+              fontSize: 11.5,
+              fontWeight: '800',
+              color: dashboardTab === 'operasional' ? '#FFF' : colors.text,
+            }}
+          >
+            Operasional
           </Text>
         </Pressable>
-      )}
 
-      {/* 2.5 SPPG KITCHEN READINESS INDEX BANNER (Modern Multi-Metric Circular Progress Gauge) */}
-      {(isKepala || role === 'AHLI_GIZI') && (
-        <CircularProgressGauge
-          score={kitchenReadinessScore.score}
-          maxScore={100}
-          grade={kitchenReadinessScore.grade}
-          label="Kesiapan & Kepatuhan Dapur MBG Hari Ini"
-          onPress={() => setShowReadinessModal(true)}
-          subScores={[
-            { label: 'Presensi', score: kitchenReadinessScore.subScores.presensiTim },
-            { label: 'SOP Masak', score: kitchenReadinessScore.subScores.produksiSop },
-            { label: 'Food Safety', score: kitchenReadinessScore.subScores.foodSafety },
-            { label: 'Distribusi', score: kitchenReadinessScore.subScores.distribusiArmada },
-            { label: 'Sanitasi', score: kitchenReadinessScore.subScores.sanitasiHigiene },
+        <Pressable
+          onPress={() => setDashboardTab('analisis')}
+          style={[
+            styles.dashTabBtn,
+            dashboardTab === 'analisis' && {
+              backgroundColor: colors.primary,
+              borderRadius: radius.lg,
+            },
           ]}
-        />
-      )}
-
-      {/* 2.55 EXECUTIVE STATISTIK & REKAP BERKALA (Khusus Kepala SPPG) */}
-      {isKepala && (
-        <Card
-          style={{
-            backgroundColor: colors.surface,
-            borderColor: colors.borderStrong,
-            borderWidth: 1,
-            borderRadius: radius.xl,
-            gap: 6,
-          }}
-          onPress={() => navigation.navigate('StatistikEksekutif')}
         >
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
-              <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
-                <Feather name="bar-chart-2" size={18} color={isDark ? colors.gold : colors.primary} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
-                  Laporan Statistik & Rekap Berkala
-                </Text>
-                <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
-                  Executive Summary: kehadiran staf, porsi MBG, insiden, & efisiensi biaya
-                </Text>
-              </View>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <Pill label="Buka Rekap" tone="primary" />
-              <Feather name="chevron-right" size={16} color={colors.textMuted} />
-            </View>
-          </View>
-        </Card>
-      )}
+          <Feather
+            name="cpu"
+            size={13}
+            color={dashboardTab === 'analisis' ? '#FFF' : colors.textMuted}
+          />
+          <Text
+            style={{
+              fontSize: 11.5,
+              fontWeight: '800',
+              color: dashboardTab === 'analisis' ? '#FFF' : colors.text,
+            }}
+          >
+            Kinerja & AI
+          </Text>
+          {aiEarlyWarnings.filter((w) => w.targetRole.includes(role)).length > 0 && (
+            <View style={[styles.tabBadgeDot, { backgroundColor: colors.warning }]} />
+          )}
+        </Pressable>
 
-      {/* 2.6 AI KITCHEN EARLY WARNING & TACTICAL ADVISOR */}
-      {aiEarlyWarnings.filter((w) => w.targetRole.includes(role)).length > 0 && (
-        <Card
-          style={{
-            backgroundColor: isDark ? 'rgba(59,130,246,0.08)' : '#F0F9FF',
-            borderWidth: 0,
-            borderRadius: radius.xl,
-            gap: 10,
-          }}
+        <Pressable
+          onPress={() => setDashboardTab('pemantauan')}
+          style={[
+            styles.dashTabBtn,
+            dashboardTab === 'pemantauan' && {
+              backgroundColor: colors.primary,
+              borderRadius: radius.lg,
+            },
+          ]}
         >
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: isDark ? 'rgba(59,130,246,0.25)' : '#DBEAFE', alignItems: 'center', justifyContent: 'center' }}>
-                <Feather name="cpu" size={14} color={colors.primary} />
-              </View>
-              <Text style={{ fontSize: 11, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
-                AI KITCHEN TACTICAL ADVISOR
-              </Text>
-            </View>
-            <Pill label="Live Analysis" tone="primary" />
-          </View>
+          <Feather
+            name="bell"
+            size={13}
+            color={dashboardTab === 'pemantauan' ? '#FFF' : colors.textMuted}
+          />
+          <Text
+            style={{
+              fontSize: 11.5,
+              fontWeight: '800',
+              color: dashboardTab === 'pemantauan' ? '#FFF' : colors.text,
+            }}
+          >
+            Alert & Wilayah
+          </Text>
+          {(activeAlerts.length > 0 || (broadcastInScope.length > 0 && !isBroadcastHidden)) && (
+            <View style={[styles.tabBadgeDot, { backgroundColor: colors.danger }]} />
+          )}
+        </Pressable>
+      </View>
 
-          {aiEarlyWarnings
-            .filter((w) => w.targetRole.includes(role))
-            .slice(0, 2)
-            .map((warn) => (
+      {/* ========================================================================= */}
+      {/* TAB 1: OPERASIONAL UTAMA (FOKUS KERJA HARIAN)                             */}
+      {/* ========================================================================= */}
+      {dashboardTab === 'operasional' && (
+        <>
+          {/* Role-Specific Tasks / Daily Operational Hub */}
+          <Card variant="accent" style={{ gap: spacing.sm }}>
+            <Pressable
+              onPress={() => setIsWorkflowExpanded(!isWorkflowExpanded)}
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
+                <Feather name={isKepala ? 'layers' : 'check-circle'} size={16} color={colors.primary} />
+                <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.4 }}>
+                  {isKepala ? 'ALUR OPERASIONAL SPPG HARI INI' : `TUGAS SAYA HARI INI (${ROLE_LABEL[role]?.toUpperCase() || 'STAF'})`}
+                </Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Pill
+                  label={`${roleProgressPct}% (${completedRoleSteps}/${activeTaskList.length})`}
+                  tone={roleProgressPct >= 100 ? 'success' : roleProgressPct > 50 ? 'primary' : 'warning'}
+                />
+                <Feather name={isWorkflowExpanded ? 'chevron-up' : 'chevron-down'} size={18} color={colors.primary} />
+              </View>
+            </Pressable>
+
+            {/* Progress Bar Track */}
+            <View style={{ height: 6, backgroundColor: colors.background, borderRadius: radius.pill, overflow: 'hidden', marginVertical: 2 }}>
               <View
-                key={warn.id}
                 style={{
-                  backgroundColor: colors.surface,
-                  borderRadius: radius.lg,
-                  padding: 12,
-                  gap: 8,
-                  borderLeftWidth: 3.5,
-                  borderLeftColor: warn.tingkat === 'warning' ? colors.warning : colors.primary,
-                  borderWidth: 1,
-                  borderColor: colors.border,
+                  height: '100%',
+                  width: `${roleProgressPct}%`,
+                  backgroundColor: roleProgressPct >= 100 ? colors.success : isDark ? colors.gold : colors.primary,
+                  borderRadius: radius.pill,
                 }}
+              />
+            </View>
+
+            {/* Collapsed State Summary or Expanded List */}
+            {!isWorkflowExpanded ? (
+              <Pressable
+                onPress={() => setIsWorkflowExpanded(true)}
+                style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 2 }}
               >
-                {/* Header row with category pill and timestamp chip */}
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Pill
-                    label={warn.kategori.replace('_', ' ').toUpperCase()}
-                    tone={warn.tingkat === 'warning' ? 'warning' : 'primary'}
+                <Text style={{ fontSize: 11, color: colors.textMuted, flex: 1 }}>
+                  {roleProgressPct >= 100
+                    ? 'Semua target kerja hari ini telah tuntas diselesaikan.'
+                    : `${completedRoleSteps} dari ${activeTaskList.length} tugas selesai • Ketuk untuk membuka daftar rincian.`}
+                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Text style={{ fontSize: 11, fontWeight: '800', color: colors.primary }}>Buka Rincian</Text>
+                  <Feather name="chevron-down" size={14} color={colors.primary} />
+                </View>
+              </Pressable>
+            ) : (
+              <>
+                <Text style={{ fontSize: 11, color: colors.textMuted }}>
+                  {isKepala
+                    ? 'Pantau dan jalankan seluruh rantai kerja dapur MBG dari persiapan hingga serah terima sekolah:'
+                    : `Daftar target & tanggung jawab kerja Anda hari ini (${ROLE_LABEL[role]}):`}
+                </Text>
+
+                {/* Task Steps Pipeline List */}
+                <View style={{ gap: 8, marginTop: 4 }}>
+                  {activeTaskList.map((step) => (
+                    <Pressable
+                      key={step.id}
+                      onPress={step.onPress}
+                      style={({ pressed }) => [
+                        styles.workflowRow,
+                        {
+                          backgroundColor: colors.surface,
+                          borderColor: step.isDone ? colors.success : colors.border,
+                          borderRadius: radius.md,
+                        },
+                        pressed && { opacity: 0.8 },
+                      ]}
+                    >
+                      <View
+                        style={[
+                          styles.workflowIconWrap,
+                          {
+                            backgroundColor: step.isDone ? colors.successBg : colors.primaryLight,
+                          },
+                        ]}
+                      >
+                        <Feather
+                          name={step.isDone ? 'check' : step.icon}
+                          size={15}
+                          color={step.isDone ? colors.success : colors.primary}
+                          strokeWidth={2.4}
+                        />
+                      </View>
+
+                      <View style={{ flex: 1, gap: 2 }}>
+                        <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
+                          {step.title}
+                        </Text>
+                        <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
+                          {'desc' in step ? (step as any).desc : `PIC: ${(step as any).pic}`}
+                        </Text>
+                      </View>
+
+                      <View style={{ alignItems: 'flex-end', gap: 4 }}>
+                        <Pill label={step.status} tone={step.tone} />
+                        <Text style={{ fontSize: 9.5, fontWeight: '700', color: colors.primary }}>Buka</Text>
+                      </View>
+                    </Pressable>
+                  ))}
+                </View>
+
+                <Pressable
+                  onPress={() => setIsWorkflowExpanded(false)}
+                  style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingTop: 4 }}
+                >
+                  <Text style={{ fontSize: 11, fontWeight: '800', color: colors.textMuted }}>Sembunyikan Rincian Tugas</Text>
+                  <Feather name="chevron-up" size={14} color={colors.textMuted} />
+                </Pressable>
+              </>
+            )}
+          </Card>
+
+          {/* Quick Menu */}
+          <SectionTitle style={{ marginTop: spacing.xs }}>Menu Pintasan Cepat</SectionTitle>
+          <QuickActionGrid items={quickActions} />
+
+          {/* Status Kinerja Operasional */}
+          <SectionTitle
+            action={
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.success }} />
+                <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: '700' }}>
+                  Monitoring Real-Time
+                </Text>
+              </View>
+            }
+          >
+            Status Kinerja Operasional
+          </SectionTitle>
+
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+            {statusCards.map((c) => (
+              <Pressable
+                key={c.key}
+                onPress={c.onPress}
+                style={({ pressed }) => [
+                  styles.simpleStatusCard,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: colors.border,
+                    borderRadius: radius.xl,
+                  },
+                  pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+                ]}
+              >
+                <View style={styles.simpleStatusTopRow}>
+                  <View
+                    style={[
+                      styles.simpleStatusIconWrap,
+                      {
+                        backgroundColor: c.ok
+                          ? (isDark ? 'rgba(13,148,136,0.15)' : '#F0FDF4')
+                          : (isDark ? 'rgba(217,119,6,0.15)' : '#FFFBEB'),
+                      },
+                    ]}
+                  >
+                    <Feather
+                      name={c.icon}
+                      size={17}
+                      color={c.ok ? colors.success : colors.warning}
+                      strokeWidth={iconStrokeWidth}
+                    />
+                  </View>
+                  <View
+                    style={[
+                      styles.simpleStatusDot,
+                      { backgroundColor: c.ok ? colors.success : colors.warning },
+                    ]}
                   />
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.pill }}>
-                    <Feather name="clock" size={10.5} color={colors.textMuted} />
-                    <Text style={{ fontSize: 10.5, fontWeight: '700', color: colors.textMuted }}>
-                      {warn.timestamp}
+                </View>
+
+                <View style={{ gap: 2, marginTop: 8 }}>
+                  <Text style={{ fontSize: 18, fontWeight: '900', color: colors.text }}>
+                    {c.value}
+                  </Text>
+                  <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: '600' }} numberOfLines={1}>
+                    {c.label}
+                  </Text>
+                </View>
+              </Pressable>
+            ))}
+          </View>
+        </>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 2: KINERJA MUTU & AI ADVISOR                                          */}
+      {/* ========================================================================= */}
+      {dashboardTab === 'analisis' && (
+        <>
+          {/* SPPG KITCHEN READINESS INDEX BANNER */}
+          {(isKepala || role === 'AHLI_GIZI') && (
+            <CircularProgressGauge
+              score={kitchenReadinessScore.score}
+              maxScore={100}
+              grade={kitchenReadinessScore.grade}
+              label="Kesiapan & Kepatuhan Dapur MBG Hari Ini"
+              onPress={() => setShowReadinessModal(true)}
+              subScores={[
+                { label: 'Presensi', score: kitchenReadinessScore.subScores.presensiTim },
+                { label: 'SOP Masak', score: kitchenReadinessScore.subScores.produksiSop },
+                { label: 'Food Safety', score: kitchenReadinessScore.subScores.foodSafety },
+                { label: 'Distribusi', score: kitchenReadinessScore.subScores.distribusiArmada },
+                { label: 'Sanitasi', score: kitchenReadinessScore.subScores.sanitasiHigiene },
+              ]}
+            />
+          )}
+
+          {/* EXECUTIVE STATISTIK & REKAP BERKALA (Khusus Kepala SPPG) */}
+          {isKepala && (
+            <Card
+              style={{
+                backgroundColor: colors.surface,
+                borderColor: colors.borderStrong,
+                borderWidth: 1,
+                borderRadius: radius.xl,
+                gap: 6,
+              }}
+              onPress={() => navigation.navigate('StatistikEksekutif')}
+            >
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                  <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
+                    <Feather name="bar-chart-2" size={18} color={isDark ? colors.gold : colors.primary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
+                      Laporan Statistik & Rekap Berkala
+                    </Text>
+                    <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
+                      Executive Summary: kehadiran staf, porsi MBG, insiden, & efisiensi biaya
                     </Text>
                   </View>
                 </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Pill label="Buka Rekap" tone="primary" />
+                  <Feather name="chevron-right" size={16} color={colors.textMuted} />
+                </View>
+              </View>
+            </Card>
+          )}
 
-                {/* Main message text */}
-                <Text style={{ fontSize: 12, fontWeight: '800', color: colors.text, lineHeight: 18 }}>
-                  {warn.pesan}
-                </Text>
-
-                {/* Recommendation box */}
-                <View style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : colors.background, padding: 8, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border }}>
-                  <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
-                    <Text style={{ fontWeight: '800', color: colors.text }}>Rekomendasi AI:</Text> {warn.rekomendasiAksi}
+          {/* AI KITCHEN EARLY WARNING & TACTICAL ADVISOR */}
+          {aiEarlyWarnings.filter((w) => w.targetRole.includes(role)).length > 0 && (
+            <Card
+              style={{
+                backgroundColor: isDark ? 'rgba(59,130,246,0.08)' : '#F0F9FF',
+                borderWidth: 0,
+                borderRadius: radius.xl,
+                gap: 10,
+              }}
+            >
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: isDark ? 'rgba(59,130,246,0.25)' : '#DBEAFE', alignItems: 'center', justifyContent: 'center' }}>
+                    <Feather name="cpu" size={14} color={colors.primary} />
+                  </View>
+                  <Text style={{ fontSize: 11, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
+                    AI KITCHEN TACTICAL ADVISOR
                   </Text>
                 </View>
-
-                {/* Action button */}
-                {warn.actionRoute && warn.actionLabel && (
-                  <Pressable
-                    onPress={() => navigation.navigate(warn.actionRoute)}
-                    style={({ pressed }) => [
-                      {
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        paddingVertical: 6,
-                        paddingHorizontal: 10,
-                        backgroundColor: isDark ? 'rgba(59,130,246,0.15)' : '#EFF6FF',
-                        borderRadius: radius.md,
-                        marginTop: 2,
-                      },
-                      pressed && { opacity: 0.75 },
-                    ]}
-                  >
-                    <Text style={{ fontSize: 11, fontWeight: '800', color: colors.primary }}>
-                      {warn.actionLabel}
-                    </Text>
-                    <Feather name="arrow-right" size={13} color={colors.primary} />
-                  </Pressable>
-                )}
+                <Pill label="Live Analysis" tone="primary" />
               </View>
-            ))}
-        </Card>
+
+              {aiEarlyWarnings
+                .filter((w) => w.targetRole.includes(role))
+                .slice(0, 3)
+                .map((warn) => (
+                  <View
+                    key={warn.id}
+                    style={{
+                      backgroundColor: colors.surface,
+                      borderRadius: radius.lg,
+                      padding: 12,
+                      gap: 8,
+                      borderLeftWidth: 3.5,
+                      borderLeftColor: warn.tingkat === 'warning' ? colors.warning : colors.primary,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                    }}
+                  >
+                    {/* Header row with category pill and timestamp chip */}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Pill
+                        label={warn.kategori.replace('_', ' ').toUpperCase()}
+                        tone={warn.tingkat === 'warning' ? 'warning' : 'primary'}
+                      />
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.pill }}>
+                        <Feather name="clock" size={10.5} color={colors.textMuted} />
+                        <Text style={{ fontSize: 10.5, fontWeight: '700', color: colors.textMuted }}>
+                          {warn.timestamp}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Main message text */}
+                    <Text style={{ fontSize: 12, fontWeight: '800', color: colors.text, lineHeight: 18 }}>
+                      {warn.pesan}
+                    </Text>
+
+                    {/* Recommendation box */}
+                    <View style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : colors.background, padding: 8, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border }}>
+                      <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
+                        <Text style={{ fontWeight: '800', color: colors.text }}>Rekomendasi AI:</Text> {warn.rekomendasiAksi}
+                      </Text>
+                    </View>
+
+                    {/* Action button */}
+                    {warn.actionRoute && warn.actionLabel && (
+                      <Pressable
+                        onPress={() => navigation.navigate(warn.actionRoute)}
+                        style={({ pressed }) => [
+                          {
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            paddingVertical: 6,
+                            paddingHorizontal: 10,
+                            backgroundColor: isDark ? 'rgba(59,130,246,0.15)' : '#EFF6FF',
+                            borderRadius: radius.md,
+                            marginTop: 2,
+                          },
+                          pressed && { opacity: 0.75 },
+                        ]}
+                      >
+                        <Text style={{ fontSize: 11, fontWeight: '800', color: colors.primary }}>
+                          {warn.actionLabel}
+                        </Text>
+                        <Feather name="arrow-right" size={13} color={colors.primary} />
+                      </Pressable>
+                    )}
+                  </View>
+                ))}
+            </Card>
+          )}
+        </>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 3: ALERT KOMANDO & DISTRIBUSI WILAYAH SEKOLAH                         */}
+      {/* ========================================================================= */}
+      {dashboardTab === 'pemantauan' && (
+        <>
+          {/* BROADCAST KOMANDO MABES / BGN */}
+          {broadcastInScope.length > 0 && !isBroadcastHidden && (
+            <Card style={{ backgroundColor: isDark ? 'rgba(217,119,6,0.15)' : '#FFFBEB', borderColor: colors.warning, gap: 8, borderWidth: 1.5 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
+                  <Feather name="radio" size={16} color={colors.warning} />
+                  <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.warning }}>
+                    ARAHAN KOMANDO PUSAT (MABES/BGN)
+                  </Text>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Pill label={broadcastInScope[0].tingkat.toUpperCase()} tone="warning" />
+                  <Pressable
+                    onPress={() => setIsBroadcastHidden(true)}
+                    hitSlop={8}
+                    style={{ padding: 4, borderRadius: 12, backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)' }}
+                  >
+                    <Feather name="x" size={14} color={colors.textMuted} />
+                  </Pressable>
+                </View>
+              </View>
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
+                {broadcastInScope[0].judul}
+              </Text>
+              <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
+                {broadcastInScope[0].isi}
+              </Text>
+            </Card>
+          )}
+
+          {/* Active Emergency Alert List */}
+          <AlertPreviewList
+            alerts={activeAlerts}
+            onSeeAll={() => navigation.navigate('Alert')}
+            onOpen={(a) => navigation.navigate('AlertDetail', { alertId: a.id })}
+          />
+
+          {/* Daftar Sekolah Bina SPPG */}
+          {sekolahBina.length > 0 && (
+            <Card style={{ gap: spacing.sm }}>
+              <SectionTitle
+                style={{ marginBottom: 0 }}
+                action={
+                  role && ROLE_PERMISSIONS[role].canManageStaff ? (
+                    <Pressable onPress={() => navigation.navigate('SekolahForm')} hitSlop={8}>
+                      <Text style={{ color: colors.primary, fontWeight: '700', fontSize: fontSize.xs }}>+ Tambah Sekolah</Text>
+                    </Pressable>
+                  ) : undefined
+                }
+              >
+                Sekolah Penerima MBG ({sekolahBina.length})
+              </SectionTitle>
+              {sekolahBina.map((sch) => (
+                <Pressable
+                  key={sch.id}
+                  onPress={() => navigation.navigate('SekolahDetail', { sekolahId: sch.id })}
+                  style={[styles.sppgCard, { backgroundColor: colors.background, borderRadius: radius.md, padding: 10 }]}
+                >
+                  <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+                    {sch.fotoSekolah ? (
+                      <Image source={{ uri: sch.fotoSekolah }} style={{ width: 44, height: 44, borderRadius: radius.sm }} />
+                    ) : (
+                      <View style={{ width: 44, height: 44, borderRadius: radius.sm, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
+                        <Feather name="home" size={20} color={colors.primary} />
+                      </View>
+                    )}
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text style={{ fontSize: fontSize.sm, fontWeight: '700', color: colors.text }} numberOfLines={1}>
+                        {sch.nama}
+                      </Text>
+                      <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>
+                        Target: {sch.jumlahSiswa.toLocaleString('id-ID')} siswa • {sch.alamat}
+                      </Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 }}>
+                        <Text style={{ fontSize: 10.5, color: colors.primary, fontWeight: '800' }}>Lihat Detail Pengiriman</Text>
+                        <Feather name="chevron-right" size={12} color={colors.primary} />
+                      </View>
+                    </View>
+                    <Feather name="chevron-right" size={18} color={colors.textMuted} />
+                  </View>
+                </Pressable>
+              ))}
+            </Card>
+          )}
+        </>
       )}
 
       {/* MODAL DETAIL SPPG KITCHEN READINESS INDEX */}
@@ -1945,253 +2294,11 @@ export default function DashboardScreen({ navigation }: any) {
                     navigation.navigate('FoodQualityPassport');
                   }}
                 />
-                <SecondaryButton label="Tutup Rincian" onPress={() => setShowReadinessModal(false)} />
               </View>
             </ScrollView>
           </Card>
         </View>
       </Modal>
-
-      {/* 3. Role-Specific Tasks / Daily Operational Hub */}
-      <Card variant="accent" style={{ gap: spacing.sm, marginVertical: spacing.xs }}>
-        <Pressable
-          onPress={() => setIsWorkflowExpanded(!isWorkflowExpanded)}
-          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
-            <Feather name={isKepala ? 'layers' : 'check-circle'} size={16} color={colors.primary} />
-            <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.4 }}>
-              {isKepala ? 'ALUR OPERASIONAL SPPG HARI INI' : `TUGAS SAYA HARI INI (${ROLE_LABEL[role]?.toUpperCase() || 'STAF'})`}
-            </Text>
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Pill
-              label={`${roleProgressPct}% (${completedRoleSteps}/${activeTaskList.length})`}
-              tone={roleProgressPct >= 100 ? 'success' : roleProgressPct > 50 ? 'primary' : 'warning'}
-            />
-            <Feather name={isWorkflowExpanded ? 'chevron-up' : 'chevron-down'} size={18} color={colors.primary} />
-          </View>
-        </Pressable>
-
-        {/* Progress Bar Track */}
-        <View style={{ height: 6, backgroundColor: colors.background, borderRadius: radius.pill, overflow: 'hidden', marginVertical: 2 }}>
-          <View
-            style={{
-              height: '100%',
-              width: `${roleProgressPct}%`,
-              backgroundColor: roleProgressPct >= 100 ? colors.success : isDark ? colors.gold : colors.primary,
-              borderRadius: radius.pill,
-            }}
-          />
-        </View>
-
-        {/* Collapsed State Summary or Expanded List */}
-        {!isWorkflowExpanded ? (
-          <Pressable
-            onPress={() => setIsWorkflowExpanded(true)}
-            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 2 }}
-          >
-            <Text style={{ fontSize: 11, color: colors.textMuted, flex: 1 }}>
-              {roleProgressPct >= 100
-                ? 'Semua tugas pekerjaan Anda hari ini telah tuntas diselesaikan.'
-                : `${completedRoleSteps} dari ${activeTaskList.length} tugas selesai • Ketuk untuk membuka daftar tugas.`}
-            </Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <Text style={{ fontSize: 11, fontWeight: '800', color: colors.primary }}>Buka Rincian</Text>
-              <Feather name="chevron-down" size={14} color={colors.primary} />
-            </View>
-          </Pressable>
-        ) : (
-          <>
-            <Text style={{ fontSize: 11, color: colors.textMuted }}>
-              {isKepala
-                ? 'Pantau dan jalankan seluruh rantai kerja dapur MBG dari persiapan hingga serah terima sekolah:'
-                : `Daftar target & tanggung jawab kerja Anda hari ini (${ROLE_LABEL[role]}):`}
-            </Text>
-
-            {/* Task Steps Pipeline List */}
-            <View style={{ gap: 8, marginTop: 4 }}>
-              {activeTaskList.map((step) => (
-                <Pressable
-                  key={step.id}
-                  onPress={step.onPress}
-                  style={({ pressed }) => [
-                    styles.workflowRow,
-                    {
-                      backgroundColor: colors.surface,
-                      borderColor: step.isDone ? colors.success : colors.border,
-                      borderRadius: radius.md,
-                    },
-                    pressed && { opacity: 0.8 },
-                  ]}
-                >
-                  <View
-                    style={[
-                      styles.workflowIconWrap,
-                      {
-                        backgroundColor: step.isDone ? colors.successBg : colors.primaryLight,
-                      },
-                    ]}
-                  >
-                    <Feather
-                      name={step.isDone ? 'check' : step.icon}
-                      size={15}
-                      color={step.isDone ? colors.success : colors.primary}
-                      strokeWidth={2.4}
-                    />
-                  </View>
-
-                  <View style={{ flex: 1, gap: 2 }}>
-                    <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
-                      {step.title}
-                    </Text>
-                    <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
-                      {'desc' in step ? (step as any).desc : `PIC: ${(step as any).pic}`}
-                    </Text>
-                  </View>
-
-                  <View style={{ alignItems: 'flex-end', gap: 4 }}>
-                    <Pill label={step.status} tone={step.tone} />
-                    <Text style={{ fontSize: 9.5, fontWeight: '700', color: colors.primary }}>Buka</Text>
-                  </View>
-                </Pressable>
-              ))}
-            </View>
-
-            <Pressable
-              onPress={() => setIsWorkflowExpanded(false)}
-              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingTop: 4 }}
-            >
-              <Text style={{ fontSize: 11, fontWeight: '800', color: colors.textMuted }}>Sembunyikan Rincian Tugas</Text>
-              <Feather name="chevron-up" size={14} color={colors.textMuted} />
-            </Pressable>
-          </>
-        )}
-      </Card>
-
-      {/* 4. Quick Menu */}
-      <SectionTitle style={{ marginTop: spacing.sm }}>Quick Menu</SectionTitle>
-      <QuickActionGrid items={quickActions} />
-
-      {/* 5. Executive Bento Grid — Status Kinerja Dinamis */}
-      <SectionTitle
-        action={
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.success }} />
-            <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: '700' }}>
-              Monitoring Real-Time
-            </Text>
-          </View>
-        }
-      >
-        Status Kinerja Operasional
-      </SectionTitle>
-
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-        {statusCards.map((c) => (
-          <Pressable
-            key={c.key}
-            onPress={c.onPress}
-            style={({ pressed }) => [
-              styles.simpleStatusCard,
-              {
-                backgroundColor: colors.surface,
-                borderColor: colors.border,
-                borderRadius: radius.xl,
-              },
-              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
-            ]}
-          >
-            <View style={styles.simpleStatusTopRow}>
-              <View
-                style={[
-                  styles.simpleStatusIconWrap,
-                  {
-                    backgroundColor: c.ok
-                      ? (isDark ? 'rgba(13,148,136,0.15)' : '#F0FDF4')
-                      : (isDark ? 'rgba(217,119,6,0.15)' : '#FFFBEB'),
-                  },
-                ]}
-              >
-                <Feather
-                  name={c.icon}
-                  size={17}
-                  color={c.ok ? colors.success : colors.warning}
-                  strokeWidth={iconStrokeWidth}
-                />
-              </View>
-              <View
-                style={[
-                  styles.simpleStatusDot,
-                  { backgroundColor: c.ok ? colors.success : colors.warning },
-                ]}
-              />
-            </View>
-
-            <View style={{ gap: 2, marginTop: 8 }}>
-              <Text style={{ fontSize: 18, fontWeight: '900', color: colors.text }}>
-                {c.value}
-              </Text>
-              <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: '600' }} numberOfLines={1}>
-                {c.label}
-              </Text>
-            </View>
-          </Pressable>
-        ))}
-      </View>
-
-      {/* 6. Daftar Sekolah Bina SPPG */}
-      {!!role && ROLE_PERMISSIONS[role].canManageStaff && sekolahBina.length > 0 && (
-        <Card style={{ gap: spacing.sm }}>
-          <SectionTitle
-            style={{ marginBottom: 0 }}
-            action={
-              <Pressable onPress={() => navigation.navigate('SekolahForm')} hitSlop={8}>
-                <Text style={{ color: colors.primary, fontWeight: '700', fontSize: fontSize.xs }}>+ Tambah Sekolah</Text>
-              </Pressable>
-            }
-          >
-            Sekolah Penerima MBG ({sekolahBina.length})
-          </SectionTitle>
-          {sekolahBina.map((sch) => (
-            <Pressable
-              key={sch.id}
-              onPress={() => navigation.navigate('SekolahDetail', { sekolahId: sch.id })}
-              style={[styles.sppgCard, { backgroundColor: colors.background, borderRadius: radius.md, padding: 10 }]}
-            >
-              <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
-                {sch.fotoSekolah ? (
-                  <Image source={{ uri: sch.fotoSekolah }} style={{ width: 44, height: 44, borderRadius: radius.sm }} />
-                ) : (
-                  <View style={{ width: 44, height: 44, borderRadius: radius.sm, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
-                    <Feather name="home" size={20} color={colors.primary} />
-                  </View>
-                )}
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Text style={{ fontSize: fontSize.sm, fontWeight: '700', color: colors.text }} numberOfLines={1}>
-                    {sch.nama}
-                  </Text>
-                  <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>
-                    Target: {sch.jumlahSiswa.toLocaleString('id-ID')} siswa • {sch.alamat}
-                  </Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 }}>
-                    <Text style={{ fontSize: 10.5, color: colors.primary, fontWeight: '800' }}>Lihat Detail Pengiriman</Text>
-                    <Feather name="chevron-right" size={12} color={colors.primary} />
-                  </View>
-                </View>
-                <Feather name="chevron-right" size={18} color={colors.textMuted} />
-              </View>
-            </Pressable>
-          ))}
-        </Card>
-      )}
-
-      {/* 7. Alert Preview List */}
-      <AlertPreviewList
-        alerts={activeAlerts}
-        onSeeAll={() => navigation.navigate('Alert')}
-        onOpen={(a) => navigation.navigate('AlertDetail', { alertId: a.id })}
-      />
     </ScrollView>
   );
 }
@@ -2199,6 +2306,31 @@ export default function DashboardScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: { padding: 16, gap: 16, paddingBottom: 90 },
+  dashTabRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 4,
+    borderWidth: 1,
+    gap: 4,
+  },
+  dashTabBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 9,
+    paddingHorizontal: 6,
+    position: 'relative',
+  },
+  tabBadgeDot: {
+    position: 'absolute',
+    top: 6,
+    right: 8,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
   commandHero: {
     padding: 16,
     borderWidth: 1,
