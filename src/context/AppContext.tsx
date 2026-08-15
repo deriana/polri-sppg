@@ -52,6 +52,7 @@ import {
   User,
   MasterMenu,
   UsulanMenu,
+  QcStatus,
 } from '../types';
 import { MASTER_MENU_CATALOG } from '../data/masterMenu';
 
@@ -131,6 +132,8 @@ interface AppContextValue {
   saveLaporanDraft: (laporan: (Omit<LaporanProduksi, 'id' | 'timestamp' | 'status'> & { id?: string })) => void;
   submitLaporan: (laporanId: string) => void;
   verifyLaporan: (laporanId: string) => void;
+  approveQcLaporan: (laporanId: string, qcStatus: QcStatus, qcNotes?: string, qcApprovedBy?: string) => void;
+  updateProductionStage: (laporanId: string, stage: 'preparation' | 'cooking' | 'qc' | 'packing' | 'ready') => void;
   submitChecklist: (checklist: ChecklistHarian) => void;
   submitFoodSafetyLog: (log: FoodSafetyLog) => void;
   addAlert: (alert: Omit<AlertLog, 'id' | 'timestamp' | 'statusTindakLanjut'>) => void;
@@ -380,11 +383,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const saveLaporanDraft: AppContextValue['saveLaporanDraft'] = (laporan) => {
     setLaporanList((prev) => {
+      const batchId =
+        laporan.batchId ||
+        `BATCH-${laporan.sppgId}-${(laporan.tanggal || todayDate()).replace(/-/g, '')}-01`;
       if (laporan.id) {
-        return prev.map((l) => (l.id === laporan.id ? { ...l, ...laporan, id: laporan.id!, status: 'draft' } : l));
+        return prev.map((l) => (l.id === laporan.id ? { ...l, ...laporan, batchId, id: laporan.id!, status: 'draft' } : l));
       }
       const id = `LAP-${String(prev.length + 1).padStart(3, '0')}`;
-      return [...prev, { ...laporan, id, status: 'draft', timestamp: nowTimestamp() }];
+      return [
+        ...prev,
+        {
+          ...laporan,
+          id,
+          batchId,
+          status: 'draft',
+          timestamp: nowTimestamp(),
+          preparationTimestamp: nowTime(),
+          qcStatus: 'MENUNGGU_QC',
+        },
+      ];
     });
   };
 
@@ -397,6 +414,49 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const verifyLaporan: AppContextValue['verifyLaporan'] = (laporanId) => {
     setLaporanList((prev) =>
       prev.map((l) => (l.id === laporanId && l.status === 'terkirim' ? { ...l, status: 'diverifikasi' } : l)),
+    );
+  };
+
+  const approveQcLaporan: AppContextValue['approveQcLaporan'] = (laporanId, qcStatus, qcNotes, qcApprovedBy) => {
+    const timestamp = nowTimestamp();
+    setLaporanList((prev) =>
+      prev.map((l) => {
+        if (l.id !== laporanId) return l;
+        return {
+          ...l,
+          qcStatus,
+          qcNotes: qcNotes ?? l.qcNotes,
+          qcApprovedBy: qcApprovedBy ?? currentUser?.nama ?? 'Tim QC Gizi',
+          qcTimestamp: nowTime(),
+        };
+      }),
+    );
+
+    const targetLap = laporanList.find((l) => l.id === laporanId);
+    if (qcStatus === 'HOLD' || qcStatus === 'REJECTED') {
+      addAlert({
+        sppgId: targetLap?.sppgId || currentUser?.sppgId || 'SPPG-001',
+        jenis: 'checklist_kritis',
+        sumber: 'command_center',
+        tingkat: qcStatus === 'REJECTED' ? 'emergency' : 'perhatian',
+        judul: `QC Batch ${qcStatus}: ${targetLap?.menu || 'Menu MBG'}`,
+        deskripsi: `Pemeriksaan QC Gizi memberikan status ${qcStatus} pada Batch ${targetLap?.batchId || laporanId}. Catatan: ${qcNotes || 'Perlu evaluasi kelayakan makanan sebelum distribusi'}.`,
+      });
+    }
+  };
+
+  const updateProductionStage: AppContextValue['updateProductionStage'] = (laporanId, stage) => {
+    const time = nowTime();
+    setLaporanList((prev) =>
+      prev.map((l) => {
+        if (l.id !== laporanId) return l;
+        if (stage === 'preparation') return { ...l, preparationTimestamp: time };
+        if (stage === 'cooking') return { ...l, cookingTimestamp: time };
+        if (stage === 'qc') return { ...l, qcTimestamp: time };
+        if (stage === 'packing') return { ...l, packingTimestamp: time };
+        if (stage === 'ready') return { ...l, readyTimestamp: time };
+        return l;
+      }),
     );
   };
 
@@ -632,6 +692,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       saveLaporanDraft,
       submitLaporan,
       verifyLaporan,
+      approveQcLaporan,
+      updateProductionStage,
       submitChecklist,
       submitFoodSafetyLog,
       addAlert,

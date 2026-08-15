@@ -75,13 +75,29 @@ export default function LaporanProduksiListScreen({ navigation }: any) {
         ) : (
           filtered.map((l: LaporanProduksi) => {
             const canVerify = role && currentUser ? canVerifyLaporan(role, currentUser.sppgId, l) : false;
+            const batchLabel = l.batchId || `BATCH-${l.sppgId}-${l.tanggal.replace(/-/g, '')}-01`;
+            const qcTone =
+              l.qcStatus === 'READY'
+                ? 'success'
+                : l.qcStatus === 'HOLD'
+                ? 'warning'
+                : l.qcStatus === 'REJECTED'
+                ? 'danger'
+                : 'neutral';
+
             return (
               <Card key={l.id} style={{ gap: spacing.xs }} onPress={() => navigation.navigate('LaporanForm', { laporanId: l.id })}>
                 <View style={styles.rowTop}>
-                  <Text style={{ color: colors.text, fontWeight: '800', fontSize: fontSize.sm }}>{l.tanggal}</Text>
-                  <Pill label={STATUS_LABEL[l.status]} tone={STATUS_TONE[l.status]} />
+                  <View style={{ gap: 2 }}>
+                    <Text style={{ color: colors.text, fontWeight: '800', fontSize: fontSize.sm }}>{l.tanggal}</Text>
+                    <Text style={{ color: colors.primary, fontSize: 10, fontWeight: '700' }}>{batchLabel}</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
+                    {l.qcStatus && <Pill label={`QC: ${l.qcStatus}`} tone={qcTone} />}
+                    <Pill label={STATUS_LABEL[l.status]} tone={STATUS_TONE[l.status]} />
+                  </View>
                 </View>
-                <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }} numberOfLines={1}>
+                <Text style={{ color: colors.text, fontWeight: '700', fontSize: fontSize.xs }} numberOfLines={1}>
                   {l.menu}
                 </Text>
                 <View style={styles.rowBottom}>
@@ -90,7 +106,7 @@ export default function LaporanProduksiListScreen({ navigation }: any) {
                   </Text>
                   <Feather name="chevron-right" size={16} color={colors.textMuted} strokeWidth={iconStrokeWidth} />
                 </View>
-                {canVerify && (
+                {canVerify && l.status === 'terkirim' && (
                   <PrimaryButton
                     label="Verifikasi Laporan"
                     icon="check-circle"

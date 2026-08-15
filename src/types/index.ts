@@ -138,6 +138,7 @@ export interface PublicReport {
 }
 
 export type LaporanStatus = 'draft' | 'terkirim' | 'diverifikasi';
+export type QcStatus = 'MENUNGGU_QC' | 'READY' | 'HOLD' | 'REJECTED';
 
 export interface LaporanProduksiFoto {
   id: string;
@@ -161,6 +162,16 @@ export interface LaporanProduksi {
   status: LaporanStatus;
   dibuatOleh: string;
   timestamp: string;
+  // Workflow & Traceability Fields
+  batchId?: string;
+  preparationTimestamp?: string;
+  cookingTimestamp?: string;
+  qcTimestamp?: string;
+  packingTimestamp?: string;
+  readyTimestamp?: string;
+  qcStatus?: QcStatus;
+  qcNotes?: string;
+  qcApprovedBy?: string;
 }
 
 export type PresensiStatus = 'hadir' | 'belum_presensi';
