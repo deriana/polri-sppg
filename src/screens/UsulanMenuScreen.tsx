@@ -22,7 +22,7 @@ const STATUS_TONE: Record<UsulanMenu['status'], 'warning' | 'success' | 'danger'
 
 const FILTERS: Array<UsulanMenu['status'] | 'semua'> = ['semua', 'diajukan', 'disetujui', 'ditolak'];
 
-export default function UsulanMenuScreen() {
+export default function UsulanMenuScreen({ navigation }: any) {
   const { role, usulanMenuList, sekolahList, updateUsulanMenuStatus } = useApp();
   const { sppgInScope } = useScopedData();
   const { colors, spacing, fontSize, radius, isDark } = useTheme();
@@ -30,6 +30,7 @@ export default function UsulanMenuScreen() {
   const [filterStatus, setFilterStatus] = useState<UsulanMenu['status'] | 'semua'>('semua');
   const [selectedUsulan, setSelectedUsulan] = useState<UsulanMenu | null>(null);
   const [tanggapanText, setTanggapanText] = useState('');
+  const [isEditingResponse, setIsEditingResponse] = useState(false);
 
   const canRespond = !!role && ROLE_PERMISSIONS[role].canManageMenu;
 
@@ -47,6 +48,7 @@ export default function UsulanMenuScreen() {
     updateUsulanMenuStatus(id, status, tanggapanText.trim() || undefined);
     setSelectedUsulan(null);
     setTanggapanText('');
+    setIsEditingResponse(false);
   };
 
   return (
@@ -105,6 +107,7 @@ export default function UsulanMenuScreen() {
               onPress={() => {
                 setSelectedUsulan(u);
                 setTanggapanText(u.tanggapan ?? '');
+                setIsEditingResponse(false);
               }}
             >
               <View style={styles.rowBetween}>
@@ -198,30 +201,85 @@ export default function UsulanMenuScreen() {
                   </Text>
                 </View>
 
-                {/* Existing Response or Response Form */}
-                <View style={{ gap: 6 }}>
-                  <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
-                    Tanggapan & Rekomendasi Ahli Gizi:
-                  </Text>
-                  {selectedUsulan.tanggapan ? (
-                    <View style={{ backgroundColor: isDark ? 'rgba(13,148,136,0.15)' : colors.primaryLight, padding: 10, borderRadius: radius.md }}>
-                      <Text style={{ fontSize: fontSize.xs, color: colors.text }}>{selectedUsulan.tanggapan}</Text>
+                {/* Status-specific Callout & Details */}
+                {selectedUsulan.status === 'disetujui' && (
+                  <View
+                    style={{
+                      backgroundColor: isDark ? 'rgba(16,185,129,0.15)' : '#ECFDF5',
+                      borderColor: colors.success,
+                      borderWidth: 1,
+                      borderRadius: radius.md,
+                      padding: 12,
+                      gap: 6,
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Feather name="check-circle" size={16} color={colors.success} />
+                      <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.success }}>
+                        Usulan Menu Telah Disetujui
+                      </Text>
                     </View>
-                  ) : (
-                    <Text style={{ fontSize: 11.5, color: colors.textMuted, fontStyle: 'italic' }}>
-                      Belum ada tanggapan resmi dari tim gizi SPPG.
+                    <Text style={{ fontSize: 11.5, color: colors.text, lineHeight: 18 }}>
+                      Menu ini telah divalidasi oleh Ahli Gizi SPPG dan dapat dimasukkan ke dalam perencanaan siklus Kalender Menu MBG.
                     </Text>
-                  )}
-                </View>
+                    {selectedUsulan.tanggapan && (
+                      <View style={{ marginTop: 4, paddingTop: 6, borderTopWidth: 1, borderTopColor: 'rgba(16,185,129,0.2)' }}>
+                        <Text style={{ fontSize: 10.5, fontWeight: '700', color: colors.success }}>Catatan Tim Gizi:</Text>
+                        <Text style={{ fontSize: 11, color: colors.text, marginTop: 2 }}>{selectedUsulan.tanggapan}</Text>
+                      </View>
+                    )}
+                  </View>
+                )}
 
-                {/* Response Input for Ahli Gizi / Kepala SPPG */}
-                {canRespond && (
+                {selectedUsulan.status === 'ditolak' && (
+                  <View
+                    style={{
+                      backgroundColor: isDark ? 'rgba(239,68,68,0.15)' : '#FEF2F2',
+                      borderColor: colors.danger,
+                      borderWidth: 1,
+                      borderRadius: radius.md,
+                      padding: 12,
+                      gap: 6,
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Feather name="x-circle" size={16} color={colors.danger} />
+                      <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.danger }}>
+                        Usulan Menu Tidak Disetujui
+                      </Text>
+                    </View>
+                    <Text style={{ fontSize: 11.5, color: colors.text, lineHeight: 18 }}>
+                      Usulan ini belum memenuhi standar kecukupan nutrisi AKG atau ketersediaan bahan dapur.
+                    </Text>
+                    {selectedUsulan.tanggapan && (
+                      <View style={{ marginTop: 4, paddingTop: 6, borderTopWidth: 1, borderTopColor: 'rgba(239,68,68,0.2)' }}>
+                        <Text style={{ fontSize: 10.5, fontWeight: '700', color: colors.danger }}>Alasan Penolakan:</Text>
+                        <Text style={{ fontSize: 11, color: colors.text, marginTop: 2 }}>{selectedUsulan.tanggapan}</Text>
+                      </View>
+                    )}
+                  </View>
+                )}
+
+                {/* If already Approved, provide Quick Navigation to Menu Planner */}
+                {selectedUsulan.status === 'disetujui' && (
+                  <PrimaryButton
+                    label="Buka Kalender Menu (Jadwalkan)"
+                    icon="calendar"
+                    onPress={() => {
+                      setSelectedUsulan(null);
+                      navigation.navigate('MenuKalender');
+                    }}
+                  />
+                )}
+
+                {/* Response Input for Pending (Diajukan) or when in Edit mode */}
+                {canRespond && (selectedUsulan.status === 'diajukan' || isEditingResponse) && (
                   <View style={{ gap: spacing.xs, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 12 }}>
                     <Input
                       label="Berikan Tanggapan Resmi / Catatan Gizi:"
                       value={tanggapanText}
                       onChangeText={setTanggapanText}
-                      placeholder="Tuliskan catatan kelayakan gizi / komposisi..."
+                      placeholder="Tuliskan catatan kelayakan gizi / takaran porsi..."
                       multiline
                     />
                     <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: 4 }}>
@@ -240,7 +298,23 @@ export default function UsulanMenuScreen() {
                         style={{ flex: 1 }}
                       />
                     </View>
+                    {isEditingResponse && (
+                      <SecondaryButton
+                        label="Batal Ubah Tanggapan"
+                        onPress={() => setIsEditingResponse(false)}
+                        style={{ marginTop: 4 }}
+                      />
+                    )}
                   </View>
+                )}
+
+                {/* Option to modify response if already reviewed */}
+                {canRespond && selectedUsulan.status !== 'diajukan' && !isEditingResponse && (
+                  <SecondaryButton
+                    label="Ubah Status / Catatan Tanggapan"
+                    icon="edit-3"
+                    onPress={() => setIsEditingResponse(true)}
+                  />
                 )}
 
                 <SecondaryButton label="Tutup" onPress={() => setSelectedUsulan(null)} />
