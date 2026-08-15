@@ -4,7 +4,8 @@ export interface RolePermission {
   canCreate: boolean; // create new operational records (laporan, checklist, dsb.)
   canUpdateOwn: boolean; // edit own/SPPG-scoped records
   canDelete: boolean; // always false in this app — no delete flow exists anywhere
-  canManageStaff: boolean; // add/remove petugas accounts within own SPPG
+  canManageStaff: boolean; // add/remove petugas accounts & view team attendance within own SPPG
+  canViewActivityLog: boolean; // view system activity logs & forensic audit trail
   canVerifyLaporan: boolean; // mark a LaporanProduksi as diverifikasi
   canManageGudang: boolean; // manage stock, requests, and supply receipts
   canManageDistribusi: boolean; // driver route execution & tracking
@@ -27,6 +28,7 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canUpdateOwn: true,
     canDelete: false,
     canManageStaff: true,
+    canViewActivityLog: true,
     canVerifyLaporan: true,
     canManageGudang: true,
     canManageDistribusi: true,
@@ -47,6 +49,7 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canUpdateOwn: true,
     canDelete: false,
     canManageStaff: false,
+    canViewActivityLog: false,
     canVerifyLaporan: true,
     canManageGudang: false,
     canManageDistribusi: false,
@@ -67,6 +70,7 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canUpdateOwn: true,
     canDelete: false,
     canManageStaff: false,
+    canViewActivityLog: false,
     canVerifyLaporan: false,
     canManageGudang: false,
     canManageDistribusi: false,
@@ -87,6 +91,7 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canUpdateOwn: true,
     canDelete: false,
     canManageStaff: false,
+    canViewActivityLog: false,
     canVerifyLaporan: false,
     canManageGudang: false,
     canManageDistribusi: false,
@@ -107,6 +112,7 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canUpdateOwn: true,
     canDelete: false,
     canManageStaff: false,
+    canViewActivityLog: false,
     canVerifyLaporan: false,
     canManageGudang: true,
     canManageDistribusi: false,
@@ -127,6 +133,7 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canUpdateOwn: true,
     canDelete: false,
     canManageStaff: false,
+    canViewActivityLog: false,
     canVerifyLaporan: false,
     canManageGudang: false,
     canManageDistribusi: false,
@@ -147,6 +154,7 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canUpdateOwn: true,
     canDelete: false,
     canManageStaff: false,
+    canViewActivityLog: false,
     canVerifyLaporan: false,
     canManageGudang: false,
     canManageDistribusi: false,
@@ -167,6 +175,7 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canUpdateOwn: true,
     canDelete: false,
     canManageStaff: false,
+    canViewActivityLog: false,
     canVerifyLaporan: false,
     canManageGudang: false,
     canManageDistribusi: true,
@@ -187,6 +196,7 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canUpdateOwn: false,
     canDelete: false,
     canManageStaff: false,
+    canViewActivityLog: true,
     canVerifyLaporan: false,
     canManageGudang: false,
     canManageDistribusi: false,
@@ -207,6 +217,7 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canUpdateOwn: false,
     canDelete: false,
     canManageStaff: false,
+    canViewActivityLog: true,
     canVerifyLaporan: false,
     canManageGudang: false,
     canManageDistribusi: false,

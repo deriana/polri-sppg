@@ -17,12 +17,26 @@ import { ROLE_LABEL } from '../utils/scope';
 import { ACTIVITY_CATEGORY_TABS as CATEGORY_TABS } from '../mock/activityLogs';
 
 export default function LogAktivitasScreen() {
-  const { activityLogs, currentSppg } = useApp();
+  const { activityLogs, currentSppg, role } = useApp();
   const { colors, fontSize, iconStrokeWidth, radius, spacing, isDark } = useTheme();
+
+  const isKepala = role === 'KEPALA_SPPG' || role === 'SUPERVISOR_POLRES' || role === 'SUPERVISOR_POLDA';
 
   const [selectedCategory, setSelectedCategory] = useState<ActivityCategory | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLog, setSelectedLog] = useState<SystemActivityLog | null>(null);
+
+  if (!isKepala) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background, padding: spacing.lg }]}>
+        <EmptyState
+          icon="lock"
+          title="Akses Terbatas"
+          body="Hanya Kepala SPPG / Pimpinan BGN dan Pengawas yang memiliki hak akses log aktivitas sistem & audit trail forensik."
+        />
+      </View>
+    );
+  }
 
   const filteredLogs = useMemo(() => {
     return activityLogs.filter((log) => {

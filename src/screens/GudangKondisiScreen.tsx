@@ -3,11 +3,21 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { Card, EmptyState, Input, Modal, Pill, PrimaryButton, SectionTitle } from '../components/ui';
+import {
+  Card,
+  EmptyState,
+  Input,
+  Modal,
+  Pill,
+  PrimaryButton,
+  SecondaryButton,
+  SectionTitle,
+} from '../components/ui';
 import { useScopedData } from '../hooks';
 import { scopeBahanBaku } from '../utils/scope';
 import CctvPlayer from '../components/CctvPlayer';
 import { CCTV_FEEDS, CCTV_VIDEO_ASSETS } from '../mock/cctvEvents';
+import { INITIAL_STORAGE_IOT_UNITS, StorageIotUnit } from '../mock/gudangIot';
 import { useLocalVideoUri } from '../utils/localVideoAsset';
 import { BahanBaku, BahanKategori } from '../types';
 
@@ -41,8 +51,185 @@ export default function GudangKondisiScreen({ navigation }: any) {
   const [activeModal, setActiveModal] = useState<'semua' | 'menipis' | 'kadaluarsa' | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Tab State for Bahan: 'stok_kritis' | 'fefo_exp' | 'semua_stok'
+  const [activeListTab, setActiveListTab] = useState<'stok_kritis' | 'fefo_exp' | 'semua_stok'>('stok_kritis');
+
+  // Interactive IoT Storage Units State
+  const [iotUnits, setIotUnits] = useState<StorageIotUnit[]>(INITIAL_STORAGE_IOT_UNITS);
+  const [selectedUnitId, setSelectedUnitId] = useState<string>('IOT-CHL-01');
+  const [iotFeedback, setIotFeedback] = useState<string | null>(null);
+  const [livePulse, setLivePulse] = useState(false);
+
+  // Live Real-Time IoT Simulation: updates telemetry every 2.5 seconds
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setLivePulse((p) => !p);
+      setIotUnits((prev) =>
+        prev.map((unit) => {
+          let newSuhu = unit.suhuAktual;
+
+          if (unit.pintuStatus === 'terbuka') {
+            // Door open: temperature gradually climbs towards ambient room temperature
+            const maxTemp = unit.tipe === 'deep_freezer' ? 0.0 : 12.0;
+            if (newSuhu < maxTemp) {
+              newSuhu = Math.round((newSuhu + 0.15) * 10) / 10;
+            }
+          } else {
+            // Door closed: compressor regulates towards target setpoint
+            const diff = unit.suhuTarget - newSuhu;
+            if (Math.abs(diff) > 0.25) {
+              const step = diff > 0 ? 0.1 : -0.1;
+              newSuhu = Math.round((newSuhu + step) * 10) / 10;
+            } else {
+              // Natural sensor jitter around target setpoint (±0.1°C)
+              const jitter = Math.round(((Math.random() - 0.5) * 0.2) * 10) / 10;
+              newSuhu = Math.round((unit.suhuTarget + jitter) * 10) / 10;
+            }
+          }
+
+          // Natural humidity fluctuation (±1% RH)
+          const humidJitter = Math.floor(Math.random() * 3) - 1;
+          const newHumid = Math.max(45, Math.min(88, unit.kelembaban + humidJitter));
+
+          // Natural power draw fluctuation (kW)
+          const basePower =
+            unit.modePendingin === 'turbo_freeze'
+              ? 2.2
+              : unit.modePendingin === 'eco_saving'
+              ? 0.7
+              : unit.modePendingin === 'auto_defrost'
+              ? 1.8
+              : 1.35;
+          const powerJitter = Math.round(((Math.random() - 0.5) * 0.12) * 100) / 100;
+          const newPower = Math.max(0.4, Math.round((basePower + powerJitter) * 100) / 100);
+
+          // Freon pressure fluctuation (PSI)
+          const freonJitter = Math.floor(Math.random() * 3) - 1;
+          const newFreon = Math.max(36, Math.min(52, unit.tekananFreonPsi + freonJitter));
+
+          return {
+            ...unit,
+            suhuAktual: newSuhu,
+            kelembaban: newHumid,
+            dayaListrikKw: newPower,
+            tekananFreonPsi: newFreon,
+          };
+        }),
+      );
+    }, 2500);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const activeUnit = useMemo(() => {
+    return iotUnits.find((u) => u.id === selectedUnitId) ?? iotUnits[0];
+  }, [iotUnits, selectedUnitId]);
+
+  // Adjust Temperature Handler (+ / -)
+  const handleAdjustTemp = (delta: number) => {
+    setIotUnits((prev) =>
+      prev.map((unit) => {
+        if (unit.id !== selectedUnitId) return unit;
+        const newTarget = Math.round((unit.suhuTarget + delta) * 10) / 10;
+        if (newTarget < unit.suhuMin || newTarget > unit.suhuMax) return unit;
+        // Simulate actual temperature moving slightly towards target
+        const tempDiff = newTarget - unit.suhuAktual;
+        const simulatedActual = Math.round((unit.suhuAktual + tempDiff * 0.25) * 10) / 10;
+        return {
+          ...unit,
+          suhuTarget: newTarget,
+          suhuAktual: simulatedActual,
+          lastCommand: `Perintah IoT: Suhu target disetel ke ${newTarget > 0 ? `+${newTarget}` : newTarget}°C (Inverter menyesuaikan)`,
+          lastCommandTime: 'Baru saja',
+        };
+      }),
+    );
+    setIotFeedback(`Perintah dikirim ke ${activeUnit.nama}: Suhu target disetel.`);
+    setTimeout(() => setIotFeedback(null), 3500);
+  };
+
+  // Toggle Door Open / Locked (Buka / Kunci Kulkas)
+  const handleToggleDoor = () => {
+    setIotUnits((prev) =>
+      prev.map((unit) => {
+        if (unit.id !== selectedUnitId) return unit;
+        const nextStatus = unit.pintuStatus === 'terkunci' ? 'terbuka' : 'terkunci';
+        const isNowOpen = nextStatus === 'terbuka';
+        return {
+          ...unit,
+          pintuStatus: nextStatus,
+          // When door is open, air curtain automatically activates to maintain cold air
+          airCurtainAktif: isNowOpen ? true : unit.airCurtainAktif,
+          lastCommand: isNowOpen
+            ? 'Pintu Cold Storage DIBUKA via IoT Solenoid (Air Curtain Otomatis Aktif)'
+            : 'Pintu Cold Storage DITUTUP & TERKUNCI RAPAT',
+          lastCommandTime: 'Baru saja',
+        };
+      }),
+    );
+    setIotFeedback(
+      activeUnit.pintuStatus === 'terkunci'
+        ? `Pintu ${activeUnit.nama} berhasil dibuka via IoT. Air curtain otomatis aktif.`
+        : `Pintu ${activeUnit.nama} telah dikunci rapat kembali.`,
+    );
+    setTimeout(() => setIotFeedback(null), 3500);
+  };
+
+  // Change Cooling Mode
+  const handleChangeMode = (mode: StorageIotUnit['modePendingin']) => {
+    setIotUnits((prev) =>
+      prev.map((unit) => {
+        if (unit.id !== selectedUnitId) return unit;
+        const modeLabels = {
+          standar_haccp: 'Standar HACCP (Otomatis)',
+          turbo_freeze: 'Turbo Fast Chill / Freeze',
+          eco_saving: 'Eco Saving Mode (Hemat Daya)',
+          auto_defrost: 'Siklus Auto-Defrost (Pencairan Es)',
+        };
+        return {
+          ...unit,
+          modePendingin: mode,
+          lastCommand: `Mode pendingin diubah ke: ${modeLabels[mode]}`,
+          lastCommandTime: 'Baru saja',
+        };
+      }),
+    );
+    setIotFeedback(`Mode pendingin ${activeUnit.nama} berhasil diubah.`);
+    setTimeout(() => setIotFeedback(null), 3500);
+  };
+
+  // Toggle Air Curtain
+  const handleToggleAirCurtain = () => {
+    setIotUnits((prev) =>
+      prev.map((unit) => {
+        if (unit.id !== selectedUnitId) return unit;
+        return {
+          ...unit,
+          airCurtainAktif: !unit.airCurtainAktif,
+          lastCommand: `Air curtain penghalang udara dingin ${!unit.airCurtainAktif ? 'DIAKTIFKAN' : 'DINONAKTIFKAN'}`,
+          lastCommandTime: 'Baru saja',
+        };
+      }),
+    );
+  };
+
+  // Toggle UV Lamp
+  const handleToggleLampuUv = () => {
+    setIotUnits((prev) =>
+      prev.map((unit) => {
+        if (unit.id !== selectedUnitId) return unit;
+        return {
+          ...unit,
+          lampuUvAktif: !unit.lampuUvAktif,
+          lastCommand: `Lampu UV-C sterilisasi udara ${!unit.lampuUvAktif ? 'DIAKTIFKAN' : 'DINONAKTIFKAN'}`,
+          lastCommandTime: 'Baru saja',
+        };
+      }),
+    );
+  };
+
   const sensorSuhu = foodSafetyList.find((f) => f.sppgId === currentSppg?.id && f.sumberSuhu === 'sensor_iot');
-  const isSuhuAman = sensorSuhu ? sensorSuhu.suhuPenyimpanan <= SUHU_AMAN_MAX : true;
+  const isSuhuAman = activeUnit.suhuAktual <= (activeUnit.tipe === 'deep_freezer' ? -12 : SUHU_AMAN_MAX);
 
   const bahanInScope = useMemo(() => scopeBahanBaku(sppgInScope, bahanBakuList), [sppgInScope, bahanBakuList]);
 
@@ -80,33 +267,332 @@ export default function GudangKondisiScreen({ navigation }: any) {
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       {/* 1. Header Banner */}
       <View style={[styles.disclaimer, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
-        <Feather name="info" size={16} color={colors.primary} strokeWidth={iconStrokeWidth} />
-        <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>
-          Panel Kondisi Gudang — pantau suhu cold storage IoT, status stok real-time, dan kendali CCTV area gudang.
+        <Feather name="cpu" size={18} color={colors.primary} strokeWidth={iconStrokeWidth} />
+        <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1, fontWeight: '600' }}>
+          Smart Storage IoT Controller — pantau & atur suhu ruang pendingin, kendalikan solenoid pintu kulkas freezer, dan pantau stok FEFO real-time.
         </Text>
       </View>
 
-      {/* 2. Suhu Cold Storage */}
-      <SectionTitle>Suhu Cold Storage</SectionTitle>
-      <Card style={{ gap: spacing.xs }}>
-        {sensorSuhu ? (
-          <>
-            <View style={styles.rowTop}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Feather name="activity" size={14} color={colors.primary} />
-                <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Sensor IoT • Update Live</Text>
-              </View>
-              <Pill label={isSuhuAman ? 'Suhu Normal' : 'Suhu Tidak Normal (>8°C)'} tone={isSuhuAman ? 'success' : 'danger'} />
+      {/* 2. Interactive IoT Cold Storage Controller */}
+      <SectionTitle
+        action={
+          <Pill
+            label={livePulse ? 'LIVE MESH (2.5s)' : 'TELEMETRI AKTIF'}
+            tone="success"
+            icon="activity"
+          />
+        }
+      >
+        Kendali IoT Ruang Pendingin & Freezer
+      </SectionTitle>
+
+      {/* Storage Unit Selector Tabs */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingBottom: 2 }}>
+        {iotUnits.map((unit) => {
+          const isSelected = unit.id === selectedUnitId;
+          return (
+            <Pressable
+              key={unit.id}
+              onPress={() => setSelectedUnitId(unit.id)}
+              style={[
+                styles.unitTab,
+                {
+                  backgroundColor: isSelected ? colors.primary : colors.surface,
+                  borderColor: isSelected ? colors.primary : colors.border,
+                  borderRadius: radius.md,
+                },
+              ]}
+            >
+              <Feather
+                name={unit.icon as any}
+                size={14}
+                color={isSelected ? '#FFF' : colors.text}
+              />
+              <Text
+                style={{
+                  fontSize: 11,
+                  fontWeight: '800',
+                  color: isSelected ? '#FFF' : colors.text,
+                }}
+              >
+                {unit.nama.split(' ')[0]} {unit.nama.split(' ')[1]} ({unit.suhuAktual > 0 ? `+${unit.suhuAktual}` : unit.suhuAktual}°C)
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
+      {/* Main Interactive IoT Unit Control Card */}
+      <Card style={{ gap: spacing.md, borderColor: colors.primary, borderWidth: 1.5 }}>
+        {/* Card Top Title & Status */}
+        <View style={styles.rowBetween}>
+          <View style={{ flex: 1, gap: 2 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Feather name="shield" size={14} color={colors.primary} />
+              <Text style={{ fontSize: fontSize.sm, fontWeight: '900', color: colors.text }}>
+                {activeUnit.nama}
+              </Text>
             </View>
-            <Text style={{ color: isSuhuAman ? colors.success : colors.danger, fontWeight: '900', fontSize: 32 }}>
-              {sensorSuhu.suhuPenyimpanan.toFixed(1)}°C
+            <Text style={{ fontSize: 11, color: colors.textMuted }}>
+              Kategori: {activeUnit.kategoriLabel} • ID: {activeUnit.id}
             </Text>
-            <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>
-              Ambang batas dingin standar pangan: maksimal {SUHU_AMAN_MAX}°C
+          </View>
+          <Pill
+            label={isSuhuAman ? 'Suhu Sesuai Standar' : 'Waspada Suhu Naik'}
+            tone={isSuhuAman ? 'success' : 'danger'}
+          />
+        </View>
+
+        {/* Temperature & Interactive Setpoint Dial Box */}
+        <View style={[styles.tempControlBox, { backgroundColor: colors.background, borderRadius: radius.lg, borderColor: colors.border }]}>
+          {/* Actual Temperature */}
+          <View style={{ alignItems: 'center', gap: 2 }}>
+            <Text style={{ fontSize: 11, fontWeight: '800', color: colors.textMuted, letterSpacing: 0.5 }}>
+              SUHU AKTUAL SENSOR REAL-TIME
             </Text>
-          </>
-        ) : (
-          <EmptyState icon="thermometer" title="Sensor Belum Terpasang" body="Belum ada data sensor suhu IoT untuk SPPG ini." />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Feather
+                name="thermometer"
+                size={28}
+                color={activeUnit.suhuAktual <= 0 ? colors.primary : activeUnit.suhuAktual <= 6 ? colors.success : colors.danger}
+              />
+              <Text
+                style={{
+                  fontSize: 38,
+                  fontWeight: '900',
+                  color: activeUnit.suhuAktual <= 0 ? colors.primary : activeUnit.suhuAktual <= 6 ? colors.success : colors.danger,
+                }}
+              >
+                {activeUnit.suhuAktual > 0 ? `+${activeUnit.suhuAktual.toFixed(1)}` : activeUnit.suhuAktual.toFixed(1)}°C
+              </Text>
+            </View>
+            <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
+              Batas aman regulasi pangan: {activeUnit.suhuMin}°C s.d. {activeUnit.suhuMax}°C
+            </Text>
+          </View>
+
+          {/* Interactive Setpoint Stepper */}
+          <View style={[styles.setpointRow, { backgroundColor: colors.surface, borderRadius: radius.md, borderColor: colors.border }]}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 10.5, fontWeight: '700', color: colors.textMuted }}>SETPOINT TARGET (KOMPRESOR):</Text>
+              <Text style={{ fontSize: 15, fontWeight: '900', color: colors.primary }}>
+                Target: {activeUnit.suhuTarget > 0 ? `+${activeUnit.suhuTarget.toFixed(1)}` : activeUnit.suhuTarget.toFixed(1)}°C
+              </Text>
+            </View>
+
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Pressable
+                onPress={() => handleAdjustTemp(-0.5)}
+                style={[styles.tempStepBtn, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}
+              >
+                <Feather name="minus" size={16} color={colors.primary} />
+                <Text style={{ fontSize: 11, fontWeight: '900', color: colors.primary }}>0.5°C</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => handleAdjustTemp(0.5)}
+                style={[styles.tempStepBtn, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}
+              >
+                <Feather name="plus" size={16} color={colors.primary} />
+                <Text style={{ fontSize: 11, fontWeight: '900', color: colors.primary }}>0.5°C</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+
+        {/* Smart Door & Lock Solenoid (Buka / Kunci Kulkas) */}
+        <View
+          style={[
+            styles.doorCard,
+            {
+              backgroundColor: activeUnit.pintuStatus === 'terkunci' ? colors.successBg : colors.warningBg,
+              borderColor: activeUnit.pintuStatus === 'terkunci' ? colors.success : colors.warning,
+              borderRadius: radius.md,
+            },
+          ]}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+            <View
+              style={[
+                styles.doorIconWrap,
+                { backgroundColor: activeUnit.pintuStatus === 'terkunci' ? colors.success : colors.warning },
+              ]}
+            >
+              <Feather
+                name={activeUnit.pintuStatus === 'terkunci' ? 'lock' : 'unlock'}
+                size={18}
+                color="#FFF"
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 12, fontWeight: '900', color: colors.text }}>
+                {activeUnit.pintuStatus === 'terkunci'
+                  ? 'Pintu Cold Storage: TERKUNCI & TERSEGEL'
+                  : 'Pintu Cold Storage: TERBUKA (Sensors Active)'}
+              </Text>
+              <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
+                {activeUnit.pintuStatus === 'terkunci'
+                  ? 'Solenoid lock aktif. Suhu terjaga kedap udara.'
+                  : 'Peringatan: Segera kunci kembali setelah mengambil bahan makanan.'}
+              </Text>
+            </View>
+          </View>
+
+          <Pressable
+            onPress={handleToggleDoor}
+            style={[
+              styles.doorActionBtn,
+              {
+                backgroundColor: activeUnit.pintuStatus === 'terkunci' ? colors.primary : colors.success,
+                borderRadius: radius.sm,
+              },
+            ]}
+          >
+            <Feather
+              name={activeUnit.pintuStatus === 'terkunci' ? 'unlock' : 'lock'}
+              size={13}
+              color="#FFF"
+            />
+            <Text style={{ color: '#FFF', fontSize: 11, fontWeight: '800' }}>
+              {activeUnit.pintuStatus === 'terkunci' ? 'Buka Kulkas / Unlock' : 'Kunci Pintu'}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Mode Pendingin Inverter Controls */}
+        <View style={{ gap: 6 }}>
+          <Text style={{ fontSize: 11, fontWeight: '800', color: colors.textMuted }}>
+            PILIH MODE PENDINGIN KOMPRESOR (INVERTER IoT):
+          </Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+            {[
+              { mode: 'standar_haccp' as const, label: 'Standar HACCP', icon: 'shield', desc: 'Otomatis' },
+              { mode: 'turbo_freeze' as const, label: 'Turbo Chill', icon: 'zap', desc: 'Daya 100%' },
+              { mode: 'eco_saving' as const, label: 'Eco Saving', icon: 'activity', desc: 'Hemat Listrik' },
+              { mode: 'auto_defrost' as const, label: 'Auto Defrost', icon: 'refresh-cw', desc: 'Cairkan Es' },
+            ].map((item) => {
+              const isActive = activeUnit.modePendingin === item.mode;
+              return (
+                <Pressable
+                  key={item.mode}
+                  onPress={() => handleChangeMode(item.mode)}
+                  style={[
+                    styles.modeChip,
+                    {
+                      backgroundColor: isActive ? colors.primary : colors.background,
+                      borderColor: isActive ? colors.primary : colors.border,
+                      borderRadius: radius.sm,
+                    },
+                  ]}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Feather
+                      name={item.icon as any}
+                      size={13}
+                      color={isActive ? '#FFF' : colors.primary}
+                    />
+                    <Text style={{ fontSize: 11, fontWeight: '800', color: isActive ? '#FFF' : colors.text }}>
+                      {item.label}
+                    </Text>
+                  </View>
+                  <Text style={{ fontSize: 9.5, color: isActive ? 'rgba(255,255,255,0.85)' : colors.textMuted, marginTop: 2 }}>
+                    {item.desc}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Auxiliary Controls (Air Curtain & UV Lamp) */}
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <Pressable
+            onPress={handleToggleAirCurtain}
+            style={[
+              styles.auxBtn,
+              {
+                backgroundColor: activeUnit.airCurtainAktif ? colors.primaryLight : colors.background,
+                borderColor: activeUnit.airCurtainAktif ? colors.primary : colors.border,
+                borderRadius: radius.md,
+              },
+            ]}
+          >
+            <Feather
+              name="wind"
+              size={15}
+              color={activeUnit.airCurtainAktif ? colors.primary : colors.textMuted}
+            />
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }}>Air Curtain Pintu</Text>
+              <Text style={{ fontSize: 9.5, color: activeUnit.airCurtainAktif ? colors.primary : colors.textMuted, fontWeight: '700' }}>
+                {activeUnit.airCurtainAktif ? 'AKTIF (Mencegah Hawa Keluar)' : 'NONAKTIF'}
+              </Text>
+            </View>
+          </Pressable>
+
+          <Pressable
+            onPress={handleToggleLampuUv}
+            style={[
+              styles.auxBtn,
+              {
+                backgroundColor: activeUnit.lampuUvAktif ? colors.primaryLight : colors.background,
+                borderColor: activeUnit.lampuUvAktif ? colors.primary : colors.border,
+                borderRadius: radius.md,
+              },
+            ]}
+          >
+            <Feather
+              name="sun"
+              size={15}
+              color={activeUnit.lampuUvAktif ? colors.primary : colors.textMuted}
+            />
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }}>Sterilisasi Udara UV-C</Text>
+              <Text style={{ fontSize: 9.5, color: activeUnit.lampuUvAktif ? colors.primary : colors.textMuted, fontWeight: '700' }}>
+                {activeUnit.lampuUvAktif ? 'LAMPU UV NYALA (Higiene)' : 'NONAKTIF'}
+              </Text>
+            </View>
+          </Pressable>
+        </View>
+
+        {/* Telemetry Sensor Gauges (Humidity, Power, Freon) */}
+        <View style={[styles.telemetryGrid, { backgroundColor: colors.background, borderRadius: radius.md }]}>
+          <View style={styles.telemetryItem}>
+            <Text style={{ fontSize: 10, color: colors.textMuted, fontWeight: '700' }}>KELEMBABAN</Text>
+            <Text style={{ fontSize: 14, fontWeight: '900', color: colors.text }}>{activeUnit.kelembaban}% RH</Text>
+            <Text style={{ fontSize: 9.5, color: colors.success, fontWeight: '700' }}>Optimal</Text>
+          </View>
+
+          <View style={[styles.telemetryItem, { borderLeftWidth: 1, borderRightWidth: 1, borderColor: colors.border }]}>
+            <Text style={{ fontSize: 10, color: colors.textMuted, fontWeight: '700' }}>BEBAN DAYA</Text>
+            <Text style={{ fontSize: 14, fontWeight: '900', color: colors.text }}>{activeUnit.dayaListrikKw} kW</Text>
+            <Text style={{ fontSize: 9.5, color: colors.primary, fontWeight: '700' }}>Inverter Stabil</Text>
+          </View>
+
+          <View style={styles.telemetryItem}>
+            <Text style={{ fontSize: 10, color: colors.textMuted, fontWeight: '700' }}>TEKANAN FREON</Text>
+            <Text style={{ fontSize: 14, fontWeight: '900', color: colors.text }}>{activeUnit.tekananFreonPsi} PSI</Text>
+            <Text style={{ fontSize: 9.5, color: colors.success, fontWeight: '700' }}>Tekanan Normal</Text>
+          </View>
+        </View>
+
+        {/* Last IoT Command Log Banner */}
+        <View style={[styles.lastCmdBox, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.sm }]}>
+          <Feather name="terminal" size={13} color={colors.primary} />
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 10.5, color: colors.text, fontWeight: '700' }}>
+              {activeUnit.lastCommand}
+            </Text>
+            <Text style={{ fontSize: 9.5, color: colors.textMuted }}>Waktu Eksekusi: {activeUnit.lastCommandTime}</Text>
+          </View>
+        </View>
+
+        {/* Toast / Feedback Notice */}
+        {iotFeedback && (
+          <View style={[styles.feedbackToast, { backgroundColor: colors.primary, borderRadius: radius.sm }]}>
+            <Feather name="check-circle" size={14} color="#FFF" />
+            <Text style={{ color: '#FFF', fontSize: 11, fontWeight: '800', flex: 1 }}>{iotFeedback}</Text>
+          </View>
         )}
       </Card>
 
@@ -156,22 +642,171 @@ export default function GudangKondisiScreen({ navigation }: any) {
         </Card>
       </View>
 
-      {/* 4. Daftar Bahan Stok Menipis & Kritis */}
-      {stokMenipis.length > 0 && (
-        <Card style={{ gap: spacing.sm, borderColor: colors.danger, borderWidth: 1.5 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Feather name="alert-octagon" size={16} color={colors.danger} />
-              <Text style={{ color: colors.danger, fontWeight: '900', fontSize: fontSize.xs }}>
-                DAFTAR BAHAN STOK KRITIS / MENIPIS ({stokMenipis.length})
-              </Text>
-            </View>
-            <Pill label="Perlu Pengadaan" tone="danger" />
-          </View>
+      {/* 4. Tabbed Monitoring: Stok Kritis vs FEFO Expired */}
+      <SectionTitle>Monitoring Stok Kritis & Prioritas FEFO</SectionTitle>
+      <Card style={{ gap: spacing.sm, padding: 12 }}>
+        {/* Tab Buttons */}
+        <View style={{ flexDirection: 'row', gap: 6, backgroundColor: colors.background, padding: 4, borderRadius: radius.md }}>
+          <Pressable
+            onPress={() => setActiveListTab('stok_kritis')}
+            style={[
+              styles.listTabBtn,
+              {
+                backgroundColor: activeListTab === 'stok_kritis' ? (stokMenipis.length > 0 ? colors.danger : colors.primary) : 'transparent',
+                borderRadius: radius.sm,
+              },
+            ]}
+          >
+            <Feather
+              name="alert-octagon"
+              size={12}
+              color={activeListTab === 'stok_kritis' ? '#FFF' : (stokMenipis.length > 0 ? colors.danger : colors.textMuted)}
+            />
+            <Text
+              style={{
+                fontSize: 11,
+                fontWeight: '800',
+                color: activeListTab === 'stok_kritis' ? '#FFF' : colors.text,
+              }}
+            >
+              Stok Kritis ({stokMenipis.length})
+            </Text>
+          </Pressable>
 
+          <Pressable
+            onPress={() => setActiveListTab('fefo_exp')}
+            style={[
+              styles.listTabBtn,
+              {
+                backgroundColor: activeListTab === 'fefo_exp' ? (akanKadaluarsa.length > 0 ? colors.warning : colors.primary) : 'transparent',
+                borderRadius: radius.sm,
+              },
+            ]}
+          >
+            <Feather
+              name="clock"
+              size={12}
+              color={activeListTab === 'fefo_exp' ? '#FFF' : (akanKadaluarsa.length > 0 ? colors.warning : colors.textMuted)}
+            />
+            <Text
+              style={{
+                fontSize: 11,
+                fontWeight: '800',
+                color: activeListTab === 'fefo_exp' ? '#FFF' : colors.text,
+              }}
+            >
+              FEFO Exp ({akanKadaluarsa.length})
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => setActiveListTab('semua_stok')}
+            style={[
+              styles.listTabBtn,
+              {
+                backgroundColor: activeListTab === 'semua_stok' ? colors.primary : 'transparent',
+                borderRadius: radius.sm,
+              },
+            ]}
+          >
+            <Feather
+              name="package"
+              size={12}
+              color={activeListTab === 'semua_stok' ? '#FFF' : colors.textMuted}
+            />
+            <Text
+              style={{
+                fontSize: 11,
+                fontWeight: '800',
+                color: activeListTab === 'semua_stok' ? '#FFF' : colors.text,
+              }}
+            >
+              Semua ({bahanInScope.length})
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Tab Content 1: Stok Kritis */}
+        {activeListTab === 'stok_kritis' && (
           <View style={{ gap: 6 }}>
-            {stokMenipis.map((b) => {
-              const selisih = b.ambangMinimum - b.stok;
+            {stokMenipis.length === 0 ? (
+              <View style={{ paddingVertical: 18, alignItems: 'center', gap: 4 }}>
+                <Feather name="check-circle" size={24} color={colors.success} />
+                <Text style={{ fontSize: 12, fontWeight: '800', color: colors.text }}>Seluruh Stok Bahan Aman</Text>
+                <Text style={{ fontSize: 11, color: colors.textMuted }}>Tidak ada bahan baku yang berada di bawah ambang minimum.</Text>
+              </View>
+            ) : (
+              stokMenipis.map((b) => {
+                const selisih = b.ambangMinimum - b.stok;
+                return (
+                  <View key={b.id} style={[styles.listItemRow, { backgroundColor: colors.background, borderRadius: radius.sm, borderColor: colors.border }]}>
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text }}>
+                        {b.nama}
+                      </Text>
+                      <Text style={{ fontSize: 11, color: colors.textMuted }}>
+                        Lokasi: {b.lokasiRak ?? 'Gudang Utama'} • {KATEGORI_LABEL[b.kategori]}
+                      </Text>
+                    </View>
+                    <View style={{ alignItems: 'flex-end', gap: 2 }}>
+                      <Text style={{ fontSize: fontSize.sm, fontWeight: '900', color: colors.danger }}>
+                        {b.stok} {b.satuan}
+                      </Text>
+                      <Text style={{ fontSize: 10, color: colors.danger, fontWeight: '700' }}>
+                        (Kurang {selisih > 0 ? selisih : 0} {b.satuan} dari min {b.ambangMinimum})
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })
+            )}
+          </View>
+        )}
+
+        {/* Tab Content 2: FEFO Prioritas */}
+        {activeListTab === 'fefo_exp' && (
+          <View style={{ gap: 6 }}>
+            {akanKadaluarsa.length === 0 ? (
+              <View style={{ paddingVertical: 18, alignItems: 'center', gap: 4 }}>
+                <Feather name="check-circle" size={24} color={colors.success} />
+                <Text style={{ fontSize: 12, fontWeight: '800', color: colors.text }}>Kedaluwarsa Bahan Aman</Text>
+                <Text style={{ fontSize: 11, color: colors.textMuted }}>Tidak ada bahan baku mendekati tanggal expired dalam 3 hari ke depan.</Text>
+              </View>
+            ) : (
+              akanKadaluarsa.map((b) => {
+                const sisaHari = b.tanggalKadaluarsa ? daysUntil(b.tanggalKadaluarsa) : 0;
+                const isUrgent = sisaHari <= 1;
+                return (
+                  <View key={b.id} style={[styles.listItemRow, { backgroundColor: colors.background, borderRadius: radius.sm, borderColor: colors.border }]}>
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text }}>
+                        {b.nama}
+                      </Text>
+                      <Text style={{ fontSize: 11, color: colors.textMuted }}>
+                        Stok: {b.stok} {b.satuan} • {b.lokasiRak ?? 'Gudang'}
+                      </Text>
+                    </View>
+                    <View style={{ alignItems: 'flex-end', gap: 2 }}>
+                      <Pill
+                        label={sisaHari <= 0 ? 'KADALUARSA HARI INI!' : `${sisaHari} Hari Lagi`}
+                        tone={isUrgent ? 'danger' : 'warning'}
+                      />
+                      <Text style={{ fontSize: 10.5, fontWeight: '700', color: colors.text }}>
+                        Exp: {b.tanggalKadaluarsa}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })
+            )}
+          </View>
+        )}
+
+        {/* Tab Content 3: Semua Stok */}
+        {activeListTab === 'semua_stok' && (
+          <View style={{ gap: 6 }}>
+            {bahanInScope.slice(0, 10).map((b) => {
+              const isLow = b.stok <= b.ambangMinimum;
               return (
                 <View key={b.id} style={[styles.listItemRow, { backgroundColor: colors.background, borderRadius: radius.sm, borderColor: colors.border }]}>
                   <View style={{ flex: 1, gap: 2 }}>
@@ -179,67 +814,31 @@ export default function GudangKondisiScreen({ navigation }: any) {
                       {b.nama}
                     </Text>
                     <Text style={{ fontSize: 11, color: colors.textMuted }}>
-                      Lokasi: {b.lokasiRak ?? 'Gudang Utama'} • Kategori: {KATEGORI_LABEL[b.kategori]}
+                      Lokasi: {b.lokasiRak ?? 'Gudang Utama'} • {KATEGORI_LABEL[b.kategori]}
                     </Text>
                   </View>
                   <View style={{ alignItems: 'flex-end', gap: 2 }}>
-                    <Text style={{ fontSize: fontSize.sm, fontWeight: '900', color: colors.danger }}>
+                    <Text style={{ fontSize: fontSize.sm, fontWeight: '900', color: isLow ? colors.danger : colors.text }}>
                       {b.stok} {b.satuan}
                     </Text>
-                    <Text style={{ fontSize: 10, color: colors.danger, fontWeight: '700' }}>
-                      (Kurang {selisih > 0 ? selisih : 0} {b.satuan} dari min {b.ambangMinimum})
+                    <Text style={{ fontSize: 10, color: colors.textMuted }}>
+                      Min: {b.ambangMinimum} {b.satuan}
                     </Text>
                   </View>
                 </View>
               );
             })}
+            {bahanInScope.length > 10 && (
+              <PrimaryButton
+                label={`Lihat Seluruh ${bahanInScope.length} Bahan (Buka Modal)`}
+                variant="outline"
+                icon="external-link"
+                onPress={() => setActiveModal('semua')}
+              />
+            )}
           </View>
-        </Card>
-      )}
-
-      {/* 5. Daftar Bahan Mendekati Kadaluarsa (FEFO Countdown) */}
-      {akanKadaluarsa.length > 0 && (
-        <Card style={{ gap: spacing.sm, borderColor: colors.warning, borderWidth: 1.5 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Feather name="clock" size={16} color={colors.warning} />
-              <Text style={{ color: colors.warning, fontWeight: '900', fontSize: fontSize.xs }}>
-                DAFTAR PRIORITAS FEFO (KEDALUWARSA DEKAT)
-              </Text>
-            </View>
-            <Pill label={`${akanKadaluarsa.length} Bahan`} tone="warning" />
-          </View>
-
-          <View style={{ gap: 6 }}>
-            {akanKadaluarsa.map((b) => {
-              const sisaHari = b.tanggalKadaluarsa ? daysUntil(b.tanggalKadaluarsa) : 0;
-              const isUrgent = sisaHari <= 1;
-
-              return (
-                <View key={b.id} style={[styles.listItemRow, { backgroundColor: colors.background, borderRadius: radius.sm, borderColor: colors.border }]}>
-                  <View style={{ flex: 1, gap: 2 }}>
-                    <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text }}>
-                      {b.nama}
-                    </Text>
-                    <Text style={{ fontSize: 11, color: colors.textMuted }}>
-                      Stok: {b.stok} {b.satuan} • {b.lokasiRak}
-                    </Text>
-                  </View>
-                  <View style={{ alignItems: 'flex-end', gap: 2 }}>
-                    <Pill
-                      label={sisaHari <= 0 ? 'KADALUARSA HARI INI!' : `${sisaHari} Hari Lagi`}
-                      tone={isUrgent ? 'danger' : 'warning'}
-                    />
-                    <Text style={{ fontSize: 10.5, fontWeight: '700', color: colors.text }}>
-                      Exp: {b.tanggalKadaluarsa}
-                    </Text>
-                  </View>
-                </View>
-              );
-            })}
-          </View>
-        </Card>
-      )}
+        )}
+      </Card>
 
       {/* 6. CCTV Area Gudang (With Play/Pause On-Demand Control) */}
       <SectionTitle
@@ -398,6 +997,107 @@ const styles = StyleSheet.create({
   content: { padding: 16, gap: 14, paddingBottom: 110 },
   disclaimer: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 10 },
   rowTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  unitTab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+  },
+  listTabBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+  },
+  tempControlBox: {
+    padding: 14,
+    borderWidth: 1,
+    gap: 12,
+  },
+  setpointRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 10,
+    borderWidth: 1,
+    gap: 8,
+  },
+  tempStepBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  doorCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 12,
+    borderWidth: 1.5,
+    gap: 10,
+  },
+  doorIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  doorActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  modeChip: {
+    flex: 1,
+    minWidth: '47%',
+    padding: 10,
+    borderWidth: 1,
+    gap: 2,
+  },
+  auxBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 10,
+    borderWidth: 1,
+  },
+  telemetryGrid: {
+    flexDirection: 'row',
+    padding: 10,
+    alignItems: 'center',
+  },
+  telemetryItem: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 2,
+    paddingVertical: 4,
+  },
+  lastCmdBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 8,
+    borderWidth: 1,
+  },
+  feedbackToast: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 10,
+  },
   kpiCard: { flex: 1, gap: 4, padding: 12, borderWidth: 1.5 },
   kpiTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   listItemRow: {

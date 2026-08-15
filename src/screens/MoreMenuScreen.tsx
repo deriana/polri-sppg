@@ -34,16 +34,14 @@ export default function MoreMenuScreen({ navigation }: any) {
   const personalItems: MenuItem[] = [
     { key: 'Profile', icon: 'user', label: 'Profil Saya', desc: 'Info akun, data pribadi, & ganti foto profil' },
     { key: 'CheckIn', icon: 'user-check', label: 'Presensi Kehadiran Saya', desc: 'Input foto selfie & lokasi GPS presensi akun pribadi' },
-    { key: 'LogAktivitas', icon: 'activity', label: 'Log Aktivitas & Audit Trail', desc: 'Rekam jejak seluruh aktivitas & forensik sistem SPPG' },
   ];
 
   const sdmItems: MenuItem[] = [];
-  if (role !== 'DRIVER') {
-    sdmItems.push({ key: 'Presensi', icon: 'users', label: 'Rekap Presensi Staf / Anak Buah', desc: 'Pantau rekap & foto selfie hadir seluruh staf SPPG' });
-  }
   if (permissions.canManageStaff) {
+    sdmItems.push({ key: 'Presensi', icon: 'users', label: 'Rekap Presensi Seluruh Staf', desc: 'Pantau rekap & foto selfie hadir seluruh tim SPPG' });
     sdmItems.push({ key: 'StaffList', icon: 'user-plus', label: 'Data Staf Dapur', desc: 'Kelola 47-52 petugas lapangan & relawan SPPG' });
     sdmItems.push({ key: 'Payroll', icon: 'credit-card', label: 'Payroll & Slip Gaji Staf', desc: 'Gaji pokok, tunjangan, & slip gaji tiap pegawai' });
+    sdmItems.push({ key: 'LogAktivitas', icon: 'activity', label: 'Log Aktivitas & Audit Trail', desc: 'Rekam jejak seluruh aktivitas & forensik sistem SPPG' });
   }
 
   const operasionalItems: MenuItem[] = [];

@@ -11,7 +11,8 @@ export interface RbacFeatureRow {
 export const RBAC_FEATURE_CATALOG: RbacFeatureRow[] = [
   { key: 'canCreate', featureName: 'Input Data Operasional', description: 'Membuat entri baru laporan masak, checklist, uji lab, atau mutasi' },
   { key: 'canUpdateOwn', featureName: 'Edit Data Sendiri', description: 'Mengubah entri draft sebelum difinalisasi/diverifikasi' },
-  { key: 'canManageStaff', featureName: 'Kelola Staf Dapur', description: 'Menambah, mengedit, atau menonaktifkan akun staf dapur SPPG' },
+  { key: 'canManageStaff', featureName: 'Kelola Staf & Rekap Presensi', description: 'Rekap kehadiran seluruh staf, payroll/gaji, dan manajemen akun staf SPPG' },
+  { key: 'canViewActivityLog', featureName: 'Log Aktivitas & Audit Trail', description: 'Melihat rekam jejak sistem & audit trail forensik operasional' },
   { key: 'canVerifyLaporan', featureName: 'Verifikasi Laporan Masak', description: 'Memverifikasi dan mengunci laporan produksi harian' },
   { key: 'canManageGudang', featureName: 'Kelola Gudang & Stok', description: 'Penerimaan bahan suplier DO, mutasi stok, & permintaan bahan' },
   { key: 'canManageDistribusi', featureName: 'Distribusi Armada GPS', description: 'Memulai rute pengantaran armada & bukti serah terima sekolah' },

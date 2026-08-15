@@ -147,8 +147,8 @@ export default function RiwayatPermintaanScreen({ navigation }: any) {
               )}
 
               <PrimaryButton
-                label="Lacak Pengiriman (Peta)"
-                icon="map-pin"
+                label="Lacak Pengiriman Truk (Peta Live)"
+                icon="truck"
                 variant="outline"
                 onPress={() => navigation.navigate('PermintaanBahanDetail', { permintaanId: p.id })}
               />

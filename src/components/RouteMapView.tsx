@@ -84,9 +84,13 @@ export default function RouteMapView({
   <style>
     html, body, #map { width: 100%; height: 100%; margin: 0; padding: 0; background: ${colors.surface}; font-family: -apple-system, Roboto, sans-serif; }
     .pin-badge { border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 2px solid #ffffff; }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.9; }
+      100% { transform: scale(1.8); opacity: 0; }
+    }
     #hud { position: absolute; top: 12px; left: 12px; max-width: calc(100% - 210px); z-index: 1000; background: ${colors.surface}; border: 1px solid ${colors.border}; color: ${colors.text}; padding: 10px 14px; border-radius: 16px; font-size: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.18); display: flex; flex-direction: column; gap: 4px; }
     #hud-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-    #hud-title { font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; font-size: 11px; color: ${colors.textMuted}; }
+    #hud-title { font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; font-size: 11px; color: ${colors.textMuted}; display: flex; align-items: center; gap: 4px; }
     #hud-status { font-weight: 800; color: ${colors.primary}; font-size: 12px; }
     #hud-eta { font-weight: 800; color: ${colors.text}; font-size: 13px; margin-top: 2px; }
     #bar-track { width: 100%; height: 6px; background: ${colors.border}; border-radius: 3px; overflow: hidden; margin-top: 4px; }
@@ -97,7 +101,7 @@ export default function RouteMapView({
   <div id="map"></div>
   <div id="hud">
     <div id="hud-row">
-      <div id="hud-title">LIVE ROUTE TRACKING</div>
+      <div id="hud-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>LIVE ROUTE TRACKING</div>
       <div id="hud-status">MENUNGGU SINKRON</div>
     </div>
     <div id="bar-track"><div id="bar-fill"></div></div>
@@ -115,10 +119,8 @@ export default function RouteMapView({
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19 }).addTo(map);
 
     function makeIcon(markup, bgColor, size, isVehicle) {
-      var inner = isVehicle
-        ? '<img src="${truckImgUri}" style="width:34px;height:34px;object-fit:contain" />'
-        : markup;
-      var html = '<div class="pin-badge" style="width:' + size + 'px;height:' + size + 'px;background:' + bgColor + ';box-shadow:0 3px 8px rgba(0,0,0,0.35);border:2px solid #fff;overflow:hidden;display:flex;align-items:center;justify-content:center">' + inner + '</div>';
+      var pulseRing = isVehicle ? '<div style="position:absolute;width:100%;height:100%;border-radius:50%;background:' + bgColor + ';animation:pulse 1.6s infinite ease-out;pointer-events:none"></div>' : '';
+      var html = '<div style="position:relative;width:' + size + 'px;height:' + size + 'px;display:flex;align-items:center;justify-content:center">' + pulseRing + '<div class="pin-badge" style="width:' + size + 'px;height:' + size + 'px;background:' + bgColor + ';box-shadow:0 3px 10px rgba(0,0,0,0.35);border:2.5px solid #fff;overflow:hidden;display:flex;align-items:center;justify-content:center;z-index:2">' + markup + '</div></div>';
       return L.divIcon({ html: html, className:'', iconSize:[size,size], iconAnchor:[size/2, size/2] });
     }
 

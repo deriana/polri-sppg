@@ -27,7 +27,8 @@ Folder ini (`src/rbac/`) merupakan **pusat pemetaan hak akses dan wewenang (RBAC
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Input Data Operasional** (`canCreate`) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
 | **Edit Data Sendiri** (`canUpdateOwn`) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
-| **Kelola Staf Dapur** (`canManageStaff`) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Kelola Staf & Rekap Presensi** (`canManageStaff`) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Log Aktivitas & Audit Trail** (`canViewActivityLog`) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
 | **Verifikasi Laporan Masak** (`canVerifyLaporan`) | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **Kelola Gudang & Stok** (`canManageGudang`) | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
 | **Distribusi Armada GPS** (`canManageDistribusi`) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |

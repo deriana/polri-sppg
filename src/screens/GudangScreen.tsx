@@ -99,6 +99,24 @@ export default function GudangScreen({ navigation }: any) {
     { key: 'aman', label: 'Stok Aman' },
   ];
 
+  // Live Telemetry Simulation for Gudang
+  const [telemetry, setTelemetry] = useState({
+    chillerDaging: 3.2,
+    deepFreezer: -18.4,
+    chillerSayur: 5.6,
+  });
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setTelemetry({
+        chillerDaging: Math.round((2.5 + (Math.random() - 0.5) * 0.4) * 10) / 10,
+        deepFreezer: Math.round((-18.0 + (Math.random() - 0.5) * 0.5) * 10) / 10,
+        chillerSayur: Math.round((5.0 + (Math.random() - 0.5) * 0.4) * 10) / 10,
+      });
+    }, 2500);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       {/* 1. Header Row */}
@@ -132,6 +150,60 @@ export default function GudangScreen({ navigation }: any) {
           </Text>
         </Card>
       )}
+
+      {/* Quick IoT Cold Storage & Freezer Telemetry Card */}
+      <Card
+        onPress={() => navigation.navigate('GudangKondisi')}
+        style={{
+          gap: 10,
+          borderWidth: 1.5,
+          borderColor: colors.primary,
+          backgroundColor: isDark ? 'rgba(30, 41, 59, 0.4)' : '#F0FDF4',
+        }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Feather name="cpu" size={16} color={colors.primary} />
+            <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.text }}>
+              KONTROL IoT RUANG PENDINGIN & FREEZER
+            </Text>
+          </View>
+          <Pill label="Buka Panel IoT >" tone="primary" icon="sliders" />
+        </View>
+
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <View style={{ flex: 1, padding: 8, backgroundColor: colors.surface, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, alignItems: 'center' }}>
+            <Text style={{ fontSize: 10, color: colors.textMuted, fontWeight: '700' }}>CHILLER DAGING</Text>
+            <Text style={{ fontSize: 16, fontWeight: '900', color: colors.success }}>
+              {telemetry.chillerDaging > 0 ? `+${telemetry.chillerDaging.toFixed(1)}` : telemetry.chillerDaging.toFixed(1)}°C
+            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 }}>
+              <Feather name="lock" size={10} color={colors.success} />
+              <Text style={{ fontSize: 9.5, color: colors.success, fontWeight: '700' }}>Terkunci</Text>
+            </View>
+          </View>
+          <View style={{ flex: 1, padding: 8, backgroundColor: colors.surface, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, alignItems: 'center' }}>
+            <Text style={{ fontSize: 10, color: colors.textMuted, fontWeight: '700' }}>DEEP FREEZER</Text>
+            <Text style={{ fontSize: 16, fontWeight: '900', color: colors.primary }}>
+              {telemetry.deepFreezer.toFixed(1)}°C
+            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 }}>
+              <Feather name="lock" size={10} color={colors.success} />
+              <Text style={{ fontSize: 9.5, color: colors.success, fontWeight: '700' }}>Terkunci</Text>
+            </View>
+          </View>
+          <View style={{ flex: 1, padding: 8, backgroundColor: colors.surface, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, alignItems: 'center' }}>
+            <Text style={{ fontSize: 10, color: colors.textMuted, fontWeight: '700' }}>CHILLER SAYUR</Text>
+            <Text style={{ fontSize: 16, fontWeight: '900', color: colors.success }}>
+              {telemetry.chillerSayur > 0 ? `+${telemetry.chillerSayur.toFixed(1)}` : telemetry.chillerSayur.toFixed(1)}°C
+            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 }}>
+              <Feather name="lock" size={10} color={colors.success} />
+              <Text style={{ fontSize: 9.5, color: colors.success, fontWeight: '700' }}>Terkunci</Text>
+            </View>
+          </View>
+        </View>
+      </Card>
 
       {/* 3. FILTER GROUP 1: Status & Prioritas Stok */}
       <View style={{ gap: 6 }}>

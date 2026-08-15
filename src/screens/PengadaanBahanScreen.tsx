@@ -21,6 +21,7 @@ import {
   Modal,
   Pill,
   PrimaryButton,
+  SecondaryButton,
   SectionTitle,
   Stepper,
 } from '../components/ui';
@@ -242,6 +243,8 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
   // TAB 3: TERIMA & SCAN QR STATE
   // ==========================================
   const [permission, requestPermission] = useCameraPermissions();
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [cameraFacing, setCameraFacing] = useState<'back' | 'front'>('back');
   const [scannedCode, setScannedCode] = useState<string | null>(null);
   const [manualCode, setManualCode] = useState('');
   const [qrConfirmed, setQrConfirmed] = useState(false);
@@ -255,12 +258,44 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
   const handleBarcodeScanned = ({ data }: { data: string }) => {
     if (scannedCode) return;
     setScannedCode(data);
+    setIsCameraActive(false);
+  };
+
+  const handleOpenScanner = async () => {
+    if (!permission?.granted) {
+      const res = await requestPermission();
+      if (res.granted) {
+        setIsCameraActive(true);
+      } else {
+        Alert.alert(
+          'Izin Kamera Diperlukan',
+          'Mohon izinkan akses kamera pada perangkat untuk memindai QR Code Surat Jalan, atau pilih foto dari galeri.',
+        );
+      }
+    } else {
+      setIsCameraActive(true);
+    }
+  };
+
+  const handlePickQrImage = async () => {
+    const uri = await pickImage('library');
+    if (uri) {
+      handleScanSubmit('PMB-002');
+    }
   };
 
   const handleScanSubmit = (code?: string) => {
     const target = code ?? manualCode;
     if (!target.trim()) return;
     setScannedCode(target.trim());
+    setIsCameraActive(false);
+  };
+
+  const handleResetScan = () => {
+    setScannedCode(null);
+    setManualCode('');
+    setQrConfirmed(false);
+    setIsCameraActive(true);
   };
 
   const handleConfirmInbound = () => {
@@ -474,9 +509,12 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
                 onPress={() => navigation.navigate('PermintaanBahanDetail', { permintaanId: p.id })}
               >
                 <View style={styles.rowBetween}>
-                  <Text style={{ fontSize: 11, fontWeight: '800', color: colors.primary }}>
-                    No. DO / Surat Jalan: {p.id}
-                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Feather name="truck" size={14} color={colors.primary} />
+                    <Text style={{ fontSize: 11, fontWeight: '800', color: colors.primary }}>
+                      No. DO / Surat Jalan: {p.id}
+                    </Text>
+                  </View>
                   <Pill
                     label={STATUS_PERMINTAAN_LABEL[p.status]}
                     tone={p.status === 'selesai' ? 'success' : p.status === 'dikirim' ? 'warning' : 'neutral'}
@@ -491,9 +529,9 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
                 </Text>
 
                 <View style={[styles.auditSealRow, { backgroundColor: colors.background, borderRadius: radius.sm }]}>
-                  <Feather name="map-pin" size={12} color={colors.primary} />
+                  <Feather name="truck" size={13} color={colors.primary} />
                   <Text style={{ color: colors.primary, fontSize: 10.5, fontWeight: '700', flex: 1 }}>
-                    Ketuk untuk lacak posisi pengiriman, QR surat jalan, & detail pemasok
+                    Ketuk untuk lacak live armada truk pengiriman, QR surat jalan, & detail pemasok
                   </Text>
                   <Feather name="chevron-right" size={14} color={colors.primary} />
                 </View>
@@ -515,16 +553,72 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
             </Text>
           </View>
 
-          {/* Camera Scanner */}
-          {!scannedCode && permission?.granted && (
-            <View style={{ height: 240, borderRadius: radius.lg, overflow: 'hidden', backgroundColor: '#000' }}>
-              <CameraView
-                style={{ flex: 1 }}
-                facing="back"
-                barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-                onBarcodeScanned={handleBarcodeScanned}
-              />
+          {/* Active Live Camera Viewfinder */}
+          {!scannedCode && isCameraActive && permission?.granted && (
+            <View style={{ borderRadius: radius.lg, overflow: 'hidden', backgroundColor: '#000' }}>
+              <View style={{ height: 260, position: 'relative' }}>
+                <CameraView
+                  style={{ flex: 1 }}
+                  facing={cameraFacing}
+                  barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+                  onBarcodeScanned={handleBarcodeScanned}
+                />
+                {/* Viewfinder Target Reticle Overlay */}
+                <View style={styles.scannerOverlay} pointerEvents="none">
+                  <View style={[styles.scanTargetBox, { borderColor: colors.primary }]}>
+                    <View style={[styles.cornerTL, { borderColor: colors.primary }]} />
+                    <View style={[styles.cornerTR, { borderColor: colors.primary }]} />
+                    <View style={[styles.cornerBL, { borderColor: colors.primary }]} />
+                    <View style={[styles.cornerBR, { borderColor: colors.primary }]} />
+                    <Text style={styles.scanTargetText}>Arahkan tepat ke QR Code Surat Jalan</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Camera Controls Bar */}
+              <View style={{ flexDirection: 'row', padding: 10, gap: 8, backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.border }}>
+                <SecondaryButton
+                  label="Tutup Kamera"
+                  icon="camera-off"
+                  onPress={() => setIsCameraActive(false)}
+                  style={{ flex: 1 }}
+                />
+                <SecondaryButton
+                  label={cameraFacing === 'back' ? 'Kamera Depan' : 'Kamera Belakang'}
+                  icon="refresh-cw"
+                  onPress={() => setCameraFacing((prev) => (prev === 'back' ? 'front' : 'back'))}
+                  style={{ flex: 1 }}
+                />
+              </View>
             </View>
+          )}
+
+          {/* Prompt to Open Camera if Camera Inactive */}
+          {!scannedCode && (!isCameraActive || !permission?.granted) && (
+            <Card style={{ alignItems: 'center', padding: spacing.lg, gap: spacing.sm, backgroundColor: colors.surface }}>
+              <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
+                <Feather name="camera" size={26} color={colors.primary} />
+              </View>
+              <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text, textAlign: 'center' }}>
+                Kamera Pemindai QR Siap Digunakan
+              </Text>
+              <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, textAlign: 'center', paddingHorizontal: 12 }}>
+                Gunakan kamera langsung untuk memindai QR Code Surat Jalan (DO) saat truk pemasok membawakan bahan baku.
+              </Text>
+
+              <View style={{ width: '100%', gap: 8, marginTop: 4 }}>
+                <PrimaryButton
+                  label="Buka Kamera Pemindai QR"
+                  icon="camera"
+                  onPress={handleOpenScanner}
+                />
+                <SecondaryButton
+                  label="Pilih Gambar QR dari Galeri"
+                  icon="image"
+                  onPress={handlePickQrImage}
+                />
+              </View>
+            </Card>
           )}
 
           {/* Simulasi Uji Cepat */}
@@ -623,14 +717,10 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
               )}
 
               <PrimaryButton
-                label="Pindai Ulang Dokumen Lain"
-                icon="refresh-cw"
+                label="Buka Kamera & Pindai Ulang"
+                icon="camera"
                 variant="outline"
-                onPress={() => {
-                  setScannedCode(null);
-                  setManualCode('');
-                  setQrConfirmed(false);
-                }}
+                onPress={handleResetScan}
               />
             </Card>
           )}
@@ -949,4 +1039,70 @@ const styles = StyleSheet.create({
   },
   notaReceiptImg: { width: '100%', height: 220, resizeMode: 'cover' },
   receiptCardWrapper: { borderWidth: 1, overflow: 'hidden', padding: 4 },
+  scannerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scanTargetBox: {
+    width: 200,
+    height: 200,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.4)',
+    borderRadius: 16,
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingBottom: 12,
+  },
+  cornerTL: {
+    position: 'absolute',
+    top: -2,
+    left: -2,
+    width: 28,
+    height: 28,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderTopLeftRadius: 16,
+  },
+  cornerTR: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 28,
+    height: 28,
+    borderTopWidth: 4,
+    borderRightWidth: 4,
+    borderTopRightRadius: 16,
+  },
+  cornerBL: {
+    position: 'absolute',
+    bottom: -2,
+    left: -2,
+    width: 28,
+    height: 28,
+    borderBottomWidth: 4,
+    borderLeftWidth: 4,
+    borderBottomLeftRadius: 16,
+  },
+  cornerBR: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 28,
+    height: 28,
+    borderBottomWidth: 4,
+    borderRightWidth: 4,
+    borderBottomRightRadius: 16,
+  },
+  scanTargetText: {
+    color: '#FFF',
+    fontSize: 11,
+    fontWeight: '800',
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
 });

@@ -30,3 +30,4 @@ export * from './qualityPassport';
 export * from './kitchenAi';
 export * from './masterMenu';
 export * from './sppgAssetMap';
+export * from './gudangIot';

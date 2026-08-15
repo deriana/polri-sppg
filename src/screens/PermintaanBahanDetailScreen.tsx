@@ -56,16 +56,27 @@ export default function PermintaanBahanDetailScreen({ navigation, route }: any) 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       <View style={styles.rowTop}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
+            <Feather name="truck" size={17} color={colors.primary} />
+          </View>
+          <View>
+            <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text }}>Lacak Pengiriman Pasokan</Text>
+            <Text style={{ fontSize: 10.5, color: colors.textMuted }}>No. DO: {permintaan.id}</Text>
+          </View>
+        </View>
         <Pill label={STATUS_LABEL[permintaan.status]} tone={permintaan.status === 'selesai' ? 'success' : permintaan.status === 'dikirim' ? 'info' : 'neutral'} />
-        <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>{permintaan.tanggal}</Text>
       </View>
 
       <Text style={{ fontSize: fontSize.md, fontWeight: '800', color: colors.text }}>
         {bahan?.nama ?? permintaan.bahanId} • {permintaan.jumlah} {bahan?.satuan ?? 'unit'}
       </Text>
 
-      <View style={{ gap: 4 }}>
-        <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>Peta Live Pelacakan (OpenStreetMap):</Text>
+      <View style={{ gap: 6 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Feather name="truck" size={14} color={colors.primary} />
+          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>Peta Live Posisi Truk Pengiriman (OpenStreetMap GPS):</Text>
+        </View>
         <RouteMapView
           originLat={origin.lat}
           originLng={origin.lng}
@@ -76,6 +87,7 @@ export default function PermintaanBahanDetailScreen({ navigation, route }: any) 
           status={TRIP_STATUS[permintaan.status]}
           originIcon="factory"
           destIcon="home"
+          vehicleIcon="truck"
           colors={colors}
           height={380}
         />

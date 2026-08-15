@@ -5,9 +5,10 @@ import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { Card, EmptyState, Input, Pill, PrimaryButton, Screen, SectionTitle } from '../components/ui';
+import { Card, EmptyState, Input, Pill, PrimaryButton, SecondaryButton, Screen, SectionTitle } from '../components/ui';
 import { Peralatan, PermintaanBahan } from '../types';
 import { ROLE_PERMISSIONS } from '../utils/scope';
+import { pickImage } from '../utils/pickImage';
 
 const STATUS_LABEL: Record<PermintaanBahan['status'], string> = {
   diajukan: 'Diajukan',
@@ -25,17 +26,31 @@ export default function QrScanScreen() {
   const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark } = useTheme();
   const navigation = useNavigation<any>();
   const [permission, requestPermission] = useCameraPermissions();
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [cameraFacing, setCameraFacing] = useState<'back' | 'front'>('back');
   const [scannedCode, setScannedCode] = useState<string | null>(null);
   const [manualCode, setManualCode] = useState('');
   const [confirmed, setConfirmed] = useState(false);
 
-  useEffect(() => {
-    if (permission && !permission.granted && permission.canAskAgain) {
-      requestPermission();
-    } else if (permission && !permission.granted && !permission.canAskAgain) {
-      Alert.alert('Izin Kamera Ditolak', 'Aktifkan izin kamera di pengaturan perangkat untuk memindai QR, atau masukkan kode secara manual.');
+  const handleOpenScanner = async () => {
+    if (!permission?.granted) {
+      const res = await requestPermission();
+      if (res.granted) {
+        setIsCameraActive(true);
+      } else {
+        Alert.alert('Izin Kamera Ditolak', 'Aktifkan izin kamera di pengaturan perangkat untuk memindai QR secara langsung, atau pilih foto dari galeri.');
+      }
+    } else {
+      setIsCameraActive(true);
     }
-  }, [permission?.granted, permission?.canAskAgain]);
+  };
+
+  const handlePickQrImage = async () => {
+    const uri = await pickImage('library');
+    if (uri) {
+      handleManualSubmit('PMB-002');
+    }
+  };
 
   if (!role || ROLE_PERMISSIONS[role].isViewOnly) {
     return (
@@ -61,18 +76,21 @@ export default function QrScanScreen() {
   const handleBarcodeScanned = ({ data }: { data: string }) => {
     if (scannedCode) return;
     setScannedCode(data);
+    setIsCameraActive(false);
   };
 
   const handleManualSubmit = (codeToUse?: string) => {
     const target = codeToUse ?? manualCode;
     if (!target.trim()) return;
     setScannedCode(target.trim());
+    setIsCameraActive(false);
   };
 
   const reset = () => {
     setScannedCode(null);
     setManualCode('');
     setConfirmed(false);
+    setIsCameraActive(true);
   };
 
   const confirmPenerimaan = () => {
@@ -95,20 +113,70 @@ export default function QrScanScreen() {
           </Text>
         </View>
 
-        {/* Camera View */}
-        {!scannedCode && permission?.granted && (
-          <View style={{ height: 260, borderRadius: radius.lg, overflow: 'hidden', backgroundColor: '#000' }}>
-            <CameraView
-              style={{ flex: 1 }}
-              facing="back"
-              barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-              onBarcodeScanned={handleBarcodeScanned}
-            />
+        {/* Active Live Camera Viewfinder */}
+        {!scannedCode && isCameraActive && permission?.granted && (
+          <View style={{ borderRadius: radius.lg, overflow: 'hidden', backgroundColor: '#000' }}>
+            <View style={{ height: 260, position: 'relative' }}>
+              <CameraView
+                style={{ flex: 1 }}
+                facing={cameraFacing}
+                barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+                onBarcodeScanned={handleBarcodeScanned}
+              />
+              <View style={styles.scannerOverlay} pointerEvents="none">
+                <View style={[styles.scanTargetBox, { borderColor: colors.primary }]}>
+                  <View style={[styles.cornerTL, { borderColor: colors.primary }]} />
+                  <View style={[styles.cornerTR, { borderColor: colors.primary }]} />
+                  <View style={[styles.cornerBL, { borderColor: colors.primary }]} />
+                  <View style={[styles.cornerBR, { borderColor: colors.primary }]} />
+                  <Text style={styles.scanTargetText}>Arahkan ke QR Code</Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={{ flexDirection: 'row', padding: 10, gap: 8, backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.border }}>
+              <SecondaryButton
+                label="Tutup Kamera"
+                icon="camera-off"
+                onPress={() => setIsCameraActive(false)}
+                style={{ flex: 1 }}
+              />
+              <SecondaryButton
+                label={cameraFacing === 'back' ? 'Kamera Depan' : 'Kamera Belakang'}
+                icon="refresh-cw"
+                onPress={() => setCameraFacing((prev) => (prev === 'back' ? 'front' : 'back'))}
+                style={{ flex: 1 }}
+              />
+            </View>
           </View>
         )}
 
-        {!permission?.granted && !scannedCode && (
-          <EmptyState icon="camera-off" title="Kamera Tidak Aktif" body="Izin kamera belum aktif. Anda dapat menggunakan tombol simulasi cepat di bawah." />
+        {/* Prompt to Open Camera if Camera Inactive */}
+        {!scannedCode && (!isCameraActive || !permission?.granted) && (
+          <Card style={{ alignItems: 'center', padding: spacing.lg, gap: spacing.sm, backgroundColor: colors.surface }}>
+            <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
+              <Feather name="camera" size={26} color={colors.primary} />
+            </View>
+            <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text, textAlign: 'center' }}>
+              Kamera Pemindai QR Siap Digunakan
+            </Text>
+            <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, textAlign: 'center', paddingHorizontal: 12 }}>
+              Gunakan kamera untuk memindai QR Code Surat Jalan penerimaan barang atau label barcode QR aset peralatan SPPG.
+            </Text>
+
+            <View style={{ width: '100%', gap: 8, marginTop: 4 }}>
+              <PrimaryButton
+                label="Buka Kamera Pemindai QR"
+                icon="camera"
+                onPress={handleOpenScanner}
+              />
+              <SecondaryButton
+                label="Pilih Gambar QR dari Galeri"
+                icon="image"
+                onPress={handlePickQrImage}
+              />
+            </View>
+          </Card>
         )}
 
         {/* Manual Input & Simulation Shortcuts */}
@@ -305,5 +373,71 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  scannerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scanTargetBox: {
+    width: 200,
+    height: 200,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.4)',
+    borderRadius: 16,
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingBottom: 12,
+  },
+  cornerTL: {
+    position: 'absolute',
+    top: -2,
+    left: -2,
+    width: 28,
+    height: 28,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderTopLeftRadius: 16,
+  },
+  cornerTR: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 28,
+    height: 28,
+    borderTopWidth: 4,
+    borderRightWidth: 4,
+    borderTopRightRadius: 16,
+  },
+  cornerBL: {
+    position: 'absolute',
+    bottom: -2,
+    left: -2,
+    width: 28,
+    height: 28,
+    borderBottomWidth: 4,
+    borderLeftWidth: 4,
+    borderBottomLeftRadius: 16,
+  },
+  cornerBR: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 28,
+    height: 28,
+    borderBottomWidth: 4,
+    borderRightWidth: 4,
+    borderBottomRightRadius: 16,
+  },
+  scanTargetText: {
+    color: '#FFF',
+    fontSize: 11,
+    fontWeight: '800',
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    overflow: 'hidden',
   },
 });

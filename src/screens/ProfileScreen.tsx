@@ -236,12 +236,14 @@ export default function ProfileScreen({ navigation }: any) {
       {/* ===== Pintasan Akun & Audit Log ===== */}
       <Card style={{ gap: 6 }}>
         <SectionTitle style={{ marginBottom: 2 }}>Pintasan & Keamanan Akun</SectionTitle>
-        <SecondaryButton
-          label="Log Aktivitas & Audit Trail Sistem"
-          icon="activity"
-          onPress={() => navigation.navigate('LogAktivitas')}
-        />
-        <SecondaryButton label="Riwayat Presensi Saya" icon="calendar" onPress={() => navigation.navigate('Presensi')} />
+        {(role === 'KEPALA_SPPG' || role === 'SUPERVISOR_POLRES' || role === 'SUPERVISOR_POLDA') && (
+          <SecondaryButton
+            label="Log Aktivitas & Audit Trail Sistem"
+            icon="activity"
+            onPress={() => navigation.navigate('LogAktivitas')}
+          />
+        )}
+        <SecondaryButton label="Presensi Kehadiran Saya" icon="user-check" onPress={() => navigation.navigate('CheckIn')} />
         <SecondaryButton label="Slip Gaji & Payroll" icon="file-text" onPress={() => navigation.navigate('PayrollDetail', { userId: currentUser.id })} />
         <SecondaryButton label="Profil Unit SPPG" icon="home" onPress={() => navigation.navigate('SppgProfile')} />
       </Card>
