@@ -384,16 +384,23 @@ export default function GudangScreen({ navigation }: any) {
         <SectionTitle style={{ marginBottom: 0 }}>Aksi Cepat Manajemen Gudang</SectionTitle>
 
         {canRequest && (
-          <PrimaryButton
-            label="Catat Mutasi Keluar / Masuk Manual"
-            icon="repeat"
-            variant="secondary"
-            onPress={() => navigation.navigate('MutasiStokForm')}
-          />
+          <>
+            <PrimaryButton
+              label="+ Belanja Bahan Pokok Mandiri (Log Anggaran)"
+              icon="shopping-cart"
+              onPress={() => navigation.navigate('Anggaran')}
+            />
+            <PrimaryButton
+              label="Catat Mutasi Keluar / Masuk Manual"
+              icon="repeat"
+              variant="secondary"
+              onPress={() => navigation.navigate('MutasiStokForm')}
+            />
+          </>
         )}
 
         <PrimaryButton
-          label="Riwayat Permintaan Bahan Dapur"
+          label="Riwayat Permintaan Bahan ke Pusat"
           icon="clipboard"
           variant="outline"
           onPress={() => navigation.navigate('RiwayatPermintaan')}
@@ -401,7 +408,7 @@ export default function GudangScreen({ navigation }: any) {
 
         {!isWilayah && (
           <PrimaryButton
-            label="Pindai QR Penerimaan Barang dari Supplier"
+            label="Pindai QR Penerimaan Barang / Surat Jalan"
             icon="camera"
             variant="secondary"
             onPress={() => navigation.navigate('QrScan')}
