@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { Card, EmptyState, Input, Pill, PrimaryButton, SectionTitle } from '../components/ui';
+import { Card, EmptyState, Input, Pill, PrimaryButton, SecondaryButton, SectionTitle } from '../components/ui';
 import { useScopedData } from '../hooks';
 import { ROLE_PERMISSIONS } from '../utils/scope';
 import { UsulanMenu } from '../types';
@@ -14,21 +14,21 @@ const STATUS_LABEL: Record<UsulanMenu['status'], string> = {
   ditolak: 'Ditolak',
 };
 
-const STATUS_TONE: Record<UsulanMenu['status'], 'neutral' | 'success' | 'danger'> = {
-  diajukan: 'neutral',
+const STATUS_TONE: Record<UsulanMenu['status'], 'warning' | 'success' | 'danger'> = {
+  diajukan: 'warning',
   disetujui: 'success',
   ditolak: 'danger',
 };
 
 const FILTERS: Array<UsulanMenu['status'] | 'semua'> = ['semua', 'diajukan', 'disetujui', 'ditolak'];
 
-export default function UsulanMenuScreen({ navigation }: any) {
+export default function UsulanMenuScreen() {
   const { role, usulanMenuList, sekolahList, updateUsulanMenuStatus } = useApp();
   const { sppgInScope } = useScopedData();
-  const { colors, spacing, fontSize, radius } = useTheme();
+  const { colors, spacing, fontSize, radius, isDark } = useTheme();
 
   const [filterStatus, setFilterStatus] = useState<UsulanMenu['status'] | 'semua'>('semua');
-  const [respondingId, setRespondingId] = useState<string | null>(null);
+  const [selectedUsulan, setSelectedUsulan] = useState<UsulanMenu | null>(null);
   const [tanggapanText, setTanggapanText] = useState('');
 
   const canRespond = !!role && ROLE_PERMISSIONS[role].canManageMenu;
@@ -43,19 +43,31 @@ export default function UsulanMenuScreen({ navigation }: any) {
     [sorted, filterStatus],
   );
 
-  const respond = (id: string, status: UsulanMenu['status']) => {
+  const handleRespond = (id: string, status: UsulanMenu['status']) => {
     updateUsulanMenuStatus(id, status, tanggapanText.trim() || undefined);
-    setRespondingId(null);
+    setSelectedUsulan(null);
     setTanggapanText('');
   };
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
-      <View style={styles.rowTop}>
-        <SectionTitle style={{ marginBottom: 0 }}>Usulan Menu Sekolah</SectionTitle>
-        <PrimaryButton label="Buat Usulan" icon="plus" fullWidth={false} onPress={() => navigation.navigate('UsulanMenuForm')} />
-      </View>
+      {/* Banner Explanation */}
+      <Card variant="accent" style={{ gap: spacing.xs }}>
+        <View style={styles.rowBetween}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Feather name="book-open" size={18} color={isDark ? colors.gold : colors.primary} />
+            <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
+              USULAN MENU DARI SEKOLAH
+            </Text>
+          </View>
+          <Pill label={`${filtered.length} Usulan`} tone="primary" />
+        </View>
+        <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, marginTop: 2 }}>
+          Daftar aspirasi variasi menu makanan bergizi yang diajukan oleh kepala sekolah, guru, & komite sekolah binaan SPPG.
+        </Text>
+      </Card>
 
+      {/* Filter Tabs */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.xs, marginVertical: 2 }}>
         {FILTERS.map((st) => {
           const isActive = filterStatus === st;
@@ -65,7 +77,11 @@ export default function UsulanMenuScreen({ navigation }: any) {
               onPress={() => setFilterStatus(st)}
               style={[
                 styles.chip,
-                { backgroundColor: isActive ? colors.primary : colors.surface, borderColor: isActive ? colors.primary : colors.border, borderRadius: radius.pill },
+                {
+                  backgroundColor: isActive ? colors.primary : colors.surface,
+                  borderColor: isActive ? colors.primary : colors.border,
+                  borderRadius: radius.pill,
+                },
               ]}
             >
               <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: isActive ? colors.textInverse : colors.text }}>
@@ -77,63 +93,172 @@ export default function UsulanMenuScreen({ navigation }: any) {
       </ScrollView>
 
       {filtered.length === 0 ? (
-        <EmptyState icon="clipboard" title="Belum Ada Usulan" body="Belum ada usulan menu dari sekolah pada status ini." />
+        <EmptyState icon="clipboard" title="Belum Ada Usulan" body="Belum ada usulan menu dari sekolah pada kategori status ini." />
       ) : (
         filtered.map((u) => {
           const sekolah = sekolahList.find((s) => s.id === u.sekolahId);
-          const isResponding = respondingId === u.id;
 
           return (
-            <Card key={u.id} style={{ gap: spacing.xs }}>
-              <View style={styles.rowTop}>
+            <Card
+              key={u.id}
+              style={{ gap: spacing.xs }}
+              onPress={() => {
+                setSelectedUsulan(u);
+                setTanggapanText(u.tanggapan ?? '');
+              }}
+            >
+              <View style={styles.rowBetween}>
                 <Pill label={STATUS_LABEL[u.status]} tone={STATUS_TONE[u.status]} />
                 <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>{u.tanggal}</Text>
               </View>
 
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Feather name="home" size={12} color={colors.textMuted} />
-                <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>{sekolah?.nama ?? u.sekolahId}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                <Feather name="home" size={13} color={colors.primary} />
+                <Text style={{ color: colors.text, fontSize: fontSize.xs, fontWeight: '700' }}>
+                  {sekolah?.nama ?? u.sekolahId}
+                </Text>
               </View>
 
-              <Text style={{ color: colors.text, fontWeight: '800', fontSize: fontSize.sm }}>{u.usulanMenu}</Text>
-              {u.alasan && <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Alasan: {u.alasan}</Text>}
+              <Text style={{ color: colors.text, fontWeight: '900', fontSize: fontSize.sm, marginTop: 2 }}>
+                {u.usulanMenu}
+              </Text>
+              {u.alasan && (
+                <Text style={{ color: colors.textMuted, fontSize: 11.5 }} numberOfLines={2}>
+                  Alasan: {u.alasan}
+                </Text>
+              )}
 
               {u.tanggapan && (
-                <View style={{ backgroundColor: colors.primaryLight, borderRadius: radius.md, padding: 8 }}>
-                  <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.primary }}>Tanggapan SPPG:</Text>
-                  <Text style={{ fontSize: fontSize.xs, color: colors.text }}>{u.tanggapan}</Text>
+                <View style={{ backgroundColor: isDark ? 'rgba(13,148,136,0.15)' : colors.primaryLight, borderRadius: radius.sm, padding: 8, marginTop: 4 }}>
+                  <Text style={{ fontSize: 11, fontWeight: '800', color: colors.primary }}>Tanggapan Ahli Gizi SPPG:</Text>
+                  <Text style={{ fontSize: 11, color: colors.text, marginTop: 1 }}>{u.tanggapan}</Text>
                 </View>
               )}
 
-              {canRespond && u.status === 'diajukan' && (
-                isResponding ? (
-                  <View style={{ gap: spacing.xs }}>
-                    <Input
-                      value={tanggapanText}
-                      onChangeText={setTanggapanText}
-                      placeholder="Catatan tanggapan (opsional)"
-                      multiline
-                    />
-                    <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                      <PrimaryButton label="Setujui" variant="secondary" fullWidth onPress={() => respond(u.id, 'disetujui')} style={{ flex: 1 }} />
-                      <PrimaryButton label="Tolak" variant="danger" fullWidth onPress={() => respond(u.id, 'ditolak')} style={{ flex: 1 }} />
-                    </View>
-                  </View>
-                ) : (
-                  <PrimaryButton label="Tinjau Usulan" variant="secondary" onPress={() => { setRespondingId(u.id); setTanggapanText(''); }} />
-                )
-              )}
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 4, marginTop: 4 }}>
+                <Text style={{ fontSize: 10.5, fontWeight: '700', color: colors.primary }}>Ketuk untuk Lihat Detail</Text>
+                <Feather name="chevron-right" size={13} color={colors.primary} />
+              </View>
             </Card>
           );
         })
       )}
+
+      {/* Modal Detail Usulan Menu Lengkap */}
+      <Modal visible={!!selectedUsulan} animationType="slide" transparent onRequestClose={() => setSelectedUsulan(null)}>
+        <View style={styles.modalOverlay}>
+          <Card style={[styles.modalCard, { backgroundColor: colors.surface, maxHeight: '90%' }]}>
+            {selectedUsulan && (
+              <ScrollView contentContainerStyle={{ gap: spacing.md }} showsVerticalScrollIndicator={false}>
+                {/* Modal Header */}
+                <View style={styles.rowBetween}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: '700' }}>
+                      DETAIL USULAN MENU SEKOLAH
+                    </Text>
+                    <Text style={{ fontSize: fontSize.md, fontWeight: '900', color: colors.text, marginTop: 2 }}>
+                      {selectedUsulan.usulanMenu}
+                    </Text>
+                  </View>
+                  <Pressable onPress={() => setSelectedUsulan(null)} style={{ padding: 4 }}>
+                    <Feather name="x" size={20} color={colors.textMuted} />
+                  </Pressable>
+                </View>
+
+                {/* Status & Date */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Pill label={STATUS_LABEL[selectedUsulan.status]} tone={STATUS_TONE[selectedUsulan.status]} />
+                  <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>
+                    Diajukan pada: {selectedUsulan.tanggal}
+                  </Text>
+                </View>
+
+                {/* School Information */}
+                <View style={[styles.infoBlock, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <Feather name="home" size={16} color={colors.primary} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
+                        {sekolahList.find((s) => s.id === selectedUsulan.sekolahId)?.nama ?? selectedUsulan.sekolahId}
+                      </Text>
+                      <Text style={{ fontSize: 11, color: colors.textMuted }}>
+                        Sekolah Penerima Manfaat MBG SPPG-001
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Proposal Reason */}
+                <View style={{ gap: 4 }}>
+                  <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
+                    Alasan & Kebutuhan Nutrisi Siswa:
+                  </Text>
+                  <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, lineHeight: 18 }}>
+                    {selectedUsulan.alasan || 'Tidak ada alasan khusus yang dicantumkan.'}
+                  </Text>
+                </View>
+
+                {/* Existing Response or Response Form */}
+                <View style={{ gap: 6 }}>
+                  <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
+                    Tanggapan & Rekomendasi Ahli Gizi:
+                  </Text>
+                  {selectedUsulan.tanggapan ? (
+                    <View style={{ backgroundColor: isDark ? 'rgba(13,148,136,0.15)' : colors.primaryLight, padding: 10, borderRadius: radius.md }}>
+                      <Text style={{ fontSize: fontSize.xs, color: colors.text }}>{selectedUsulan.tanggapan}</Text>
+                    </View>
+                  ) : (
+                    <Text style={{ fontSize: 11.5, color: colors.textMuted, fontStyle: 'italic' }}>
+                      Belum ada tanggapan resmi dari tim gizi SPPG.
+                    </Text>
+                  )}
+                </View>
+
+                {/* Response Input for Ahli Gizi / Kepala SPPG */}
+                {canRespond && (
+                  <View style={{ gap: spacing.xs, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 12 }}>
+                    <Input
+                      label="Berikan Tanggapan Resmi / Catatan Gizi:"
+                      value={tanggapanText}
+                      onChangeText={setTanggapanText}
+                      placeholder="Tuliskan catatan kelayakan gizi / komposisi..."
+                      multiline
+                    />
+                    <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: 4 }}>
+                      <PrimaryButton
+                        label="Setujui Usulan"
+                        variant="secondary"
+                        icon="check"
+                        onPress={() => handleRespond(selectedUsulan.id, 'disetujui')}
+                        style={{ flex: 1 }}
+                      />
+                      <PrimaryButton
+                        label="Tolak"
+                        variant="danger"
+                        icon="x"
+                        onPress={() => handleRespond(selectedUsulan.id, 'ditolak')}
+                        style={{ flex: 1 }}
+                      />
+                    </View>
+                  </View>
+                )}
+
+                <SecondaryButton label="Tutup" onPress={() => setSelectedUsulan(null)} />
+              </ScrollView>
+            )}
+          </Card>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
-  rowTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  chip: { borderWidth: 1, paddingHorizontal: 12, paddingVertical: 6 },
+  content: { padding: 16, gap: 14, paddingBottom: 100 },
+  rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  chip: { borderWidth: 1, paddingHorizontal: 12, paddingVertical: 7 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', padding: 16 },
+  modalCard: { padding: 16, borderRadius: 16, gap: 12 },
+  infoBlock: { padding: 12, borderRadius: 10, borderWidth: 1 },
 });
