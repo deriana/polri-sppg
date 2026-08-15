@@ -6,9 +6,9 @@ import { dateRange } from './dateRange';
 // (rute, riwayat distribusi) bisa join "menu apa hari itu" dengan "sudah dikirim
 // atau belum". Mencakup 7 hari terakhir s.d. hari ini (riwayat) plus besok
 // (rute terjadwal, status masih 'menunggu' karena belum berjalan).
-const PAST_DATES = dateRange('2026-08-03', '2026-08-09');
-const TODAY = '2026-08-10';
-const TOMORROW = '2026-08-11';
+const PAST_DATES = dateRange('2026-08-01', '2026-08-14');
+const TODAY = '2026-08-15';
+const TOMORROW = '2026-08-16';
 
 // Titik koordinat sekolah — perkiraan lokasi nyata per kota, dipakai untuk peta rute driver.
 const SEKOLAH_COORD: Record<string, { lat: number; lng: number }> = {
