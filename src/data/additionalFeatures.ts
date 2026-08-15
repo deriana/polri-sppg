@@ -1,4 +1,5 @@
 import { AnggaranLog, BroadcastMessage, PengajuanSekolah } from '../types';
+import { SPPG_ASSET_MAP } from './sppgAssetMap';
 
 export const initialBroadcastList: BroadcastMessage[] = [
   {
@@ -44,7 +45,7 @@ export const initialAnggaranLogs: AnggaranLog[] = [
     kategori: 'alokasi_pusat',
     nominal: 450000000,
     keterangan: 'Alokasi Dana Operasional Dapur SPPG Bulan Agustus 2026 dari BGN / POLRI',
-    buktiNota: 'SK-ALOKASI-AUG-2026.pdf',
+    buktiNota: SPPG_ASSET_MAP.polri_1,
     noInvoice: 'INV/BGN-POLRI/2026/08/001',
     namaSupplier: 'Kemenko Pangan & Badan Gizi Nasional (BGN)',
     dibuatOleh: 'Rian Hidayat, S.Ak',
@@ -57,7 +58,7 @@ export const initialAnggaranLogs: AnggaranLog[] = [
     kategori: 'bahan_baku',
     nominal: 78500000,
     keterangan: 'Pembelian Beras Premium, Daging Ayam Broiler Segar, & Telur Ayam Ras',
-    buktiNota: 'NOTA-PASOK-001.jpg',
+    buktiNota: SPPG_ASSET_MAP.lh01_ayam_bakar,
     noInvoice: 'INV-MTR-001-20260803',
     mitraId: 'MTR-001',
     namaSupplier: 'PT Daging Segar Utama',
@@ -76,7 +77,7 @@ export const initialAnggaranLogs: AnggaranLog[] = [
     kategori: 'operasional_armada',
     nominal: 12400000,
     keterangan: 'BBM Dexlite & Perawatan Mobil Box Thermal MBG Plat D-8801-SPP & D-8802-SPP',
-    buktiNota: 'SPBU-NOTA-778.jpg',
+    buktiNota: SPPG_ASSET_MAP.mobil_1,
     noInvoice: 'SPBU-PERTAMINA-34401',
     namaSupplier: 'SPBU Pertamina Pasteur',
     dibuatOleh: 'Rian Hidayat, S.Ak',
@@ -89,7 +90,7 @@ export const initialAnggaranLogs: AnggaranLog[] = [
     kategori: 'peralatan_dapur',
     nominal: 24500000,
     keterangan: 'Pengadaan 250 Tray Ompreng Stainless Steel 5 Sekat & 4 Thermal Insulated Box',
-    buktiNota: 'NOTA-OMPRENG-044.jpg',
+    buktiNota: SPPG_ASSET_MAP.tray_1,
     noInvoice: 'INV-EQP-2026-089',
     namaSupplier: 'CV Dapur Prima Stainless',
     dibuatOleh: 'Rian Hidayat, S.Ak',
@@ -106,7 +107,7 @@ export const initialAnggaranLogs: AnggaranLog[] = [
     kategori: 'gaji_insentif',
     nominal: 115000000,
     keterangan: 'Pembayaran Gaji Pokok & Insentif 48 Petugas & Relawan Dapur SPPG Periode Agustus (Tahap 1)',
-    buktiNota: 'SLIP-REKAP-08.pdf',
+    buktiNota: SPPG_ASSET_MAP.suasana_sppg_1,
     noInvoice: 'PAYROLL-SPPG-2026-08-1',
     namaSupplier: 'Payroll Internal SPPG',
     dibuatOleh: 'Rian Hidayat, S.Ak',
@@ -119,7 +120,7 @@ export const initialAnggaranLogs: AnggaranLog[] = [
     kategori: 'bahan_baku',
     nominal: 42300000,
     keterangan: 'Pembelian Sayur & Buah Segar Mingguan dari Mitra Petani Lokal',
-    buktiNota: 'NOTA-PASOK-002.jpg',
+    buktiNota: SPPG_ASSET_MAP.sy03_capcay,
     noInvoice: 'INV-SAYUR-002-88',
     mitraId: 'MTR-002',
     namaSupplier: 'Koperasi Tani Makmur Sayur',
@@ -138,7 +139,7 @@ export const initialAnggaranLogs: AnggaranLog[] = [
     kategori: 'operasional_armada',
     nominal: 8600000,
     keterangan: 'BBM Dexlite Armada Distribusi Harian & Cuci Mobil Box Thermal',
-    buktiNota: 'SPBU-NOTA-779.jpg',
+    buktiNota: SPPG_ASSET_MAP.mobil_2,
     dibuatOleh: 'Rian Hidayat, S.Ak',
   },
 ];

@@ -123,7 +123,7 @@ export default function GudangKondisiScreen({ navigation }: any) {
             {bahanInScope.length}
           </Text>
           <Text style={{ color: colors.primary, fontSize: 10.5, fontWeight: '700' }}>
-            Lihat Semua ➔
+            Lihat Semua
           </Text>
         </Card>
 
@@ -137,7 +137,7 @@ export default function GudangKondisiScreen({ navigation }: any) {
             {stokMenipis.length}
           </Text>
           <Text style={{ color: stokMenipis.length > 0 ? colors.danger : colors.textMuted, fontSize: 10.5, fontWeight: '700' }}>
-            {stokMenipis.length > 0 ? 'Perlu Restok ➔' : 'Stok Aman'}
+            {stokMenipis.length > 0 ? 'Perlu Restok >' : 'Stok Aman'}
           </Text>
         </Card>
 
@@ -151,7 +151,7 @@ export default function GudangKondisiScreen({ navigation }: any) {
             {akanKadaluarsa.length}
           </Text>
           <Text style={{ color: akanKadaluarsa.length > 0 ? colors.warning : colors.textMuted, fontSize: 10.5, fontWeight: '700' }}>
-            {akanKadaluarsa.length > 0 ? 'Prioritas Olah ➔' : 'Kadaluarsa Aman'}
+            {akanKadaluarsa.length > 0 ? 'Prioritas Olah >' : 'Kadaluarsa Aman'}
           </Text>
         </Card>
       </View>

@@ -675,17 +675,17 @@ export default function DashboardScreen({ navigation }: any) {
       {broadcastInScope.length > 0 && isBroadcastHidden && (
         <Pressable
           onPress={() => setIsBroadcastHidden(false)}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 2, paddingHorizontal: 4 }}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4, paddingHorizontal: 6 }}
         >
           <Feather name="radio" size={12} color={colors.warning} />
           <Text style={{ fontSize: 11, fontWeight: '700', color: colors.warning }}>
-            📢 1 Arahan Mabes Disembunyikan • <Text style={{ textDecorationLine: 'underline' }}>Tampilkan Pengumuman</Text>
+            1 Arahan Mabes Disembunyikan • <Text style={{ textDecorationLine: 'underline' }}>Tampilkan Pengumuman</Text>
           </Text>
         </Pressable>
       )}
 
       {/* 3. SPPG Daily Operational Workflow Hub (Work Order Aggregator) */}
-      <Card variant="accent" style={{ gap: spacing.sm }}>
+      <Card variant="accent" style={{ gap: spacing.sm, marginVertical: spacing.xs }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <Feather name="layers" size={16} color={colors.primary} />
@@ -758,7 +758,7 @@ export default function DashboardScreen({ navigation }: any) {
 
               <View style={{ alignItems: 'flex-end', gap: 4 }}>
                 <Pill label={step.status} tone={step.tone} />
-                <Text style={{ fontSize: 9.5, fontWeight: '700', color: colors.primary }}>Buka ➔</Text>
+                <Text style={{ fontSize: 9.5, fontWeight: '700', color: colors.primary }}>Buka</Text>
               </View>
             </Pressable>
           ))}
@@ -767,7 +767,7 @@ export default function DashboardScreen({ navigation }: any) {
 
       {/* 3. Role-based 'My Work' Card for Driver or Petugas */}
       {isDriver ? (
-        <Card variant="accent" style={{ gap: spacing.xs }}>
+        <Card variant="accent" style={{ gap: spacing.xs, marginVertical: spacing.xs }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Feather name="truck" size={18} color={isDark ? colors.gold : colors.primary} />
@@ -778,7 +778,7 @@ export default function DashboardScreen({ navigation }: any) {
             <Pill label={`${ruteDistribusi.length} Rute Sekolah`} tone="primary" />
           </View>
           <Text style={{ fontSize: fontSize.xs, color: colors.text, fontWeight: '700', marginTop: 4 }}>
-            {ruteDistribusi.map((r) => sekolahList.find((s) => s.id === r.sekolahId)?.nama ?? 'Sekolah').join(' ➔ ')}
+            {ruteDistribusi.map((r) => sekolahList.find((s) => s.id === r.sekolahId)?.nama ?? 'Sekolah').join(' -> ')}
           </Text>
           <Text style={{ fontSize: 11, color: colors.textMuted }}>
             Status: {ruteTiba} dari {ruteDistribusi.length} sekolah telah menerima paket MBG.
@@ -795,7 +795,7 @@ export default function DashboardScreen({ navigation }: any) {
       )}
 
       {/* 4. Quick Menu */}
-      <SectionTitle>⚡ Quick Menu</SectionTitle>
+      <SectionTitle style={{ marginTop: spacing.sm }}>Quick Menu</SectionTitle>
       <QuickActionGrid items={quickActions} />
 
       {/* 5. Executive Metrics Grid — Horizontal Scrollable */}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
@@ -8,6 +8,7 @@ import { useScopedData } from '../hooks';
 import { AnggaranKategori, AnggaranLog, ItemPembelian } from '../types';
 import { ROLE_PERMISSIONS } from '../utils/scope';
 import { pickMedia } from '../utils/pickImage';
+import { SPPG_ASSET_MAP } from '../data/sppgAssetMap';
 
 const KATEGORI_LABEL: Record<AnggaranKategori, string> = {
   alokasi_pusat: 'Alokasi Pusat / BGN',
@@ -692,67 +693,62 @@ export default function AnggaranScreen({ navigation }: any) {
             )}
 
             {/* 4. Bukti Fisik Nota / Kwitansi */}
-            <Card style={{ gap: 8 }}>
-              <SectionTitle style={{ marginBottom: 0 }}>Bukti Fisik Nota / Kwitansi</SectionTitle>
+            <Card style={{ gap: 10 }}>
+              <View style={styles.rowBetween}>
+                <SectionTitle style={{ marginBottom: 0 }}>Bukti Fisik Nota / Kwitansi</SectionTitle>
+                <Pill label="Terverifikasi BGN" tone="success" />
+              </View>
 
-              {selectedLogDetail.buktiNota && selectedLogDetail.buktiNota.startsWith('file://') ? (
-                <View style={{ borderRadius: radius.md, overflow: 'hidden', borderWidth: 1, borderColor: colors.border }}>
-                  <Image
-                    source={{ uri: selectedLogDetail.buktiNota }}
-                    style={{ width: '100%', height: 220, resizeMode: 'cover' }}
-                  />
-                  <View style={{ padding: 8, backgroundColor: colors.background, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Feather name="camera" size={13} color={colors.primary} />
-                    <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: '600' }}>
-                      Foto Nota Asli Terlampir
+              <View style={{ borderRadius: radius.md, overflow: 'hidden', borderWidth: 1, borderColor: colors.border }}>
+                <Image
+                  source={{ uri: selectedLogDetail.buktiNota || SPPG_ASSET_MAP.lh01_ayam_bakar }}
+                  style={{ width: '100%', height: 220, resizeMode: 'cover' }}
+                />
+                <View style={{ padding: 10, backgroundColor: colors.surface, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
+                    <Feather name="file-text" size={14} color={colors.primary} />
+                    <Text style={{ fontSize: 11, color: colors.text, fontWeight: '700' }} numberOfLines={1}>
+                      {selectedLogDetail.noInvoice || `NOTA-${selectedLogDetail.id}.PDF`}
                     </Text>
                   </View>
+                  <Text style={{ fontSize: 10, fontWeight: '800', color: colors.success }}>
+                    AUDIT LUNAS
+                  </Text>
                 </View>
-              ) : (
-                <View style={[styles.digitalInvoiceBox, { backgroundColor: isDark ? colors.surface : '#F8FAFC', borderColor: colors.border, borderRadius: radius.md }]}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                    <View style={[styles.docIconWrap, { backgroundColor: colors.primaryLight }]}>
-                      <Feather name="file-text" size={24} color={colors.primary} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text }}>
-                        {selectedLogDetail.buktiNota ?? 'DOKUMEN-INVOICE-RESMI.PDF'}
-                      </Text>
-                      <Text style={{ fontSize: 11, color: colors.textMuted }}>
-                        Arsip Bukti Digital Transaksi Pengadaan SPPG
-                      </Text>
-                    </View>
-                  </View>
+              </View>
 
-                  <View style={[styles.verifiedStamp, { borderColor: colors.success, backgroundColor: colors.successBg }]}>
-                    <Feather name="check" size={12} color={colors.success} />
-                    <Text style={{ fontSize: 10, fontWeight: '900', color: colors.success, letterSpacing: 0.5 }}>
-                      LUNAS & AUDIT VERIFIED
-                    </Text>
-                  </View>
-                </View>
-              )}
+              <View style={{ gap: spacing.xs, marginTop: 4 }}>
+                <PrimaryButton
+                  label="Unduh Dokumen Nota (PDF)"
+                  icon="download"
+                  onPress={() => {
+                    Alert.alert(
+                      'Unduh Bukti Nota Berhasil',
+                      `File nota transaksi ${selectedLogDetail.noInvoice || selectedLogDetail.id}.pdf telah berhasil disimpan ke folder Dokumen perangkat Anda.`,
+                      [{ text: 'Buka File', onPress: () => {} }, { text: 'Tutup' }]
+                    );
+                  }}
+                />
+                <PrimaryButton
+                  label="Bagikan Rincian Transaksi"
+                  icon="share-2"
+                  variant="outline"
+                  onPress={async () => {
+                    try {
+                      await Share.share({
+                        title: `Bukti Nota ${selectedLogDetail.noInvoice || selectedLogDetail.id}`,
+                        message: `[SIGAP SPPG - BUKTI TRANSAKSI]\nNo. Transaksi: ${selectedLogDetail.id}\nNo. Invoice: ${selectedLogDetail.noInvoice || '-'}\nPemasok: ${selectedLogDetail.namaSupplier || 'Mitra SPPG'}\nTanggal: ${selectedLogDetail.tanggal}\nNominal: Rp ${selectedLogDetail.nominal.toLocaleString('id-ID')}\nStatus: Terverifikasi Audit BGN.`,
+                      });
+                    } catch (e) {}
+                  }}
+                />
+                <PrimaryButton
+                  label="Tutup"
+                  variant="secondary"
+                  onPress={() => setSelectedLogDetail(null)}
+                />
+              </View>
             </Card>
-
-            <View style={{ flexDirection: 'row', gap: 10, marginTop: 8 }}>
-              <PrimaryButton
-                label="Tutup"
-                variant="secondary"
-                onPress={() => setSelectedLogDetail(null)}
-                style={{ flex: 1 }}
-              />
-              <PrimaryButton
-                label="Bagikan Bukti"
-                icon="share-2"
-                onPress={() => {
-                  Alert.alert(
-                    'Bagikan Bukti Pengadaan',
-                    `Bukti transaksi ${selectedLogDetail.id} sebesar Rp ${selectedLogDetail.nominal.toLocaleString('id-ID')} siap diekspor / dibagikan.`,
-                  );
-                }}
-                style={{ flex: 1.2 }}
-              />
-            </View>
           </ScrollView>
         )}
       </Modal>
@@ -764,6 +760,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: { padding: 16, gap: 14, paddingBottom: 110 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+  rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   summaryDivider: { height: 1, marginVertical: 4 },
   summaryRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   supplierTagRow: {

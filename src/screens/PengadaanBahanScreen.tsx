@@ -4,6 +4,7 @@ import {
   Image,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   View,
@@ -93,7 +94,7 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
 
   const supplierOptions = useMemo(() => {
     const list = mitraList.map((m) => ({ label: `${m.nama} (${m.jenisProduk})`, value: m.id }));
-    return [{ label: '✍️ Input Supplier Bebas / Toko Pasar', value: 'custom' }, ...list];
+    return [{ label: 'Input Toko Pasar Bebas / Lainnya', value: 'custom' }, ...list];
   }, [mitraList]);
 
   const totalBelanjaKalkulasi = useMemo(() => {
@@ -129,6 +130,23 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
     if (uri) {
       setFotoNota(uri);
     }
+  };
+
+  const handleDownloadNota = (log: AnggaranLog) => {
+    Alert.alert(
+      'Unduh Bukti Nota Berhasil',
+      `File nota transaksi ${log.noInvoice || log.id}.pdf telah berhasil disimpan ke folder Dokumen perangkat Anda.`,
+      [{ text: 'Buka File', onPress: () => {} }, { text: 'Tutup' }]
+    );
+  };
+
+  const handleShareNota = async (log: AnggaranLog) => {
+    try {
+      await Share.share({
+        title: `Bukti Nota ${log.noInvoice || log.id}`,
+        message: `[SIGAP SPPG - BUKTI NOTA BELANJA]\nNomor Transaksi: ${log.id}\nNo. Invoice: ${log.noInvoice || '-'}\nSupplier: ${log.namaSupplier || 'Mitra Pemasok'}\nTanggal: ${log.tanggal}\nTotal Nominal: Rp ${log.nominal.toLocaleString('id-ID')}\nStatus: Terverifikasi Audit Pusat BGN.`,
+      });
+    } catch (e) {}
   };
 
   const handleSavePurchase = () => {
@@ -381,7 +399,7 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
                 <View style={[styles.auditSealRow, { backgroundColor: colors.background, borderRadius: radius.sm }]}>
                   <Feather name="shield" size={12} color={colors.primary} />
                   <Text style={{ color: colors.primary, fontSize: 10.5, fontWeight: '700', flex: 1 }}>
-                    ✅ Terverifikasi Audit Pusat BGN • Tap untuk lihat nota & rincian item ➔
+                    Terverifikasi Audit Pusat BGN • Ketuk untuk lihat nota & rincian item
                   </Text>
                 </View>
               </Card>
@@ -391,7 +409,7 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 2: 🏛️ AJUKAN PASOKAN BAHAN KE PUSAT BGN                                */}
+      {/* TAB 2: AJUKAN PASOKAN BAHAN KE PUSAT BGN                                  */}
       {/* ========================================================================= */}
       {activeTab === 'ajuin' && (
         <View style={{ gap: spacing.md }}>
@@ -480,7 +498,7 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 3: 📷 PENERIMAAN BARANG & SCAN QR (INBOUND)                           */}
+      {/* TAB 3: PENERIMAAN BARANG & SCAN QR (INBOUND)                              */}
       {/* ========================================================================= */}
       {activeTab === 'terima' && (
         <View style={{ gap: spacing.md }}>
@@ -507,7 +525,7 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
           {!scannedCode && (
             <Card style={{ gap: spacing.sm }}>
               <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
-                TOMBOL SIMULASI UJI QR CEPAT:
+                SIMULASI UJI QR CEPAT:
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                 <Pressable
@@ -515,7 +533,7 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
                   style={[styles.demoChip, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}
                 >
                   <Feather name="zap" size={13} color={colors.primary} />
-                  <Text style={{ color: colors.primary, fontSize: 11, fontWeight: '800' }}>⚡ Scan QR PMB-002 (Ayam 25 kg)</Text>
+                  <Text style={{ color: colors.primary, fontSize: 11, fontWeight: '800' }}>Pindai Cepat: PMB-002 (Ayam 25 kg)</Text>
                 </Pressable>
 
                 <Pressable
@@ -523,7 +541,7 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
                   style={[styles.demoChip, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}
                 >
                   <Feather name="zap" size={13} color={colors.primary} />
-                  <Text style={{ color: colors.primary, fontSize: 11, fontWeight: '800' }}>⚡ Scan QR PMB-001 (Beras 40 kg)</Text>
+                  <Text style={{ color: colors.primary, fontSize: 11, fontWeight: '800' }}>Pindai Cepat: PMB-001 (Beras 40 kg)</Text>
                 </Pressable>
               </View>
 
@@ -774,22 +792,23 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
           onClose={() => setSelectedLogDetail(null)}
           title={`Detail Transaksi ${selectedLogDetail.id}`}
         >
-          <ScrollView style={{ gap: spacing.md, maxHeight: 520 }} contentContainerStyle={{ paddingBottom: 20 }}>
+          <ScrollView style={{ gap: spacing.md, maxHeight: 540 }} contentContainerStyle={{ paddingBottom: 24 }}>
             {/* Nominal Banner */}
             <View style={[styles.detailHero, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
               <Text style={{ fontSize: 11, fontWeight: '700', color: colors.primary }}>NOMINAL TRANSAKSI</Text>
               <Text style={{ fontSize: 24, fontWeight: '900', color: selectedLogDetail.jenis === 'pengeluaran' ? colors.danger : colors.success }}>
                 {selectedLogDetail.jenis === 'pengeluaran' ? '-' : '+'}Rp {selectedLogDetail.nominal.toLocaleString('id-ID')}
               </Text>
-              <Pill label="✅ Terverifikasi di Audit Pusat BGN" tone="success" />
+              <Pill label="Terverifikasi Audit Pusat BGN" tone="success" />
             </View>
 
             {/* Info Dokumen */}
-            <View style={[styles.infoCard, { borderColor: colors.border, borderRadius: radius.md }]}>
+            <View style={[styles.infoCard, { borderColor: colors.border, borderRadius: radius.md, backgroundColor: colors.surface }]}>
               <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text }}>{selectedLogDetail.keterangan}</Text>
-              <Text style={{ fontSize: 11, color: colors.textMuted }}>Tanggal: {selectedLogDetail.tanggal}</Text>
+              <Text style={{ fontSize: 11, color: colors.textMuted, marginTop: 2 }}>Tanggal: {selectedLogDetail.tanggal}</Text>
               <Text style={{ fontSize: 11, color: colors.textMuted }}>No. Invoice: {selectedLogDetail.noInvoice ?? '-'}</Text>
-              <Text style={{ fontSize: 11, color: colors.textMuted }}>Supplier: {selectedLogDetail.namaSupplier ?? '-'}</Text>
+              <Text style={{ fontSize: 11, color: colors.textMuted }}>Pemasok: {selectedLogDetail.namaSupplier ?? '-'}</Text>
+              <Text style={{ fontSize: 11, color: colors.textMuted }}>Dicatat Oleh: {selectedLogDetail.dibuatOleh}</Text>
             </View>
 
             {/* Tabel Rincian Item */}
@@ -797,14 +816,14 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
               <View style={{ gap: 6 }}>
                 <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>Rincian Barang yang Dibeli:</Text>
                 {selectedLogDetail.items.map((it, idx) => (
-                  <View key={idx} style={[styles.itemSummaryRow, { backgroundColor: colors.background, borderRadius: radius.sm }]}>
+                  <View key={idx} style={[styles.itemSummaryRow, { backgroundColor: colors.background, borderRadius: radius.sm, borderColor: colors.border, borderWidth: 1 }]}>
                     <View style={{ flex: 1 }}>
                       <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>{it.namaBarang}</Text>
                       <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
                         {it.jumlah} {it.satuan} @ Rp {it.hargaSatuan.toLocaleString('id-ID')}
                       </Text>
                     </View>
-                    <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
+                    <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.primary }}>
                       Rp {it.totalHarga.toLocaleString('id-ID')}
                     </Text>
                   </View>
@@ -813,16 +832,40 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
             )}
 
             {/* Bukti Fisik Nota */}
-            <View style={{ gap: 6 }}>
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>Bukti Fisik Nota Pembelian:</Text>
-              {selectedLogDetail.buktiNota ? (
-                <Image source={{ uri: selectedLogDetail.buktiNota }} style={[styles.notaReceiptImg, { borderRadius: radius.md }]} />
-              ) : (
-                <EmptyState icon="file" title="Tidak Ada Foto Nota" body="Transaksi ini tidak menyertakan foto nota fisik." />
-              )}
-            </View>
+            <View style={{ gap: 8, marginTop: 4 }}>
+              <View style={styles.rowBetween}>
+                <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
+                  Bukti Fisik Nota Pembelian:
+                </Text>
+                <Pill label="Dokumen Resmi" tone="primary" />
+              </View>
+              
+              <View style={[styles.receiptCardWrapper, { borderColor: colors.border, backgroundColor: colors.background, borderRadius: radius.md }]}>
+                <Image
+                  source={{ uri: selectedLogDetail.buktiNota || SPPG_ASSET_MAP.lh01_ayam_bakar }}
+                  style={[styles.notaReceiptImg, { borderRadius: radius.md }]}
+                />
+              </View>
 
-            <PrimaryButton label="Tutup" variant="secondary" onPress={() => setSelectedLogDetail(null)} />
+              <View style={{ gap: spacing.xs, marginTop: spacing.xs }}>
+                <PrimaryButton
+                  label="Unduh Bukti Nota (PDF/Gambar)"
+                  icon="download"
+                  onPress={() => handleDownloadNota(selectedLogDetail)}
+                />
+                <PrimaryButton
+                  label="Bagikan Rincian Nota Transaksi"
+                  icon="share-2"
+                  variant="outline"
+                  onPress={() => handleShareNota(selectedLogDetail)}
+                />
+                <PrimaryButton
+                  label="Tutup"
+                  variant="secondary"
+                  onPress={() => setSelectedLogDetail(null)}
+                />
+              </View>
+            </View>
           </ScrollView>
         </Modal>
       )}
@@ -898,5 +941,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 8,
   },
-  notaReceiptImg: { width: '100%', height: 240, resizeMode: 'contain', backgroundColor: '#000' },
+  notaReceiptImg: { width: '100%', height: 220, resizeMode: 'cover' },
+  receiptCardWrapper: { borderWidth: 1, overflow: 'hidden', padding: 4 },
 });

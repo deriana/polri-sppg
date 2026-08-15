@@ -102,9 +102,9 @@ export default function GudangScreen({ navigation }: any) {
 
   const statusFilterOptions = [
     { key: 'semua', label: `Semua (${bahanInScope.length})` },
-    { key: 'fefo', label: `⚠️ FEFO / Dekat Expired (${expiringSoonList.length})`, isWarning: true },
-    { key: 'kritis', label: `🔴 Stok Kritis (${criticalStockList.length})`, isDanger: true },
-    { key: 'aman', label: '🟢 Stok Aman' },
+    { key: 'fefo', label: `FEFO / Dekat Expired (${expiringSoonList.length})`, isWarning: true },
+    { key: 'kritis', label: `Stok Kritis (${criticalStockList.length})`, isDanger: true },
+    { key: 'aman', label: 'Stok Aman' },
   ];
 
   return (
