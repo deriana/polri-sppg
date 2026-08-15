@@ -22,6 +22,7 @@ import {
   initialBroadcastList,
   initialAnggaranLogs,
   initialPengajuanSekolahList,
+  initialIncidentList,
   CCTV_ANOMALI_LABEL,
   findAccount,
 } from '../data';
@@ -53,6 +54,8 @@ import {
   MasterMenu,
   UsulanMenu,
   QcStatus,
+  IncidentReport,
+  IncidentStatus,
 } from '../types';
 import { MASTER_MENU_CATALOG } from '../data/masterMenu';
 
@@ -140,6 +143,9 @@ interface AppContextValue {
   resolveAlert: (alertId: string) => void;
   followUpAlert: (alertId: string) => void;
   eskalasiAlert: (alertId: string) => void;
+  incidentList: IncidentReport[];
+  submitIncident: (incident: Omit<IncidentReport, 'id' | 'timestamp' | 'status'>) => void;
+  updateIncidentStatus: (id: string, status: IncidentStatus, tindakanPerbaikan?: string) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -172,6 +178,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [broadcastList, setBroadcastList] = useState<BroadcastMessage[]>(initialBroadcastList);
   const [anggaranLogs, setAnggaranLogs] = useState<AnggaranLog[]>(initialAnggaranLogs);
   const [pengajuanSekolahList, setPengajuanSekolahList] = useState<PengajuanSekolah[]>(initialPengajuanSekolahList);
+  const [incidentList, setIncidentList] = useState<IncidentReport[]>(initialIncidentList);
 
   const sendBroadcast: AppContextValue['sendBroadcast'] = (msg) => {
     const id = `BC-${String(broadcastList.length + 1).padStart(3, '0')}`;
@@ -634,6 +641,45 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     ]);
   };
 
+  const submitIncident: AppContextValue['submitIncident'] = (payload) => {
+    const id = `INC-${String(incidentList.length + 1).padStart(3, '0')}`;
+    const timestamp = nowTimestamp();
+    const newIncident: IncidentReport = {
+      ...payload,
+      id,
+      timestamp,
+      status: 'OPEN',
+    };
+    setIncidentList((prev) => [newIncident, ...prev]);
+
+    // Auto-raise alert if severity is kritis or sedang
+    if (payload.tingkatKeparahan === 'kritis' || payload.tingkatKeparahan === 'sedang') {
+      addAlert({
+        sppgId: payload.sppgId,
+        jenis: 'manual',
+        sumber: 'manual',
+        tingkat: payload.tingkatKeparahan === 'kritis' ? 'emergency' : 'perhatian',
+        judul: `🚨 Laporan Insiden: ${payload.judul}`,
+        deskripsi: `Kategori: ${payload.kategori} di ${payload.lokasi || 'Dapur'}. ${payload.deskripsi}`,
+      });
+    }
+  };
+
+  const updateIncidentStatus: AppContextValue['updateIncidentStatus'] = (id, status, tindakanPerbaikan) => {
+    setIncidentList((prev) =>
+      prev.map((inc) => {
+        if (inc.id !== id) return inc;
+        return {
+          ...inc,
+          status,
+          tindakanPerbaikan: tindakanPerbaikan ?? inc.tindakanPerbaikan,
+          diselesaikanOleh: status === 'RESOLVED' ? (currentUser?.nama ?? 'Kepala SPPG') : inc.diselesaikanOleh,
+          resolvedTimestamp: status === 'RESOLVED' ? nowTimestamp() : inc.resolvedTimestamp,
+        };
+      }),
+    );
+  };
+
   const value = useMemo(
     () => ({
       progressProduksiRealtime,
@@ -700,6 +746,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       resolveAlert,
       followUpAlert,
       eskalasiAlert,
+      incidentList,
+      submitIncident,
+      updateIncidentStatus,
     }),
     [
       progressProduksiRealtime,
@@ -708,6 +757,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       broadcastList,
       anggaranLogs,
       pengajuanSekolahList,
+      incidentList,
       role,
       loggedIn,
       currentUser,

@@ -19,3 +19,5 @@ export * from './publicReports';
 export * from './peralatan';
 export * from './usulanMenu';
 export * from './additionalFeatures';
+export * from './incidents';
+

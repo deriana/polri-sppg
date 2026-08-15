@@ -57,6 +57,7 @@ export default function MoreMenuScreen({ navigation }: any) {
   operasionalItems.push({ key: 'MenuKalender', icon: 'calendar', label: 'Kalender Menu Harian', desc: 'Lihat & atur menu per tanggal, status kirim per sekolah' });
   operasionalItems.push({ key: 'MasterMenu', icon: 'book-open', label: 'Master Katalog & Resep Gizi', desc: 'Kelola master resep makanan, gizi AKG, & porsi' });
   operasionalItems.push({ key: 'UsulanMenu', icon: 'edit-3', label: 'Usulan Menu Sekolah', desc: 'Usulan menu dari sekolah & tinjauan SPPG' });
+  operasionalItems.push({ key: 'IncidentList', icon: 'alert-octagon', label: 'Manajemen Insiden Lapangan', desc: 'Pelaporan & investigasi kendala/insiden operasional' });
   operasionalItems.push({ key: 'AduanMasyarakat', icon: 'message-square', label: 'Aduan Masyarakat', desc: 'Laporan pengaduan publik & respon SPPG' });
   operasionalItems.push({ key: 'Notifikasi', icon: 'bell', label: 'Notifikasi & Alarm', desc: 'Pengingat tugas & riwayat alert' });
 

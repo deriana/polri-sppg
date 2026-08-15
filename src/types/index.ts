@@ -395,3 +395,35 @@ export interface Peralatan {
   catatanKondisi: string;
   terakhirDiperiksa: string;
 }
+
+export type IncidentCategory =
+  | 'kecelakaan_kerja'
+  | 'kerusakan_alat'
+  | 'keterlambatan_bahan'
+  | 'keterlambatan_distribusi'
+  | 'listrik_air_padam'
+  | 'kontaminasi_pangan'
+  | 'lainnya';
+
+export type IncidentStatus = 'OPEN' | 'INVESTIGASI' | 'RESOLVED';
+export type IncidentSeverity = 'rendah' | 'sedang' | 'kritis';
+
+export interface IncidentReport {
+  id: string;
+  sppgId: string;
+  tanggal: string;
+  timestamp: string;
+  kategori: IncidentCategory;
+  tingkatKeparahan: IncidentSeverity;
+  judul: string;
+  deskripsi: string;
+  fotoBukti?: string | null;
+  lokasi?: string;
+  pelaporNama: string;
+  pelaporRole: Role;
+  status: IncidentStatus;
+  tindakanPerbaikan?: string;
+  diselesaikanOleh?: string;
+  resolvedTimestamp?: string;
+}
+

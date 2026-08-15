@@ -47,6 +47,8 @@ import SekolahDetailScreen from '../screens/SekolahDetailScreen';
 import MasterMenuScreen from '../screens/MasterMenuScreen';
 import AnggaranScreen from '../screens/AnggaranScreen';
 import BroadcastScreen from '../screens/BroadcastScreen';
+import IncidentListScreen from '../screens/IncidentListScreen';
+import IncidentFormScreen from '../screens/IncidentFormScreen';
 
 const Stack = createNativeStackNavigator<any>();
 
@@ -97,6 +99,8 @@ const DETAIL_SCREENS: Array<{ name: string; component: React.ComponentType<any>;
   { name: 'MutasiStokForm', component: MutasiStokFormScreen, title: 'Catat Mutasi Stok' },
   { name: 'Anggaran', component: AnggaranScreen, title: 'Log Anggaran & Pengeluaran' },
   { name: 'Broadcast', component: BroadcastScreen, title: 'Pusat Broadcast Pengumuman' },
+  { name: 'IncidentList', component: IncidentListScreen, title: 'Manajemen Insiden Lapangan' },
+  { name: 'IncidentForm', component: IncidentFormScreen, title: 'Formulir Lapor Insiden' },
 ];
 
 export function buildDetailStack(homeName: string, HomeComponent: React.ComponentType<any>, homeTitle: string) {
