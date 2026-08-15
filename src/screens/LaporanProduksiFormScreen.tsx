@@ -52,8 +52,10 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
   const [batchId] = useState(
     existing?.batchId ?? `BATCH-${currentSppg?.id || 'SPPG'}-${tanggal.replace(/-/g, '')}-01`,
   );
-  const [targetPorsi, setTargetPorsi] = useState(existing?.targetPorsi ?? currentSppg?.kapasitasProduksi ?? 0);
-  const [realisasiPorsi, setRealisasiPorsi] = useState(existing?.realisasiPorsi ?? 0);
+  const [targetPorsi, setTargetPorsi] = useState(existing?.targetPorsi ?? currentSppg?.kapasitasProduksi ?? 1200);
+  const [realisasiPorsi, setRealisasiPorsi] = useState(existing?.realisasiPorsi ?? (existing?.targetPorsi ?? 1200));
+  const [sudahDiporsi, setSudahDiporsi] = useState<boolean>(existing?.realisasiPorsi ? existing.realisasiPorsi > 0 : false);
+  const [catatanYield, setCatatanYield] = useState<string>(existing?.catatanYield ?? '');
   const [menuSelection, setMenuSelection] = useState<string>(() => {
     if (existing) return MENU_OPTIONS.some((m) => m.label === existing.menu) ? existing.menu : MANUAL_MENU_VALUE;
     if (planForDate) return MENU_OPTIONS.some((m) => m.label === planForDate.menu) ? planForDate.menu : MANUAL_MENU_VALUE;
@@ -159,7 +161,7 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
     tanggal,
     batchId,
     targetPorsi,
-    realisasiPorsi,
+    realisasiPorsi: sudahDiporsi ? realisasiPorsi : 0,
     menu,
     kategoriGizi,
     foto,
@@ -172,6 +174,7 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
     qcStatus,
     qcNotes,
     qcApprovedBy: existing?.qcApprovedBy || (qcStatus !== 'MENUNGGU_QC' ? currentUser.nama : undefined),
+    catatanYield: catatanYield.trim() || undefined,
   });
 
   const handleSaveDraft = async () => {
@@ -366,18 +369,130 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
         </View>
       </Card>
 
-      {/* 3. Target & Realisasi Porsi */}
+      {/* 3. Target Kebutuhan Sekolah & Realisasi Pemorsian (Yield Dapur) */}
       <Card style={{ gap: spacing.md }}>
-        <View style={styles.stepperRow}>
-          <Stepper label="Target Porsi" value={targetPorsi} onChange={setTargetPorsi} step={10} min={0} disabled={readOnly} style={{ flex: 1 }} />
-          <Stepper label="Realisasi Porsi" value={realisasiPorsi} onChange={setRealisasiPorsi} step={10} min={0} disabled={readOnly} style={{ flex: 1 }} />
-        </View>
-        {implausible && (
-          <View style={[styles.warnBanner, { backgroundColor: colors.warningBg, borderRadius: radius.md }]}>
-            <Feather name="alert-triangle" size={16} color={colors.warning} strokeWidth={iconStrokeWidth} />
-            <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>
-              Realisasi porsi jauh berbeda dari target. Periksa kembali sebelum mengirim.
+        <View style={styles.rowBetween}>
+          <View style={{ flex: 1 }}>
+            <SectionTitle style={{ marginBottom: 0 }}>Target & Hasil Pemorsian (Yield Porsi)</SectionTitle>
+            <Text style={{ fontSize: 11, color: colors.textMuted, marginTop: 2 }}>
+              Target order sekolah ditentukan di awal, realisasi fisik dihitung saat selesai pemorsian ompreng.
             </Text>
+          </View>
+          <Pill
+            label={sudahDiporsi ? (realisasiPorsi >= targetPorsi ? 'Porsi Mencukupi' : 'Porsi Defisit') : 'Sedang Dimasak'}
+            tone={sudahDiporsi ? (realisasiPorsi >= targetPorsi ? 'success' : 'danger') : 'warning'}
+          />
+        </View>
+
+        {/* Target Kebutuhan Sekolah */}
+        <View style={{ gap: 4 }}>
+          <Stepper
+            label="Target Kebutuhan Sekolah (Order Porsi)"
+            value={targetPorsi}
+            onChange={setTargetPorsi}
+            step={50}
+            min={0}
+            disabled={readOnly}
+          />
+          <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
+            * Jumlah ompreng yang dibutuhkan untuk seluruh siswa sekolah penerima manfaat hari ini.
+          </Text>
+        </View>
+
+        {/* Toggle Status Pemorsian */}
+        <View style={{ gap: 6, marginTop: 4 }}>
+          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
+            Status Penghitungan Pemorsian Fisik:
+          </Text>
+          <View style={[styles.segmentContainer, { backgroundColor: colors.background, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border }]}>
+            <Pressable
+              onPress={() => setSudahDiporsi(false)}
+              style={[
+                styles.segmentBtn,
+                { backgroundColor: !sudahDiporsi ? colors.primary : 'transparent', borderRadius: radius.sm },
+              ]}
+            >
+              <Feather name="activity" size={13} color={!sudahDiporsi ? '#FFF' : colors.text} />
+              <Text style={{ fontSize: 11, fontWeight: '800', color: !sudahDiporsi ? '#FFF' : colors.text }}>
+                Masih Dimasak di Dapur
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => setSudahDiporsi(true)}
+              style={[
+                styles.segmentBtn,
+                { backgroundColor: sudahDiporsi ? colors.primary : 'transparent', borderRadius: radius.sm },
+              ]}
+            >
+              <Feather name="check-circle" size={13} color={sudahDiporsi ? '#FFF' : colors.text} />
+              <Text style={{ fontSize: 11, fontWeight: '800', color: sudahDiporsi ? '#FFF' : colors.text }}>
+                Sudah Diporsi ke Ompreng
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+
+        {!sudahDiporsi ? (
+          <View style={[styles.infoBanner, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
+            <Feather name="info" size={16} color={colors.primary} />
+            <Text style={{ fontSize: 11, color: colors.text, flex: 1, lineHeight: 16 }}>
+              Koki saat ini memasak bahan baku volume besar di kuali. Jumlah porsi riil akan dihitung dan diinput setelah tim pemorsi selesai menakar dan mengisi ompreng (Tahap 4).
+            </Text>
+          </View>
+        ) : (
+          <View style={{ gap: spacing.sm, marginTop: 4 }}>
+            {/* Input Realisasi Porsi */}
+            <Stepper
+              label="Realisasi Porsi Nyata (Hasil Hitung Ompreng Fisik)"
+              value={realisasiPorsi}
+              onChange={setRealisasiPorsi}
+              step={10}
+              min={0}
+              disabled={readOnly}
+            />
+
+            {/* Yield & Efficiency Analysis Box */}
+            <View style={[styles.yieldAnalysisBox, { backgroundColor: colors.background, borderColor: colors.border, borderRadius: radius.md }]}>
+              <View style={styles.rowBetween}>
+                <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }}>ANALISIS YIELD & KETERSEDIAAN PORSI</Text>
+                <Pill
+                  label={realisasiPorsi >= targetPorsi ? `Surplus +${realisasiPorsi - targetPorsi} Tray` : `Kurang ${targetPorsi - realisasiPorsi} Tray`}
+                  tone={realisasiPorsi >= targetPorsi ? 'success' : 'danger'}
+                />
+              </View>
+
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 }}>
+                <View>
+                  <Text style={{ fontSize: 10, color: colors.textMuted }}>TARGET ORDER</Text>
+                  <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text }}>{targetPorsi.toLocaleString('id-ID')} Porsi</Text>
+                </View>
+                <View>
+                  <Text style={{ fontSize: 10, color: colors.textMuted }}>REALISASI PORSI</Text>
+                  <Text style={{ fontSize: fontSize.sm, fontWeight: '900', color: colors.primary }}>{realisasiPorsi.toLocaleString('id-ID')} Porsi</Text>
+                </View>
+                <View>
+                  <Text style={{ fontSize: 10, color: colors.textMuted }}>EFISIENSI YIELD</Text>
+                  <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: realisasiPorsi >= targetPorsi ? colors.success : colors.danger }}>
+                    {targetPorsi > 0 ? ((realisasiPorsi / targetPorsi) * 100).toFixed(1) : '100'}%
+                  </Text>
+                </View>
+              </View>
+
+              <Text style={{ fontSize: 11, color: realisasiPorsi >= targetPorsi ? colors.success : colors.danger, fontWeight: '700' }}>
+                {realisasiPorsi >= targetPorsi
+                  ? 'Porsi mencukupi seluruh kebutuhan sekolah penerima manfaat.'
+                  : `Perhatian: Hasil masak kurang ${targetPorsi - realisasiPorsi} porsi! Siapkan batch tambahan segera.`}
+              </Text>
+            </View>
+
+            <Input
+              label="Catatan Hasil Pemorsian / Alasan Selisih (Opsional)"
+              value={catatanYield}
+              onChangeText={setCatatanYield}
+              placeholder="Contoh: 5 ompreng disisihkan untuk uji sampling organoleptik QC..."
+              editable={!readOnly}
+            />
           </View>
         )}
       </Card>
@@ -595,6 +710,36 @@ const styles = StyleSheet.create({
     padding: 18,
     borderWidth: 1,
     gap: 14,
+  },
+  rowBetween: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  segmentContainer: {
+    flexDirection: 'row',
+    padding: 4,
+    gap: 6,
+  },
+  segmentBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 8,
+  },
+  infoBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 12,
+  },
+  yieldAnalysisBox: {
+    padding: 12,
+    borderWidth: 1,
+    gap: 8,
   },
 });
 

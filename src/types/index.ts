@@ -196,6 +196,7 @@ export interface LaporanProduksi {
   qcStatus?: QcStatus;
   qcNotes?: string;
   qcApprovedBy?: string;
+  catatanYield?: string;
 }
 
 export type PresensiStatus = 'hadir' | 'belum_presensi';

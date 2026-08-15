@@ -102,7 +102,9 @@ export default function LaporanProduksiListScreen({ navigation }: any) {
                 </Text>
                 <View style={styles.rowBottom}>
                   <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>
-                    Realisasi {l.realisasiPorsi}/{l.targetPorsi} porsi • {l.foto.length} foto
+                    {l.realisasiPorsi > 0
+                      ? `Hasil Pemorsian: ${l.realisasiPorsi}/${l.targetPorsi} tray (${l.realisasiPorsi >= l.targetPorsi ? '+' + (l.realisasiPorsi - l.targetPorsi) + ' surplus' : (l.realisasiPorsi - l.targetPorsi) + ' defisit'}) • ${l.foto.length} foto`
+                      : `Target Order: ${l.targetPorsi} porsi • Masih proses masak • ${l.foto.length} foto`}
                   </Text>
                   <Feather name="chevron-right" size={16} color={colors.textMuted} strokeWidth={iconStrokeWidth} />
                 </View>
