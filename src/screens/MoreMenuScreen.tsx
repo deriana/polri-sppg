@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { SectionTitle, SyncStatusBadge } from '../components/ui';
+import { RpIcon, SectionTitle, SyncStatusBadge } from '../components/ui';
 import { usePendingSyncCount } from '../hooks';
 import { ROLE_PERMISSIONS } from '../utils/scope';
 import { syncOfflineQueue } from '../utils/offlineQueue';
@@ -32,8 +32,9 @@ export default function MoreMenuScreen({ navigation }: any) {
   };
 
   const personalItems: MenuItem[] = [
-    { key: 'Profile', icon: 'user', label: 'Profil Saya', desc: 'Info akun, data pribadi, & pengaturan' },
+    { key: 'Profile', icon: 'user', label: 'Profil Saya', desc: 'Info akun, data pribadi, & ganti foto profil' },
     { key: 'CheckIn', icon: 'user-check', label: 'Presensi Kehadiran Saya', desc: 'Input foto selfie & lokasi GPS presensi akun pribadi' },
+    { key: 'LogAktivitas', icon: 'activity', label: 'Log Aktivitas & Audit Trail', desc: 'Rekam jejak seluruh aktivitas & forensik sistem SPPG' },
   ];
 
   const sdmItems: MenuItem[] = [];
@@ -42,7 +43,7 @@ export default function MoreMenuScreen({ navigation }: any) {
   }
   if (permissions.canManageStaff) {
     sdmItems.push({ key: 'StaffList', icon: 'user-plus', label: 'Data Staf Dapur', desc: 'Kelola 47-52 petugas lapangan & relawan SPPG' });
-    sdmItems.push({ key: 'Payroll', icon: 'dollar-sign', label: 'Payroll & Slip Gaji Staf', desc: 'Gaji pokok, tunjangan, & slip gaji tiap pegawai' });
+    sdmItems.push({ key: 'Payroll', icon: 'credit-card', label: 'Payroll & Slip Gaji Staf', desc: 'Gaji pokok, tunjangan, & slip gaji tiap pegawai' });
   }
 
   const operasionalItems: MenuItem[] = [];

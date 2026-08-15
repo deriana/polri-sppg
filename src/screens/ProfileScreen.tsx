@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from 'react';
-import { Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { Card, EmptyState, Pill, PrimaryButton, SecondaryButton, SectionTitle } from '../components/ui';
+import { Card, EmptyState, Pill, PrimaryButton, RpIcon, SecondaryButton, SectionTitle } from '../components/ui';
 import { useScopedData } from '../hooks';
 import { ROLE_LABEL, roleScopeLabel } from '../utils/scope';
 import { JOBDESK_LABEL } from '../utils/jobdesk';
@@ -16,16 +16,35 @@ function todayDate(): string {
 }
 
 export default function ProfileScreen({ navigation }: any) {
-  const { currentUser, currentSppg, role } = useApp();
+  const { currentUser, currentSppg, role, updateCurrentUser } = useApp();
   const { presensiInScope } = useScopedData();
   const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark } = useTheme();
 
-  // ponytail: AppContext punya addStaff/removeStaff tapi tidak ada updateUser,
-  // jadi foto yang diambil di sini hanya hidup di state layar ini. Sambungkan
-  // ke mutasi updateUser(userId, patch) kalau nanti perlu ikut tersimpan.
-  const [foto, setFoto] = useState<string | null>(currentUser?.fotoProfil ?? null);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const foto = currentUser?.fotoProfil ?? null;
 
   const today = todayDate();
+
+  const handlePickCamera = async () => {
+    setShowPhotoModal(false);
+    const uri = await pickImage('camera');
+    if (uri) {
+      updateCurrentUser({ fotoProfil: uri });
+    }
+  };
+
+  const handlePickLibrary = async () => {
+    setShowPhotoModal(false);
+    const uri = await pickImage('library');
+    if (uri) {
+      updateCurrentUser({ fotoProfil: uri });
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setShowPhotoModal(false);
+    updateCurrentUser({ fotoProfil: null });
+  };
 
   const stats = useMemo(() => {
     if (!currentUser) return { hadirBulanIni: 0, totalCatatan: 0, tepatWaktu: 0, streak: 0 };
@@ -33,7 +52,6 @@ export default function ProfileScreen({ navigation }: any) {
     const milikSaya = presensiInScope.filter((p) => p.userId === currentUser.id);
     const bulanan = milikSaya.filter((p) => p.tanggal.startsWith(bulanIni));
     const hadir = bulanan.filter((p) => p.jamMasuk);
-    // Ambang "tepat waktu" mengikuti jam mulai shift pagi dapur SPPG: 06:30 WIB.
     const tepat = hadir.filter((p) => (p.jamMasuk ?? '23:59') <= '06:30');
     return {
       hadirBulanIni: hadir.length,
@@ -57,11 +75,6 @@ export default function ProfileScreen({ navigation }: any) {
       </View>
     );
   }
-
-  const gantiFoto = async () => {
-    const uri = await pickImage('camera');
-    if (uri) setFoto(uri);
-  };
 
   const sudahMasuk = !!presensiHariIni?.jamMasuk;
   const sudahKeluar = !!presensiHariIni?.jamKeluar;
@@ -95,7 +108,7 @@ export default function ProfileScreen({ navigation }: any) {
                 <Feather name="user" size={34} color={colors.gold} strokeWidth={iconStrokeWidth} />
               </View>
             )}
-            <Pressable onPress={gantiFoto} style={[styles.avatarEditBtn, { backgroundColor: colors.gold }]} hitSlop={6}>
+            <Pressable onPress={() => setShowPhotoModal(true)} style={[styles.avatarEditBtn, { backgroundColor: colors.gold }]} hitSlop={6}>
               <Feather name="camera" size={13} color={isDark ? colors.background : colors.primary} />
             </Pressable>
           </View>
@@ -205,8 +218,8 @@ export default function ProfileScreen({ navigation }: any) {
       {payroll && (
         <Card style={{ gap: spacing.sm }} onPress={() => navigation.navigate('PayrollDetail', { userId: currentUser.id })}>
           <View style={styles.rowBetween}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Feather name="dollar-sign" size={15} color={colors.primary} strokeWidth={iconStrokeWidth} />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+              <RpIcon size={20} />
               <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.text }}>PENGHASILAN BULAN INI</Text>
             </View>
             <Feather name="chevron-right" size={16} color={colors.textMuted} />
@@ -220,13 +233,98 @@ export default function ProfileScreen({ navigation }: any) {
         </Card>
       )}
 
-      {/* ===== Pintasan ===== */}
+      {/* ===== Pintasan Akun & Audit Log ===== */}
       <Card style={{ gap: 6 }}>
-        <SectionTitle style={{ marginBottom: 2 }}>Pintasan Akun</SectionTitle>
+        <SectionTitle style={{ marginBottom: 2 }}>Pintasan & Keamanan Akun</SectionTitle>
+        <SecondaryButton
+          label="Log Aktivitas & Audit Trail Sistem"
+          icon="activity"
+          onPress={() => navigation.navigate('LogAktivitas')}
+        />
         <SecondaryButton label="Riwayat Presensi Saya" icon="calendar" onPress={() => navigation.navigate('Presensi')} />
         <SecondaryButton label="Slip Gaji & Payroll" icon="file-text" onPress={() => navigation.navigate('PayrollDetail', { userId: currentUser.id })} />
         <SecondaryButton label="Profil Unit SPPG" icon="home" onPress={() => navigation.navigate('SppgProfile')} />
       </Card>
+
+      {/* ===== Modal Pilih Sumber Foto Profil ===== */}
+      <Modal visible={showPhotoModal} animationType="fade" transparent onRequestClose={() => setShowPhotoModal(false)}>
+        <View style={styles.modalOverlay}>
+          <Pressable style={styles.modalBackdrop} onPress={() => setShowPhotoModal(false)} />
+          <Card style={[styles.photoModalCard, { backgroundColor: colors.surface, borderRadius: radius.xl }]}>
+            <View style={{ alignItems: 'center', gap: 4, paddingBottom: 8 }}>
+              <View style={[styles.modalIconWrap, { backgroundColor: colors.primaryLight }]}>
+                <Feather name="camera" size={22} color={colors.primary} />
+              </View>
+              <Text style={{ fontSize: fontSize.md, fontWeight: '900', color: colors.text }}>
+                Pilih Sumber Foto Profil
+              </Text>
+              <Text style={{ fontSize: 11, color: colors.textMuted, textAlign: 'center' }}>
+                Perbarui foto identitas resmi dinas SPPG Anda
+              </Text>
+            </View>
+
+            <View style={{ gap: 8, marginVertical: 4 }}>
+              <Pressable
+                onPress={handlePickCamera}
+                style={({ pressed }) => [
+                  styles.sourceOptionRow,
+                  { backgroundColor: colors.background, borderColor: colors.border, borderRadius: radius.lg },
+                  pressed && { opacity: 0.75 },
+                ]}
+              >
+                <View style={[styles.sourceIconWrap, { backgroundColor: isDark ? 'rgba(59,130,246,0.2)' : '#EFF6FF' }]}>
+                  <Feather name="camera" size={18} color="#3B82F6" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>Ambil dari Kamera</Text>
+                  <Text style={{ fontSize: 10.5, color: colors.textMuted }}>Buka kamera langsung untuk foto selfie</Text>
+                </View>
+                <Feather name="chevron-right" size={16} color={colors.textMuted} />
+              </Pressable>
+
+              <Pressable
+                onPress={handlePickLibrary}
+                style={({ pressed }) => [
+                  styles.sourceOptionRow,
+                  { backgroundColor: colors.background, borderColor: colors.border, borderRadius: radius.lg },
+                  pressed && { opacity: 0.75 },
+                ]}
+              >
+                <View style={[styles.sourceIconWrap, { backgroundColor: isDark ? 'rgba(16,185,129,0.2)' : '#F0FDF4' }]}>
+                  <Feather name="image" size={18} color="#10B981" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>Pilih dari Galeri</Text>
+                  <Text style={{ fontSize: 10.5, color: colors.textMuted }}>Pilih foto terbaik dari penyimpanan perangkat</Text>
+                </View>
+                <Feather name="chevron-right" size={16} color={colors.textMuted} />
+              </Pressable>
+
+              {foto && (
+                <Pressable
+                  onPress={handleRemovePhoto}
+                  style={({ pressed }) => [
+                    styles.sourceOptionRow,
+                    { backgroundColor: isDark ? 'rgba(239,68,68,0.1)' : '#FEF2F2', borderColor: colors.danger, borderRadius: radius.lg },
+                    pressed && { opacity: 0.75 },
+                  ]}
+                >
+                  <View style={[styles.sourceIconWrap, { backgroundColor: isDark ? 'rgba(239,68,68,0.2)' : '#FEE2E2' }]}>
+                    <Feather name="trash-2" size={18} color={colors.danger} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.danger }}>Hapus Foto Profil</Text>
+                    <Text style={{ fontSize: 10.5, color: colors.danger }}>Gunakan avatar default sistem</Text>
+                  </View>
+                  <Feather name="chevron-right" size={16} color={colors.danger} />
+                </Pressable>
+              )}
+            </View>
+
+            <SecondaryButton label="Batal" onPress={() => setShowPhotoModal(false)} />
+          </Card>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -283,4 +381,43 @@ const styles = StyleSheet.create({
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 5 },
   infoIcon: { width: 30, height: 30, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   miniAction: { width: 28, height: 28, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    padding: 16,
+  },
+  modalBackdrop: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  photoModalCard: {
+    padding: 16,
+    gap: 8,
+  },
+  modalIconWrap: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  sourceOptionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 12,
+    borderWidth: 1,
+  },
+  sourceIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

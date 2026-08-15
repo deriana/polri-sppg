@@ -25,6 +25,7 @@ import {
   initialIncidentList,
   initialKandunganGiziList,
   initialPengajuanAsetList,
+  INITIAL_ACTIVITY_LOGS,
   CCTV_ANOMALI_LABEL,
   findAccount,
 } from '../data';
@@ -69,6 +70,7 @@ import {
   CostPerMealBreakdown,
   KitchenReadinessScore,
   AiKitchenEarlyWarning,
+  SystemActivityLog,
 } from '../types';
 import { MASTER_MENU_CATALOG } from '../data/masterMenu';
 import { INITIAL_LAPORAN_PACKING } from '../data/laporanPacking';
@@ -182,6 +184,9 @@ interface AppContextValue {
   kitchenReadinessScore: KitchenReadinessScore;
   aiEarlyWarnings: AiKitchenEarlyWarning[];
   updateCostPerMeal: (payload: Partial<CostPerMealBreakdown>) => void;
+  updateCurrentUser: (patch: Partial<User>) => void;
+  activityLogs: SystemActivityLog[];
+  addActivityLog: (log: Omit<SystemActivityLog, 'id' | 'timestamp'>) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -221,9 +226,42 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [laporanSanitasiList, setLaporanSanitasiList] = useState<LaporanSanitasi[]>(INITIAL_LAPORAN_SANITASI);
   const [batchTraceabilityList, setBatchTraceabilityList] = useState<BatchTraceabilityRecord[]>(INITIAL_BATCH_TRACEABILITY);
   const [qualityPassportList, setQualityPassportList] = useState<FoodQualityPassport[]>(INITIAL_QUALITY_PASSPORTS);
-  const [costPerMeal, setCostPerMeal] = useState<CostPerMealBreakdown>(INITIAL_COST_PER_MEAL);
+   const [costPerMeal, setCostPerMeal] = useState<CostPerMealBreakdown>(INITIAL_COST_PER_MEAL);
   const [kitchenReadinessScore, setKitchenReadinessScore] = useState<KitchenReadinessScore>(INITIAL_KITCHEN_READINESS);
   const [aiEarlyWarnings, setAiEarlyWarnings] = useState<AiKitchenEarlyWarning[]>(INITIAL_AI_EARLY_WARNINGS);
+  const [activityLogs, setActivityLogs] = useState<SystemActivityLog[]>(INITIAL_ACTIVITY_LOGS);
+
+  const addActivityLog: AppContextValue['addActivityLog'] = (log) => {
+    const id = `ACT-${Date.now().toString().slice(-8)}`;
+    const timestamp = nowTimestamp();
+    const newLog: SystemActivityLog = {
+      ...log,
+      id,
+      timestamp,
+      ipAddress: log.ipAddress || '10.12.4.88',
+      deviceInfo: log.deviceInfo || 'Dinas SPPG Mobile App (Secured)',
+    };
+    setActivityLogs((prev) => [newLog, ...prev]);
+  };
+
+  const updateCurrentUser: AppContextValue['updateCurrentUser'] = (patch) => {
+    if (!currentUser) return;
+    const updated = { ...currentUser, ...patch };
+    setCurrentUser(updated);
+    setUsers((prev) => prev.map((u) => (u.id === currentUser.id ? updated : u)));
+    addActivityLog({
+      sppgId: currentUser.sppgId,
+      userId: currentUser.id,
+      userName: currentUser.nama,
+      userRole: currentUser.role,
+      kategori: 'pengaturan',
+      aksi: 'Perbarui Profil Akun',
+      rincian: patch.fotoProfil
+        ? 'Memperbarui foto profil akun pengguna dari kamera/galeri'
+        : 'Memperbarui informasi profil pengguna',
+      status: 'SUCCESS',
+    });
+  };
 
   const updateCostPerMeal: AppContextValue['updateCostPerMeal'] = (payload) => {
     setCostPerMeal((prev) => {
@@ -930,6 +968,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       kitchenReadinessScore,
       aiEarlyWarnings,
       updateCostPerMeal,
+      updateCurrentUser,
+      activityLogs,
+      addActivityLog,
     }),
     [
       progressProduksiRealtime,
@@ -948,6 +989,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       costPerMeal,
       kitchenReadinessScore,
       aiEarlyWarnings,
+      activityLogs,
       role,
       loggedIn,
       currentUser,

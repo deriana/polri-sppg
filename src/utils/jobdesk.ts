@@ -20,7 +20,7 @@ export const JOBDESK_LABEL: Record<Jobdesk, string> = {
 
 export const JOBDESK_ICON: Record<Jobdesk, keyof typeof Feather.glyphMap> = {
   ahli_gizi: 'activity',
-  akuntan: 'dollar-sign',
+  akuntan: 'credit-card',
   chef_utama: 'coffee',
   asisten_masak: 'sliders',
   pemorsi_packing: 'package',

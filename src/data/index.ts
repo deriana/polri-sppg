@@ -23,3 +23,4 @@ export * from './incidents';
 export * from './kandunganGizi';
 
 export * from './pengajuanAset';
+export * from './activityLogs';

@@ -577,10 +577,10 @@ export default function AnggaranScreen({ navigation }: any) {
           {calculatedItemsTotal === 0 && (
             <Input
               label="Nominal Total Transaksi (Rp)"
-              icon="dollar-sign"
+              prefix="Rp"
               value={nominalStr}
               onChangeText={setNominalStr}
-              placeholder="Contoh: 15000000"
+              placeholder="15.000.000"
               keyboardType="number-pad"
             />
           )}

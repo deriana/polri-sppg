@@ -58,6 +58,7 @@ import BatchTraceabilityScreen from '../screens/BatchTraceabilityScreen';
 import FoodQualityPassportScreen from '../screens/FoodQualityPassportScreen';
 import AssetQrDetailScreen from '../screens/AssetQrDetailScreen';
 import StatistikEksekutifScreen from '../screens/StatistikEksekutifScreen';
+import LogAktivitasScreen from '../screens/LogAktivitasScreen';
 
 const Stack = createNativeStackNavigator<any>();
 
@@ -120,6 +121,7 @@ const DETAIL_SCREENS: Array<{ name: string; component: React.ComponentType<any>;
   { name: 'FoodQualityPassport', component: FoodQualityPassportScreen, title: 'Digital Food Quality Passport' },
   { name: 'AssetQrDetail', component: AssetQrDetailScreen, title: 'Detail Aset Peralatan' },
   { name: 'StatistikEksekutif', component: StatistikEksekutifScreen, title: 'Statistik & Rekap Berkala' },
+  { name: 'LogAktivitas', component: LogAktivitasScreen, title: 'Log Aktivitas & Audit Trail' },
 ];
 
 export function buildDetailStack(homeName: string, HomeComponent: React.ComponentType<any>, homeTitle: string) {

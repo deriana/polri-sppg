@@ -2178,3 +2178,39 @@ export function SchoolCarouselCard({
     </Pressable>
   );
 }
+
+export function RpIcon({
+  size = 20,
+  color,
+  bgColor,
+  style,
+}: {
+  size?: number;
+  color?: string;
+  bgColor?: string;
+  style?: any;
+}) {
+  const { colors, isDark } = useTheme();
+  const textColor = color || (isDark ? colors.gold : colors.primary);
+  const background = bgColor || (isDark ? 'rgba(255,255,255,0.08)' : colors.primaryLight);
+  const fontSize = Math.max(9, Math.round(size * 0.55));
+  return (
+    <View
+      style={[
+        {
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: background,
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+        style,
+      ]}
+    >
+      <Text style={{ fontSize, fontWeight: '900', color: textColor, letterSpacing: -0.5 }}>
+        Rp
+      </Text>
+    </View>
+  );
+}

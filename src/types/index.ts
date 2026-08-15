@@ -662,3 +662,32 @@ export interface KandunganGiziHarian {
   createdAt: string;
 }
 
+export type ActivityCategory =
+  | 'autentikasi'
+  | 'presensi'
+  | 'produksi'
+  | 'food_safety'
+  | 'logistik'
+  | 'distribusi'
+  | 'keuangan'
+  | 'insiden'
+  | 'pengaturan';
+
+export type ActivityStatus = 'SUCCESS' | 'WARNING' | 'FAILED' | 'INFO';
+
+export interface SystemActivityLog {
+  id: string;
+  sppgId: string;
+  userId: string;
+  userName: string;
+  userRole: Role;
+  kategori: ActivityCategory;
+  aksi: string;
+  rincian: string;
+  status: ActivityStatus;
+  timestamp: string; // YYYY-MM-DD HH:mm:ss
+  ipAddress?: string;
+  deviceInfo?: string;
+  metadata?: Record<string, any>;
+}
+
