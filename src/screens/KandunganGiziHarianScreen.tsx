@@ -515,18 +515,23 @@ export default function KandunganGiziHarianScreen({ navigation }: any) {
           onClose={() => setSelectedDetail(null)}
           title={`Sertifikasi Gizi ${selectedDetail.id}`}
         >
-          <ScrollView style={{ gap: spacing.md, maxHeight: 540 }} contentContainerStyle={{ paddingBottom: 24 }}>
+          <ScrollView
+            style={{ maxHeight: 540 }}
+            contentContainerStyle={{ gap: spacing.md, paddingBottom: 28, paddingTop: 4 }}
+          >
+            {/* 1. Hero Kalori Banner */}
             <View style={[styles.detailHero, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
               <Text style={{ fontSize: 11, fontWeight: '700', color: colors.primary }}>TOTAL NILAI ENERGI SAJIAN</Text>
-              <Text style={{ fontSize: 28, fontWeight: '900', color: colors.primary }}>
+              <Text style={{ fontSize: 30, fontWeight: '900', color: colors.primary }}>
                 {selectedDetail.kalori} kkal
               </Text>
               <Pill label="Terverifikasi Ahli Gizi BGN" tone="success" />
             </View>
 
+            {/* 2. Menu Info Card with Margin */}
             <View style={[styles.infoCard, { borderColor: colors.border, borderRadius: radius.md, backgroundColor: colors.surface }]}>
               <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text }}>{selectedDetail.namaPaketMenu}</Text>
-              <Text style={{ fontSize: 11, color: colors.textMuted, marginTop: 2 }}>Tanggal Sajian: {selectedDetail.tanggal}</Text>
+              <Text style={{ fontSize: 11, color: colors.textMuted, marginTop: 4 }}>Tanggal Sajian: {selectedDetail.tanggal}</Text>
               <Text style={{ fontSize: 11, color: colors.textMuted }}>Kelompok Sasaran: {selectedDetail.targetPenerima}</Text>
               <Text style={{ fontSize: 11, color: colors.textMuted }}>Ahli Gizi: {selectedDetail.namaAhliGizi}</Text>
             </View>
@@ -631,8 +636,8 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   macroCol: { alignItems: 'center', flex: 1 },
-  detailHero: { padding: 12, alignItems: 'center', gap: 4 },
-  infoCard: { padding: 10, borderWidth: 1, gap: 2 },
+  detailHero: { padding: 16, alignItems: 'center', gap: 6, marginBottom: 2 },
+  infoCard: { padding: 12, borderWidth: 1, gap: 4, marginBottom: 2 },
   nutriRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
