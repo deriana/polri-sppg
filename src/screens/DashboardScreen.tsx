@@ -273,6 +273,7 @@ export default function DashboardScreen({ navigation }: any) {
     progressProduksiRealtime,
     distribusiList,
     bahanBakuList,
+    kandunganGiziList,
   } = useApp();
   const { colors, spacing, fontSize, radius, iconStrokeWidth, isDark } = useTheme();
   const {
@@ -451,6 +452,13 @@ export default function DashboardScreen({ navigation }: any) {
   // Gudang & Bahan
   const bahanSppg = bahanBakuList.filter((b) => b.sppgId === activeSppgId);
   const bahanKritis = bahanSppg.filter((b) => b.stok <= b.ambangMinimum);
+  const akanKadaluarsa = bahanSppg.filter((b) => {
+    if (!b.tanggalKadaluarsa) return false;
+    const d = new Date(b.tanggalKadaluarsa);
+    const now = new Date();
+    const diffDays = Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return diffDays <= 3;
+  });
 
   // Distribusi Hari Ini
   const ruteDistribusi = distribusiList.filter((d) => d.sppgId === activeSppgId);
@@ -528,8 +536,360 @@ export default function DashboardScreen({ navigation }: any) {
     },
   ];
 
-  const completedStepsCount = workflowSteps.filter((s) => s.isDone).length;
-  const operationalProgressPct = Math.round((completedStepsCount / workflowSteps.length) * 100);
+  const roleSpecificTasks = useMemo(() => {
+    const isSelfHadir = presensiHariIni.some((p) => p.userId === currentUser.id);
+
+    if (role === 'AHLI_GIZI') {
+      const hasEvaluasi = kandunganGiziList && kandunganGiziList.length > 0;
+      return [
+        {
+          id: 'ag_presensi',
+          title: '1. Presensi Kehadiran & Foto Wajah',
+          desc: 'Konfirmasi kehadiran bertugas di unit SPPG',
+          status: isSelfHadir ? 'Sudah Presensi' : 'Belum Presensi',
+          tone: isSelfHadir ? ('success' as const) : ('warning' as const),
+          isDone: isSelfHadir,
+          icon: 'user-check' as const,
+          onPress: () => navigation.navigate('CheckIn'),
+        },
+        {
+          id: 'ag_suhu',
+          title: '2. Cek Suhu Cold Storage & Keamanan Pangan',
+          desc: 'Pastikan chiller ≤8°C untuk menjaga kesegaran daging/sayur',
+          status: foodSafetyAman ? 'Suhu Aman (≤8°C)' : 'Perlu Pengecekan',
+          tone: foodSafetyAman ? ('success' as const) : ('danger' as const),
+          isDone: foodSafetyAman,
+          icon: 'thermometer' as const,
+          onPress: () => navigation.navigate('FoodSafetyForm'),
+        },
+        {
+          id: 'ag_gizi',
+          title: '3. Evaluasi Kandungan Kalori & Makronutrien',
+          desc: 'Input nilai energi pokok, karbo, protein, lemak, & serat AKG BGN',
+          status: hasEvaluasi ? 'Tersertifikasi' : 'Perlu Input Hari Ini',
+          tone: hasEvaluasi ? ('success' as const) : ('warning' as const),
+          isDone: hasEvaluasi,
+          icon: 'activity' as const,
+          onPress: () => navigation.navigate('KandunganGiziHarian'),
+        },
+        {
+          id: 'ag_alergen',
+          title: '4. Uji Sampel Bebas Alergen & Organoleptik',
+          desc: 'Cek bebas kontaminasi kacang/seafood & ambil foto sampel porsi',
+          status: hasEvaluasi ? 'Sampel Terverifikasi' : 'Uji Porsi Fisik',
+          tone: hasEvaluasi ? ('success' as const) : ('neutral' as const),
+          isDone: hasEvaluasi,
+          icon: 'shield' as const,
+          onPress: () => navigation.navigate('KandunganGiziHarian'),
+        },
+        {
+          id: 'ag_resep',
+          title: '5. Review Standar Resep & AKG Menu Besok',
+          desc: 'Validasi katalog resep dan kebutuhan nutrisi siswa',
+          status: 'Katalog Siap',
+          tone: 'primary' as const,
+          isDone: true,
+          icon: 'book-open' as const,
+          onPress: () => navigation.navigate('MasterMenu'),
+        },
+      ];
+    }
+
+    if (role === 'CHEF_UTAMA') {
+      const isMasak = !!laporanHariIni;
+      const isQcOk = laporanHariIni?.qcStatus === 'READY';
+      return [
+        {
+          id: 'cu_presensi',
+          title: '1. Presensi Tim Dapur & Cook',
+          desc: 'Kesiapan juru masak utama dan asisten masak',
+          status: isSelfHadir ? 'Sudah Presensi' : 'Belum Presensi',
+          tone: isSelfHadir ? ('success' as const) : ('warning' as const),
+          isDone: isSelfHadir,
+          icon: 'user-check' as const,
+          onPress: () => navigation.navigate('CheckIn'),
+        },
+        {
+          id: 'cu_stok',
+          title: '2. Cek Ketersediaan Bahan Masak di Gudang',
+          desc: 'Pastikan daging, beras, sayur, & bumbu tersedia lengkap',
+          status: bahanKritis.length === 0 ? 'Bahan Lengkap' : `${bahanKritis.length} Bahan Menipis`,
+          tone: bahanKritis.length === 0 ? ('success' as const) : ('danger' as const),
+          isDone: bahanKritis.length === 0,
+          icon: 'package' as const,
+          onPress: () => navigation.navigate('Gudang'),
+        },
+        {
+          id: 'cu_alat',
+          title: '3. Checklist Kesiapan Kompor & Wajan Jumbo',
+          desc: 'Uji nyala api burner, kettle uap 200L, & sanitasi alat',
+          status: checklistSelesai ? 'Alat Dapur Siap' : 'Perlu Checklist',
+          tone: checklistSelesai ? ('success' as const) : ('neutral' as const),
+          isDone: checklistSelesai,
+          icon: 'check-square' as const,
+          onPress: () => navigation.navigate('Checklist'),
+        },
+        {
+          id: 'cu_masak',
+          title: '4. Pengolahan Masakan 5 Tahap (Suhu >75°C)',
+          desc: 'Olah masakan sesuai standar resep dan titik matang aman',
+          status: isMasak ? 'Sedang Diproses' : 'Siap Mulai Memasak',
+          tone: isMasak ? ('success' as const) : ('warning' as const),
+          isDone: isMasak,
+          icon: 'layers' as const,
+          onPress: () => navigation.navigate('ProduksiList'),
+        },
+        {
+          id: 'cu_qc',
+          title: '5. Uji Rasa QC & Approval Gate Kelayakan',
+          desc: 'Pemeriksaan organoleptik rasa, tekstur, & aroma makanan',
+          status: isQcOk ? 'Lolos QC (READY)' : 'Menunggu Uji Rasa',
+          tone: isQcOk ? ('success' as const) : ('warning' as const),
+          isDone: isQcOk,
+          icon: 'shield' as const,
+          onPress: () => navigation.navigate('ProduksiList'),
+        },
+      ];
+    }
+
+    if (role === 'PEMORSI_PACKING') {
+      return [
+        {
+          id: 'pp_presensi',
+          title: '1. Presensi Tim Pemorsi & Packing',
+          desc: 'Kehadiran staf pemorsian di ruang packing steril',
+          status: isSelfHadir ? 'Sudah Presensi' : 'Belum Presensi',
+          tone: isSelfHadir ? ('success' as const) : ('warning' as const),
+          isDone: isSelfHadir,
+          icon: 'user-check' as const,
+          onPress: () => navigation.navigate('CheckIn'),
+        },
+        {
+          id: 'pp_ompreng',
+          title: '2. Kesiapan 1.500 Ompreng Stainless Steril',
+          desc: 'Cek wadah saji 5 sekat bebas noda dan bau',
+          status: '1.485 Tray Steril Siap',
+          tone: 'success' as const,
+          isDone: true,
+          icon: 'grid' as const,
+          onPress: () => navigation.navigate('Peralatan'),
+        },
+        {
+          id: 'pp_gramasi',
+          title: '3. Penakaran Gramasi Nasi & Lauk Sesuai Porsi',
+          desc: 'Timbang presisi nasi, protein, sayur, & buah per piring',
+          status: checklistSelesai ? 'Gramasi Terverifikasi' : 'Uji Timbangan Porsi',
+          tone: checklistSelesai ? ('success' as const) : ('warning' as const),
+          isDone: checklistSelesai,
+          icon: 'check-square' as const,
+          onPress: () => navigation.navigate('Checklist'),
+        },
+        {
+          id: 'pp_seal',
+          title: '4. Penyegelan Tutup Ompreng (Anti-Bocor)',
+          desc: 'Pastikan klip pengunci rapat dan band sealer terkunci rapi',
+          status: 'Sealing Berjalan',
+          tone: 'primary' as const,
+          isDone: true,
+          icon: 'package' as const,
+          onPress: () => navigation.navigate('Checklist'),
+        },
+        {
+          id: 'pp_box',
+          title: '5. Susun ke Insulated Thermal Box (>60°C)',
+          desc: 'Pastikan wadah thermal tertutup rapat menahan panas',
+          status: '50 Box Siap Muat',
+          tone: 'success' as const,
+          isDone: true,
+          icon: 'box' as const,
+          onPress: () => navigation.navigate('Peralatan'),
+        },
+        {
+          id: 'pp_handover',
+          title: '6. Serah Terima Box ke Driver Armada Sekolah',
+          desc: 'Hitung alokasi thermal box sesuai rute sekolah tujuan',
+          status: 'Alokasi Terjadwal',
+          tone: 'primary' as const,
+          isDone: true,
+          icon: 'clipboard' as const,
+          onPress: () => navigation.navigate('RiwayatDistribusi'),
+        },
+      ];
+    }
+
+    if (role === 'PETUGAS_LOGISTIK') {
+      return [
+        {
+          id: 'pl_presensi',
+          title: '1. Presensi Kehadiran Gudang & Logistik',
+          desc: 'Kehadiran petugas loading dock dan pergudangan',
+          status: isSelfHadir ? 'Sudah Presensi' : 'Belum Presensi',
+          tone: isSelfHadir ? ('success' as const) : ('warning' as const),
+          isDone: isSelfHadir,
+          icon: 'user-check' as const,
+          onPress: () => navigation.navigate('CheckIn'),
+        },
+        {
+          id: 'pl_terima',
+          title: '2. Penerimaan Pasokan Bahan (Scan QR DO)',
+          desc: 'Scan QR surat jalan supplier & timbang berat pasokan masuk',
+          status: 'Scanner Siap',
+          tone: 'success' as const,
+          isDone: true,
+          icon: 'camera' as const,
+          onPress: () => navigation.navigate('PengadaanBahan', { initialTab: 'terima' }),
+        },
+        {
+          id: 'pl_fefo',
+          title: '3. Sortir & Penataan Bahan Sistem FEFO',
+          desc: 'Pastikan barang kedaluwarsa terdekat ditaruh di depan',
+          status: akanKadaluarsa.length === 0 ? 'FEFO Aman' : `${akanKadaluarsa.length} Prioritas Olah`,
+          tone: akanKadaluarsa.length === 0 ? ('success' as const) : ('warning' as const),
+          isDone: akanKadaluarsa.length === 0,
+          icon: 'clock' as const,
+          onPress: () => navigation.navigate('Gudang'),
+        },
+        {
+          id: 'pl_suhu',
+          title: '4. Monitoring Suhu Sensor IoT Gudang Dingin',
+          desc: 'Pantau suhu chiller (0-4°C) dan deep freezer (-18°C)',
+          status: foodSafetyAman ? 'Suhu Normal' : 'Peringatan Suhu',
+          tone: foodSafetyAman ? ('success' as const) : ('danger' as const),
+          isDone: foodSafetyAman,
+          icon: 'thermometer' as const,
+          onPress: () => navigation.navigate('GudangKondisi'),
+        },
+        {
+          id: 'pl_mutasi',
+          title: '5. Catat Mutasi Pengeluaran Bahan untuk Dapur',
+          desc: 'Input pengeluaran bahan masak ke buku mutasi stok',
+          status: 'Pencatatan Aktif',
+          tone: 'primary' as const,
+          isDone: true,
+          icon: 'file-text' as const,
+          onPress: () => navigation.navigate('MutasiStokForm'),
+        },
+      ];
+    }
+
+    if (role === 'PETUGAS_SANITASI') {
+      return [
+        {
+          id: 'ps_presensi',
+          title: '1. Presensi Tim Sanitasi & Kebersihan',
+          desc: 'Kehadiran staf washing bay dan higiene lingkungan SPPG',
+          status: isSelfHadir ? 'Sudah Presensi' : 'Belum Presensi',
+          tone: isSelfHadir ? ('success' as const) : ('warning' as const),
+          isDone: isSelfHadir,
+          icon: 'user-check' as const,
+          onPress: () => navigation.navigate('CheckIn'),
+        },
+        {
+          id: 'ps_cuci',
+          title: '2. Cuci & Sterilisasi Ompreng (Air Panas 85°C)',
+          desc: 'Proses mesin cuci otomatis desinfektan dan uap panas',
+          status: 'Dishwasher Siap',
+          tone: 'success' as const,
+          isDone: true,
+          icon: 'shield' as const,
+          onPress: () => navigation.navigate('Peralatan'),
+        },
+        {
+          id: 'ps_desinfeksi',
+          title: '3. Desinfeksi Meja Pemorsian, Talenan, & Pisau',
+          desc: 'Sterilisasi permukaan kontak makanan bebas kontaminasi',
+          status: checklistSelesai ? 'Area Higienis' : 'Perlu Desinfeksi',
+          tone: checklistSelesai ? ('success' as const) : ('warning' as const),
+          isDone: checklistSelesai,
+          icon: 'check-square' as const,
+          onPress: () => navigation.navigate('Checklist'),
+        },
+        {
+          id: 'ps_apd',
+          title: '4. Audit Kelayakan APD Seluruh Staf SPPG',
+          desc: 'Cek pemakaian masker, hairnet, apron, & sarung tangan',
+          status: checklistSelesai ? 'APD 100% Lengkap' : 'Pemeriksaan APD',
+          tone: checklistSelesai ? ('success' as const) : ('neutral' as const),
+          isDone: checklistSelesai,
+          icon: 'user' as const,
+          onPress: () => navigation.navigate('Checklist'),
+        },
+        {
+          id: 'ps_limbah',
+          title: '5. Pembersihan Saluran Grease Trap & Limbah Organik',
+          desc: 'Pembersihan perangkap lemak dan pembuangan sisa bahan',
+          status: 'Limbah Terkendali',
+          tone: 'primary' as const,
+          isDone: true,
+          icon: 'trash-2' as const,
+          onPress: () => navigation.navigate('Checklist'),
+        },
+      ];
+    }
+
+    if (role === 'DRIVER') {
+      const isRuteDone = ruteDistribusi.length > 0 && ruteTiba === ruteDistribusi.length;
+      return [
+        {
+          id: 'dr_presensi',
+          title: '1. Presensi Driver & Cek BBM Armada Box',
+          desc: 'Pemeriksaan fisik mobil box pendingin dan bahan bakar',
+          status: isSelfHadir ? 'Sudah Presensi' : 'Belum Presensi',
+          tone: isSelfHadir ? ('success' as const) : ('warning' as const),
+          isDone: isSelfHadir,
+          icon: 'user-check' as const,
+          onPress: () => navigation.navigate('CheckIn'),
+        },
+        {
+          id: 'dr_muat',
+          title: '2. Pemuatan Thermal Box Sesuai Alokasi Sekolah',
+          desc: 'Muat box ke dalam kabin dan pastikan suhu holding terjaga',
+          status: `${ruteDistribusi.length} Rute Sekolah`,
+          tone: 'primary' as const,
+          isDone: true,
+          icon: 'box' as const,
+          onPress: () => navigation.navigate('Distribusi'),
+        },
+        {
+          id: 'dr_rute',
+          title: '3. Pengantaran MBG ke Sekolah via Live GPS',
+          desc: 'Pelacakan rute real-time dan estimasi waktu tiba tepat waktu',
+          status: isRuteDone ? 'Semua Tiba' : `${ruteTiba}/${ruteDistribusi.length} Sekolah`,
+          tone: isRuteDone ? ('success' as const) : ('warning' as const),
+          isDone: isRuteDone,
+          icon: 'navigation' as const,
+          onPress: () => navigation.navigate('Distribusi'),
+        },
+        {
+          id: 'dr_serah',
+          title: '4. Serah Terima Sekolah (Foto Guru & TTD)',
+          desc: 'Dokumentasi bukti penerimaan ompreng oleh kepala sekolah/guru',
+          status: isRuteDone ? 'Lengkap Terverifikasi' : 'Proses Serah Terima',
+          tone: isRuteDone ? ('success' as const) : ('neutral' as const),
+          isDone: isRuteDone,
+          icon: 'check-square' as const,
+          onPress: () => navigation.navigate('Distribusi'),
+        },
+        {
+          id: 'dr_retur',
+          title: '5. Pengambilan Ompreng Kotor Hari Sebelumnya',
+          desc: 'Angkut ompreng kosong dari sekolah kembali ke SPPG untuk dicuci',
+          status: 'Retur Siap',
+          tone: 'primary' as const,
+          isDone: true,
+          icon: 'truck' as const,
+          onPress: () => navigation.navigate('RiwayatDistribusi'),
+        },
+      ];
+    }
+
+    // Default: Petugas Lapangan Umum
+    return workflowSteps;
+  }, [role, currentUser, presensiHariIni, foodSafetyAman, kandunganGiziList, bahanKritis, checklistSelesai, laporanHariIni, akanKadaluarsa, ruteDistribusi, ruteTiba, workflowSteps, navigation]);
+
+  const activeTaskList = isKepala ? workflowSteps : roleSpecificTasks;
+  const completedRoleSteps = activeTaskList.filter((s) => s.isDone).length;
+  const roleProgressPct = Math.round((completedRoleSteps / activeTaskList.length) * 100);
 
   const quickActions: QuickAction[] = useMemo(() => {
     if (role === 'AHLI_GIZI') {
@@ -1024,22 +1384,22 @@ export default function DashboardScreen({ navigation }: any) {
         </Pressable>
       )}
 
-      {/* 3. SPPG Daily Operational Workflow Hub (Work Order Aggregator - Collapsible) */}
+      {/* 3. Role-Specific Tasks / Daily Operational Hub */}
       <Card variant="accent" style={{ gap: spacing.sm, marginVertical: spacing.xs }}>
         <Pressable
           onPress={() => setIsWorkflowExpanded(!isWorkflowExpanded)}
           style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
-            <Feather name="layers" size={16} color={colors.primary} />
+            <Feather name={isKepala ? 'layers' : 'check-circle'} size={16} color={colors.primary} />
             <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.4 }}>
-              ALUR OPERASIONAL HARI INI
+              {isKepala ? 'ALUR OPERASIONAL SPPG HARI INI' : `TUGAS SAYA HARI INI (${ROLE_LABEL[role]?.toUpperCase() || 'STAF'})`}
             </Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Pill
-              label={`${operationalProgressPct}% (${completedStepsCount}/${workflowSteps.length})`}
-              tone={operationalProgressPct >= 100 ? 'success' : operationalProgressPct > 50 ? 'primary' : 'warning'}
+              label={`${roleProgressPct}% (${completedRoleSteps}/${activeTaskList.length})`}
+              tone={roleProgressPct >= 100 ? 'success' : roleProgressPct > 50 ? 'primary' : 'warning'}
             />
             <Feather name={isWorkflowExpanded ? 'chevron-up' : 'chevron-down'} size={18} color={colors.primary} />
           </View>
@@ -1050,8 +1410,8 @@ export default function DashboardScreen({ navigation }: any) {
           <View
             style={{
               height: '100%',
-              width: `${operationalProgressPct}%`,
-              backgroundColor: operationalProgressPct >= 100 ? colors.success : isDark ? colors.gold : colors.primary,
+              width: `${roleProgressPct}%`,
+              backgroundColor: roleProgressPct >= 100 ? colors.success : isDark ? colors.gold : colors.primary,
               borderRadius: radius.pill,
             }}
           />
@@ -1064,9 +1424,9 @@ export default function DashboardScreen({ navigation }: any) {
             style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 2 }}
           >
             <Text style={{ fontSize: 11, color: colors.textMuted, flex: 1 }}>
-              {operationalProgressPct >= 100
-                ? 'Semua 6 tahapan kerja dapur hari ini telah tuntas diverifikasi.'
-                : `${completedStepsCount} dari 6 tahap selesai • Ketuk untuk membuka rincian alur.`}
+              {roleProgressPct >= 100
+                ? 'Semua tugas pekerjaan Anda hari ini telah tuntas diselesaikan.'
+                : `${completedRoleSteps} dari ${activeTaskList.length} tugas selesai • Ketuk untuk membuka daftar tugas.`}
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
               <Text style={{ fontSize: 11, fontWeight: '800', color: colors.primary }}>Buka Rincian</Text>
@@ -1076,12 +1436,14 @@ export default function DashboardScreen({ navigation }: any) {
         ) : (
           <>
             <Text style={{ fontSize: 11, color: colors.textMuted }}>
-              Pantau dan jalankan seluruh rantai kerja dapur MBG dari persiapan hingga serah terima sekolah:
+              {isKepala
+                ? 'Pantau dan jalankan seluruh rantai kerja dapur MBG dari persiapan hingga serah terima sekolah:'
+                : `Daftar target & tanggung jawab kerja Anda hari ini (${ROLE_LABEL[role]}):`}
             </Text>
 
             {/* Task Steps Pipeline List */}
             <View style={{ gap: 8, marginTop: 4 }}>
-              {workflowSteps.map((step) => (
+              {activeTaskList.map((step) => (
                 <Pressable
                   key={step.id}
                   onPress={step.onPress}
@@ -1116,7 +1478,7 @@ export default function DashboardScreen({ navigation }: any) {
                       {step.title}
                     </Text>
                     <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
-                      PIC: <Text style={{ fontWeight: '600', color: colors.text }}>{step.pic}</Text>
+                      {'desc' in step ? (step as any).desc : `PIC: ${(step as any).pic}`}
                     </Text>
                   </View>
 
@@ -1132,149 +1494,12 @@ export default function DashboardScreen({ navigation }: any) {
               onPress={() => setIsWorkflowExpanded(false)}
               style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingTop: 4 }}
             >
-              <Text style={{ fontSize: 11, fontWeight: '800', color: colors.textMuted }}>Sembunyikan Rincian Alur</Text>
+              <Text style={{ fontSize: 11, fontWeight: '800', color: colors.textMuted }}>Sembunyikan Rincian Tugas</Text>
               <Feather name="chevron-up" size={14} color={colors.textMuted} />
             </Pressable>
           </>
         )}
       </Card>
-
-      {/* 3. Role-based 'My Work' Card for Driver or Operational Roles */}
-      {isDriver ? (
-        <Card variant="accent" style={{ gap: spacing.xs, marginVertical: spacing.xs }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Feather name="truck" size={18} color={isDark ? colors.gold : colors.primary} />
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
-                TUGAS PENGIRIMAN SAYA HARI INI
-              </Text>
-            </View>
-            <Pill label={`${ruteDistribusi.length} Rute Sekolah`} tone="primary" />
-          </View>
-          <Text style={{ fontSize: fontSize.xs, color: colors.text, fontWeight: '700', marginTop: 4 }}>
-            {ruteDistribusi.map((r) => sekolahList.find((s) => s.id === r.sekolahId)?.nama ?? 'Sekolah').join(' -> ')}
-          </Text>
-          <Text style={{ fontSize: 11, color: colors.textMuted }}>
-            Status: {ruteTiba} dari {ruteDistribusi.length} sekolah telah menerima paket MBG.
-          </Text>
-          <PrimaryButton
-            label="Buka Live GPS & Serah Terima Sekolah"
-            icon="navigation"
-            onPress={() => navigation.navigate('Distribusi')}
-            style={{ marginTop: 8 }}
-          />
-        </Card>
-      ) : role === 'AHLI_GIZI' ? (
-        <Card variant="accent" style={{ gap: spacing.xs, marginVertical: spacing.xs }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Feather name="activity" size={18} color={colors.primary} />
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
-                TUGAS AHLI GIZI SPPG HARI INI
-              </Text>
-            </View>
-            <Pill label="Standar AKG BGN" tone="success" />
-          </View>
-          <Text style={{ fontSize: fontSize.xs, color: colors.text, fontWeight: '700', marginTop: 4 }}>
-            Evaluasi kandungan energi pokok makanan (kalori, karbohidrat, protein hewani/nabati, lemak, serat) untuk sajian siswa hari ini.
-          </Text>
-          <Text style={{ fontSize: 11, color: colors.textMuted }}>
-            Pastikan porsi makanan memenuhi standar gizi seimbang dan bebas kontaminasi alergen.
-          </Text>
-          <PrimaryButton
-            label="Input & Validasi Kandungan Gizi Sajian Hari Ini"
-            icon="edit-3"
-            onPress={() => navigation.navigate('KandunganGiziHarian')}
-            style={{ marginTop: 8 }}
-          />
-        </Card>
-      ) : role === 'CHEF_UTAMA' ? (
-        <Card variant="accent" style={{ gap: spacing.xs, marginVertical: spacing.xs }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Feather name="layers" size={18} color={colors.primary} />
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
-                TUGAS CHEF UTAMA & COOK HARI INI
-              </Text>
-            </View>
-            <Pill label="5 Tahap Masak" tone="warning" />
-          </View>
-          <Text style={{ fontSize: fontSize.xs, color: colors.text, fontWeight: '700', marginTop: 4 }}>
-            Pengolahan masakan dapur SPPG sesuai takaran resep standar, pencatatan titik suhu masak (min 75°C), dan sampling uji organoleptik rasa.
-          </Text>
-          <PrimaryButton
-            label="Mulai / Lanjutkan Laporan Masak Batch"
-            icon="file-text"
-            onPress={() => navigation.navigate('ProduksiList')}
-            style={{ marginTop: 8 }}
-          />
-        </Card>
-      ) : role === 'PEMORSI_PACKING' ? (
-        <Card variant="accent" style={{ gap: spacing.xs, marginVertical: spacing.xs }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Feather name="box" size={18} color={colors.primary} />
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
-                TUGAS PEMORSI & PACKING HARI INI
-              </Text>
-            </View>
-            <Pill label="Ompreng & Box" tone="primary" />
-          </View>
-          <Text style={{ fontSize: fontSize.xs, color: colors.text, fontWeight: '700', marginTop: 4 }}>
-            Penimbangan gramasi porsi ompreng stainless steel, perapatan tutup wadah, dan penataan ke dalam thermal box tahan panas (min 60°C).
-          </Text>
-          <PrimaryButton
-            label="Cek Kesiapan Ompreng & Checklist"
-            icon="check-square"
-            onPress={() => navigation.navigate('Checklist')}
-            style={{ marginTop: 8 }}
-          />
-        </Card>
-      ) : role === 'PETUGAS_LOGISTIK' ? (
-        <Card variant="accent" style={{ gap: spacing.xs, marginVertical: spacing.xs }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Feather name="package" size={18} color={colors.primary} />
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
-                TUGAS LOGISTIK & GUDANG HARI INI
-              </Text>
-            </View>
-            <Pill label="Scan DO & FEFO" tone="success" />
-          </View>
-          <Text style={{ fontSize: fontSize.xs, color: colors.text, fontWeight: '700', marginTop: 4 }}>
-            Penerimaan pasokan bahan baku (scan QR surat jalan), kontrol kadaluarsa bahan FEFO, dan pemantauan suhu cold storage IoT.
-          </Text>
-          <PrimaryButton
-            label="Penerimaan Pasokan & Scan QR"
-            icon="camera"
-            onPress={() => navigation.navigate('PengadaanBahan', { initialTab: 'terima' })}
-            style={{ marginTop: 8 }}
-          />
-        </Card>
-      ) : role === 'PETUGAS_SANITASI' ? (
-        <Card variant="accent" style={{ gap: spacing.xs, marginVertical: spacing.xs }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Feather name="shield" size={18} color={colors.primary} />
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
-                TUGAS SANITASI & KELAYAKAN APD
-              </Text>
-            </View>
-            <Pill label="Steril & Higienis" tone="success" />
-          </View>
-          <Text style={{ fontSize: fontSize.xs, color: colors.text, fontWeight: '700', marginTop: 4 }}>
-            Sterilisasi ompreng makan, pembersihan area dapur & grease trap, serta checklist kelayakan APD staf pengolah makanan.
-          </Text>
-          <PrimaryButton
-            label="Isi Checklist Sanitasi & APD"
-            icon="check-square"
-            onPress={() => navigation.navigate('Checklist')}
-            style={{ marginTop: 8 }}
-          />
-        </Card>
-      ) : (
-        <ProductionStageBar progress={progressProduksiRealtime} target={targetKapasitas} />
-      )}
 
       {/* 4. Quick Menu */}
       <SectionTitle style={{ marginTop: spacing.sm }}>Quick Menu</SectionTitle>
