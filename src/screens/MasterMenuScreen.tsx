@@ -4,11 +4,13 @@ import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Card, EmptyState, Input, Pill, PrimaryButton, SecondaryButton, SectionTitle } from '../components/ui';
+import HppBadge from '../components/HppBadge';
 import { MasterMenu } from '../types';
+import { hppFromMenu } from '../utils/hpp';
 import { pickImage } from '../utils/pickImage';
 
 export default function MasterMenuScreen() {
-  const { masterMenuList, addMasterMenu, updateMasterMenu, deleteMasterMenu, role } = useApp();
+  const { masterMenuList, addMasterMenu, updateMasterMenu, deleteMasterMenu, role, costPerMeal } = useApp();
   const { colors, fontSize, iconStrokeWidth, radius, spacing, isDark } = useTheme();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,6 +31,7 @@ export default function MasterMenuScreen() {
   const [karboGram, setKarboGram] = useState('65');
   const [lemakGram, setLemakGram] = useState('18');
   const [porsiGram, setPorsiGram] = useState('380');
+  const [hppPerPorsi, setHppPerPorsi] = useState('11750');
   const [deskripsi, setDeskripsi] = useState('');
   const [resep, setResep] = useState('');
   const [bahanUtamaStr, setBahanUtamaStr] = useState('');
@@ -60,6 +63,7 @@ export default function MasterMenuScreen() {
     setKarboGram('65');
     setLemakGram('18');
     setPorsiGram('380');
+    setHppPerPorsi('11750');
     setDeskripsi('');
     setResep('');
     setBahanUtamaStr('');
@@ -77,6 +81,7 @@ export default function MasterMenuScreen() {
     setKarboGram(String(menu.karboGram));
     setLemakGram(String(menu.lemakGram));
     setPorsiGram(String(menu.porsiGram || 380));
+    setHppPerPorsi(String(menu.hppPerPorsi || 11750));
     setDeskripsi(menu.deskripsi);
     setResep(menu.resep || '');
     setBahanUtamaStr(menu.bahanUtama ? menu.bahanUtama.join(', ') : '');
@@ -99,6 +104,7 @@ export default function MasterMenuScreen() {
       karboGram: Number(karboGram) || 60,
       lemakGram: Number(lemakGram) || 16,
       porsiGram: Number(porsiGram) || 380,
+      hppPerPorsi: Number(hppPerPorsi) || 11750,
       deskripsi: deskripsi.trim() || 'Menu sehat dan bergizi seimbang standar BGN.',
       resep: resep.trim() || 'Resep terstandar koki SPPG.',
       bahanUtama: bahanUtamaStr.trim()
@@ -278,6 +284,10 @@ export default function MasterMenuScreen() {
               </View>
             </View>
 
+            <View style={{ gap: 6, marginTop: 2 }}>
+              <HppBadge info={hppFromMenu(menu, costPerMeal)} />
+            </View>
+
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 2 }}>
               <Text style={{ fontSize: 11, color: colors.textMuted }}>Porsi: {menu.porsiGram || 380} gram / siswa</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -341,6 +351,9 @@ export default function MasterMenuScreen() {
                     <Text style={{ fontSize: fontSize.sm, fontWeight: '900', color: colors.text }}>{selectedMenu.lemakGram} gram</Text>
                   </View>
                 </View>
+
+                {/* HPP per porsi */}
+                <HppBadge info={hppFromMenu(selectedMenu, costPerMeal)} variant="block" />
 
                 {/* Bahan Utama */}
                 {selectedMenu.bahanUtama && selectedMenu.bahanUtama.length > 0 && (
@@ -458,6 +471,16 @@ export default function MasterMenuScreen() {
                 onChangeText={setPorsiGram}
                 keyboardType="numeric"
                 placeholder="380"
+              />
+
+              <Input
+                label="HPP — Harga Pokok Produksi (per porsi)"
+                prefix="Rp"
+                value={hppPerPorsi}
+                onChangeText={setHppPerPorsi}
+                keyboardType="numeric"
+                placeholder="11750"
+                helperText={`Pagu standar BGN: Rp ${costPerMeal.paguStandarBgn.toLocaleString('id-ID')}/porsi`}
               />
 
               <Input

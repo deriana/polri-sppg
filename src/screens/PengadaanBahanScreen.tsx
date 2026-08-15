@@ -186,7 +186,7 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
       noInvoice: noInvoice.trim() || `INV-${Date.now().toString().slice(-6)}`,
       mitraId: mitraId !== 'custom' ? mitraId : null,
       namaSupplier: finalSupplier,
-      buktiNota: fotoNota ?? SPPG_ASSET_MAP.lh01_ayam_bakar,
+      buktiNota: fotoNota ?? SPPG_ASSET_MAP.nota_pembelian_1,
       items: compiledItems,
     });
 
@@ -474,7 +474,11 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
           {permintaanBahanList.map((p) => {
             const bhn = bahanBakuList.find((b) => b.id === p.bahanId);
             return (
-              <Card key={p.id} style={{ gap: 6 }}>
+              <Card
+                key={p.id}
+                style={{ gap: 6 }}
+                onPress={() => navigation.navigate('PermintaanBahanDetail', { permintaanId: p.id })}
+              >
                 <View style={styles.rowBetween}>
                   <Text style={{ fontSize: 11, fontWeight: '800', color: colors.primary }}>
                     No. DO / Surat Jalan: {p.id}
@@ -491,6 +495,14 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
                 <Text style={{ fontSize: 11, color: colors.textMuted }}>
                   Tanggal: {p.tanggal} • Catatan: {p.catatan ?? 'Kebutuhan reguler dapur'}
                 </Text>
+
+                <View style={[styles.auditSealRow, { backgroundColor: colors.background, borderRadius: radius.sm }]}>
+                  <Feather name="map-pin" size={12} color={colors.primary} />
+                  <Text style={{ color: colors.primary, fontSize: 10.5, fontWeight: '700', flex: 1 }}>
+                    Ketuk untuk lacak posisi pengiriman, QR surat jalan, & detail pemasok
+                  </Text>
+                  <Feather name="chevron-right" size={14} color={colors.primary} />
+                </View>
               </Card>
             );
           })}
@@ -639,7 +651,7 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
         onClose={() => setIsBuyModalVisible(false)}
         title="Input Pembelian Bahan & Nota Baru"
       >
-        <ScrollView style={{ gap: spacing.md, maxHeight: 520 }} contentContainerStyle={{ paddingBottom: 24 }}>
+        <ScrollView style={{ maxHeight: 520 }} contentContainerStyle={{ gap: spacing.md, paddingBottom: 24 }}>
           <Input
             label="Peruntukan Belanja / Judul Transaksi *"
             icon="file-text"
@@ -792,7 +804,7 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
           onClose={() => setSelectedLogDetail(null)}
           title={`Detail Transaksi ${selectedLogDetail.id}`}
         >
-          <ScrollView style={{ gap: spacing.md, maxHeight: 540 }} contentContainerStyle={{ paddingBottom: 24 }}>
+          <ScrollView style={{ maxHeight: 540 }} contentContainerStyle={{ gap: spacing.md, paddingBottom: 24 }}>
             {/* Nominal Banner */}
             <View style={[styles.detailHero, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
               <Text style={{ fontSize: 11, fontWeight: '700', color: colors.primary }}>NOMINAL TRANSAKSI</Text>
@@ -842,7 +854,7 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
               
               <View style={[styles.receiptCardWrapper, { borderColor: colors.border, backgroundColor: colors.background, borderRadius: radius.md }]}>
                 <Image
-                  source={{ uri: selectedLogDetail.buktiNota || SPPG_ASSET_MAP.lh01_ayam_bakar }}
+                  source={{ uri: selectedLogDetail.buktiNota || SPPG_ASSET_MAP.nota_pembelian_1 }}
                   style={[styles.notaReceiptImg, { borderRadius: radius.md }]}
                 />
               </View>

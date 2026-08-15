@@ -24,12 +24,16 @@ import {
   initialPengajuanSekolahList,
   initialIncidentList,
   initialKandunganGiziList,
+  initialPengajuanAsetList,
   CCTV_ANOMALI_LABEL,
   findAccount,
 } from '../data';
 import {
   AlertLog,
   AnggaranLog,
+  BuktiMedia,
+  PengajuanAset,
+  StatusPengajuanAset,
   BahanBaku,
   BroadcastMessage,
   CctvEvent,
@@ -119,6 +123,9 @@ interface AppContextValue {
   sendBroadcast: (msg: Omit<BroadcastMessage, 'id' | 'timestamp'>) => void;
   anggaranLogs: AnggaranLog[];
   addAnggaranLog: (log: Omit<AnggaranLog, 'id' | 'tanggal'>) => void;
+  pengajuanAsetList: PengajuanAset[];
+  ajukanAset: (payload: Omit<PengajuanAset, 'id' | 'tanggal' | 'status' | 'anggaranLogId' | 'tanggapan'>) => void;
+  updateStatusPengajuanAset: (id: string, status: StatusPengajuanAset, tanggapan?: string) => void;
   pengajuanSekolahList: PengajuanSekolah[];
   ajukanSekolah: (pengajuan: Omit<PengajuanSekolah, 'id' | 'tanggal' | 'status' | 'tanggapan'>) => void;
   updateStatusPengajuanSekolah: (id: string, status: StatusPengajuanSekolah, tanggapan?: string) => void;
@@ -143,6 +150,7 @@ interface AppContextValue {
   ajukanPermintaanBahan: (payload: Omit<PermintaanBahan, 'id' | 'status' | 'tanggal'>) => void;
   updatePermintaanStatus: (id: string, status: PermintaanBahan['status']) => void;
   updateDistribusiStatus: (id: string, status: DistribusiRute['status'], buktiFoto?: string) => void;
+  laporkanKendalaDistribusi: (id: string, rincian: string, bukti: BuktiMedia[], pelapor: string) => void;
   sendChatMessage: (sppgId: string, text: string) => void;
   addStaff: (user: Omit<User, 'id'>) => void;
   removeStaff: (userId: string) => void;
@@ -206,6 +214,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [broadcastList, setBroadcastList] = useState<BroadcastMessage[]>(initialBroadcastList);
   const [anggaranLogs, setAnggaranLogs] = useState<AnggaranLog[]>(initialAnggaranLogs);
   const [pengajuanSekolahList, setPengajuanSekolahList] = useState<PengajuanSekolah[]>(initialPengajuanSekolahList);
+  const [pengajuanAsetList, setPengajuanAsetList] = useState<PengajuanAset[]>(initialPengajuanAsetList);
   const [incidentList, setIncidentList] = useState<IncidentReport[]>(initialIncidentList);
   const [kandunganGiziList, setKandunganGiziList] = useState<KandunganGiziHarian[]>(initialKandunganGiziList);
   const [laporanPackingList, setLaporanPackingList] = useState<LaporanPacking[]>(INITIAL_LAPORAN_PACKING);
@@ -265,6 +274,63 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       { ...pengajuan, id, tanggal, status: 'diajukan' },
       ...prev,
     ]);
+  };
+
+  // Pengadaan aset dapur. Jalur 'mandiri' memotong anggaran unit saat itu juga
+  // dengan menulis satu AnggaranLog pengeluaran kategori peralatan_dapur —
+  // itulah yang bikin saldo di layar anggaran ikut turun. Jalur 'pusat' hanya
+  // mencatat pengajuan; anggaran unit tidak tersentuh sama sekali.
+  const ajukanAset: AppContextValue['ajukanAset'] = (payload) => {
+    const id = `ASE-${String(pengajuanAsetList.length + 1).padStart(3, '0')}`;
+    const tanggal = todayDate();
+    let anggaranLogId: string | null = null;
+
+    if (payload.jalur === 'mandiri') {
+      anggaranLogId = `ANG-${String(anggaranLogs.length + 1).padStart(3, '0')}`;
+      setAnggaranLogs((prev) => [
+        {
+          id: anggaranLogId as string,
+          tanggal,
+          sppgId: payload.sppgId,
+          jenis: 'pengeluaran',
+          kategori: 'peralatan_dapur',
+          nominal: payload.totalHarga,
+          keterangan: `Pengadaan aset dapur: ${payload.namaAset} (${payload.jumlah} ${payload.satuan})`,
+          buktiNota: payload.buktiNota ?? null,
+          dibuatOleh: payload.diajukanOleh,
+          namaSupplier: payload.namaSupplier,
+          noInvoice: payload.noInvoice,
+          items: [
+            {
+              namaBarang: payload.namaAset,
+              jumlah: payload.jumlah,
+              satuan: payload.satuan,
+              hargaSatuan: payload.hargaSatuan,
+              totalHarga: payload.totalHarga,
+            },
+          ],
+        },
+        ...prev,
+      ]);
+    }
+
+    setPengajuanAsetList((prev) => [
+      {
+        ...payload,
+        id,
+        tanggal,
+        status: payload.jalur === 'mandiri' ? 'diterima' : 'diajukan',
+        anggaranLogId,
+        tanggapan: null,
+      },
+      ...prev,
+    ]);
+  };
+
+  const updateStatusPengajuanAset: AppContextValue['updateStatusPengajuanAset'] = (id, status, tanggapan) => {
+    setPengajuanAsetList((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, status, tanggapan: tanggapan ?? item.tanggapan } : item)),
+    );
   };
 
   const updateStatusPengajuanSekolah: AppContextValue['updateStatusPengajuanSekolah'] = (id, status, tanggapan) => {
@@ -669,6 +735,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setDistribusiList((prev) => prev.map((d) => (d.id === id ? { ...d, status, ...(buktiFoto ? { buktiFoto } : {}) } : d)));
   };
 
+  // Laporan kendala rute selalu membawa bukti visual (foto/video) — teks saja
+  // tidak cukup untuk diverifikasi command center, jadi bukti disimpan ikut
+  // rincian dan waktu lapor di record rute-nya, bukan di state layar.
+  const laporkanKendalaDistribusi: AppContextValue['laporkanKendalaDistribusi'] = (id, rincian, bukti, pelapor) => {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    setDistribusiList((prev) =>
+      prev.map((d) =>
+        d.id === id
+          ? {
+              ...d,
+              status: 'kendala',
+              kendalaRincian: rincian,
+              kendalaBukti: bukti,
+              kendalaDilaporkan: timestamp,
+              kendalaPelapor: pelapor,
+            }
+          : d,
+      ),
+    );
+  };
+
   // Menu Kalender — upsert: update the plan already at sppgId+tanggal, else insert.
   const setMenuForDate: AppContextValue['setMenuForDate'] = (sppgId, tanggal, menu, kategoriGizi, fotoMenu) => {
     setMenuHarianPlanList((prev) => {
@@ -785,6 +874,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       pengajuanSekolahList,
       ajukanSekolah,
       updateStatusPengajuanSekolah,
+      pengajuanAsetList,
+      ajukanAset,
+      updateStatusPengajuanAset,
       cctvEvents,
       bahanBakuList,
       permintaanBahanList,
@@ -806,6 +898,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       ajukanPermintaanBahan,
       updatePermintaanStatus,
       updateDistribusiStatus,
+      laporkanKendalaDistribusi,
       sendChatMessage,
       addStaff,
       removeStaff,
@@ -845,6 +938,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       broadcastList,
       anggaranLogs,
       pengajuanSekolahList,
+      pengajuanAsetList,
       incidentList,
       kandunganGiziList,
       laporanPackingList,

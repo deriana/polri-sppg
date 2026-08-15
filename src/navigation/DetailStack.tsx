@@ -50,11 +50,14 @@ import BroadcastScreen from '../screens/BroadcastScreen';
 import IncidentListScreen from '../screens/IncidentListScreen';
 import IncidentFormScreen from '../screens/IncidentFormScreen';
 import PengadaanBahanScreen from '../screens/PengadaanBahanScreen';
+import PengadaanPeralatanScreen from '../screens/PengadaanPeralatanScreen';
 import KandunganGiziHarianScreen from '../screens/KandunganGiziHarianScreen';
 import LaporanPackingScreen from '../screens/LaporanPackingScreen';
 import LaporanSanitasiScreen from '../screens/LaporanSanitasiScreen';
 import BatchTraceabilityScreen from '../screens/BatchTraceabilityScreen';
 import FoodQualityPassportScreen from '../screens/FoodQualityPassportScreen';
+import AssetQrDetailScreen from '../screens/AssetQrDetailScreen';
+import StatistikEksekutifScreen from '../screens/StatistikEksekutifScreen';
 
 const Stack = createNativeStackNavigator<any>();
 
@@ -101,9 +104,11 @@ const DETAIL_SCREENS: Array<{ name: string; component: React.ComponentType<any>;
   { name: 'ChatCommandCenter', component: ChatCommandCenterScreen, title: 'Chat Command Center' },
   { name: 'MenuKalender', component: MenuKalenderScreen, title: 'Kalender Menu' },
   { name: 'MasterMenu', component: MasterMenuScreen, title: 'Master Katalog & Resep Gizi' },
+  { name: 'Anggaran', component: AnggaranScreen, title: 'Log Anggaran & Financial' },
   { name: 'MitraList', component: MitraListScreen, title: 'Mitra Pemasok' },
   { name: 'MutasiStokForm', component: MutasiStokFormScreen, title: 'Catat Mutasi Stok' },
   { name: 'PengadaanBahan', component: PengadaanBahanScreen, title: 'Pengadaan & Logistik Bahan' },
+  { name: 'PengadaanPeralatan', component: PengadaanPeralatanScreen, title: 'Pengadaan Peralatan & Aset' },
   { name: 'KandunganGiziHarian', component: KandunganGiziHarianScreen, title: 'Evaluasi Kandungan Gizi' },
   { name: 'ProduksiList', component: LaporanProduksiListScreen, title: 'Laporan Produksi' },
   { name: 'Broadcast', component: BroadcastScreen, title: 'Pusat Broadcast Pengumuman' },
@@ -113,6 +118,8 @@ const DETAIL_SCREENS: Array<{ name: string; component: React.ComponentType<any>;
   { name: 'LaporanSanitasi', component: LaporanSanitasiScreen, title: 'Laporan Sanitasi & Sterilisasi' },
   { name: 'BatchTraceability', component: BatchTraceabilityScreen, title: 'Pelacakan Rantai Pangan (Traceability)' },
   { name: 'FoodQualityPassport', component: FoodQualityPassportScreen, title: 'Digital Food Quality Passport' },
+  { name: 'AssetQrDetail', component: AssetQrDetailScreen, title: 'Detail Aset Peralatan' },
+  { name: 'StatistikEksekutif', component: StatistikEksekutifScreen, title: 'Statistik & Rekap Berkala' },
 ];
 
 export function buildDetailStack(homeName: string, HomeComponent: React.ComponentType<any>, homeTitle: string) {

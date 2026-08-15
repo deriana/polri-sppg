@@ -427,6 +427,8 @@ export interface InputProps extends Omit<TextInputProps, 'style'> {
   error?: string;
   helperText?: string;
   icon?: keyof typeof Feather.glyphMap;
+  /** Teks tetap di depan nilai, mis. "Rp" untuk kolom nominal rupiah. */
+  prefix?: string;
   onClear?: () => void;
   clearable?: boolean;
   containerStyle?: StyleProp<ViewStyle>;
@@ -439,6 +441,7 @@ export function Input({
   error,
   helperText,
   icon,
+  prefix,
   onClear,
   clearable = false,
   containerStyle,
@@ -495,6 +498,19 @@ export function Input({
             strokeWidth={iconStrokeWidth}
             style={styles.inputPrefixIcon}
           />
+        )}
+
+        {!!prefix && (
+          <Text
+            style={{
+              color: error ? colors.danger : isFocused ? colors.primary : colors.textMuted,
+              fontSize: fontSize.sm,
+              fontWeight: '800',
+              marginRight: 6,
+            }}
+          >
+            {prefix}
+          </Text>
         )}
 
         <TextInput
@@ -914,33 +930,42 @@ export function SyncStatusBadge({ pendingCount, onSyncPress, syncing, style }: S
   const { colors, fontSize, iconStrokeWidth, radius, spacing } = useTheme();
   const isPending = pendingCount > 0;
 
+  // Kondisi normal (tidak ada antrean) bukan kabar penting — ditampilkan
+  // sebagai baris status kecil, bukan banner hijau setinggi kartu. Banner penuh
+  // disimpan untuk keadaan yang memang butuh tindakan: ada data tertunda.
+  if (!isPending) {
+    return (
+      <View style={[styles.syncInline, style]}>
+        <Feather name="check-circle" size={12} color={colors.success} strokeWidth={iconStrokeWidth} />
+        <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: '600' }}>
+          Semua data tersinkron dengan server
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View
       style={[
         styles.syncBanner,
         {
-          backgroundColor: isPending ? colors.warningBg : colors.successBg,
+          backgroundColor: colors.warningBg,
           borderRadius: radius.md,
           padding: spacing.md,
         },
         style,
       ]}
     >
-      <Feather
-        name={isPending ? 'upload-cloud' : 'check-circle'}
-        size={18}
-        color={isPending ? colors.warning : colors.success}
-        strokeWidth={iconStrokeWidth}
-      />
+      <Feather name="upload-cloud" size={18} color={colors.warning} strokeWidth={iconStrokeWidth} />
       <View style={{ flex: 1 }}>
         <Text style={[styles.syncBannerTitle, { color: colors.text, fontSize: fontSize.sm }]}>
-          {isPending ? `${pendingCount} data menunggu sinkron` : 'Semua data tersinkron'}
+          {pendingCount} data menunggu sinkron
         </Text>
         <Text style={[styles.syncBannerSub, { color: colors.textMuted, fontSize: fontSize.xs }]}>
-          {isPending ? 'Tersimpan lokal di perangkat ini' : 'Tidak ada data yang tertunda'}
+          Tersimpan lokal di perangkat ini
         </Text>
       </View>
-      {isPending && onSyncPress && (
+      {onSyncPress && (
         <PrimaryButton
           label={syncing ? 'Menyinkron...' : 'Sinkron'}
           onPress={onSyncPress}
@@ -1214,6 +1239,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+  },
+  syncInline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 2,
   },
   syncBannerTitle: {
     fontWeight: '700',

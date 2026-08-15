@@ -4,6 +4,8 @@ import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Card, EmptyState, Pill, PrimaryButton, SectionTitle } from '../components/ui';
+import HppBadge from '../components/HppBadge';
+import { formatRp, resolveHpp } from '../utils/hpp';
 import { useScopedData } from '../hooks';
 import { LaporanProduksi, LaporanStatus } from '../types';
 import { canVerifyLaporan } from '../utils/scope';
@@ -33,7 +35,7 @@ function inCurrentMonth(tanggal: string): boolean {
 }
 
 export default function LaporanProduksiListScreen({ navigation }: any) {
-  const { role, currentUser, verifyLaporan } = useApp();
+  const { role, currentUser, verifyLaporan, masterMenuList, costPerMeal } = useApp();
   const { laporanInScope } = useScopedData();
   const { colors, spacing, fontSize, iconStrokeWidth, radius } = useTheme();
   const [filter, setFilter] = useState<Filter>('minggu');
@@ -100,6 +102,18 @@ export default function LaporanProduksiListScreen({ navigation }: any) {
                 <Text style={{ color: colors.text, fontWeight: '700', fontSize: fontSize.xs }} numberOfLines={1}>
                   {l.menu}
                 </Text>
+                {(() => {
+                  const hpp = resolveHpp(l.menu, masterMenuList, costPerMeal);
+                  const porsi = l.realisasiPorsi > 0 ? l.realisasiPorsi : l.targetPorsi;
+                  return (
+                    <View style={{ gap: 4 }}>
+                      <HppBadge info={hpp} />
+                      <Text style={{ color: colors.textMuted, fontSize: 10.5 }}>
+                        Estimasi biaya batch: {formatRp(hpp.nilai * porsi)} untuk {porsi} porsi
+                      </Text>
+                    </View>
+                  );
+                })()}
                 <View style={styles.rowBottom}>
                   <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>
                     {l.realisasiPorsi > 0

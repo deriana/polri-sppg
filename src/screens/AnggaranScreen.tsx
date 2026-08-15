@@ -430,7 +430,7 @@ export default function AnggaranScreen({ navigation }: any) {
 
       {/* Modal Input Procurement / Belanja Baru */}
       <Modal visible={showModal} onClose={() => setShowModal(false)} title="Input Pembelian & Pengadaan Bahan">
-        <ScrollView style={{ gap: spacing.md }} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={{ gap: spacing.md, paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
           {error && (
             <View style={{ backgroundColor: colors.dangerBg, padding: 10, borderRadius: radius.md, marginBottom: 8 }}>
               <Text style={{ color: colors.danger, fontSize: fontSize.xs, fontWeight: '600' }}>{error}</Text>
@@ -612,7 +612,7 @@ export default function AnggaranScreen({ navigation }: any) {
         title="Detail Transaksi & Bukti Nota"
       >
         {selectedLogDetail && (
-          <ScrollView style={{ gap: spacing.sm }} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
+          <ScrollView contentContainerStyle={{ gap: spacing.md, paddingBottom: 20 }} keyboardShouldPersistTaps="handled">
             {/* 1. Header Amount Card */}
             <Card
               variant="accent"
@@ -770,7 +770,7 @@ export default function AnggaranScreen({ navigation }: any) {
 
               <View style={{ borderRadius: radius.md, overflow: 'hidden', borderWidth: 1, borderColor: colors.border }}>
                 <Image
-                  source={{ uri: selectedLogDetail.buktiNota || SPPG_ASSET_MAP.lh01_ayam_bakar }}
+                  source={{ uri: selectedLogDetail.buktiNota || SPPG_ASSET_MAP.nota_pembelian_1 }}
                   style={{ width: '100%', height: 220, resizeMode: 'cover' }}
                 />
                 <View style={{ padding: 10, backgroundColor: colors.surface, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>

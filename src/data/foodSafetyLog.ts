@@ -11,10 +11,10 @@ export const JENIS_MAKANAN_MASA_SIMPAN: Record<string, number> = {
   buah: 8,
 };
 
-const FOOD_SAFETY_DATES = dateRange('2026-08-03', '2026-08-10');
+const FOOD_SAFETY_DATES = dateRange('2026-08-08', '2026-08-15');
 
 // 2 pengukuran per hari (nasi pagi + satu lauk/sayur bergilir) untuk SPPG-001,
-// mencakup 7 hari terakhir s.d. hari ini agar dashboard "hari ini" selalu ada datanya.
+// mencakup 8 hari terakhir s.d. tanggal berjalan data (15 Agustus 2026) agar dashboard "hari ini" selalu ada datanya.
 const ROTATING_JENIS: FoodSafetyLog['jenisMakanan'][] = ['sayur berkuah', 'lauk berkuah', 'lauk goreng', 'buah'];
 
 let seq = 0;

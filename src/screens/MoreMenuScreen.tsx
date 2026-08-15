@@ -3,9 +3,9 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { Pill, SectionTitle, SyncStatusBadge } from '../components/ui';
+import { SectionTitle, SyncStatusBadge } from '../components/ui';
 import { usePendingSyncCount } from '../hooks';
-import { ROLE_PERMISSIONS, roleScopeLabel } from '../utils/scope';
+import { ROLE_PERMISSIONS } from '../utils/scope';
 import { syncOfflineQueue } from '../utils/offlineQueue';
 
 interface MenuItem {
@@ -32,8 +32,8 @@ export default function MoreMenuScreen({ navigation }: any) {
   };
 
   const personalItems: MenuItem[] = [
+    { key: 'Profile', icon: 'user', label: 'Profil Saya', desc: 'Info akun, data pribadi, & pengaturan' },
     { key: 'CheckIn', icon: 'user-check', label: 'Presensi Kehadiran Saya', desc: 'Input foto selfie & lokasi GPS presensi akun pribadi' },
-    { key: 'Profile', icon: 'user', label: 'Profil Saya', desc: 'Info akun & data pribadi' },
   ];
 
   const sdmItems: MenuItem[] = [];
@@ -49,8 +49,10 @@ export default function MoreMenuScreen({ navigation }: any) {
   const phase2Items: MenuItem[] = [];
 
   if (role === 'KEPALA_SPPG') {
+    operasionalItems.push({ key: 'StatistikEksekutif', icon: 'bar-chart-2', label: 'Laporan Statistik & Rekap Berkala', desc: 'Executive Summary mingguan/bulanan: kehadiran staf, distribusi porsi, insiden, kepatuhan gizi, & efisiensi anggaran' });
     operasionalItems.push({ key: 'KandunganGiziHarian', icon: 'activity', label: 'Evaluasi Kandungan Gizi (AKG BGN)', desc: 'Input kandungan energi pokok, makronutrien, & sertifikasi gizi harian' });
     operasionalItems.push({ key: 'PengadaanBahan', icon: 'shopping-cart', label: 'Pengadaan & Logistik Bahan', desc: 'Satu pintu: beli bahan (nota), ajuin ke pusat, & scan QR terima barang' });
+    operasionalItems.push({ key: 'PengadaanPeralatan', icon: 'tool', label: 'Pengadaan Peralatan & Aset Dapur', desc: 'Beli mandiri (potong anggaran unit) atau ajukan ke BGN Pusat' });
     operasionalItems.push({ key: 'Anggaran', icon: 'pie-chart', label: 'Log Anggaran & Financial', desc: 'Pantau alokasi dana BGN/Polri, saldo, & log pengeluaran' });
     operasionalItems.push({ key: 'Broadcast', icon: 'radio', label: 'Pusat Broadcast Pengumuman', desc: 'Kirim instruksi resmi & pengumuman ke seluruh tim & driver' });
     operasionalItems.push({ key: 'SppgProfile', icon: 'home', label: 'Profil SPPG Unit', desc: 'Info dapur & kapasitas produksi' });
@@ -108,6 +110,7 @@ export default function MoreMenuScreen({ navigation }: any) {
     operasionalItems.push({ key: 'PengadaanBahan', icon: 'camera', label: 'Penerimaan Pasokan (Scan QR DO)', desc: 'Scan QR surat jalan pasokan bahan & ajuin ke pusat' });
     operasionalItems.push({ key: 'Gudang', icon: 'package', label: 'Gudang & Stok Bahan Baku (FEFO)', desc: 'Manajemen stok bahan & kontrol kedaluwarsa' });
     operasionalItems.push({ key: 'MutasiStokForm', icon: 'file-text', label: 'Catat Mutasi Stok Keluar-Masuk', desc: 'Pencatatan pengeluaran bahan untuk masak' });
+    operasionalItems.push({ key: 'PengadaanPeralatan', icon: 'tool', label: 'Pengadaan Peralatan & Aset Dapur', desc: 'Usulkan alat dapur: beli mandiri atau ajukan ke BGN Pusat' });
     operasionalItems.push({ key: 'IncidentList', icon: 'alert-octagon', label: 'Lapor Insiden Pasokan', desc: 'Pelaporan bahan baku busuk / reject / kurang' });
     operasionalItems.push({ key: 'Notifikasi', icon: 'bell', label: 'Notifikasi Stok', desc: 'Peringatan stok menipis & tanggal expired' });
 
@@ -147,14 +150,6 @@ export default function MoreMenuScreen({ navigation }: any) {
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
-      <View style={[styles.headerCard, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.lg, ...shadow.card }]}>
-        <View style={{ flex: 1 }}>
-          <Text style={{ color: colors.text, fontWeight: '900', fontSize: fontSize.md }}>{currentUser.nama}</Text>
-          <Text style={{ color: colors.primary, fontWeight: '700', fontSize: fontSize.xs, marginTop: 2 }}>{roleScopeLabel(currentUser)}</Text>
-        </View>
-        <Pill label={role} tone="primary" />
-      </View>
-
       <SyncStatusBadge pendingCount={pendingCount} onSyncPress={handleSync} syncing={syncing} />
 
       {/* Group 1: Akun & Kehadiran Pribadi */}
@@ -308,7 +303,6 @@ export default function MoreMenuScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: { padding: 16, gap: 12, paddingBottom: 90 },
-  headerCard: { padding: 16, borderWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   tileGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between' },
   tileCard: {
     width: '48.5%',

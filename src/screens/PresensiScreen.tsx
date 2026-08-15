@@ -1,11 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { Card, EmptyState, Input, Pill, PrimaryButton, SectionTitle } from '../components/ui';
+import { Card, EmptyState, Input, Modal, Pill, PrimaryButton, SecondaryButton, SectionTitle } from '../components/ui';
 import { useScopedData } from '../hooks';
 import { ROLE_LABEL } from '../utils/scope';
+import { toWhatsAppNumber } from '../utils/contact';
+import { JOBDESK_LABEL } from '../utils/jobdesk';
+import { User } from '../types';
 
 function todayDate(): string {
   return new Date().toISOString().slice(0, 10);
@@ -32,6 +35,8 @@ export default function PresensiScreen({ navigation }: any) {
   // Filter state for Kepala SPPG
   const [activeTab, setActiveTab] = useState<'semua' | 'hadir' | 'belum'>('semua');
   const [searchQuery, setSearchQuery] = useState('');
+  // Kepala SPPG: ketuk kartu staf untuk buka rincian presensi lengkap staf itu.
+  const [selectedStaff, setSelectedStaff] = useState<User | null>(null);
 
   if (!role || !currentUser) return null;
 
@@ -75,25 +80,101 @@ export default function PresensiScreen({ navigation }: any) {
     return logs;
   }, []);
 
-  // Attendance Analytics Calculation for Kepala SPPG
-  const totalStaff = usersInScope.length > 0 ? usersInScope.length : 48;
-  const presensiHariIni = presensiInScope.filter((p) => p.tanggal === today);
-  const hadirActual = presensiHariIni.filter((p) => p.jamMasuk).length;
-  const hadirCount = hadirActual > 0 ? hadirActual : Math.round(totalStaff * 0.88);
-  const izinCount = 2;
-  const belumCount = Math.max(0, totalStaff - hadirCount - izinCount);
-  const pctHadir = Math.round((hadirCount / totalStaff) * 100);
+  // Dynamic Attendance Analytics Calculation for Kepala SPPG
+  const totalStaff = usersInScope.length;
 
-  const filteredStaff = usersInScope.filter((u) => {
-    const p = presensiInScope.find((item) => item.userId === u.id && item.tanggal === today);
-    const isHadir = !!p?.jamMasuk;
-    if (activeTab === 'hadir' && !isHadir) return false;
-    if (activeTab === 'belum' && isHadir) return false;
-    if (searchQuery.trim()) {
-      return u.nama.toLowerCase().includes(searchQuery.toLowerCase()) || (u.role && u.role.toLowerCase().includes(searchQuery.toLowerCase()));
-    }
-    return true;
-  });
+  const staffAttendanceMap = useMemo(() => {
+    return usersInScope.map((u) => {
+      const p = presensiInScope.find((item) => item.userId === u.id && item.tanggal === today);
+      const isHadir = !!p?.jamMasuk;
+      const isIzin = (p as any)?.status === 'izin' || (p as any)?.status === 'sakit';
+      return {
+        user: u,
+        presensi: p,
+        isHadir,
+        isIzin,
+        isBelum: !isHadir && !isIzin,
+      };
+    });
+  }, [usersInScope, presensiInScope, today]);
+
+  const hadirCount = staffAttendanceMap.filter((s) => s.isHadir).length;
+  const izinCount = staffAttendanceMap.filter((s) => s.isIzin).length;
+  const belumCount = staffAttendanceMap.filter((s) => s.isBelum).length;
+  const pctHadir = totalStaff > 0 ? Math.round((hadirCount / totalStaff) * 100) : 0;
+
+  // Dynamic Division Breakdown
+  const divisionStats = useMemo(() => {
+    const dapurStaff = staffAttendanceMap.filter(
+      (s) =>
+        s.user.jobdesk === 'chef_utama' ||
+        s.user.jobdesk === 'asisten_masak' ||
+        s.user.jobdesk === 'masak' ||
+        s.user.role === 'CHEF_UTAMA'
+    );
+    const packingStaff = staffAttendanceMap.filter(
+      (s) =>
+        s.user.jobdesk === 'pemorsi_packing' ||
+        s.user.jobdesk === 'petugas_logistik' ||
+        s.user.role === 'PEMORSI_PACKING' ||
+        s.user.role === 'PETUGAS_LOGISTIK'
+    );
+    const driverStaff = staffAttendanceMap.filter(
+      (s) =>
+        s.user.jobdesk === 'driver_distribusi' ||
+        s.user.jobdesk === 'driver' ||
+        s.user.role === 'DRIVER'
+    );
+    const giziStaff = staffAttendanceMap.filter(
+      (s) =>
+        s.user.jobdesk === 'ahli_gizi' ||
+        s.user.jobdesk === 'akuntan' ||
+        s.user.role === 'KEPALA_SPPG' ||
+        s.user.role === 'AHLI_GIZI' ||
+        s.user.jobdesk === 'petugas_sanitasi' ||
+        s.user.role === 'PETUGAS_SANITASI'
+    );
+
+    return [
+      {
+        label: `Dapur Masak: ${dapurStaff.filter((s) => s.isHadir).length}/${dapurStaff.length} Hadir`,
+        tone: dapurStaff.length > 0 && dapurStaff.every((s) => s.isHadir) ? ('success' as const) : ('primary' as const),
+        icon: 'user' as const,
+      },
+      {
+        label: `Packing & Logistik: ${packingStaff.filter((s) => s.isHadir).length}/${packingStaff.length} Hadir`,
+        tone: packingStaff.length > 0 && packingStaff.every((s) => s.isHadir) ? ('success' as const) : ('primary' as const),
+        icon: 'box' as const,
+      },
+      {
+        label: `Driver Armada: ${driverStaff.filter((s) => s.isHadir).length}/${driverStaff.length} Hadir`,
+        tone: driverStaff.length > 0 && driverStaff.every((s) => s.isHadir) ? ('success' as const) : ('primary' as const),
+        icon: 'truck' as const,
+      },
+      {
+        label: `Gizi & Tim: ${giziStaff.filter((s) => s.isHadir).length}/${giziStaff.length} Hadir`,
+        tone: giziStaff.length > 0 && giziStaff.every((s) => s.isHadir) ? ('success' as const) : ('info' as const),
+        icon: 'activity' as const,
+      },
+    ];
+  }, [staffAttendanceMap]);
+
+  const filteredStaff = useMemo(() => {
+    return usersInScope.filter((u) => {
+      const s = staffAttendanceMap.find((item) => item.user.id === u.id);
+      if (activeTab === 'hadir' && !s?.isHadir) return false;
+      if (activeTab === 'belum' && !s?.isBelum) return false;
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        return (
+          u.nama.toLowerCase().includes(query) ||
+          (u.role && u.role.toLowerCase().includes(query)) ||
+          (u.jobdesk && u.jobdesk.toLowerCase().includes(query))
+        );
+      }
+      return true;
+    });
+  }, [usersInScope, staffAttendanceMap, activeTab, searchQuery]);
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
@@ -330,11 +411,11 @@ export default function PresensiScreen({ navigation }: any) {
               <View style={[styles.trackFill, { width: `${pctHadir}%`, backgroundColor: colors.success }]} />
             </View>
 
-            {/* Division Breakdown */}
+            {/* Dynamic Division Breakdown */}
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-              <Pill label="Dapur Masak: 28/30 Hadir" tone="primary" icon="user" />
-              <Pill label="Driver Armada: 8/8 Hadir" tone="success" icon="truck" />
-              <Pill label="Ahli Gizi & QC: 6/6 Hadir" tone="info" icon="activity" />
+              {divisionStats.map((stat, idx) => (
+                <Pill key={idx} label={stat.label} tone={stat.tone} icon={stat.icon} />
+              ))}
             </View>
           </Card>
 
@@ -384,7 +465,7 @@ export default function PresensiScreen({ navigation }: any) {
               const osmMapUrl = `https://static-maps.yandex.ru/1.x/?lang=en-US&ll=${geoLng},${geoLat}&z=16&l=map&size=500,140&pt=${geoLng},${geoLat},pm2rdm`;
 
               return (
-                <Card key={u.id} style={{ gap: spacing.sm }}>
+                <Card key={u.id} style={{ gap: spacing.sm }} onPress={() => setSelectedStaff(u)}>
                   <View style={styles.row}>
                     {u.fotoProfil ? (
                       <Image source={{ uri: u.fotoProfil }} style={{ width: 44, height: 44, borderRadius: 22 }} />
@@ -437,12 +518,141 @@ export default function PresensiScreen({ navigation }: any) {
                       <Image source={{ uri: osmMapUrl }} style={{ width: '100%', height: 90, borderRadius: radius.sm }} resizeMode="cover" />
                     </View>
                   )}
+
+                  <View style={[styles.tapHint, { borderTopColor: colors.border }]}>
+                    <Text style={{ fontSize: 10.5, color: colors.textMuted }}>NIK: {u.nik}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                      <Text style={{ fontSize: 11, fontWeight: '800', color: colors.primary }}>Rincian Presensi</Text>
+                      <Feather name="chevron-right" size={14} color={colors.primary} />
+                    </View>
+                  </View>
                 </Card>
               );
             })
           )}
         </>
       )}
+
+      {/* Modal Rincian Presensi Staf (Kepala SPPG) */}
+      <Modal
+        visible={!!selectedStaff}
+        onClose={() => setSelectedStaff(null)}
+        title={selectedStaff ? `Rincian Presensi — ${selectedStaff.nama}` : ''}
+      >
+        {selectedStaff && (() => {
+          const p = presensiInScope.find((item) => item.userId === selectedStaff.id && item.tanggal === today);
+          const hadir = !!p?.jamMasuk;
+          const lat = p?.geotagMasuk?.lat ?? -6.9147;
+          const lng = p?.geotagMasuk?.lng ?? 107.6098;
+          const mapUrl = `https://static-maps.yandex.ru/1.x/?lang=en-US&ll=${lng},${lat}&z=16&l=map&size=520,180&pt=${lng},${lat},pm2rdm`;
+          const riwayat = presensiInScope
+            .filter((item) => item.userId === selectedStaff.id)
+            .sort((a, b) => (a.tanggal < b.tanggal ? 1 : -1))
+            .slice(0, 7);
+
+          return (
+            <ScrollView style={{ maxHeight: 500 }} contentContainerStyle={{ gap: spacing.md, paddingBottom: 16 }}>
+              {/* Identitas Staf */}
+              <View style={[styles.detailHero, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
+                {selectedStaff.fotoProfil ? (
+                  <Image source={{ uri: selectedStaff.fotoProfil }} style={{ width: 60, height: 60, borderRadius: 30 }} />
+                ) : (
+                  <View style={[styles.avatar, { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.surface }]}>
+                    <Feather name="user" size={26} color={colors.primary} />
+                  </View>
+                )}
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={{ fontSize: fontSize.sm, fontWeight: '900', color: colors.text }}>{selectedStaff.nama}</Text>
+                  <Text style={{ fontSize: 11, color: colors.primary, fontWeight: '700' }}>
+                    {ROLE_LABEL[selectedStaff.role] || selectedStaff.role}
+                    {selectedStaff.jobdesk ? ` • ${JOBDESK_LABEL[selectedStaff.jobdesk]}` : ''}
+                  </Text>
+                  <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
+                    NIK {selectedStaff.nik} • Shift {selectedStaff.shift ?? 'Pagi'} • {selectedStaff.kategoriPegawai === 'relawan_lokal' ? 'Relawan Lokal' : 'Pegawai Inti BGN'}
+                  </Text>
+                </View>
+                <Pill label={hadir ? 'Hadir' : 'Belum Presensi'} tone={hadir ? 'success' : 'warning'} />
+              </View>
+
+              {/* Jam Masuk / Keluar + Selfie Geotag */}
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <View style={[styles.attendColumn, { backgroundColor: colors.background, borderColor: p?.jamMasuk ? colors.success : colors.border }]}>
+                  <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.text }}>JAM MASUK</Text>
+                  <Text style={{ fontSize: 17, fontWeight: '900', color: p?.jamMasuk ? colors.success : colors.textMuted, marginVertical: 3 }}>
+                    {p?.jamMasuk ? `${p.jamMasuk}` : '—:—'}
+                  </Text>
+                  {p?.fotoSelfieMasuk ? (
+                    <Image source={{ uri: p.fotoSelfieMasuk }} style={styles.selfieThumb} />
+                  ) : (
+                    <View style={[styles.selfiePlaceholder, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                      <Feather name="camera" size={16} color={colors.textMuted} />
+                    </View>
+                  )}
+                </View>
+
+                <View style={[styles.attendColumn, { backgroundColor: colors.background, borderColor: p?.jamKeluar ? colors.primary : colors.border }]}>
+                  <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.text }}>JAM KELUAR</Text>
+                  <Text style={{ fontSize: 17, fontWeight: '900', color: p?.jamKeluar ? colors.primary : colors.textMuted, marginVertical: 3 }}>
+                    {p?.jamKeluar ? `${p.jamKeluar}` : '—:—'}
+                  </Text>
+                  {p?.fotoSelfieKeluar ? (
+                    <Image source={{ uri: p.fotoSelfieKeluar }} style={styles.selfieThumb} />
+                  ) : (
+                    <View style={[styles.selfiePlaceholder, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                      <Feather name="log-out" size={16} color={colors.textMuted} />
+                    </View>
+                  )}
+                </View>
+              </View>
+
+              {/* Titik Geofence */}
+              <View style={{ gap: 4 }}>
+                <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }}>Titik Geotag Check-In</Text>
+                <Image source={{ uri: mapUrl }} style={{ width: '100%', height: 130, borderRadius: radius.md }} resizeMode="cover" />
+                <Text style={{ fontSize: 10, color: colors.textMuted }}>
+                  Koordinat {lat.toFixed(4)}, {lng.toFixed(4)} — {hadir ? 'di dalam radius geofence dapur SPPG' : 'belum ada check-in hari ini'}
+                </Text>
+              </View>
+
+              {/* Riwayat presensi staf ini */}
+              <View style={{ gap: 6 }}>
+                <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }}>Riwayat Presensi Tercatat</Text>
+                {riwayat.length === 0 ? (
+                  <Text style={{ fontSize: 11, color: colors.textMuted }}>Belum ada catatan presensi untuk staf ini.</Text>
+                ) : (
+                  riwayat.map((item) => (
+                    <View key={item.id} style={[styles.logRow, { backgroundColor: colors.background, borderColor: colors.border, borderRadius: radius.md }]}>
+                      <View style={{ flex: 1, gap: 2 }}>
+                        <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>{item.tanggal}</Text>
+                        <Text style={{ fontSize: 11, color: colors.textMuted }}>
+                          Masuk: {item.jamMasuk ?? '—'} • Pulang: {item.jamKeluar ?? '—'}
+                        </Text>
+                      </View>
+                      <Pill label={item.status === 'hadir' ? 'Hadir' : item.status} tone={item.status === 'hadir' ? 'success' : 'warning'} />
+                    </View>
+                  ))
+                )}
+              </View>
+
+              {/* Kontak staf */}
+              <View style={{ gap: spacing.xs }}>
+                <PrimaryButton
+                  label={`Telepon ${selectedStaff.noHp}`}
+                  icon="phone"
+                  onPress={() => Linking.openURL(`tel:${selectedStaff.noHp}`)}
+                />
+                <PrimaryButton
+                  label="Hubungi via WhatsApp"
+                  icon="message-circle"
+                  variant="outline"
+                  onPress={() => Linking.openURL(`https://wa.me/${toWhatsAppNumber(selectedStaff.noHp)}`)}
+                />
+                <SecondaryButton label="Tutup" onPress={() => setSelectedStaff(null)} />
+              </View>
+            </ScrollView>
+          );
+        })()}
+      </Modal>
     </ScrollView>
   );
 }
@@ -470,4 +680,6 @@ const styles = StyleSheet.create({
   name: { fontWeight: '700' },
   timeRow: { flexDirection: 'row', borderTopWidth: 1, paddingTop: 8 },
   timeCol: { flex: 1, gap: 2 },
+  tapHint: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, paddingTop: 8 },
+  detailHero: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12 },
 });

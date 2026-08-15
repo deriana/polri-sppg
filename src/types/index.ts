@@ -73,6 +73,36 @@ export interface AnggaranLog {
 }
 
 
+// Pengadaan peralatan/aset dapur punya dua jalur yang saling eksklusif:
+//   - 'mandiri'  : SPPG beli sendiri, nominalnya langsung memotong saldo
+//                  anggaran unit (tercatat sebagai AnggaranLog pengeluaran).
+//   - 'pusat'    : diajukan ke BGN Pusat, tidak memotong anggaran unit sampai
+//                  (dan kalau) pusat menyetujui dan mengirim barangnya.
+export type JalurPengadaanAset = 'mandiri' | 'pusat';
+export type StatusPengajuanAset = 'diajukan' | 'disetujui' | 'ditolak' | 'dikirim' | 'diterima';
+
+export interface PengajuanAset {
+  id: string;
+  sppgId: string;
+  tanggal: string;
+  jalur: JalurPengadaanAset;
+  namaAset: string;
+  kategori: PeralatanKategori;
+  jumlah: number;
+  satuan: string;
+  hargaSatuan: number;
+  totalHarga: number;
+  alasan: string;
+  urgensi: 'rutin' | 'mendesak' | 'darurat';
+  status: StatusPengajuanAset;
+  diajukanOleh: string;
+  namaSupplier?: string;
+  noInvoice?: string;
+  buktiNota?: string | null;
+  anggaranLogId?: string | null; // terisi hanya untuk jalur 'mandiri'
+  tanggapan?: string | null;
+}
+
 export type StatusPengajuanSekolah = 'diajukan' | 'disetujui' | 'ditolak';
 
 export interface PengajuanSekolah {
@@ -101,6 +131,7 @@ export interface MasterMenu {
   resep?: string;
   bahanUtama?: string[];
   porsiGram?: number;
+  hppPerPorsi: number; // Harga Pokok Produksi per porsi (Rp), dibanding pagu BGN
 }
 
 export interface Sppg {
@@ -508,6 +539,14 @@ export interface PermintaanBahan {
   tanggal: string;
 }
 
+// Lampiran bukti visual (foto atau video) — dipakai laporan kendala distribusi
+// supaya klaim driver bisa diverifikasi komando, bukan sekadar teks.
+export interface BuktiMedia {
+  uri: string;
+  mediaType: 'image' | 'video';
+  keterangan?: string;
+}
+
 export interface DistribusiRute {
   id: string;
   sppgId: string;
@@ -518,6 +557,11 @@ export interface DistribusiRute {
   lat: number;
   lng: number;
   buktiFoto?: string | null; // foto bukti serah terima, diambil petugas saat konfirmasi status "tiba"
+  // Laporan kendala rute — terisi saat driver menekan "Laporkan Kendala Rute".
+  kendalaRincian?: string | null;
+  kendalaBukti?: BuktiMedia[] | null;
+  kendalaDilaporkan?: string | null; // timestamp "YYYY-MM-DD HH:mm"
+  kendalaPelapor?: string | null;
 }
 
 export interface ChatMessage {
@@ -529,7 +573,22 @@ export interface ChatMessage {
   timestamp: string;
 }
 
-export type PeralatanKategori = 'kendaraan' | 'ompreng_tray' | 'kontainer_suhu' | 'alat_masak' | 'sealing_packaging' | 'kebersihan_apd';
+// Kategori aset dapur SPPG. 'sterilisasi', 'penyimpanan', 'ukur_qc', dan
+// 'k3_darurat' dipisah dari 'kebersihan_apd'/'alat_masak' karena penanggung
+// jawab, jadwal pemeriksaan, dan konsekuensi kerusakannya berbeda: chiller yang
+// mati adalah masalah keamanan pangan, sedangkan hairnet habis adalah masalah
+// logistik APD.
+export type PeralatanKategori =
+  | 'kendaraan'
+  | 'ompreng_tray'
+  | 'kontainer_suhu'
+  | 'alat_masak'
+  | 'penyimpanan'
+  | 'sealing_packaging'
+  | 'sterilisasi'
+  | 'kebersihan_apd'
+  | 'ukur_qc'
+  | 'k3_darurat';
 export type PeralatanStatus = 'ready' | 'digunakan' | 'maintenance' | 'perlu_perbaikan' | 'rusak';
 
 export interface Peralatan {
@@ -537,6 +596,7 @@ export interface Peralatan {
   sppgId: string;
   nama: string;
   kodeUnit: string;
+  qrCodeId: string;
   kategori: PeralatanKategori;
   jumlahTotal: number;
   jumlahReady: number;

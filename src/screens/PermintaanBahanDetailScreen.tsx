@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Card, EmptyState, Pill, SecondaryButton } from '../components/ui';
 import RouteMapView, { RouteTripStatus } from '../components/RouteMapView';
+import QrPanel from '../components/QrPanel';
 import { PermintaanBahan } from '../types';
 
 const STATUS_LABEL: Record<PermintaanBahan['status'], string> = {
@@ -99,6 +100,24 @@ export default function PermintaanBahanDetailScreen({ navigation, route }: any) 
         </View>
         <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>Tujuan: {sppg.nama}</Text>
         {permintaan.catatan && <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>Catatan: {permintaan.catatan}</Text>}
+      </Card>
+
+      {/* QR surat jalan — isinya id permintaan polos, karena yang memindai adalah
+          scanner penerimaan di app ini sendiri (Pindai QR Penerimaan Barang). */}
+      <Card style={{ gap: spacing.xs }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Feather name="maximize" size={16} color={colors.primary} />
+          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text, flex: 1 }}>
+            QR Surat Jalan (DO) — {permintaan.id}
+          </Text>
+        </View>
+        <Text style={{ fontSize: 11, color: colors.textMuted }}>
+          Tempel/tunjukkan QR ini di dokumen pengiriman. Petugas gudang memindainya lewat menu
+          "Pindai QR Penerimaan Barang" saat pasokan tiba untuk mencocokkan dan mencatat stok masuk.
+        </Text>
+        <View style={{ alignItems: 'center', paddingVertical: 6 }}>
+          <QrPanel value={permintaan.id} size={190} caption={`${bahan?.nama ?? permintaan.bahanId} • ${permintaan.jumlah} ${bahan?.satuan ?? 'unit'}`} />
+        </View>
       </Card>
 
       <SecondaryButton label="Kembali" onPress={() => navigation.goBack()} />

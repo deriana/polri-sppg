@@ -70,14 +70,14 @@ export default function BroadcastScreen({ navigation }: any) {
       </Card>
 
       {/* Button to Create Broadcast for Authorized / Simulation */}
-      {permissions.canManageBroadcast && (
+      {/*{permissions.canManageBroadcast && (
         <PrimaryButton
           label="+ Simulasi Terbitkan Broadcast dari Pusat"
           icon="radio"
           variant="secondary"
           onPress={() => setShowModal(true)}
         />
-      )}
+      )}*/}
 
       {/* Broadcast Feed */}
       <SectionTitle>Daftar Maklumat & Instruksi Resmi</SectionTitle>
@@ -113,7 +113,7 @@ export default function BroadcastScreen({ navigation }: any) {
 
       {/* Modal Broadcast */}
       <Modal visible={showModal} onClose={() => setShowModal(false)} title="Kirim Broadcast Pengumuman Baru">
-        <ScrollView style={{ gap: spacing.md }} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={{ gap: spacing.md, paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
           {error && (
             <View style={{ backgroundColor: colors.dangerBg, padding: 10, borderRadius: radius.md, marginBottom: 8 }}>
               <Text style={{ color: colors.danger, fontSize: fontSize.xs, fontWeight: '600' }}>{error}</Text>

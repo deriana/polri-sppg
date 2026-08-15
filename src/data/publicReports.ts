@@ -11,7 +11,7 @@ export const publicReportList: PublicReport[] = [
     kategori: 'keterlambatan',
     judul: 'Keterlambatan Pengiriman Makanan di SDN Cibeunying 01',
     deskripsi: 'Pengiriman makanan siang untuk kelas 4 dan 5 baru tiba jam 12.45 WIB, padahal jam istirahat dimulai jam 12.00 WIB.',
-    fotoBukti: SPPG_ASSET_MAP.aduan_1,
+    fotoBukti: SPPG_ASSET_MAP.sekolah_1,
     tanggal: '2026-08-08',
     timestamp: '2026-08-08 13:10',
     status: 'ditindaklanjuti',

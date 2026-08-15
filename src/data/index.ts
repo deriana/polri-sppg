@@ -22,3 +22,4 @@ export * from './additionalFeatures';
 export * from './incidents';
 export * from './kandunganGizi';
 
+export * from './pengajuanAset';

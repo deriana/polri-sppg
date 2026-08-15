@@ -8,6 +8,9 @@ export interface CctvPlayerProps {
   height?: number;
   autoPlay?: boolean;
   onTogglePlay?: (playing: boolean) => void;
+  /** HUD "REC LIVE" hanya cocok untuk feed CCTV. Matikan saat komponen ini
+   *  dipakai memutar video bukti (mis. lampiran kendala distribusi). */
+  showRecHud?: boolean;
 }
 
 export default function CctvPlayer({
@@ -15,6 +18,7 @@ export default function CctvPlayer({
   label,
   height = 200,
   autoPlay = true,
+  showRecHud = true,
 }: CctvPlayerProps) {
   if (!videoUri) {
     return (
@@ -42,7 +46,7 @@ export default function CctvPlayer({
 <body>
   <div class="container">
     <video src="${videoUri}" ${autoPlay ? 'autoplay' : ''} loop playsinline controls></video>
-    <div class="hud-top-left"><div class="rec-dot"></div>REC LIVE</div>
+    ${showRecHud ? '<div class="hud-top-left"><div class="rec-dot"></div>REC LIVE</div>' : ''}
     <div class="hud-bottom-left">${label.toUpperCase()}</div>
   </div>
 </body>

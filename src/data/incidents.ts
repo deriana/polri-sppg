@@ -1,4 +1,5 @@
 import { IncidentReport } from '../types';
+import { SPPG_ASSET_MAP } from './sppgAssetMap';
 
 export const initialIncidentList: IncidentReport[] = [
   {
@@ -10,6 +11,7 @@ export const initialIncidentList: IncidentReport[] = [
     tingkatKeparahan: 'sedang',
     judul: 'Pemadaman PLN Lokal 15 Menit',
     deskripsi: 'Suplai listrik PLN padam pukul 07:00 saat proses memasak berjalan. Genset cadangan otomatis aktif dalam 30 detik sehingga chiller dan rice cooker komersial tetap beroperasi.',
+    fotoBukti: SPPG_ASSET_MAP.alat_kettle,
     lokasi: 'Ruang Dapur Utama & Cold Storage',
     pelaporNama: 'Bripka Siti Nurhaliza',
     pelaporRole: 'PETUGAS_LAPANGAN',
@@ -27,6 +29,7 @@ export const initialIncidentList: IncidentReport[] = [
     tingkatKeparahan: 'sedang',
     judul: 'Macet Elemen Mesin Sealer Kemasan #2',
     deskripsi: 'Mesin heat sealer kemasan meja pemorsian 2 mengalami panas tidak stabil sehingga plastik seal ompreng tidak merekat sempurna.',
+    fotoBukti: SPPG_ASSET_MAP.tray_1,
     lokasi: 'Meja Pemorsian & Packing B',
     pelaporNama: 'Bripka Siti Nurhaliza',
     pelaporRole: 'PETUGAS_LAPANGAN',
@@ -41,6 +44,7 @@ export const initialIncidentList: IncidentReport[] = [
     tingkatKeparahan: 'rendah',
     judul: 'Keterlambatan Armada 10 Menit Karena Macet',
     deskripsi: 'Armada MBG-02 sempat tertahan di simpang jalan protokol karena pengerjaan drainase, paket makanan tetap dalam suhu hangat 65°C di Thermal Box.',
+    fotoBukti: SPPG_ASSET_MAP.mobil_2,
     lokasi: 'Jalan Raya Bekasi Km 18',
     pelaporNama: 'Bripda Agus Prasetyo',
     pelaporRole: 'DRIVER',

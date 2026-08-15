@@ -134,7 +134,7 @@ function AlertPreviewList({ alerts, onSeeAll, onOpen }: { alerts: AlertLog[]; on
   );
 }
 
-function CommandHeroHeader({ currentUser, role, sppgName, sppgScopeCount, onNotifPress, activeAlertCount }: any) {
+function CommandHeroHeader({ currentUser, role, sppgName, sppgScopeCount, onNotifPress, onProfilePress, activeAlertCount }: any) {
   const { colors, fontSize, radius, spacing, isDark } = useTheme();
 
   return (
@@ -169,7 +169,11 @@ function CommandHeroHeader({ currentUser, role, sppgName, sppgScopeCount, onNoti
         </Pressable>
       </View>
 
-      <View style={styles.commandHeroMainRow}>
+      {/* Kartu identitas — ketuk untuk membuka Profil Saya */}
+      <Pressable
+        onPress={onProfilePress}
+        style={({ pressed }) => [styles.commandHeroMainRow, pressed && { opacity: 0.75 }]}
+      >
         {currentUser.fotoProfil ? (
           <Image source={{ uri: currentUser.fotoProfil }} style={styles.heroAvatar} />
         ) : (
@@ -184,8 +188,12 @@ function CommandHeroHeader({ currentUser, role, sppgName, sppgScopeCount, onNoti
           <Text style={{ color: isDark ? colors.textMuted : 'rgba(255,255,255,0.85)', fontSize: fontSize.xs, fontWeight: '600' }}>
             {ROLE_LABEL[role as keyof typeof ROLE_LABEL] ?? role} • {sppgName}
           </Text>
+          <Text style={{ color: colors.gold, fontSize: 10.5, fontWeight: '800', marginTop: 1 }}>
+            Ketuk untuk buka Profil Saya
+          </Text>
         </View>
-      </View>
+        <Feather name="chevron-right" size={18} color={isDark ? colors.textMuted : 'rgba(255,255,255,0.75)'} />
+      </Pressable>
     </View>
   );
 }
@@ -279,6 +287,10 @@ export default function DashboardScreen({ navigation }: any) {
     batchTraceabilityList,
     qualityPassportList,
     costPerMeal,
+    laporanPackingList,
+    laporanSanitasiList,
+    permintaanBahanList,
+    incidentList,
   } = useApp();
   const { colors, spacing, fontSize, radius, iconStrokeWidth, isDark } = useTheme();
   const {
@@ -351,6 +363,7 @@ export default function DashboardScreen({ navigation }: any) {
           sppgName={roleScopeLabel(currentUser)}
           sppgScopeCount={sppgInScope.length}
           onNotifPress={() => navigation.navigate('Notifikasi')}
+          onProfilePress={() => navigation.navigate('Profile')}
           activeAlertCount={activeAlerts.length}
         />
 
@@ -474,6 +487,179 @@ export default function DashboardScreen({ navigation }: any) {
   const isKepala = role === 'KEPALA_SPPG';
   const isDriver = role === 'DRIVER';
   const sekolahBina = currentSppg ? sekolahList.filter((s) => s.sppgId === currentSppg.id) : [];
+
+  // -------------------------------------------------------------
+  // RINGKASAN STATUS CEPAT — DISARING PER PERAN
+  // Sebelumnya keempat kartu (laporan produksi, rekap presensi seluruh staf,
+  // checklist, distribusi) tampil ke semua peran, jadi driver dan petugas
+  // sanitasi ikut melihat rekap yang bukan wewenangnya. Sekarang tiap peran
+  // hanya dapat kartu yang memang jadi tanggung jawabnya, ditambah kartu
+  // pribadi (presensi sendiri) yang berlaku untuk semua.
+  // -------------------------------------------------------------
+  const presensiSaya = presensiHariIni.find((p) => p.userId === currentUser.id);
+  const packingHariIni = laporanPackingList.find((l) => l.tanggal === today && l.sppgId === activeSppgId);
+  const sanitasiHariIni = laporanSanitasiList.find((l) => l.tanggal === today && l.sppgId === activeSppgId);
+  const giziHariIni = kandunganGiziList.find((g) => g.tanggal === today && g.sppgId === activeSppgId);
+  const doMenunggu = permintaanBahanList.filter((p) => p.sppgId === activeSppgId && p.status === 'dikirim');
+  const insidenTerbuka = incidentList.filter((i) => i.sppgId === activeSppgId && i.status !== 'RESOLVED');
+  const ruteKendala = ruteDistribusi.filter((d) => d.tanggal === today && d.status === 'kendala');
+  const ruteHariIni = ruteDistribusi.filter((d) => d.tanggal === today);
+  const ruteTibaHariIni = ruteHariIni.filter((d) => d.status === 'tiba').length;
+
+  interface StatusCard {
+    key: string;
+    label: string;
+    value: string;
+    ok: boolean;
+    icon: keyof typeof Feather.glyphMap;
+    onPress: () => void;
+  }
+
+  const CARD: Record<string, StatusCard> = {
+    laporan: {
+      key: 'laporan',
+      label: 'Laporan Produksi',
+      value: laporanHariIni ? (laporanHariIni.status === 'draft' ? 'Draft' : 'Selesai') : 'Belum',
+      ok: !!laporanHariIni && laporanHariIni.status !== 'draft',
+      icon: 'file-text',
+      onPress: () => navigation.navigate('LaporanForm', { laporanId: laporanHariIni?.id, tanggal: today }),
+    },
+    presensiStaf: {
+      key: 'presensiStaf',
+      label: 'Presensi Staf',
+      value: `${hadirCount}/${staffAktif.length || 1}`,
+      ok: hadirCount >= (staffAktif.length || 1) && hadirCount > 0,
+      icon: 'users',
+      onPress: () => navigation.navigate('Presensi'),
+    },
+    presensiSaya: {
+      key: 'presensiSaya',
+      label: 'Presensi Saya',
+      value: presensiSaya?.jamKeluar ? 'Selesai' : presensiSaya?.jamMasuk ? 'Bertugas' : 'Belum',
+      ok: !!presensiSaya?.jamMasuk,
+      icon: 'user-check',
+      onPress: () => navigation.navigate(presensiSaya?.jamMasuk ? 'Presensi' : 'CheckIn'),
+    },
+    checklist: {
+      key: 'checklist',
+      label: 'Checklist Dapur',
+      value: checklistSelesai ? (checklistKritisGagal ? 'Gagal' : 'Lolos') : 'Belum',
+      ok: checklistSelesai && !checklistKritisGagal,
+      icon: 'check-square',
+      onPress: () => navigation.navigate('Checklist'),
+    },
+    distribusi: {
+      key: 'distribusi',
+      label: 'Distribusi Sekolah',
+      value: ruteHariIni.length > 0 ? `${ruteTibaHariIni}/${ruteHariIni.length}` : '0/0',
+      ok: ruteHariIni.length > 0 && ruteTibaHariIni === ruteHariIni.length,
+      icon: 'truck',
+      onPress: () => navigation.navigate('Distribusi'),
+    },
+    ruteSaya: {
+      key: 'ruteSaya',
+      label: 'Rute Saya Hari Ini',
+      value: `${ruteTibaHariIni}/${ruteHariIni.length}`,
+      ok: ruteHariIni.length > 0 && ruteTibaHariIni === ruteHariIni.length,
+      icon: 'navigation',
+      onPress: () => navigation.navigate('Distribusi'),
+    },
+    kendalaRute: {
+      key: 'kendalaRute',
+      label: 'Kendala Rute',
+      value: ruteKendala.length > 0 ? `${ruteKendala.length} rute` : 'Nihil',
+      ok: ruteKendala.length === 0,
+      icon: 'alert-triangle',
+      onPress: () => navigation.navigate('Distribusi'),
+    },
+    stok: {
+      key: 'stok',
+      label: 'Stok Kritis',
+      value: bahanKritis.length > 0 ? `${bahanKritis.length} bahan` : 'Aman',
+      ok: bahanKritis.length === 0,
+      icon: 'package',
+      onPress: () => navigation.navigate('Gudang'),
+    },
+    kadaluarsa: {
+      key: 'kadaluarsa',
+      label: 'Mendekati Expired',
+      value: akanKadaluarsa.length > 0 ? `${akanKadaluarsa.length} item` : 'Aman',
+      ok: akanKadaluarsa.length === 0,
+      icon: 'clock',
+      onPress: () => navigation.navigate('GudangKondisi'),
+    },
+    doMasuk: {
+      key: 'doMasuk',
+      label: 'DO Menunggu Terima',
+      value: doMenunggu.length > 0 ? `${doMenunggu.length} DO` : 'Nihil',
+      ok: doMenunggu.length === 0,
+      icon: 'inbox',
+      onPress: () => navigation.navigate('PengadaanBahan', { initialTab: 'terima' }),
+    },
+    foodSafety: {
+      key: 'foodSafety',
+      label: 'Suhu & Food Safety',
+      value: foodSafetyHariIni ? (foodSafetyAman ? 'Aman' : 'Waspada') : 'Belum',
+      ok: !!foodSafetyHariIni && foodSafetyAman,
+      icon: 'thermometer',
+      onPress: () => navigation.navigate('FoodSafetyForm'),
+    },
+    gizi: {
+      key: 'gizi',
+      label: 'Evaluasi Gizi AKG',
+      value: giziHariIni ? (giziHariIni.statusKesesuaianAkg === 'sesuai' ? 'Sesuai' : 'Perhatian') : 'Belum',
+      ok: giziHariIni?.statusKesesuaianAkg === 'sesuai',
+      icon: 'activity',
+      onPress: () => navigation.navigate('KandunganGiziHarian'),
+    },
+    packing: {
+      key: 'packing',
+      label: 'Laporan Packing',
+      value: packingHariIni ? (packingHariIni.status === 'draft' ? 'Draft' : 'Terkirim') : 'Belum',
+      ok: !!packingHariIni && packingHariIni.status !== 'draft',
+      icon: 'box',
+      onPress: () => navigation.navigate('LaporanPacking'),
+    },
+    sanitasi: {
+      key: 'sanitasi',
+      label: 'Laporan Sanitasi',
+      value: sanitasiHariIni ? (sanitasiHariIni.status === 'draft' ? 'Draft' : 'Terkirim') : 'Belum',
+      ok: !!sanitasiHariIni && sanitasiHariIni.status !== 'draft',
+      icon: 'shield',
+      onPress: () => navigation.navigate('LaporanSanitasi'),
+    },
+    insiden: {
+      key: 'insiden',
+      label: 'Insiden Terbuka',
+      value: insidenTerbuka.length > 0 ? `${insidenTerbuka.length} kasus` : 'Nihil',
+      ok: insidenTerbuka.length === 0,
+      icon: 'alert-octagon',
+      onPress: () => navigation.navigate('IncidentList'),
+    },
+    alert: {
+      key: 'alert',
+      label: 'Alert Aktif',
+      value: activeAlerts.length > 0 ? `${activeAlerts.length} alert` : 'Nihil',
+      ok: activeAlerts.length === 0,
+      icon: 'bell',
+      onPress: () => navigation.navigate('Alert'),
+    },
+  };
+
+  const STATUS_BY_ROLE: Record<string, string[]> = {
+    KEPALA_SPPG: ['laporan', 'presensiStaf', 'checklist', 'distribusi', 'stok', 'alert'],
+    AHLI_GIZI: ['gizi', 'laporan', 'foodSafety', 'checklist', 'presensiSaya'],
+    CHEF_UTAMA: ['laporan', 'checklist', 'stok', 'foodSafety', 'presensiSaya'],
+    PEMORSI_PACKING: ['packing', 'checklist', 'distribusi', 'presensiSaya'],
+    PETUGAS_LOGISTIK: ['stok', 'kadaluarsa', 'doMasuk', 'checklist', 'presensiSaya'],
+    PETUGAS_SANITASI: ['sanitasi', 'checklist', 'presensiSaya'],
+    DRIVER: ['ruteSaya', 'kendalaRute', 'presensiSaya'],
+    PETUGAS_LAPANGAN: ['laporan', 'checklist', 'distribusi', 'presensiSaya'],
+    SUPERVISOR_POLRES: ['laporan', 'presensiStaf', 'checklist', 'distribusi', 'insiden', 'alert'],
+    SUPERVISOR_POLDA: ['laporan', 'presensiStaf', 'distribusi', 'insiden', 'alert'],
+  };
+
+  const statusCards = (STATUS_BY_ROLE[role ?? ''] ?? ['presensiSaya', 'checklist']).map((k) => CARD[k]).filter(Boolean);
 
   // Alur Kerja Operasional Harian SPPG (Daily Task Pipeline)
   const workflowSteps = [
@@ -1417,6 +1603,7 @@ export default function DashboardScreen({ navigation }: any) {
         sppgName={currentSppgName}
         sppgScopeCount={1}
         onNotifPress={() => navigation.navigate('Notifikasi')}
+        onProfilePress={() => navigation.navigate('Profile')}
         activeAlertCount={activeAlerts.length}
       />
 
@@ -1560,6 +1747,40 @@ export default function DashboardScreen({ navigation }: any) {
               <Text style={{ fontSize: 12, fontWeight: '900', color: colors.text }}>
                 {kitchenReadinessScore.subScores.sanitasiHigiene}%
               </Text>
+            </View>
+          </View>
+        </Card>
+      )}
+
+      {/* 2.55 EXECUTIVE STATISTIK & REKAP BERKALA (Khusus Kepala SPPG) */}
+      {isKepala && (
+        <Card
+          style={{
+            backgroundColor: colors.surface,
+            borderColor: colors.borderStrong,
+            borderWidth: 1,
+            borderRadius: radius.xl,
+            gap: 6,
+          }}
+          onPress={() => navigation.navigate('StatistikEksekutif')}
+        >
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+              <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
+                <Feather name="bar-chart-2" size={18} color={isDark ? colors.gold : colors.primary} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
+                  Laporan Statistik & Rekap Berkala
+                </Text>
+                <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
+                  Executive Summary: kehadiran staf, porsi MBG, insiden, & efisiensi biaya
+                </Text>
+              </View>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Pill label="Buka Rekap" tone="primary" />
+              <Feather name="chevron-right" size={16} color={colors.textMuted} />
             </View>
           </View>
         </Card>
@@ -1923,44 +2144,27 @@ export default function DashboardScreen({ navigation }: any) {
       <QuickActionGrid items={quickActions} />
 
       {/* 5. Executive Metrics Grid — Horizontal Scrollable */}
-      <SectionTitle>Ringkasan Status Cepat</SectionTitle>
+      <SectionTitle
+        action={
+          <Text style={{ color: colors.textMuted, fontSize: 10.5, fontWeight: '700' }}>
+            Sesuai peran {ROLE_LABEL[role as keyof typeof ROLE_LABEL] ?? role}
+          </Text>
+        }
+      >
+        Ringkasan Status Cepat
+      </SectionTitle>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingBottom: 4 }}>
-        <View style={{ width: 136 }}>
-          <KpiCard
-            label="Laporan Produksi"
-            value={laporanHariIni ? (laporanHariIni.status === 'draft' ? 'Draft' : 'Selesai') : 'Belum'}
-            tone={laporanHariIni && laporanHariIni.status !== 'draft' ? colors.success : colors.warning}
-            icon="file-text"
-            onPress={() => navigation.navigate('LaporanForm', { laporanId: laporanHariIni?.id, tanggal: today })}
-          />
-        </View>
-        <View style={{ width: 136 }}>
-          <KpiCard
-            label="Presensi Staf"
-            value={`${hadirCount}/${staffAktif.length || 1}`}
-            tone={hadirCount >= (staffAktif.length || 1) && hadirCount > 0 ? colors.success : colors.warning}
-            icon="users"
-            onPress={() => navigation.navigate('Presensi')}
-          />
-        </View>
-        <View style={{ width: 136 }}>
-          <KpiCard
-            label="Checklist Dapur"
-            value={checklistSelesai ? (checklistKritisGagal ? 'Gagal' : 'Lolos') : 'Belum'}
-            tone={checklistSelesai && !checklistKritisGagal ? colors.success : colors.warning}
-            icon="check-square"
-            onPress={() => navigation.navigate('Checklist')}
-          />
-        </View>
-        <View style={{ width: 136 }}>
-          <KpiCard
-            label="Distribusi Sekolah"
-            value={ruteDistribusi.length > 0 ? `${ruteTiba}/${ruteDistribusi.length}` : '0/0'}
-            tone={ruteDistribusi.length > 0 && ruteTiba === ruteDistribusi.length ? colors.success : colors.warning}
-            icon="truck"
-            onPress={() => navigation.navigate('Distribusi')}
-          />
-        </View>
+        {statusCards.map((c) => (
+          <View key={c.key} style={{ width: 136 }}>
+            <KpiCard
+              label={c.label}
+              value={c.value}
+              tone={c.ok ? colors.success : colors.warning}
+              icon={c.icon}
+              onPress={c.onPress}
+            />
+          </View>
+        ))}
       </ScrollView>
 
       {/* 6. Daftar Sekolah Bina SPPG */}

@@ -68,7 +68,10 @@ export default function RouteMapView({
   colors,
 }: RouteMapViewProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const truckImgUri = Image.resolveAssetSource(BRAND_ASSETS.truckMbg).uri;
+  // Image.resolveAssetSource tidak ada di react-native-web; di web require()
+  // sudah menghasilkan URL string, jadi dipakai langsung sebagai fallback.
+  const truckImgUri =
+    Image.resolveAssetSource?.(BRAND_ASSETS.truckMbg)?.uri ?? (BRAND_ASSETS.truckMbg as unknown as string);
 
   const html = useMemo(
     () => `

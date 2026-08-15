@@ -1,6 +1,7 @@
 import { DistribusiRute } from '../types';
 import { sekolahList } from './sekolah';
 import { dateRange } from './dateRange';
+import { SPPG_ASSET_MAP } from './sppgAssetMap';
 
 // Delivery instances keyed by sekolahId+tanggal so Menu Kalender & layar driver
 // (rute, riwayat distribusi) bisa join "menu apa hari itu" dengan "sudah dikirim
@@ -32,10 +33,34 @@ const SEKOLAH_COORD: Record<string, { lat: number; lng: number }> = {
 
 const JAM_TIBA = ['07:30', '07:40', '07:50', '08:00'];
 
+// Rute berstatus 'kendala' selalu dibarengi rincian + bukti visual — laporan
+// kendala tanpa foto/video tidak bisa diverifikasi komando, jadi data contoh
+// pun mengikuti aturan yang sama seperti form aslinya.
+const KENDALA_SKENARIO: Array<{ rincian: string; bukti: DistribusiRute['kendalaBukti'] }> = [
+  {
+    rincian:
+      'Ban belakang mobil box pecah di Km 12 jalur utama. Ompreng tetap tersegel di dalam thermal box, suhu terpantau 63°C.',
+    bukti: [
+      { uri: SPPG_ASSET_MAP.mobil_1, mediaType: 'image', keterangan: 'Kondisi armada di bahu jalan' },
+      { uri: SPPG_ASSET_MAP.tray_2, mediaType: 'image', keterangan: 'Thermal box masih tersegel rapat' },
+    ],
+  },
+  {
+    rincian:
+      'Macet total akibat kecelakaan di simpang protokol. Estimasi tertahan 25 menit, driver menunggu arahan rute alternatif.',
+    bukti: [{ uri: SPPG_ASSET_MAP.mobil_2, mediaType: 'image', keterangan: 'Antrean kendaraan di titik macet' }],
+  },
+  {
+    rincian:
+      'Gerbang sekolah terkunci, petugas piket belum datang. Driver menunggu di depan sekolah sambil menjaga suhu box.',
+    bukti: [{ uri: SPPG_ASSET_MAP.sekolah_2, mediaType: 'image', keterangan: 'Gerbang sekolah masih tertutup' }],
+  },
+];
+
 function buildRow(seq: number, sekolahId: string, sppgId: string, tanggal: string, status: DistribusiRute['status'], jamIdx: number): DistribusiRute {
   const coord = SEKOLAH_COORD[sekolahId];
   const jam = JAM_TIBA[jamIdx % JAM_TIBA.length];
-  return {
+  const row: DistribusiRute = {
     id: `DST-${String(seq).padStart(3, '0')}`,
     sppgId,
     sekolahId,
@@ -45,6 +70,16 @@ function buildRow(seq: number, sekolahId: string, sppgId: string, tanggal: strin
     lat: coord.lat,
     lng: coord.lng,
   };
+
+  if (status === 'kendala') {
+    const skenario = KENDALA_SKENARIO[seq % KENDALA_SKENARIO.length];
+    row.kendalaRincian = skenario.rincian;
+    row.kendalaBukti = skenario.bukti;
+    row.kendalaDilaporkan = `${tanggal} ${jam}`;
+    row.kendalaPelapor = 'Bripda Agus Prasetyo (Driver Armada)';
+  }
+
+  return row;
 }
 
 let seq = 0;

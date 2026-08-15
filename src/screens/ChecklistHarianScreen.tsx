@@ -348,7 +348,7 @@ export default function ChecklistHarianScreen() {
 
       {/* Modal Add Custom Item */}
       <Modal visible={showAddModal} onClose={() => setShowAddModal(false)} title="Tambah Item Checklist Baru">
-        <ScrollView style={{ gap: spacing.md }} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={{ gap: spacing.md, paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
           <DropdownPicker
             label="Kategori Checklist"
             value={newItemKategori}

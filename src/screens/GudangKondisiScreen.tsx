@@ -315,7 +315,7 @@ export default function GudangKondisiScreen({ navigation }: any) {
             clearable
           />
 
-          <ScrollView style={{ gap: 8 }} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
+          <ScrollView contentContainerStyle={{ gap: 8, paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
             {modalItems.length === 0 ? (
               <EmptyState icon="package" title="Tidak Ditemukan" body="Tidak ada bahan baku yang cocok dengan pencarian." />
             ) : (

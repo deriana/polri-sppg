@@ -56,8 +56,8 @@ function instantiate(overrides: Record<string, Pick<ChecklistItem, 'status' | 'c
   }));
 }
 
-// Riwayat checklist harian SPPG-001 — 7 hari terakhir s.d. hari ini
-const CHECKLIST_DATES = dateRange('2026-08-03', '2026-08-10');
+// Riwayat checklist harian SPPG-001 — 8 hari terakhir s.d. tanggal berjalan data (15 Agustus 2026)
+const CHECKLIST_DATES = dateRange('2026-08-08', '2026-08-15');
 
 export const checklistList: ChecklistHarian[] = CHECKLIST_DATES.map((tanggal, idx) => {
   const isSuhuBermasalah = tanggal === '2026-08-09';

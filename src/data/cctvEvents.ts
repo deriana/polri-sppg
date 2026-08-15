@@ -9,7 +9,7 @@ export const CCTV_ANOMALI_LABEL: Record<CctvEvent['anomaliType'], string> = {
   kebersihan: 'Indikasi Pelanggaran Kebersihan',
 };
 
-const CCTV_DATES = dateRange('2026-08-03', '2026-08-10');
+const CCTV_DATES = dateRange('2026-08-08', '2026-08-15');
 
 const ROTATION: Array<Pick<CctvEvent, 'sppgId' | 'cameraLabel' | 'anomaliType' | 'confidence' | 'fotoSnapshot' | 'deskripsiTemuan'>> = [
   {

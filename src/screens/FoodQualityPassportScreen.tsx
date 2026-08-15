@@ -85,7 +85,7 @@ export default function FoodQualityPassportScreen({ navigation, route }: any) {
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Sajian Menu:</Text>
-            <Text style={[styles.infoValue, { flex: 1 }]}>{passport.menuNama}</Text>
+            <Text style={styles.infoValue}>{passport.menuNama}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Unit Dapur:</Text>
@@ -250,9 +250,9 @@ const styles = StyleSheet.create({
   scoreHero: { padding: 16, alignItems: 'center', justifyContent: 'center' },
   gradeBadge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 99 },
   infoBox: { padding: 12, gap: 6 },
-  infoRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  infoLabel: { fontSize: 11, color: '#64748B' },
-  infoValue: { fontSize: 11, fontWeight: '700' },
+  infoRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 },
+  infoLabel: { fontSize: 11, color: '#64748B', flexShrink: 0 },
+  infoValue: { fontSize: 11, fontWeight: '700', flex: 1, textAlign: 'right' },
   paramCard: { padding: 10 },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   checkCircle: { width: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },

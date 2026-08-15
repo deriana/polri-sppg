@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
@@ -134,9 +134,18 @@ export default function IncidentListScreen({ navigation }: any) {
                 Kategori: <Text style={{ color: colors.text, fontWeight: '600' }}>{KATEGORI_LABEL[inc.kategori]}</Text> • Lokasi: {inc.lokasi || 'Dapur SPPG'}
               </Text>
 
-              <Text style={{ color: colors.text, fontSize: fontSize.xs, marginTop: 2 }} numberOfLines={2}>
-                {inc.deskripsi}
-              </Text>
+              <View style={{ flexDirection: 'row', gap: 10, marginTop: 2 }}>
+                {inc.fotoBukti ? (
+                  <Image source={{ uri: inc.fotoBukti }} style={[styles.evidenceThumb, { borderRadius: radius.sm, borderColor: colors.border }]} />
+                ) : (
+                  <View style={[styles.evidenceThumb, styles.evidenceEmpty, { borderRadius: radius.sm, borderColor: colors.border, backgroundColor: colors.background }]}>
+                    <Feather name="image" size={16} color={colors.textMuted} />
+                  </View>
+                )}
+                <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }} numberOfLines={4}>
+                  {inc.deskripsi}
+                </Text>
+              </View>
 
               {inc.tindakanPerbaikan && (
                 <View style={[styles.resolutionBox, { backgroundColor: colors.successBg, borderRadius: radius.sm }]}>
@@ -178,6 +187,7 @@ export default function IncidentListScreen({ navigation }: any) {
                   </Pressable>
                 </View>
 
+                <ScrollView style={{ maxHeight: 420 }} contentContainerStyle={{ gap: 14, paddingBottom: 4 }}>
                 <View style={{ flexDirection: 'row', gap: 6 }}>
                   <Pill label={`Tingkat: ${selectedIncident.tingkatKeparahan.toUpperCase()}`} tone={SEVERITY_TONE[selectedIncident.tingkatKeparahan]} />
                   <Pill label={`Status: ${selectedIncident.status}`} tone={STATUS_TONE[selectedIncident.status]} />
@@ -191,6 +201,27 @@ export default function IncidentListScreen({ navigation }: any) {
                   <Text style={{ fontSize: 10.5, color: colors.textMuted, marginTop: 4 }}>
                     Lokasi: {selectedIncident.lokasi || 'Dapur Utama'} • Pelapor: {selectedIncident.pelaporNama}
                   </Text>
+                </View>
+
+                {/* Foto Bukti Kejadian */}
+                <View style={{ gap: 6 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Feather name="camera" size={13} color={colors.primary} />
+                    <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text, flex: 1 }}>FOTO BUKTI KEJADIAN</Text>
+                    {!!selectedIncident.fotoBukti && <Pill label="Terlampir" tone="success" />}
+                  </View>
+                  {selectedIncident.fotoBukti ? (
+                    <Image
+                      source={{ uri: selectedIncident.fotoBukti }}
+                      style={{ width: '100%', height: 180, borderRadius: radius.md }}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={[styles.noPhotoBox, { backgroundColor: colors.background, borderColor: colors.border, borderRadius: radius.md }]}>
+                      <Feather name="image" size={22} color={colors.textMuted} />
+                      <Text style={{ fontSize: 11, color: colors.textMuted }}>Pelapor tidak melampirkan foto bukti.</Text>
+                    </View>
+                  )}
                 </View>
 
                 {/* Corrective Action Input for Resolution */}
@@ -227,6 +258,7 @@ export default function IncidentListScreen({ navigation }: any) {
                     />
                   )}
                 </View>
+                </ScrollView>
               </>
             )}
           </View>
@@ -246,6 +278,9 @@ const styles = StyleSheet.create({
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   resolutionBox: { flexDirection: 'row', alignItems: 'center', gap: 6, padding: 8, marginTop: 2 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 },
+  evidenceThumb: { width: 68, height: 68, borderWidth: 1 },
+  evidenceEmpty: { alignItems: 'center', justifyContent: 'center', borderStyle: 'dashed' },
+  noPhotoBox: { height: 90, borderWidth: 1, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center', gap: 4 },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.6)',

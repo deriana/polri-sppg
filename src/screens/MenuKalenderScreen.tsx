@@ -4,6 +4,8 @@ import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Card, DropdownPicker, EmptyState, IconButton, Input, Pill, PrimaryButton, SectionTitle } from '../components/ui';
+import HppBadge from '../components/HppBadge';
+import { resolveHpp } from '../utils/hpp';
 import { useScopedData } from '../hooks';
 import { scopeDistribusi, scopeMenuHarianPlan, scopeSekolah, ROLE_PERMISSIONS } from '../utils/scope';
 import { DistribusiRute } from '../types';
@@ -53,7 +55,7 @@ function formatFullDateIndo(dateStr: string): string {
 }
 
 export default function MenuKalenderScreen() {
-  const { role, currentSppg, sekolahList, distribusiList, menuHarianPlanList, setMenuForDate, masterMenuList } = useApp();
+  const { role, currentSppg, sekolahList, distribusiList, menuHarianPlanList, setMenuForDate, masterMenuList, costPerMeal } = useApp();
   const { sppgInScope } = useScopedData();
   const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark } = useTheme();
 
@@ -362,6 +364,8 @@ export default function MenuKalenderScreen() {
                     Komposisi: {planForSelected.kategoriGizi}
                   </Text>
                 )}
+
+                <HppBadge info={resolveHpp(planForSelected.menu, masterMenuList, costPerMeal)} variant="block" />
                 {canEdit && (
                   <PrimaryButton
                     label="Ubah Menu Ini"

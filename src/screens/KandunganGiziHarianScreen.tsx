@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
+import HppBadge from '../components/HppBadge';
+import { resolveHpp } from '../utils/hpp';
 import { useTheme } from '../context/ThemeContext';
 import {
   Card,
@@ -86,7 +88,7 @@ const MENU_PAKET_PRESETS = [
 ];
 
 export default function KandunganGiziHarianScreen({ navigation }: any) {
-  const { currentUser, currentSppg, kandunganGiziList, addKandunganGiziLog } = useApp();
+  const { currentUser, currentSppg, kandunganGiziList, addKandunganGiziLog, masterMenuList, costPerMeal } = useApp();
   const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark } = useTheme();
 
   // Tab: 'input' | 'riwayat'
@@ -474,6 +476,9 @@ export default function KandunganGiziHarianScreen({ navigation }: any) {
                     <Text style={{ fontSize: 11, color: colors.textMuted }}>
                       Sasaran: <Text style={{ fontWeight: '700', color: colors.text }}>{item.targetPenerima}</Text>
                     </Text>
+                    <View style={{ marginTop: 2 }}>
+                      <HppBadge info={resolveHpp(item.namaPaketMenu, masterMenuList, costPerMeal)} />
+                    </View>
                   </View>
                 </View>
 
@@ -535,6 +540,8 @@ export default function KandunganGiziHarianScreen({ navigation }: any) {
               <Text style={{ fontSize: 11, color: colors.textMuted }}>Kelompok Sasaran: {selectedDetail.targetPenerima}</Text>
               <Text style={{ fontSize: 11, color: colors.textMuted }}>Ahli Gizi: {selectedDetail.namaAhliGizi}</Text>
             </View>
+
+            <HppBadge info={resolveHpp(selectedDetail.namaPaketMenu, masterMenuList, costPerMeal)} variant="block" />
 
             {/* Nutrisi Breakdown Table */}
             <View style={{ gap: 6 }}>

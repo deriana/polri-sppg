@@ -1,6 +1,71 @@
 import { LaporanPacking } from '../types';
+import { SPPG_ASSET_MAP } from './sppgAssetMap';
 
 export const INITIAL_LAPORAN_PACKING: LaporanPacking[] = [
+  {
+    id: 'LPK-20260815-001',
+    sppgId: 'SPPG-001',
+    tanggal: '2026-08-15',
+    petugasId: 'USR-019',
+    petugasNama: 'Siti Rohimah',
+    totalOmprengDipacking: 1480,
+    totalThermalBox: 49,
+    suhuHoldingRataRata: 63.8,
+    statusSealing: 'ada_retur',
+    fotoDokumentasi: [SPPG_ASSET_MAP.tray_2, SPPG_ASSET_MAP.suasana_sppg_2],
+    catatan:
+      '20 ompreng diretur ke dapur karena gramasi lauk kurang dari standar 80 gram dan 3 seal tidak merekat sempurna akibat elemen sealer #2 panasnya tidak stabil. Sisanya lolos QC dan berangkat tepat waktu.',
+    status: 'terkirim',
+    alokasiSekolah: [
+      { sekolahId: 'SKL-001', sekolahNama: 'SDN Cibeunying 01', jumlahOmpreng: 240, jumlahBox: 8 },
+      { sekolahId: 'SKL-002', sekolahNama: 'SDN Cibeunying 02', jumlahOmpreng: 210, jumlahBox: 7 },
+      { sekolahId: 'SKL-003', sekolahNama: 'SMPN 5 Bandung', jumlahOmpreng: 560, jumlahBox: 19 },
+      { sekolahId: 'SKL-004', sekolahNama: 'SDN Coblong 03', jumlahOmpreng: 180, jumlahBox: 6 },
+    ],
+    createdAt: '2026-08-15 06:20',
+  },
+  {
+    id: 'LPK-20260813-001',
+    sppgId: 'SPPG-001',
+    tanggal: '2026-08-13',
+    petugasId: 'USR-019',
+    petugasNama: 'Siti Rohimah',
+    totalOmprengDipacking: 1500,
+    totalThermalBox: 50,
+    suhuHoldingRataRata: 66.1,
+    statusSealing: 'rapat_sempurna',
+    fotoDokumentasi: [SPPG_ASSET_MAP.tray_1, SPPG_ASSET_MAP.suasana_sppg_1],
+    catatan:
+      'Pemorsian selesai 05.50 WIB, lebih cepat 20 menit dari jadwal. Suhu holding tertinggi sepekan ini karena thermal box dipanaskan lebih dulu sebelum diisi.',
+    status: 'diverifikasi',
+    alokasiSekolah: [
+      { sekolahId: 'SKL-001', sekolahNama: 'SDN Cibeunying 01', jumlahOmpreng: 240, jumlahBox: 8 },
+      { sekolahId: 'SKL-002', sekolahNama: 'SDN Cibeunying 02', jumlahOmpreng: 210, jumlahBox: 7 },
+      { sekolahId: 'SKL-003', sekolahNama: 'SMPN 5 Bandung', jumlahOmpreng: 560, jumlahBox: 19 },
+      { sekolahId: 'SKL-004', sekolahNama: 'SDN Coblong 03', jumlahOmpreng: 180, jumlahBox: 6 },
+    ],
+    createdAt: '2026-08-13 05:50',
+  },
+  {
+    id: 'LPK-20260815-002',
+    sppgId: 'SPPG-002',
+    tanggal: '2026-08-15',
+    petugasId: 'USR-019',
+    petugasNama: 'Siti Rohimah',
+    totalOmprengDipacking: 1980,
+    totalThermalBox: 66,
+    suhuHoldingRataRata: 64.9,
+    statusSealing: 'rapat_sempurna',
+    fotoDokumentasi: [SPPG_ASSET_MAP.tray_2],
+    catatan: 'Seluruh 1.980 ompreng tersegel rapat dan dimuat ke dua armada cold-chain sesuai urutan rute.',
+    status: 'terkirim',
+    alokasiSekolah: [
+      { sekolahId: 'SKL-005', sekolahNama: 'SDN Fatmawati 03', jumlahOmpreng: 620, jumlahBox: 21 },
+      { sekolahId: 'SKL-006', sekolahNama: 'SDN Cipete 01', jumlahOmpreng: 540, jumlahBox: 18 },
+      { sekolahId: 'SKL-007', sekolahNama: 'SMPN 12 Jakarta', jumlahOmpreng: 820, jumlahBox: 27 },
+    ],
+    createdAt: '2026-08-15 06:05',
+  },
   {
     id: 'LPK-20260814-001',
     sppgId: 'SPPG-001',
@@ -12,8 +77,9 @@ export const INITIAL_LAPORAN_PACKING: LaporanPacking[] = [
     suhuHoldingRataRata: 64.5,
     statusSealing: 'rapat_sempurna',
     fotoDokumentasi: [
-      'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=600&auto=format&fit=crop&q=60',
-      'https://images.unsplash.com/photo-1547592180-85f173990554?w=600&auto=format&fit=crop&q=60',
+      SPPG_ASSET_MAP.tray_1,
+      SPPG_ASSET_MAP.tray_2,
+      SPPG_ASSET_MAP.suasana_sppg_2,
     ],
     catatan: 'Seluruh 1.500 ompreng 5 sekat tertutup rapat dengan seal karet silikon. Suhu holding box rata-rata 64.5°C saat dimuat ke mobil box armada.',
     status: 'terkirim',

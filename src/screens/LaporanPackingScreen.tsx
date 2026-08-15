@@ -4,6 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Card, EmptyState, Input, Pill, PrimaryButton, SectionTitle } from '../components/ui';
+import { SPPG_ASSET_MAP } from '../data/sppgAssetMap';
 import { pickMedia } from '../utils/pickImage';
 import { addToOfflineQueue } from '../utils/offlineQueue';
 import { LaporanPacking } from '../types';
@@ -27,10 +28,7 @@ export default function LaporanPackingScreen() {
   const [photos, setPhotos] = useState<string[]>(
     existingToday?.fotoDokumentasi?.length
       ? existingToday.fotoDokumentasi
-      : [
-          'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=600&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1547592180-85f173990554?w=600&auto=format&fit=crop&q=60',
-        ],
+      : [SPPG_ASSET_MAP.tray_1, SPPG_ASSET_MAP.tray_2],
   );
   const [catatan, setCatatan] = useState<string>(
     existingToday?.catatan ?? 'Seluruh ompreng 5 sekat tertutup rapat dan telah disusun rapi ke dalam thermal box sesuai rute sekolah.',

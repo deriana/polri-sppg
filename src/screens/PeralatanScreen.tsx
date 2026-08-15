@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Card, EmptyState, Input, Pill, PrimaryButton, SecondaryButton, SectionTitle } from '../components/ui';
+import AssetQrModal from '../components/AssetQrModal';
 import { useScopedData } from '../hooks';
 import { Peralatan, PeralatanKategori, PeralatanStatus } from '../types';
-import { ROLE_PERMISSIONS } from '../utils/scope';
 
 const KATEGORI_OPTIONS: { id: PeralatanKategori | 'semua'; label: string; icon: keyof typeof Feather.glyphMap }[] = [
   { id: 'semua', label: 'Semua Alat', icon: 'layers' },
@@ -14,18 +15,23 @@ const KATEGORI_OPTIONS: { id: PeralatanKategori | 'semua'; label: string; icon: 
   { id: 'ompreng_tray', label: 'Ompreng Stainless', icon: 'grid' },
   { id: 'kontainer_suhu', label: 'Thermal Container', icon: 'box' },
   { id: 'alat_masak', label: 'Kettle & Kompor', icon: 'coffee' },
+  { id: 'penyimpanan', label: 'Penyimpanan Bahan', icon: 'thermometer' },
   { id: 'sealing_packaging', label: 'Sealer & Packing', icon: 'package' },
-  { id: 'kebersihan_apd', label: 'Steril & Sanitasi', icon: 'shield' },
+  { id: 'sterilisasi', label: 'Sterilisasi Alat', icon: 'droplet' },
+  { id: 'kebersihan_apd', label: 'Kebersihan & APD', icon: 'shield' },
+  { id: 'ukur_qc', label: 'Alat Ukur & QC', icon: 'activity' },
+  { id: 'k3_darurat', label: 'K3 & Darurat', icon: 'alert-octagon' },
 ];
 
 export default function PeralatanScreen() {
   const { peralatanInScope } = useScopedData();
-  const { updatePeralatanStatus, role } = useApp();
-  const { colors, fontSize, iconSize, iconStrokeWidth, radius, shadow, spacing } = useTheme();
+  const { updatePeralatanStatus, role, sppgList } = useApp();
+  const { colors, fontSize, iconStrokeWidth, radius, spacing } = useTheme();
+  const navigation = useNavigation<any>();
 
   const [activeKategori, setActiveKategori] = useState<PeralatanKategori | 'semua'>(() => {
     if (role === 'PEMORSI_PACKING') return 'ompreng_tray';
-    if (role === 'PETUGAS_SANITASI') return 'kebersihan_apd';
+    if (role === 'PETUGAS_SANITASI') return 'sterilisasi';
     if (role === 'DRIVER') return 'kendaraan';
     if (role === 'CHEF_UTAMA') return 'alat_masak';
     return 'semua';
@@ -33,6 +39,7 @@ export default function PeralatanScreen() {
   const [selectedEq, setSelectedEq] = useState<Peralatan | null>(null);
   const [editStatus, setEditStatus] = useState<PeralatanStatus>('ready');
   const [catatanText, setCatatanText] = useState('');
+  const [qrModalEq, setQrModalEq] = useState<Peralatan | null>(null);
 
   // Interactive Checklist per Role in Peralatan Hub
   const [packingTodos, setPackingTodos] = useState<{ id: string; text: string; done: boolean }[]>([
@@ -64,9 +71,9 @@ export default function PeralatanScreen() {
     if (role === 'KEPALA_SPPG' || role === 'SUPERVISOR_POLRES' || role === 'SUPERVISOR_POLDA') return true;
     if (role === 'PETUGAS_LOGISTIK') return true;
     if (role === 'PEMORSI_PACKING' && (eq?.kategori === 'kontainer_suhu' || eq?.kategori === 'ompreng_tray' || eq?.kategori === 'sealing_packaging')) return true;
-    if (role === 'AHLI_GIZI' && (eq?.kategori === 'kontainer_suhu' || eq?.kategori === 'kebersihan_apd')) return true;
-    if (role === 'CHEF_UTAMA' && eq?.kategori === 'alat_masak') return true;
-    if (role === 'PETUGAS_SANITASI' && (eq?.kategori === 'kebersihan_apd' || eq?.kategori === 'ompreng_tray')) return true;
+    if (role === 'AHLI_GIZI' && (eq?.kategori === 'kontainer_suhu' || eq?.kategori === 'penyimpanan' || eq?.kategori === 'ukur_qc')) return true;
+    if (role === 'CHEF_UTAMA' && (eq?.kategori === 'alat_masak' || eq?.kategori === 'ukur_qc')) return true;
+    if (role === 'PETUGAS_SANITASI' && (eq?.kategori === 'sterilisasi' || eq?.kategori === 'kebersihan_apd' || eq?.kategori === 'ompreng_tray')) return true;
     if (role === 'DRIVER' && eq?.kategori === 'kendaraan') return true;
     return false;
   };
@@ -90,6 +97,11 @@ export default function PeralatanScreen() {
       updatePeralatanStatus(selectedEq.id, editStatus, catatanText);
       setSelectedEq(null);
     }
+  };
+
+  const openAssetDetail = (eq: Peralatan) => {
+    const sppg = sppgList.find((s) => s.id === eq.sppgId);
+    navigation.navigate('AssetQrDetail', { peralatan: eq, sppgNama: sppg?.nama });
   };
 
   const statusTone = (st: PeralatanStatus) => {
@@ -118,7 +130,7 @@ export default function PeralatanScreen() {
               Aset & Peralatan Dapur
             </Text>
             <Text style={{ fontSize: fontSize.xs, color: colors.primaryLight, marginTop: 2 }}>
-              Manajemen Armada Distribusi, Ompreng Stainless, & Alat Produksi
+              Manajemen Armada, Ompreng Stainless, & Alat Produksi Ber-QR
             </Text>
           </View>
           <View style={[styles.iconBox, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
@@ -146,6 +158,19 @@ export default function PeralatanScreen() {
             <Text style={{ color: colors.primaryLight, fontSize: fontSize.xs }}>Bermasalah</Text>
           </View>
         </View>
+
+        {/* Action Button: Scan Asset QR */}
+        <Pressable
+          onPress={() => navigation.navigate('QrScan')}
+          style={({ pressed }) => [
+            styles.scanHeaderBtn,
+            { backgroundColor: colors.gold || '#F59E0B' },
+            pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+          ]}
+        >
+          <Feather name="camera" size={16} color="#000000" strokeWidth={2.2} />
+          <Text style={styles.scanHeaderBtnText}>Pindai QR Aset / Peralatan</Text>
+        </Pressable>
       </Card>
 
       {/* Role-Specific Interactive Work Checklist (Pemorsi & Packing) */}
@@ -307,14 +332,29 @@ export default function PeralatanScreen() {
         <EmptyState icon="box" title="Belum Ada Peralatan" body="Peralatan untuk kategori ini belum tercatat." />
       ) : (
         filtered.map((eq) => (
-          <Card key={eq.id} style={{ gap: spacing.xs }}>
+          <Card key={eq.id} onPress={() => openAssetDetail(eq)} style={{ gap: spacing.xs }}>
             {eq.fotoPeralatan && (
               <Image source={{ uri: eq.fotoPeralatan }} style={styles.eqPhoto} resizeMode="cover" />
             )}
             <View style={styles.rowBetween}>
               <View style={{ flex: 1, gap: 2 }}>
-                <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text }}>{eq.nama}</Text>
-                <Text style={{ fontSize: fontSize.xs, color: colors.primary, fontWeight: '700' }}>Kode: {eq.kodeUnit}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text, flex: 1 }}>{eq.nama}</Text>
+                  <Feather name="chevron-right" size={16} color={colors.textMuted} />
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                  <Text style={{ fontSize: fontSize.xs, color: colors.primary, fontWeight: '700' }}>Unit: {eq.kodeUnit}</Text>
+                  <Pressable
+                    onPress={(e) => {
+                      e.stopPropagation?.();
+                      setQrModalEq(eq);
+                    }}
+                    style={[styles.qrBadge, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}
+                  >
+                    <Feather name="maximize" size={10} color={colors.primary} />
+                    <Text style={{ fontSize: 10, color: colors.primary, fontWeight: '800' }}>{eq.qrCodeId}</Text>
+                  </Pressable>
+                </View>
               </View>
               <Pill label={eq.status.replace('_', ' ').toUpperCase()} tone={statusTone(eq.status)} />
             </View>
@@ -350,7 +390,7 @@ export default function PeralatanScreen() {
               </Text>
             </View>
 
-            {eq.kategori === 'kontainer_suhu' && (
+            {(eq.kategori === 'kontainer_suhu' || eq.kategori === 'penyimpanan') && (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
                 <Feather name="thermometer" size={13} color={colors.success} />
                 <Text style={{ fontSize: 11, fontWeight: '700', color: colors.success }}>
@@ -359,15 +399,57 @@ export default function PeralatanScreen() {
               </View>
             )}
 
+            {/* Action Buttons: Modal QR & Detail Aset */}
+            <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation?.();
+                  setQrModalEq(eq);
+                }}
+                style={[
+                  styles.qrToggleBtn,
+                  {
+                    backgroundColor: colors.primaryLight,
+                    borderColor: colors.primary,
+                    borderRadius: radius.md,
+                    flex: 1,
+                  },
+                ]}
+              >
+                <Feather name="maximize" size={15} color={colors.primary} />
+                <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.primary }}>
+                  QR Code & Share
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => openAssetDetail(eq)}
+                style={[
+                  styles.qrToggleBtn,
+                  {
+                    backgroundColor: colors.background,
+                    borderColor: colors.border,
+                    borderRadius: radius.md,
+                    flex: 1,
+                  },
+                ]}
+              >
+                <Feather name="file-text" size={15} color={colors.text} />
+                <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>
+                  Detail Lengkap
+                </Text>
+              </Pressable>
+            </View>
+
             {canEditEquipment(eq) ? (
               <SecondaryButton
-                label={eq.kategori === 'kontainer_suhu' ? 'Uji Suhu & Perbarui Status' : 'Perbarui Status & Kondisi'}
-                icon={eq.kategori === 'kontainer_suhu' ? 'thermometer' : 'edit-3'}
+                label={eq.kategori === 'kontainer_suhu' || eq.kategori === 'penyimpanan' ? 'Uji Suhu & Perbarui Status' : 'Perbarui Status & Kondisi'}
+                icon={eq.kategori === 'kontainer_suhu' || eq.kategori === 'penyimpanan' ? 'thermometer' : 'edit-3'}
                 onPress={() => openStatusModal(eq)}
-                style={{ marginTop: 4 }}
+                style={{ marginTop: 2 }}
               />
             ) : (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6, opacity: 0.7 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4, opacity: 0.7 }}>
                 <Feather name="lock" size={12} color={colors.textMuted} />
                 <Text style={{ fontSize: 10.5, color: colors.textMuted, fontStyle: 'italic' }}>
                   Akses audit/uji kondisi alat ini dibatasi untuk divisi yang berwenang.
@@ -377,6 +459,17 @@ export default function PeralatanScreen() {
           </Card>
         ))
       )}
+
+      {/* QR Code Modal with Share as PNG */}
+      <AssetQrModal
+        visible={!!qrModalEq}
+        onClose={() => setQrModalEq(null)}
+        peralatan={qrModalEq}
+        sppgNama={sppgList.find((s) => s.id === qrModalEq?.sppgId)?.nama}
+        onViewDetail={() => {
+          if (qrModalEq) openAssetDetail(qrModalEq);
+        }}
+      />
 
       {/* Edit Status Modal */}
       <Modal visible={!!selectedEq} animationType="slide" transparent>
@@ -443,8 +536,41 @@ const styles = StyleSheet.create({
   iconBox: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   statRow: { flexDirection: 'row', padding: 12, alignItems: 'center', justifyContent: 'space-around' },
   statCol: { alignItems: 'center', gap: 2 },
+  scanHeaderBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    marginTop: 6,
+  },
+  scanHeaderBtnText: {
+    color: '#000000',
+    fontSize: 13,
+    fontWeight: '800',
+  },
   chip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1 },
-  eqPhoto: { width: '100%', height: 160, borderRadius: 8, marginBottom: 4 },
+  eqPhoto: { width: '100%', height: 180, borderRadius: 8, marginBottom: 4 },
+  qrBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    borderWidth: 1,
+  },
+  qrToggleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+  },
   infoGrid: { flexDirection: 'row', padding: 10, gap: 12, marginVertical: 4 },
   infoCol: { flex: 1 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },

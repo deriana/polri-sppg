@@ -1,9 +1,9 @@
 import { AlertLog } from '../types';
 import { dateRange } from './dateRange';
 
-const DAILY_INFO_DATES = dateRange('2026-08-03', '2026-08-10');
+const DAILY_INFO_DATES = dateRange('2026-08-08', '2026-08-15');
 
-// Info harian rutin dari command center — satu per hari, 7 hari terakhir s.d. hari ini.
+// Info harian rutin dari command center — satu per hari, 8 hari terakhir s.d. tanggal berjalan data (15 Agustus 2026).
 let seq = 0;
 const dailyInfo: AlertLog[] = DAILY_INFO_DATES.map((tanggal) => {
   seq += 1;
