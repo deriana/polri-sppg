@@ -1,5 +1,6 @@
 import { MenuHarianPlan } from '../types';
 import { sppgList } from './sppg';
+import { dateRange } from './dateRange';
 
 const MENU_ROTATION: { menu: string; kategoriGizi: string; fotoMenu: string }[] = [
   {
@@ -38,17 +39,6 @@ const MENU_ROTATION: { menu: string; kategoriGizi: string; fotoMenu: string }[] 
     fotoMenu: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&auto=format&fit=crop&q=80',
   },
 ];
-
-function dateRange(startISO: string, endISO: string): string[] {
-  const dates: string[] = [];
-  const cur = new Date(startISO);
-  const end = new Date(endISO);
-  while (cur <= end) {
-    dates.push(cur.toISOString().slice(0, 10));
-    cur.setDate(cur.getDate() + 1);
-  }
-  return dates;
-}
 
 const PLAN_DATES = dateRange('2026-08-01', '2026-09-05');
 

@@ -14,7 +14,7 @@ const STATUS_TONE: Record<LaporanStatus, 'neutral' | 'info' | 'success'> = {
   diverifikasi: 'success',
 };
 const STATUS_LABEL: Record<LaporanStatus, string> = {
-  draft: 'Draft',
+  draft: 'Belum Dikirim',
   terkirim: 'Terkirim',
   diverifikasi: 'Diverifikasi',
 };

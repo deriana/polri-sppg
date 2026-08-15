@@ -1,19 +1,28 @@
 import { AlertLog } from '../types';
+import { dateRange } from './dateRange';
 
-export const alertList: AlertLog[] = [
-  {
-    id: 'ALT-001',
+const DAILY_INFO_DATES = dateRange('2026-08-03', '2026-08-10');
+
+// Info harian rutin dari command center — satu per hari, 7 hari terakhir s.d. hari ini.
+let seq = 0;
+const dailyInfo: AlertLog[] = DAILY_INFO_DATES.map((tanggal) => {
+  seq += 1;
+  return {
+    id: `ALT-${String(seq).padStart(3, '0')}`,
     sppgId: 'SPPG-001',
     jenis: 'info_pusat',
     sumber: 'command_center',
     tingkat: 'normal',
     judul: 'Info Command Center',
     deskripsi: 'Jadwal distribusi bahan baku pekan ini berjalan sesuai rencana.',
-    timestamp: '2026-08-07 08:00',
+    timestamp: `${tanggal} 08:00`,
     statusTindakLanjut: 'selesai',
-  },
+  };
+});
+
+const incidents: AlertLog[] = [
   {
-    id: 'ALT-002',
+    id: `ALT-${String((seq += 1)).padStart(3, '0')}`,
     sppgId: 'SPPG-001',
     jenis: 'checklist_kritis',
     sumber: 'checklist',
@@ -24,7 +33,7 @@ export const alertList: AlertLog[] = [
     statusTindakLanjut: 'baru',
   },
   {
-    id: 'ALT-003',
+    id: `ALT-${String((seq += 1)).padStart(3, '0')}`,
     sppgId: 'SPPG-001',
     jenis: 'suhu_tidak_normal',
     sumber: 'suhu',
@@ -35,7 +44,7 @@ export const alertList: AlertLog[] = [
     statusTindakLanjut: 'baru',
   },
   {
-    id: 'ALT-004',
+    id: `ALT-${String((seq += 1)).padStart(3, '0')}`,
     sppgId: 'SPPG-001',
     jenis: 'aduan_warga',
     sumber: 'aduan',
@@ -46,7 +55,7 @@ export const alertList: AlertLog[] = [
     statusTindakLanjut: 'baru',
   },
   {
-    id: 'ALT-005',
+    id: `ALT-${String((seq += 1)).padStart(3, '0')}`,
     sppgId: 'SPPG-002',
     jenis: 'aduan_warga',
     sumber: 'aduan',
@@ -56,4 +65,28 @@ export const alertList: AlertLog[] = [
     timestamp: '2026-08-08 10:00',
     statusTindakLanjut: 'ditindaklanjuti',
   },
+  {
+    id: `ALT-${String((seq += 1)).padStart(3, '0')}`,
+    sppgId: 'SPPG-001',
+    jenis: 'cctv_anomali',
+    sumber: 'cctv',
+    tingkat: 'perhatian',
+    judul: 'CCTV Mendeteksi APD Tidak Lengkap',
+    deskripsi: 'Model Computer Vision AI mendeteksi petugas memasak tidak memakai sarung tangan koki secara sempurna pagi ini.',
+    timestamp: '2026-08-10 06:10',
+    statusTindakLanjut: 'baru',
+  },
+  {
+    id: `ALT-${String((seq += 1)).padStart(3, '0')}`,
+    sppgId: 'SPPG-002',
+    jenis: 'laporan_terlambat',
+    sumber: 'manual',
+    tingkat: 'perhatian',
+    judul: 'Laporan Produksi Belum Dikirim',
+    deskripsi: 'Laporan produksi harian SPPG Jakarta Selatan belum diunggah melewati jam 08:00.',
+    timestamp: '2026-08-10 08:15',
+    statusTindakLanjut: 'baru',
+  },
 ];
+
+export const alertList: AlertLog[] = [...dailyInfo, ...incidents];

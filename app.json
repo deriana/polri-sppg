@@ -11,7 +11,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#071e49"
     },
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "updates": {
       "checkAutomatically": "NEVER",
       "enabled": false

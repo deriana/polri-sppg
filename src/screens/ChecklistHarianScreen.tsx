@@ -58,10 +58,10 @@ export default function ChecklistHarianScreen() {
   const [newItemKritis, setNewItemKritis] = useState(false);
 
   React.useEffect(() => {
-    const found = checklistInScope.find((c) => c.tanggal === selectedDate);
-    setItems(found ? found.items : freshItems());
+    setItems(existing ? existing.items : freshItems());
     setSubmitted(false);
-  }, [selectedDate, checklistInScope]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate, existing?.id]);
 
   if (!role || !currentUser || !currentSppg) return null;
 

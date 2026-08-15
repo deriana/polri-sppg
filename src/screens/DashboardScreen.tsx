@@ -484,7 +484,7 @@ export default function DashboardScreen({ navigation }: any) {
         <View style={{ width: 136 }}>
           <KpiCard
             label="Laporan Produksi"
-            value={laporanHariIni ? (laporanHariIni.status === 'draft' ? 'Draft' : 'Selesai') : 'Belum'}
+            value={laporanHariIni ? (laporanHariIni.status === 'draft' ? 'Belum Dikirim' : 'Selesai') : 'Belum'}
             tone={laporanHariIni && laporanHariIni.status !== 'draft' ? colors.success : colors.warning}
             icon="file-text"
             onPress={() => navigation.navigate('LaporanForm', { laporanId: laporanHariIni?.id, tanggal: today })}

@@ -7,7 +7,7 @@ import { Card, EmptyState, Pill, SectionTitle } from '../components/ui';
 import { useScopedData } from '../hooks';
 import { scopeBahanBaku } from '../utils/scope';
 import CctvPlayer from '../components/CctvPlayer';
-import { CCTV_FEEDS } from './CctvMonitorScreen';
+import { CCTV_FEEDS, CCTV_VIDEO_ASSETS } from './CctvMonitorScreen';
 import { useLocalVideoUri } from '../utils/localVideoAsset';
 
 const SUHU_AMAN_MAX = 8; // sama dengan ambang di AppContext — di atas ini dianggap tidak aman
@@ -32,7 +32,7 @@ export default function GudangKondisiScreen() {
   const akanKadaluarsa = bahanInScope.filter((b) => b.tanggalKadaluarsa && daysUntil(b.tanggalKadaluarsa) <= EXPIRY_WARNING_DAYS);
 
   const gudangFeed = CCTV_FEEDS.find((f) => f.zonaId === 'z1');
-  const videoUri = useLocalVideoUri(require('../../assets/sppg.mp4'));
+  const videoUri = useLocalVideoUri(CCTV_VIDEO_ASSETS[gudangFeed?.videoKey ?? 'freezer']);
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>

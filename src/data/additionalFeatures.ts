@@ -22,6 +22,17 @@ export const initialBroadcastList: BroadcastMessage[] = [
     targetRole: 'DRIVER',
     timestamp: '2026-08-08 07:15',
   },
+  {
+    id: 'BC-003',
+    pengirimNama: 'Kompol Ahmad Fauzi, S.H.',
+    pengirimRole: 'KEPALA_SPPG',
+    judul: 'RUTE BESOK SUDAH DIJADWALKAN',
+    isi: 'Seluruh driver mohon cek jadwal rute distribusi untuk besok di menu Distribusi, pastikan mobil & tray sudah siap malam ini.',
+    tingkat: 'penting',
+    targetRole: 'DRIVER',
+    sppgId: 'SPPG-001',
+    timestamp: '2026-08-10 15:00',
+  },
 ];
 
 export const initialAnggaranLogs: AnggaranLog[] = [
@@ -78,6 +89,28 @@ export const initialAnggaranLogs: AnggaranLog[] = [
     nominal: 115000000,
     keterangan: 'Pembayaran Gaji Pokok & Insentif 48 Petugas & Relawan Dapur SPPG Periode Agustus (Tahap 1)',
     buktiNota: 'SLIP-REKAP-08.pdf',
+    dibuatOleh: 'Rian Hidayat, S.Ak',
+  },
+  {
+    id: 'ANG-006',
+    sppgId: 'SPPG-001',
+    tanggal: '2026-08-09',
+    jenis: 'pengeluaran',
+    kategori: 'bahan_baku',
+    nominal: 42300000,
+    keterangan: 'Pembelian Sayur & Buah Segar Mingguan dari Mitra Lokal Pasar Induk',
+    buktiNota: 'NOTA-PASOK-002.jpg',
+    dibuatOleh: 'Rian Hidayat, S.Ak',
+  },
+  {
+    id: 'ANG-007',
+    sppgId: 'SPPG-001',
+    tanggal: '2026-08-10',
+    jenis: 'pengeluaran',
+    kategori: 'operasional_armada',
+    nominal: 8600000,
+    keterangan: 'BBM Dexlite Armada Distribusi Harian & Cuci Mobil Box Thermal',
+    buktiNota: 'SPBU-NOTA-779.jpg',
     dibuatOleh: 'Rian Hidayat, S.Ak',
   },
 ];

@@ -1,4 +1,5 @@
 import { ChecklistHarian, ChecklistItem } from '../types';
+import { dateRange } from './dateRange';
 
 // Single source of truth for the daily checklist catalog (product spec section 3.4).
 // levelKritis=true marks items that trigger an automatic alert when answered "tidak".
@@ -22,20 +23,20 @@ function instantiate(overrides: Record<string, Pick<ChecklistItem, 'status' | 'c
   }));
 }
 
-// Seeded daily checklist instances for SPPG-001.
-export const checklistList: ChecklistHarian[] = [
-  {
-    id: 'CHK-001',
+// Riwayat checklist harian SPPG-001 — 7 hari terakhir s.d. hari ini, supaya
+// dashboard & riwayat checklist punya data seolah aplikasi sudah berjalan.
+const CHECKLIST_DATES = dateRange('2026-08-03', '2026-08-10');
+
+export const checklistList: ChecklistHarian[] = CHECKLIST_DATES.map((tanggal, idx) => {
+  const isSuhuBermasalah = tanggal === '2026-08-09';
+  return {
+    id: `CHK-${String(idx + 1).padStart(3, '0')}`,
     sppgId: 'SPPG-001',
-    tanggal: '2026-08-08',
-    items: instantiate({}),
-  },
-  {
-    id: 'CHK-002',
-    sppgId: 'SPPG-001',
-    tanggal: '2026-08-09',
-    items: instantiate({
-      'CAT-007': { status: 'tidak', catatan: 'Suhu chiller naik ke 9°C saat pengecekan pagi', foto: null },
-    }),
-  },
-];
+    tanggal,
+    items: instantiate(
+      isSuhuBermasalah
+        ? { 'CAT-007': { status: 'tidak', catatan: 'Suhu chiller naik ke 9°C saat pengecekan pagi', foto: null } }
+        : {},
+    ),
+  };
+});

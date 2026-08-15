@@ -158,7 +158,7 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
             existing.status === 'draft' ? (
               <View style={[styles.draftBadge, { backgroundColor: colors.warningBg, borderColor: colors.warning }]}>
                 <Feather name="edit-3" size={12} color={colors.warning} />
-                <Text style={{ fontSize: 11, fontWeight: '800', color: colors.warning }}>DRAFT (BELUM TERKIRIM)</Text>
+                <Text style={{ fontSize: 11, fontWeight: '800', color: colors.warning }}>BELUM DIKIRIM</Text>
               </View>
             ) : (
               <Pill label={existing.status === 'diverifikasi' ? 'DIVERIFIKASI SELESAI' : 'TERKIRIM'} tone={existing.status === 'diverifikasi' ? 'success' : 'info'} />
@@ -179,8 +179,8 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
           <Feather name="lock" size={16} color={colors.info} strokeWidth={iconStrokeWidth} />
           <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>
             {existing.status === 'diverifikasi'
-              ? 'Laporan ini telah Diverifikasi Selesai oleh Pengawas SPPG sehingga berstatus Terkunci (Read-Only). Buat laporan baru jika ingin mengunggah foto hari ini.'
-              : 'Peran Anda saat ini dalam mode Lihat (View-Only).'}
+              ? 'Laporan ini sudah diverifikasi oleh Pengawas SPPG dan tidak dapat diubah lagi. Buat laporan baru jika ingin mengunggah foto hari ini.'
+              : 'Anda hanya bisa melihat laporan ini, tidak dapat mengubahnya.'}
           </Text>
         </View>
       )}
@@ -204,12 +204,12 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
       <Card style={{ gap: spacing.md }}>
         <SectionTitle style={{ marginBottom: 0 }}>Menu Makanan SPPG</SectionTitle>
         <DropdownPicker
-          label="Pilih Katalog Menu"
+          label="Pilih Menu"
           icon="coffee"
           value={menuSelection}
           onSelect={onSelectMenu}
           disabled={readOnly}
-          options={[...MENU_OPTIONS.map((m) => ({ label: m.label, value: m.label })), { label: 'Lainnya (Isi Manual)', value: MANUAL_MENU_VALUE }]}
+          options={[...MENU_OPTIONS.map((m) => ({ label: m.label, value: m.label })), { label: 'Lainnya (Isi Sendiri)', value: MANUAL_MENU_VALUE }]}
         />
 
         {/* Selected Menu Photo Preview */}
@@ -218,7 +218,7 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
             <Image source={{ uri: selectedOption.fotoMenu }} style={styles.menuPreviewImg} resizeMode="cover" />
             <View style={{ flex: 1, gap: 4 }}>
               <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
-                Preview Visual Paket Menu:
+                Tampilan Paket Menu:
               </Text>
               <Text style={{ fontSize: 11, color: colors.textMuted }}>
                 {selectedOption.kategoriGizi}
@@ -229,7 +229,7 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
 
         {menuSelection === MANUAL_MENU_VALUE && (
           <>
-            <Input label="Nama Menu (Manual)" value={manualMenu} onChangeText={setManualMenu} placeholder="Tuliskan nama menu hari ini" editable={!readOnly} />
+            <Input label="Nama Menu" value={manualMenu} onChangeText={setManualMenu} placeholder="Tuliskan nama menu hari ini" editable={!readOnly} />
             <Input label="Kategori Gizi" value={kategoriGizi} onChangeText={setKategoriGizi} placeholder="Contoh: Karbohidrat, Protein, Sayur, Buah" editable={!readOnly} />
           </>
         )}
@@ -250,7 +250,7 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
               <PrimaryButton label="Pilih Video Galeri" icon="film" variant="outline" onPress={() => attachPhoto('library', ['videos'])} style={{ flex: 1 }} />
             </View>
             <PrimaryButton
-              label="+ Tambah Foto Presets (Simulasi)"
+              label="+ Tambah Foto Contoh"
               icon="plus-circle"
               variant="outline"
               onPress={attachSamplePhoto}
@@ -283,17 +283,17 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
 
       {!readOnly && (
         <View style={{ gap: spacing.sm }}>
-          <PrimaryButton label="Simpan Draft" icon="save" variant="secondary" onPress={handleSaveDraft} />
+          <PrimaryButton label="Simpan Sementara" icon="save" variant="secondary" onPress={handleSaveDraft} />
           <PrimaryButton label="Kirim Laporan" icon="send" onPress={handleSubmit} disabled={!canSubmit} />
           {!canSubmit && (
             <Text style={{ color: colors.textMuted, fontSize: fontSize.xs, textAlign: 'center' }}>
-              Simpan draft dan lengkapi minimal 2 foto serta menu untuk dapat mengirim.
+              Simpan sementara dan lengkapi minimal 2 foto serta menu untuk dapat mengirim.
             </Text>
           )}
           {saved && (
             <View style={[styles.successBanner, { backgroundColor: colors.successBg }]}>
               <Feather name="check-circle" size={16} color={colors.success} />
-              <Text style={{ color: colors.success, fontSize: fontSize.xs, fontWeight: '700' }}>Tersimpan lokal — menunggu sinkron</Text>
+              <Text style={{ color: colors.success, fontSize: fontSize.xs, fontWeight: '700' }}>Tersimpan — akan terkirim otomatis</Text>
             </View>
           )}
         </View>

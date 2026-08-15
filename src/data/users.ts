@@ -15,7 +15,7 @@ export const users: User[] = [
     nik: '3273010101900001',
     statusAktif: true,
     kategoriPegawai: 'inti_bgn',
-    fotoProfil: SPPG_ASSET_MAP.polri_1,
+    fotoProfil: SPPG_ASSET_MAP.profil_pria_paruh_baya,
   },
   {
     id: 'USR-015',
@@ -135,7 +135,7 @@ export const users: User[] = [
     shift: 'Pagi',
     jobdesk: 'driver_distribusi',
     kategoriPegawai: 'inti_bgn',
-    fotoProfil: SPPG_ASSET_MAP.polri_1,
+    fotoProfil: SPPG_ASSET_MAP.profil_pria_dewasa,
   },
 
   // ==========================================
@@ -150,7 +150,7 @@ export const users: User[] = [
     nik: '3171010101900005',
     statusAktif: true,
     kategoriPegawai: 'inti_bgn',
-    fotoProfil: SPPG_ASSET_MAP.polri_2,
+    fotoProfil: SPPG_ASSET_MAP.profil_pria_paruh_baya,
   },
   {
     id: 'USR-007',
@@ -218,7 +218,7 @@ export const users: User[] = [
     nik: '3578010101900008',
     statusAktif: true,
     kategoriPegawai: 'inti_bgn',
-    fotoProfil: SPPG_ASSET_MAP.polri_1,
+    fotoProfil: SPPG_ASSET_MAP.profil_pria_dewasa,
   },
   {
     id: 'USR-009',
@@ -259,7 +259,7 @@ export const users: User[] = [
     nik: '3275010101900011',
     statusAktif: true,
     kategoriPegawai: 'inti_bgn',
-    fotoProfil: SPPG_ASSET_MAP.polri_2,
+    fotoProfil: SPPG_ASSET_MAP.profil_pria_paruh_baya,
   },
   {
     id: 'USR-012',
@@ -285,7 +285,7 @@ export const users: User[] = [
     nik: '3273010101900013',
     statusAktif: true,
     wilayahPolres: 'Polres Metro Bekasi',
-    fotoProfil: SPPG_ASSET_MAP.polri_1,
+    fotoProfil: SPPG_ASSET_MAP.profil_pria_dewasa,
   },
   {
     id: 'USR-014',
