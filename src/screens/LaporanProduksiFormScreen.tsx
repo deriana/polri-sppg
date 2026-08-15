@@ -226,7 +226,22 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
   };
 
   const qcTone =
-    qcStatus === 'READY' ? 'success' : qcStatus === 'HOLD' ? 'warning' : qcStatus === 'REJECTED' ? 'danger' : 'neutral';
+    qcStatus === 'READY'
+      ? 'success'
+      : qcStatus === 'HOLD'
+      ? 'warning'
+      : qcStatus === 'REJECTED'
+      ? 'danger'
+      : 'neutral';
+
+  const qcToneColor =
+    qcStatus === 'READY'
+      ? colors.success
+      : qcStatus === 'HOLD'
+      ? colors.warning
+      : qcStatus === 'REJECTED'
+      ? colors.danger
+      : colors.primary;
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
@@ -247,6 +262,73 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
         <Pill label={qcStatus} tone={qcTone} />
       </View>
 
+      {/* 2. PROMINENT QUALITY CONTROL (QC) INSPECTION GATE (PALING AWAL & MENCELOK) */}
+      <Card
+        style={{
+          backgroundColor: qcStatus === 'READY' ? colors.successBg : qcStatus === 'HOLD' ? colors.warningBg : qcStatus === 'REJECTED' ? colors.dangerBg : colors.surface,
+          borderColor: qcToneColor,
+          borderWidth: 2,
+          gap: spacing.sm,
+        }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 }}>
+            <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: qcToneColor, alignItems: 'center', justifyContent: 'center' }}>
+              <Feather name="shield" size={20} color="#FFFFFF" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: qcToneColor, letterSpacing: 0.5 }}>
+                QUALITY CONTROL GATE (QC)
+              </Text>
+              <Text style={{ fontSize: fontSize.sm, fontWeight: '900', color: colors.text }}>
+                {qcStatus === 'READY'
+                  ? 'LOLOS UJI MUTU & KELAYAKAN'
+                  : qcStatus === 'HOLD'
+                  ? 'BATCH DITAHAN (HOLD)'
+                  : qcStatus === 'REJECTED'
+                  ? 'BATCH DITOLAK (REJECTED)'
+                  : 'MENUNGGU PEMERIKSAAN QC'}
+              </Text>
+            </View>
+          </View>
+          <Pill label={qcStatus} tone={qcTone} />
+        </View>
+
+        {/* QC Audit Details Box */}
+        <View style={[styles.qcDetailBox, { backgroundColor: colors.background, borderRadius: radius.md, borderColor: colors.border, borderWidth: 1 }]}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 4, borderBottomWidth: 1, borderColor: colors.border }}>
+            <Text style={{ fontSize: 11, color: colors.textMuted }}>Petugas QC / Gizi:</Text>
+            <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }}>
+              {existing?.qcApprovedBy || (qcStatus !== 'MENUNGGU_QC' ? currentUser.nama : 'Ahli Gizi / Cook')}
+            </Text>
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 }}>
+            <Text style={{ fontSize: 11, color: colors.textMuted }}>Waktu Verifikasi:</Text>
+            <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }}>
+              {qcTime ? `${qcTime} WIB` : 'Belum diverifikasi'}
+            </Text>
+          </View>
+          {qcNotes ? (
+            <View style={{ paddingTop: 4, borderTopWidth: 1, borderColor: colors.border }}>
+              <Text style={{ fontSize: 10.5, color: colors.textMuted }}>Catatan Organoleptik & Suhu:</Text>
+              <Text style={{ fontSize: 11, fontWeight: '700', color: colors.text, marginTop: 2 }}>
+                "{qcNotes}"
+              </Text>
+            </View>
+          ) : null}
+        </View>
+
+        {!readOnly && (
+          <PrimaryButton
+            label={qcStatus === 'READY' ? 'Review / Ubah Status QC Masakan' : 'Periksa & Uji Kelayakan QC Sekarang'}
+            icon="shield"
+            variant={qcStatus === 'READY' ? 'outline' : 'primary'}
+            onPress={() => setShowQcModal(true)}
+            style={{ marginTop: 2 }}
+          />
+        )}
+      </Card>
+
       {readOnly && existing && (
         <View style={[styles.warnBanner, { backgroundColor: colors.infoBg, borderRadius: radius.md }]}>
           <Feather name="lock" size={16} color={colors.info} strokeWidth={iconStrokeWidth} />
@@ -258,7 +340,7 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
         </View>
       )}
 
-      {/* 2. Production Stage Pipeline Tracker (Timestamping) */}
+      {/* 3. Production Stage Pipeline Tracker (Timestamping) */}
       <Card variant="accent" style={{ gap: spacing.sm }}>
         <SectionTitle style={{ marginBottom: 0 }}>Alur Tahap Produksi (Stage Timestamps)</SectionTitle>
         <Text style={{ fontSize: 11, color: colors.textMuted }}>
@@ -807,6 +889,10 @@ const styles = StyleSheet.create({
     padding: 12,
     borderWidth: 1,
     gap: 8,
+  },
+  qcDetailBox: {
+    padding: 10,
+    gap: 4,
   },
   schoolBreakdownBox: {
     padding: 12,
