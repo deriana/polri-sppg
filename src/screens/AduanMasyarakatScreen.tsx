@@ -34,17 +34,7 @@ export default function AduanMasyarakatScreen() {
   const { colors, fontSize, iconStrokeWidth, radius, spacing } = useTheme();
 
   const [activeTab, setActiveTab] = useState<string>('semua');
-  const [modalVisible, setModalVisible] = useState(false);
   const [selectedReport, setSelectedReport] = useState<PublicReport | null>(null);
-
-  // Form State
-  const [namaPelapor, setNamaPelapor] = useState('');
-  const [noHpPelapor, setNoHpPelapor] = useState('');
-  const [selectedSppgId, setSelectedSppgId] = useState(currentSppg?.id || sppgList[0]?.id || 'SPPG-001');
-  const [kategori, setKategori] = useState<PublicReportKategori>('kualitas_makanan');
-  const [judul, setJudul] = useState('');
-  const [deskripsi, setDeskripsi] = useState('');
-  const [fotoUri, setFotoUri] = useState<string | null>(null);
 
   // Response State
   const [respondingId, setRespondingId] = useState<string | null>(null);
@@ -55,31 +45,6 @@ export default function AduanMasyarakatScreen() {
     if (activeTab === 'semua') return true;
     return r.status === activeTab;
   });
-
-  const handleSubmitNewReport = () => {
-    if (!namaPelapor.trim() || !judul.trim() || !deskripsi.trim()) {
-      alert('Mohon lengkapi Nama, Judul, dan Deskripsi aduan.');
-      return;
-    }
-
-    submitPublicReport({
-      sppgId: selectedSppgId,
-      namaPelapor: namaPelapor.trim(),
-      noHpPelapor: noHpPelapor.trim() || '0812-XXXX-XXXX',
-      kategori,
-      judul: judul.trim(),
-      deskripsi: deskripsi.trim(),
-      fotoBukti: fotoUri || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80',
-      tanggal: new Date().toISOString().slice(0, 10),
-    });
-
-    setModalVisible(false);
-    setNamaPelapor('');
-    setNoHpPelapor('');
-    setJudul('');
-    setDeskripsi('');
-    setFotoUri(null);
-  };
 
   const handleSaveResponse = (id: string) => {
     updatePublicReportStatus(id, newStatus, tanggapanText.trim() ? tanggapanText.trim() : undefined);
@@ -114,17 +79,17 @@ export default function AduanMasyarakatScreen() {
           </View>
         </Card>
 
-        {/* Action Bar */}
+        {/* Action Bar Header */}
         <View style={styles.rowBetween}>
-          <Text style={{ fontSize: fontSize.md, fontWeight: '700', color: colors.text }}>
-            Daftar Laporan ({filteredReports.length})
-          </Text>
-          <PrimaryButton
-            label="Buat Aduan"
-            icon="plus"
-            onPress={() => setModalVisible(true)}
-            style={{ paddingHorizontal: spacing.md, height: 38 }}
-          />
+          <View>
+            <Text style={{ fontSize: fontSize.md, fontWeight: '800', color: colors.text }}>
+              Daftar Aduan Masuk ({filteredReports.length})
+            </Text>
+            <Text style={{ fontSize: 11, color: colors.textMuted, marginTop: 1 }}>
+              Klik kartu aduan untuk melihat rincian & menindaklanjuti
+            </Text>
+          </View>
+          <Pill tone="primary" label="Portal Publik" />
         </View>
 
         {/* Tabs Filter */}
@@ -216,89 +181,8 @@ export default function AduanMasyarakatScreen() {
         })}
       </ScrollView>
 
-      {/* Modal Form Aduan Baru */}
-      <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <Card style={[styles.modalContent, { backgroundColor: colors.surface }]}>
-            <View style={styles.rowBetween}>
-              <Text style={{ fontSize: fontSize.lg, fontWeight: '800', color: colors.text }}>Formulir Aduan Masyarakat</Text>
-              <Pressable onPress={() => setModalVisible(false)}>
-                <Feather name="x" size={22} color={colors.textMuted} strokeWidth={iconStrokeWidth} />
-              </Pressable>
-            </View>
-
-            <ScrollView contentContainerStyle={{ gap: spacing.sm, paddingVertical: spacing.xs }}>
-              <Input label="Nama Pelapor / Instansi" value={namaPelapor} onChangeText={setNamaPelapor} placeholder="Contoh: Ibu Ani (Orang Tua Siswa)" />
-              <Input label="No. Handphone / WhatsApp" value={noHpPelapor} onChangeText={setNoHpPelapor} placeholder="Contoh: 0812-3456-7890" keyboardType="phone-pad" />
-              
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>Pilih Dapur SPPG Terkait</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.xs }}>
-                {sppgList.map((s) => (
-                  <Pressable
-                    key={s.id}
-                    onPress={() => setSelectedSppgId(s.id)}
-                    style={[
-                      styles.chip,
-                      {
-                        backgroundColor: selectedSppgId === s.id ? colors.primary : colors.background,
-                        borderColor: selectedSppgId === s.id ? colors.primary : colors.border,
-                        borderRadius: radius.md,
-                      },
-                    ]}
-                  >
-                    <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: selectedSppgId === s.id ? colors.textInverse : colors.text }}>
-                      {s.nama}
-                    </Text>
-                  </Pressable>
-                ))}
-              </ScrollView>
-
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }}>Kategori Aduan</Text>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
-                {(Object.keys(KATEGORI_LABEL) as PublicReportKategori[]).map((kat) => (
-                  <Pressable
-                    key={kat}
-                    onPress={() => setKategori(kat)}
-                    style={[
-                      styles.chip,
-                      {
-                        backgroundColor: kategori === kat ? colors.primary : colors.background,
-                        borderColor: kategori === kat ? colors.primary : colors.border,
-                        borderRadius: radius.md,
-                      },
-                    ]}
-                  >
-                    <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: kategori === kat ? colors.textInverse : colors.text }}>
-                      {KATEGORI_LABEL[kat]}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-
-              <Input label="Judul Ringkas Aduan" value={judul} onChangeText={setJudul} placeholder="Contoh: Pengiriman Keterlambatan di SDN 01" />
-              <Input label="Rincian Deskripsi Aduan" value={deskripsi} onChangeText={setDeskripsi} placeholder="Jelaskan secara rinci situasi yang ditemukan..." multiline />
-
-              <Pressable
-                onPress={() => setFotoUri('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80')}
-                style={[styles.uploadBox, { backgroundColor: colors.background, borderColor: colors.border, borderRadius: radius.md }]}
-              >
-                <Feather name="camera" size={20} color={colors.primary} strokeWidth={iconStrokeWidth} />
-                <Text style={{ fontSize: fontSize.xs, color: colors.primary, fontWeight: '700' }}>
-                  {fotoUri ? '✓ Foto Lampiran Terpilih' : '+ Unggah Foto Bukti (Kamera/Galeri)'}
-                </Text>
-              </Pressable>
-            </ScrollView>
-
-            <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs }}>
-              <SecondaryButton label="Batal" onPress={() => setModalVisible(false)} style={{ flex: 1 }} />
-              <PrimaryButton label="Kirim Aduan" onPress={handleSubmitNewReport} style={{ flex: 1 }} />
-            </View>
-          </Card>
-        </View>
-      </Modal>
-
-      {/* Modal Detail Aduan Informotif */}
-      <Modal visible={!!selectedReport} animationType="slide" transparent>
+      {/* Modal Detail Aduan Informatif */}
+      <Modal visible={!!selectedReport} animationType="slide" transparent onRequestClose={() => setSelectedReport(null)}>
         <View style={styles.modalOverlay}>
           <Card style={[styles.modalContent, { backgroundColor: colors.surface, maxHeight: '92%' }]}>
             <View style={styles.rowBetween}>

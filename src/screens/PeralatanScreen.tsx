@@ -13,8 +13,9 @@ const KATEGORI_OPTIONS: { id: PeralatanKategori | 'semua'; label: string; icon: 
   { id: 'kendaraan', label: 'Mobil & Motor Box', icon: 'truck' },
   { id: 'ompreng_tray', label: 'Ompreng Stainless', icon: 'grid' },
   { id: 'kontainer_suhu', label: 'Thermal Container', icon: 'box' },
-  { id: 'alat_masak', label: 'Kettle & Freezer', icon: 'coffee' },
+  { id: 'alat_masak', label: 'Kettle & Kompor', icon: 'coffee' },
   { id: 'sealing_packaging', label: 'Sealer & Packing', icon: 'package' },
+  { id: 'kebersihan_apd', label: 'Steril & Sanitasi', icon: 'shield' },
 ];
 
 export default function PeralatanScreen() {
@@ -22,12 +23,53 @@ export default function PeralatanScreen() {
   const { updatePeralatanStatus, role } = useApp();
   const { colors, fontSize, iconSize, iconStrokeWidth, radius, shadow, spacing } = useTheme();
 
-  const [activeKategori, setActiveKategori] = useState<PeralatanKategori | 'semua'>('semua');
+  const [activeKategori, setActiveKategori] = useState<PeralatanKategori | 'semua'>(() => {
+    if (role === 'PEMORSI_PACKING') return 'ompreng_tray';
+    if (role === 'PETUGAS_SANITASI') return 'kebersihan_apd';
+    if (role === 'DRIVER') return 'kendaraan';
+    if (role === 'CHEF_UTAMA') return 'alat_masak';
+    return 'semua';
+  });
   const [selectedEq, setSelectedEq] = useState<Peralatan | null>(null);
   const [editStatus, setEditStatus] = useState<PeralatanStatus>('ready');
   const [catatanText, setCatatanText] = useState('');
 
-  const canEdit = role ? ROLE_PERMISSIONS[role].canManageGudang : false;
+  // Interactive Checklist per Role in Peralatan Hub
+  const [packingTodos, setPackingTodos] = useState<{ id: string; text: string; done: boolean }[]>([
+    { id: '1', text: 'Pastikan 1.500 Ompreng Stainless dalam kondisi kering dan steril', done: true },
+    { id: '2', text: 'Cek karet seal penutup ompreng agar rapat dan anti-bocor', done: true },
+    { id: '3', text: 'Kalibrasi nol timbangan digital presisi sebelum pemorsian', done: true },
+    { id: '4', text: 'Panaskan & siapkan 50 Thermal Box dengan holding suhu >60°C', done: false },
+    { id: '5', text: 'Susun ompreng per sekolah dan lakukan serah terima ke driver', done: false },
+  ]);
+
+  const [sanitasiTodos, setSanitasiTodos] = useState<{ id: string; text: string; done: boolean }[]>([
+    { id: '1', text: 'Isi air mesin dishwasher dan setting pemanas suhu sterilisasi 85°C', done: true },
+    { id: '2', text: 'Cuci & bilas 1.500 ompreng stainless kotor retur dari sekolah', done: true },
+    { id: '3', text: 'Desinfeksi meja kerja pemorsian, talenan, dan pisau dapur', done: true },
+    { id: '4', text: 'Pemeriksaan kelayakan APD lengkap seluruh staf sebelum shift', done: true },
+    { id: '5', text: 'Kuras dan bersihkan perangkap lemak (grease trap) limbah dapur', done: false },
+  ]);
+
+  const togglePackingTodo = (id: string) => {
+    setPackingTodos((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
+  };
+
+  const toggleSanitasiTodo = (id: string) => {
+    setSanitasiTodos((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
+  };
+
+  const canEditEquipment = (eq?: Peralatan | null) => {
+    if (!role) return false;
+    if (role === 'KEPALA_SPPG' || role === 'SUPERVISOR_POLRES' || role === 'SUPERVISOR_POLDA') return true;
+    if (role === 'PETUGAS_LOGISTIK') return true;
+    if (role === 'PEMORSI_PACKING' && (eq?.kategori === 'kontainer_suhu' || eq?.kategori === 'ompreng_tray' || eq?.kategori === 'sealing_packaging')) return true;
+    if (role === 'AHLI_GIZI' && (eq?.kategori === 'kontainer_suhu' || eq?.kategori === 'kebersihan_apd')) return true;
+    if (role === 'CHEF_UTAMA' && eq?.kategori === 'alat_masak') return true;
+    if (role === 'PETUGAS_SANITASI' && (eq?.kategori === 'kebersihan_apd' || eq?.kategori === 'ompreng_tray')) return true;
+    if (role === 'DRIVER' && eq?.kategori === 'kendaraan') return true;
+    return false;
+  };
 
   const filtered = peralatanInScope.filter(
     (eq) => activeKategori === 'semua' || eq.kategori === activeKategori,
@@ -37,6 +79,7 @@ export default function PeralatanScreen() {
   const totalBermasalah = peralatanInScope.reduce((acc, curr) => acc + curr.jumlahBermasalah, 0);
 
   const openStatusModal = (eq: Peralatan) => {
+    if (!canEditEquipment(eq)) return;
     setSelectedEq(eq);
     setEditStatus(eq.status);
     setCatatanText(eq.catatanKondisi);
@@ -104,6 +147,132 @@ export default function PeralatanScreen() {
           </View>
         </View>
       </Card>
+
+      {/* Role-Specific Interactive Work Checklist (Pemorsi & Packing) */}
+      {role === 'PEMORSI_PACKING' && (
+        <Card variant="accent" style={{ gap: spacing.sm }}>
+          <View style={styles.rowBetween}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Feather name="box" size={16} color={colors.primary} />
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary }}>
+                CHECKLIST KESIAPAN WADAH SAJI & PACKING
+              </Text>
+            </View>
+            <Pill
+              label={`${packingTodos.filter((t) => t.done).length}/${packingTodos.length} Selesai`}
+              tone={packingTodos.every((t) => t.done) ? 'success' : 'primary'}
+            />
+          </View>
+
+          <View style={{ gap: 6 }}>
+            {packingTodos.map((todo) => (
+              <Pressable
+                key={todo.id}
+                onPress={() => togglePackingTodo(todo.id)}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: 8,
+                  backgroundColor: colors.background,
+                  borderRadius: radius.sm,
+                  borderWidth: 1,
+                  borderColor: todo.done ? colors.success : colors.border,
+                }}
+              >
+                <View
+                  style={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: 4,
+                    backgroundColor: todo.done ? colors.success : 'transparent',
+                    borderColor: todo.done ? colors.success : colors.textMuted,
+                    borderWidth: 1.5,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {todo.done && <Feather name="check" size={13} color="#FFFFFF" strokeWidth={3} />}
+                </View>
+                <Text
+                  style={{
+                    fontSize: fontSize.xs,
+                    color: todo.done ? colors.textMuted : colors.text,
+                    textDecorationLine: todo.done ? 'line-through' : 'none',
+                    fontWeight: todo.done ? '500' : '700',
+                    flex: 1,
+                  }}
+                >
+                  {todo.text}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </Card>
+      )}
+
+      {/* Role-Specific Interactive Work Checklist (Petugas Sanitasi) */}
+      {role === 'PETUGAS_SANITASI' && (
+        <Card variant="accent" style={{ gap: spacing.sm }}>
+          <View style={styles.rowBetween}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Feather name="shield" size={16} color={colors.primary} />
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary }}>
+                PROSEDUR STERILISASI & SANITASI ALAT DAPUR
+              </Text>
+            </View>
+            <Pill
+              label={`${sanitasiTodos.filter((t) => t.done).length}/${sanitasiTodos.length} Selesai`}
+              tone={sanitasiTodos.every((t) => t.done) ? 'success' : 'primary'}
+            />
+          </View>
+
+          <View style={{ gap: 6 }}>
+            {sanitasiTodos.map((todo) => (
+              <Pressable
+                key={todo.id}
+                onPress={() => toggleSanitasiTodo(todo.id)}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: 8,
+                  backgroundColor: colors.background,
+                  borderRadius: radius.sm,
+                  borderWidth: 1,
+                  borderColor: todo.done ? colors.success : colors.border,
+                }}
+              >
+                <View
+                  style={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: 4,
+                    backgroundColor: todo.done ? colors.success : 'transparent',
+                    borderColor: todo.done ? colors.success : colors.textMuted,
+                    borderWidth: 1.5,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {todo.done && <Feather name="check" size={13} color="#FFFFFF" strokeWidth={3} />}
+                </View>
+                <Text
+                  style={{
+                    fontSize: fontSize.xs,
+                    color: todo.done ? colors.textMuted : colors.text,
+                    textDecorationLine: todo.done ? 'line-through' : 'none',
+                    fontWeight: todo.done ? '500' : '700',
+                    flex: 1,
+                  }}
+                >
+                  {todo.text}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </Card>
+      )}
 
       {/* Category Pills */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.xs, marginVertical: spacing.xs }}>
@@ -181,13 +350,29 @@ export default function PeralatanScreen() {
               </Text>
             </View>
 
-            {canEdit && (
+            {eq.kategori === 'kontainer_suhu' && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                <Feather name="thermometer" size={13} color={colors.success} />
+                <Text style={{ fontSize: 11, fontWeight: '700', color: colors.success }}>
+                  Uji Holding Suhu: Min 60°C saat pengiriman (Khusus Pemorsi & QC)
+                </Text>
+              </View>
+            )}
+
+            {canEditEquipment(eq) ? (
               <SecondaryButton
-                label="Perbarui Status & Kondisi"
-                icon="edit-3"
+                label={eq.kategori === 'kontainer_suhu' ? 'Uji Suhu & Perbarui Status' : 'Perbarui Status & Kondisi'}
+                icon={eq.kategori === 'kontainer_suhu' ? 'thermometer' : 'edit-3'}
                 onPress={() => openStatusModal(eq)}
                 style={{ marginTop: 4 }}
               />
+            ) : (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6, opacity: 0.7 }}>
+                <Feather name="lock" size={12} color={colors.textMuted} />
+                <Text style={{ fontSize: 10.5, color: colors.textMuted, fontStyle: 'italic' }}>
+                  Akses audit/uji kondisi alat ini dibatasi untuk divisi yang berwenang.
+                </Text>
+              </View>
             )}
           </Card>
         ))

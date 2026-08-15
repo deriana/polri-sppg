@@ -1,4 +1,5 @@
 import { FoodSafetyLog } from '../types';
+import { dateRange } from './dateRange';
 
 // Max hold-time (hours) per jenis makanan before it is considered past its safe limit.
 // Consumed by src/utils/foodSafety.ts to compute estimasiKadaluarsa/statusKadaluarsa.
@@ -10,42 +11,44 @@ export const JENIS_MAKANAN_MASA_SIMPAN: Record<string, number> = {
   buah: 8,
 };
 
-export const foodSafetyList: FoodSafetyLog[] = [
-  {
-    id: 'FSL-001',
+const FOOD_SAFETY_DATES = dateRange('2026-08-03', '2026-08-10');
+
+// 2 pengukuran per hari (nasi pagi + satu lauk/sayur bergilir) untuk SPPG-001,
+// mencakup 7 hari terakhir s.d. hari ini agar dashboard "hari ini" selalu ada datanya.
+const ROTATING_JENIS: FoodSafetyLog['jenisMakanan'][] = ['sayur berkuah', 'lauk berkuah', 'lauk goreng', 'buah'];
+
+let seq = 0;
+export const foodSafetyList: FoodSafetyLog[] = FOOD_SAFETY_DATES.flatMap((tanggal, idx) => {
+  seq += 1;
+  const nasi: FoodSafetyLog = {
+    id: `FSL-${String(seq).padStart(3, '0')}`,
     sppgId: 'SPPG-001',
-    tanggal: '2026-08-08',
+    tanggal,
     suhuPenyimpanan: 4.5,
     waktuUkurSuhu: '06:30',
     waktuProduksi: '06:00',
     waktuPengiriman: '09:00',
     jenisMakanan: 'nasi',
-    estimasiKadaluarsa: '2026-08-08 10:00',
+    estimasiKadaluarsa: `${tanggal} 10:00`,
     statusKadaluarsa: 'aman',
     sumberSuhu: 'sensor_iot',
-  },
-  {
-    id: 'FSL-002',
+  };
+
+  seq += 1;
+  const jenisMakanan = ROTATING_JENIS[idx % ROTATING_JENIS.length];
+  const isBermasalah = tanggal === '2026-08-09';
+  const kedua: FoodSafetyLog = {
+    id: `FSL-${String(seq).padStart(3, '0')}`,
     sppgId: 'SPPG-001',
-    tanggal: '2026-08-08',
-    suhuPenyimpanan: 5.0,
+    tanggal,
+    suhuPenyimpanan: isBermasalah ? 9.2 : 5.0,
     waktuUkurSuhu: '06:35',
     waktuProduksi: '06:00',
-    waktuPengiriman: null,
-    jenisMakanan: 'sayur berkuah',
-    estimasiKadaluarsa: '2026-08-08 09:00',
-    statusKadaluarsa: 'mendekati_batas',
-  },
-  {
-    id: 'FSL-003',
-    sppgId: 'SPPG-001',
-    tanggal: '2026-08-09',
-    suhuPenyimpanan: 9.2,
-    waktuUkurSuhu: '06:20',
-    waktuProduksi: '06:00',
-    waktuPengiriman: null,
-    jenisMakanan: 'lauk berkuah',
-    estimasiKadaluarsa: '2026-08-09 10:00',
-    statusKadaluarsa: 'lewat_batas',
-  },
-];
+    waktuPengiriman: isBermasalah ? null : `${tanggal} 09:00`,
+    jenisMakanan,
+    estimasiKadaluarsa: `${tanggal} 09:00`,
+    statusKadaluarsa: isBermasalah ? 'lewat_batas' : idx % 5 === 0 ? 'mendekati_batas' : 'aman',
+  };
+
+  return [nasi, kedua];
+});

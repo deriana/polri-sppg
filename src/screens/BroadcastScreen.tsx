@@ -59,33 +59,37 @@ export default function BroadcastScreen({ navigation }: any) {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <Feather name="radio" size={18} color={isDark ? colors.gold : colors.primary} />
             <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
-              PUSAT BROADCAST & PENGUMUMAN RESMI
+              INSTRUKSI & BROADCAST KOMANDO PUSAT
             </Text>
           </View>
-          <Pill label={`${broadcastInScope.length} Pesan`} tone="primary" />
+          <Pill label={`${broadcastInScope.length} Instruksi`} tone="primary" />
         </View>
         <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, marginTop: 2 }}>
-          Saluran instruksi langsung dari Pengawas Polres/Polda & Kepala SPPG ke seluruh tim operasional & driver.
+          Saluran instruksi resmi & maklumat dari Mabes Polri dan Badan Gizi Nasional (BGN) Pusat yang diturunkan ke unit SPPG pelaksana.
         </Text>
       </Card>
 
-      {/* Button to Create Broadcast for Authorized Roles */}
+      {/* Button to Create Broadcast for Authorized / Simulation */}
       {permissions.canManageBroadcast && (
         <PrimaryButton
-          label="+ Buat Broadcast Pengumuman Baru"
+          label="+ Simulasi Terbitkan Broadcast dari Pusat"
           icon="radio"
+          variant="secondary"
           onPress={() => setShowModal(true)}
         />
       )}
 
       {/* Broadcast Feed */}
-      <SectionTitle>Pesan Pengumuman Terkirim & Masuk</SectionTitle>
+      <SectionTitle>Daftar Maklumat & Instruksi Resmi</SectionTitle>
 
       <View style={{ gap: spacing.sm }}>
         {broadcastInScope.map((bc) => (
           <Card key={bc.id} style={{ gap: 8 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Pill label={`Tingkat: ${bc.tingkat.toUpperCase()}`} tone={TINGKAT_TONE[bc.tingkat]} />
+              <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
+                <Pill label="KOMANDO PUSAT / BGN" tone="primary" />
+                <Pill label={bc.tingkat.toUpperCase()} tone={TINGKAT_TONE[bc.tingkat]} />
+              </View>
               <Text style={{ fontSize: 11, color: colors.textMuted }}>{bc.timestamp}</Text>
             </View>
 
@@ -98,9 +102,9 @@ export default function BroadcastScreen({ navigation }: any) {
             </Text>
 
             <View style={[styles.bcFooter, { borderTopColor: colors.border }]}>
-              <Feather name="user-check" size={13} color={colors.primary} />
+              <Feather name="shield" size={13} color={colors.primary} />
               <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: '600' }}>
-                Dari: {bc.pengirimNama} ({ROLE_LABEL[bc.pengirimRole]})
+                Diterbitkan oleh: <Text style={{ color: colors.text, fontWeight: '700' }}>{bc.pengirimNama}</Text> ({ROLE_LABEL[bc.pengirimRole] ?? bc.pengirimRole})
               </Text>
             </View>
           </Card>

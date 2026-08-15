@@ -1,89 +1,39 @@
 import { Presensi } from '../types';
 import { SPPG_ASSET_MAP } from './sppgAssetMap';
+import { dateRange } from './dateRange';
 
-export const presensiList: Presensi[] = [
-  {
-    id: 'PRE-001',
-    userId: 'USR-001',
-    tanggal: '2026-08-09',
-    jamMasuk: '06:05',
-    jamKeluar: null,
-    fotoSelfieMasuk: SPPG_ASSET_MAP.polri_1,
-    fotoSelfieKeluar: null,
-    geotagMasuk: { lat: -6.9147, lng: 107.6098 },
-    geotagKeluar: null,
-    status: 'hadir',
-  },
-  {
-    id: 'PRE-002',
-    userId: 'USR-002',
-    tanggal: '2026-08-09',
-    jamMasuk: '06:15',
-    jamKeluar: '14:20',
-    fotoSelfieMasuk: SPPG_ASSET_MAP.profil_pria_paruh_baya,
-    fotoSelfieKeluar: SPPG_ASSET_MAP.profil_pria_paruh_baya,
-    geotagMasuk: { lat: -6.9147, lng: 107.6098 },
-    geotagKeluar: { lat: -6.9147, lng: 107.6098 },
-    status: 'hadir',
-  },
-  {
-    id: 'PRE-003',
-    userId: 'USR-003',
-    tanggal: '2026-08-09',
-    jamMasuk: '06:30',
-    jamKeluar: null,
-    fotoSelfieMasuk: SPPG_ASSET_MAP.profil_pria_dewasa,
-    fotoSelfieKeluar: null,
-    geotagMasuk: { lat: -6.9148, lng: 107.6099 },
-    geotagKeluar: null,
-    status: 'hadir',
-  },
-  {
-    id: 'PRE-004',
-    userId: 'USR-004',
-    tanggal: '2026-08-09',
-    jamMasuk: '06:10',
-    jamKeluar: '14:15',
-    fotoSelfieMasuk: SPPG_ASSET_MAP.profil_wanita_dewasa,
-    fotoSelfieKeluar: SPPG_ASSET_MAP.profil_wanita_dewasa,
-    geotagMasuk: { lat: -6.9147, lng: 107.6098 },
-    geotagKeluar: { lat: -6.9147, lng: 107.6098 },
-    status: 'hadir',
-  },
-  {
-    id: 'PRE-005',
-    userId: 'USR-015',
-    tanggal: '2026-08-09',
-    jamMasuk: '06:40',
-    jamKeluar: null,
-    fotoSelfieMasuk: SPPG_ASSET_MAP.profil_wanita_dewasa,
-    fotoSelfieKeluar: null,
-    geotagMasuk: { lat: -6.9147, lng: 107.6098 },
-    geotagKeluar: null,
-    status: 'hadir',
-  },
-  {
-    id: 'PRE-006',
-    userId: 'USR-005',
-    tanggal: '2026-08-09',
-    jamMasuk: '06:00',
-    jamKeluar: null,
-    fotoSelfieMasuk: SPPG_ASSET_MAP.polri_2,
-    fotoSelfieKeluar: null,
-    geotagMasuk: { lat: -6.2934, lng: 106.7986 },
-    geotagKeluar: null,
-    status: 'hadir',
-  },
-  {
-    id: 'PRE-007',
-    userId: 'USR-006',
-    tanggal: '2026-08-09',
-    jamMasuk: '06:12',
-    jamKeluar: null,
-    fotoSelfieMasuk: SPPG_ASSET_MAP.profil_pria_paruh_baya,
-    fotoSelfieKeluar: null,
-    geotagMasuk: { lat: -6.2934, lng: 106.7986 },
-    geotagKeluar: null,
-    status: 'hadir',
-  },
+const PRESENSI_DATES = dateRange('2026-08-01', '2026-08-15');
+const TODAY = '2026-08-15';
+
+const STAFF = [
+  { userId: 'USR-001', jamMasuk: '05:30', jamKeluar: '16:00' as string | null, foto: SPPG_ASSET_MAP.profil_pria_paruh_baya, geotag: { lat: -6.9147, lng: 107.6098 } },
+  { userId: 'USR-002', jamMasuk: '04:45', jamKeluar: '14:20' as string | null, foto: SPPG_ASSET_MAP.profil_pria_paruh_baya, geotag: { lat: -6.9147, lng: 107.6098 } },
+  { userId: 'USR-003', jamMasuk: '06:00', jamKeluar: '15:00' as string | null, foto: SPPG_ASSET_MAP.profil_pria_dewasa, geotag: { lat: -6.9148, lng: 107.6099 } },
+  { userId: 'USR-004', jamMasuk: '05:00', jamKeluar: '14:15' as string | null, foto: SPPG_ASSET_MAP.profil_wanita_dewasa, geotag: { lat: -6.9147, lng: 107.6098 } },
+  { userId: 'USR-005', jamMasuk: '05:30', jamKeluar: '15:30' as string | null, foto: SPPG_ASSET_MAP.profil_pria_dewasa, geotag: { lat: -6.2934, lng: 106.7986 } },
+  { userId: 'USR-015', jamMasuk: '05:45', jamKeluar: '16:00' as string | null, foto: SPPG_ASSET_MAP.profil_wanita_dewasa, geotag: { lat: -6.9147, lng: 107.6098 } },
+  { userId: 'USR-019', jamMasuk: '05:15', jamKeluar: '14:30' as string | null, foto: SPPG_ASSET_MAP.profil_wanita_dewasa, geotag: { lat: -6.9147, lng: 107.6098 } },
+  { userId: 'USR-020', jamMasuk: '04:30', jamKeluar: '15:00' as string | null, foto: SPPG_ASSET_MAP.profil_pria_dewasa, geotag: { lat: -6.9147, lng: 107.6098 } },
+  { userId: 'USR-021', jamMasuk: '05:00', jamKeluar: '14:30' as string | null, foto: SPPG_ASSET_MAP.profil_wanita_dewasa, geotag: { lat: -6.9147, lng: 107.6098 } },
 ];
+
+// Presensi harian staf & driver — sampai hari ini (2026-08-15).
+let seq = 0;
+export const presensiList: Presensi[] = PRESENSI_DATES.flatMap((tanggal) =>
+  STAFF.map((staf) => {
+    seq += 1;
+    const jamKeluar = tanggal === TODAY ? null : staf.jamKeluar;
+    return {
+      id: `PRE-${String(seq).padStart(4, '0')}`,
+      userId: staf.userId,
+      tanggal,
+      jamMasuk: staf.jamMasuk,
+      jamKeluar,
+      fotoSelfieMasuk: staf.foto,
+      fotoSelfieKeluar: jamKeluar ? staf.foto : null,
+      geotagMasuk: staf.geotag,
+      geotagKeluar: jamKeluar ? staf.geotag : null,
+      status: 'hadir',
+    };
+  }),
+);

@@ -39,10 +39,34 @@ export default function AlertDetailScreen({ navigation, route }: any) {
   const canEskalasi = role === 'SUPERVISOR_POLDA' && sppg?.wilayahPolda === currentUser?.wilayahPolda;
   const canAct = canResolve || canFollowUp;
 
-  // Follow-up quick-action: Supervisor Polres/Polda (and Kepala SPPG, harmless) can
-  // call/WhatsApp the SPPG's Kepala SPPG directly from here — real Linking, not a simulation.
-  const canContactKepala = role === 'SUPERVISOR_POLRES' || role === 'SUPERVISOR_POLDA' || role === 'KEPALA_SPPG';
-  const kepalaSppg = canContactKepala ? users.find((u) => u.sppgId === alert.sppgId && u.role === 'KEPALA_SPPG') : undefined;
+  // Role-aware Contact Target:
+  // - If current user is KEPALA_SPPG: contact the operational team (Chef, Ahli Gizi, Logistik, or Driver)
+  // - If current user is SUPERVISOR or other roles: contact the SPPG's Kepala SPPG
+  const isSelfKepala = role === 'KEPALA_SPPG';
+  let contactTarget = null;
+  let contactTitle = 'Hubungi Petugas Terkait';
+
+  if (isSelfKepala) {
+    if (alert.jenis === 'suhu_tidak_normal' || alert.jenis === 'checklist_kritis') {
+      contactTarget =
+        users.find((u) => u.sppgId === alert.sppgId && u.role === 'CHEF_UTAMA') ||
+        users.find((u) => u.sppgId === alert.sppgId && u.role === 'AHLI_GIZI');
+      contactTitle = 'Hubungi Koki Utama (Chef)';
+    } else if (alert.jenis === 'laporan_terlambat') {
+      contactTarget =
+        users.find((u) => u.sppgId === alert.sppgId && u.role === 'DRIVER') ||
+        users.find((u) => u.sppgId === alert.sppgId && u.role === 'PETUGAS_LOGISTIK');
+      contactTitle = 'Hubungi Driver Armada / Logistik';
+    } else {
+      contactTarget =
+        users.find((u) => u.sppgId === alert.sppgId && u.role === 'PETUGAS_LOGISTIK') ||
+        users.find((u) => u.sppgId === alert.sppgId && u.role === 'AHLI_GIZI');
+      contactTitle = 'Hubungi Penanggung Jawab Terkait';
+    }
+  } else {
+    contactTarget = users.find((u) => u.sppgId === alert.sppgId && u.role === 'KEPALA_SPPG' && u.id !== currentUser?.id);
+    contactTitle = 'Hubungi Kepala SPPG';
+  }
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
@@ -65,13 +89,15 @@ export default function AlertDetailScreen({ navigation, route }: any) {
         <Text style={{ color: colors.text, fontSize: fontSize.sm, lineHeight: 20 }}>{alert.deskripsi}</Text>
       </Card>
 
-      {kepalaSppg && (
+      {contactTarget && (
         <Card style={{ gap: spacing.sm }}>
-          <SectionTitle style={{ marginBottom: 0 }}>Hubungi Kepala SPPG</SectionTitle>
-          <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>{kepalaSppg.nama} • {kepalaSppg.noHp}</Text>
+          <SectionTitle style={{ marginBottom: 0 }}>{contactTitle}</SectionTitle>
+          <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>
+            {contactTarget.nama} • {contactTarget.noHp}
+          </Text>
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-            <IconButton icon="phone" tone="primary" onPress={() => Linking.openURL(`tel:${kepalaSppg.noHp}`)} />
-            <IconButton icon="message-circle" tone="success" onPress={() => Linking.openURL(`https://wa.me/${toWhatsAppNumber(kepalaSppg.noHp)}`)} />
+            <IconButton icon="phone" tone="primary" onPress={() => Linking.openURL(`tel:${contactTarget?.noHp}`)} />
+            <IconButton icon="message-circle" tone="success" onPress={() => Linking.openURL(`https://wa.me/${toWhatsAppNumber(contactTarget?.noHp || '')}`)} />
             <Text style={{ color: colors.textMuted, fontSize: fontSize.xs, alignSelf: 'center' }}>Telepon / WhatsApp</Text>
           </View>
         </Card>

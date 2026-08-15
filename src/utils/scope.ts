@@ -20,8 +20,13 @@ import {
 
 export const ROLE_LABEL: Record<Role, string> = {
   KEPALA_SPPG: 'Kepala SPPG',
-  PETUGAS_LAPANGAN: 'Petugas Lapangan',
+  AHLI_GIZI: 'Ahli Gizi SPPG',
+  CHEF_UTAMA: 'Chef Utama & Cook',
+  PEMORSI_PACKING: 'Petugas Pemorsi & Packing',
+  PETUGAS_LOGISTIK: 'Petugas Logistik & Gudang',
+  PETUGAS_SANITASI: 'Petugas Sanitasi & APD',
   DRIVER: 'Driver & Kurir Armada',
+  PETUGAS_LAPANGAN: 'Petugas Lapangan',
   SUPERVISOR_POLRES: 'Supervisor Polres',
   SUPERVISOR_POLDA: 'Supervisor Polda',
 };
@@ -43,7 +48,8 @@ export interface RolePermission {
   canVerifyLaporan: boolean; // mark a LaporanProduksi as diverifikasi
   canManageGudang: boolean;
   canManageDistribusi: boolean;
-  canManageMenu: boolean; // Menu Kalender: ubah menu terencana untuk tanggal tertentu (Kepala SPPG saja)
+  canManageMenu: boolean; // Menu Kalender: ubah menu terencana untuk tanggal tertentu
+  canManageGizi: boolean; // Khusus Ahli Gizi: input kandungan pokok gizi & evaluasi AKG
   canManageAnggaran: boolean; // Fitur Log Anggaran & Pengeluaran
   canManageBroadcast: boolean; // Fitur Broadcast Pengumuman Resmi
   canFollowUpAlert: boolean; // Supervisor Polres: baru -> ditindaklanjuti
@@ -65,6 +71,7 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canManageGudang: true,
     canManageDistribusi: true,
     canManageMenu: true,
+    canManageGizi: true,
     canManageAnggaran: true,
     canManageBroadcast: true,
     canFollowUpAlert: false,
@@ -75,6 +82,106 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     isViewOnly: false,
     scopeLevel: 'sppg',
   },
+  AHLI_GIZI: {
+    canCreate: true,
+    canUpdateOwn: true,
+    canDelete: false,
+    canManageStaff: false,
+    canVerifyLaporan: true,
+    canManageGudang: false,
+    canManageDistribusi: false,
+    canManageMenu: true,
+    canManageGizi: true,
+    canManageAnggaran: false,
+    canManageBroadcast: false,
+    canFollowUpAlert: false,
+    canResolveAlert: false,
+    canEskalasiAlert: false,
+    canExportLaporan: false,
+    isDriver: false,
+    isViewOnly: false,
+    scopeLevel: 'assigned',
+  },
+  CHEF_UTAMA: {
+    canCreate: true,
+    canUpdateOwn: true,
+    canDelete: false,
+    canManageStaff: false,
+    canVerifyLaporan: false,
+    canManageGudang: false,
+    canManageDistribusi: false,
+    canManageMenu: true,
+    canManageGizi: false,
+    canManageAnggaran: false,
+    canManageBroadcast: false,
+    canFollowUpAlert: false,
+    canResolveAlert: false,
+    canEskalasiAlert: false,
+    canExportLaporan: false,
+    isDriver: false,
+    isViewOnly: false,
+    scopeLevel: 'assigned',
+  },
+  PEMORSI_PACKING: {
+    canCreate: true,
+    canUpdateOwn: true,
+    canDelete: false,
+    canManageStaff: false,
+    canVerifyLaporan: false,
+    canManageGudang: false,
+    canManageDistribusi: false,
+    canManageMenu: false,
+    canManageGizi: false,
+    canManageAnggaran: false,
+    canManageBroadcast: false,
+    canFollowUpAlert: false,
+    canResolveAlert: false,
+    canEskalasiAlert: false,
+    canExportLaporan: false,
+    isDriver: false,
+    isViewOnly: false,
+    scopeLevel: 'assigned',
+  },
+  PETUGAS_LOGISTIK: {
+    canCreate: true,
+    canUpdateOwn: true,
+    canDelete: false,
+    canManageStaff: false,
+    canVerifyLaporan: false,
+    canManageGudang: true,
+    canManageDistribusi: false,
+    canManageMenu: false,
+    canManageGizi: false,
+    canManageAnggaran: true,
+    canManageBroadcast: false,
+    canFollowUpAlert: false,
+    canResolveAlert: false,
+    canEskalasiAlert: false,
+    canExportLaporan: false,
+    isDriver: false,
+    isViewOnly: false,
+    scopeLevel: 'sppg',
+  },
+  PETUGAS_SANITASI: {
+    canCreate: true,
+    canUpdateOwn: true,
+    canDelete: false,
+    canManageStaff: false,
+    canVerifyLaporan: false,
+    canManageGudang: false,
+    canManageDistribusi: false,
+    canManageMenu: false,
+    canManageGizi: false,
+    canManageAnggaran: false,
+    canManageBroadcast: false,
+    canFollowUpAlert: false,
+    canResolveAlert: false,
+    canEskalasiAlert: false,
+    canExportLaporan: false,
+    isDriver: false,
+    isViewOnly: false,
+    scopeLevel: 'assigned',
+  },
   PETUGAS_LAPANGAN: {
     canCreate: true,
     canUpdateOwn: true,
@@ -84,6 +191,7 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canManageGudang: false,
     canManageDistribusi: false,
     canManageMenu: false,
+    canManageGizi: false,
     canManageAnggaran: false,
     canManageBroadcast: false,
     canFollowUpAlert: false,
@@ -103,6 +211,7 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canManageGudang: false,
     canManageDistribusi: true,
     canManageMenu: false,
+    canManageGizi: false,
     canManageAnggaran: false,
     canManageBroadcast: false,
     canFollowUpAlert: false,
@@ -122,6 +231,7 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canManageGudang: false,
     canManageDistribusi: false,
     canManageMenu: false,
+    canManageGizi: false,
     canManageAnggaran: true,
     canManageBroadcast: true,
     canFollowUpAlert: true,
@@ -141,6 +251,7 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canManageGudang: false,
     canManageDistribusi: false,
     canManageMenu: false,
+    canManageGizi: false,
     canManageAnggaran: true,
     canManageBroadcast: true,
     canFollowUpAlert: false,
@@ -163,6 +274,11 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
 export function scopeSppgForUser(user: User, allSppg: Sppg[]): Sppg[] {
   switch (user.role) {
     case 'KEPALA_SPPG':
+    case 'AHLI_GIZI':
+    case 'CHEF_UTAMA':
+    case 'PEMORSI_PACKING':
+    case 'PETUGAS_LOGISTIK':
+    case 'PETUGAS_SANITASI':
       return allSppg.filter((s) => s.id === user.sppgId);
     case 'PETUGAS_LAPANGAN':
     case 'DRIVER': {
@@ -174,7 +290,7 @@ export function scopeSppgForUser(user: User, allSppg: Sppg[]): Sppg[] {
     case 'SUPERVISOR_POLDA':
       return allSppg.filter((s) => s.wilayahPolda === user.wilayahPolda);
     default:
-      return [];
+      return allSppg.filter((s) => s.id === user.sppgId);
   }
 }
 

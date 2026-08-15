@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, ImageSourcePropType, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
 import { useApp } from '../context/AppContext';
@@ -11,16 +11,31 @@ import { CCTV_ANOMALI_LABEL } from '../data/cctvEvents';
 import { CctvEvent } from '../types';
 import { useLocalVideoUri } from '../utils/localVideoAsset';
 
-// localMp4Url below is a dead placeholder — every feed shares one physical
-// video, resolved at render time via useLocalVideoUri() (see that file for
-// why require()+resolveAssetSource breaks video playback in release builds).
+export type CctvVideoKey = 'dapur' | 'freezer' | 'garasi' | 'tempatcuci';
+
+// require() paths must be static string literals for Metro — see localVideoAsset.ts
+// for why the resolved module id still needs useLocalVideoUri() before a WebView can play it.
+export const CCTV_VIDEO_ASSETS: Record<CctvVideoKey, number> = {
+  dapur: require('../../assets/cctv_dapur.mp4'),
+  freezer: require('../../assets/cctv_freezer.mp4'),
+  garasi: require('../../assets/cctv_garasi.mp4'),
+  tempatcuci: require('../../assets/cctv_tempatcuci.mp4'),
+};
+
+const CCTV_THUMBNAILS: Record<CctvVideoKey, ImageSourcePropType> = {
+  dapur: require('../../assets/cctv_dapur_thumb.jpg'),
+  freezer: require('../../assets/cctv_freezer_thumb.jpg'),
+  garasi: require('../../assets/cctv_garasi_thumb.jpg'),
+  tempatcuci: require('../../assets/cctv_tempatcuci_thumb.jpg'),
+};
+
 export interface CctvFeedItem {
   id: string;
   zonaId: string;
   zonaNama: string;
   label: string;
-  localMp4Url: string;
-  thumbnail: string;
+  videoKey: CctvVideoKey;
+  thumbnail: ImageSourcePropType;
   fps: string;
   aiStatus: string;
 }
@@ -42,8 +57,8 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z1',
     zonaNama: 'Zona 1: Gudang & Penerimaan',
     label: 'CAM 01 - Loading Dock Penerimaan Bahan',
-    localMp4Url: '',
-    thumbnail: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&auto=format&fit=crop&q=80',
+    videoKey: 'garasi',
+    thumbnail: CCTV_THUMBNAILS.garasi,
     fps: '30 FPS',
     aiStatus: 'Verifikasi Timbangan OK',
   },
@@ -52,8 +67,8 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z1',
     zonaNama: 'Zona 1: Gudang & Penerimaan',
     label: 'CAM 02 - Gudang Bahan Kering & Sembako',
-    localMp4Url: '',
-    thumbnail: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&auto=format&fit=crop&q=80',
+    videoKey: 'freezer',
+    thumbnail: CCTV_THUMBNAILS.freezer,
     fps: '30 FPS',
     aiStatus: 'Stok FIFO Terpantau',
   },
@@ -62,8 +77,8 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z1',
     zonaNama: 'Zona 1: Gudang & Penerimaan',
     label: 'CAM 03 - Cold Room Freezer (-18°C) & Chiller',
-    localMp4Url: '',
-    thumbnail: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&auto=format&fit=crop&q=80',
+    videoKey: 'freezer',
+    thumbnail: CCTV_THUMBNAILS.freezer,
     fps: '30 FPS',
     aiStatus: 'Suhu -18.2°C (Aman)',
   },
@@ -74,8 +89,8 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z2',
     zonaNama: 'Zona 2: Persiapan & Cutting',
     label: 'CAM 04 - Area Pemotongan Daging & Ikan',
-    localMp4Url: '',
-    thumbnail: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&auto=format&fit=crop&q=80',
+    videoKey: 'dapur',
+    thumbnail: CCTV_THUMBNAILS.dapur,
     fps: '30 FPS',
     aiStatus: 'APD Sarung Tangan 100%',
   },
@@ -84,8 +99,8 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z2',
     zonaNama: 'Zona 2: Persiapan & Cutting',
     label: 'CAM 05 - Area Pencucian & Pengupasan Sayur',
-    localMp4Url: '',
-    thumbnail: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80',
+    videoKey: 'tempatcuci',
+    thumbnail: CCTV_THUMBNAILS.tempatcuci,
     fps: '30 FPS',
     aiStatus: 'Sanitasi Air Terverifikasi',
   },
@@ -96,8 +111,8 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z3',
     zonaNama: 'Zona 3: Dapur Pemasakan Utama',
     label: 'CAM 06 - Area Pemasakan Tilting Pan (Lauk)',
-    localMp4Url: '',
-    thumbnail: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600&auto=format&fit=crop&q=80',
+    videoKey: 'dapur',
+    thumbnail: CCTV_THUMBNAILS.dapur,
     fps: '30 FPS',
     aiStatus: 'APD Lengkap (99.4%)',
   },
@@ -106,8 +121,8 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z3',
     zonaNama: 'Zona 3: Dapur Pemasakan Utama',
     label: 'CAM 07 - Pengukus Nasi Raksasa B (Karbo)',
-    localMp4Url: '',
-    thumbnail: 'https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=600&auto=format&fit=crop&q=80',
+    videoKey: 'dapur',
+    thumbnail: CCTV_THUMBNAILS.dapur,
     fps: '30 FPS',
     aiStatus: 'Suhu Kuali 102°C Standard',
   },
@@ -118,8 +133,8 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z4',
     zonaNama: 'Zona 4: Pemorsian & Packaging',
     label: 'CAM 08 - Conveyor Line Pemorsian Ompreng',
-    localMp4Url: '',
-    thumbnail: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format&fit=crop&q=80',
+    videoKey: 'dapur',
+    thumbnail: CCTV_THUMBNAILS.dapur,
     fps: '30 FPS',
     aiStatus: 'Gramasi Porsi Tepat',
   },
@@ -128,8 +143,8 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z4',
     zonaNama: 'Zona 4: Pemorsian & Packaging',
     label: 'CAM 09 - Mesin Sealing & Packaging Box',
-    localMp4Url: '',
-    thumbnail: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&auto=format&fit=crop&q=80',
+    videoKey: 'dapur',
+    thumbnail: CCTV_THUMBNAILS.dapur,
     fps: '30 FPS',
     aiStatus: 'Segel Higienis Rapat',
   },
@@ -140,8 +155,8 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z5',
     zonaNama: 'Zona 5: Washing Bay & Sanitasi',
     label: 'CAM 10 - Washing Bay & Automatic Dishwasher',
-    localMp4Url: '',
-    thumbnail: 'https://images.unsplash.com/photo-1585837575652-267c041d77d4?w=600&auto=format&fit=crop&q=80',
+    videoKey: 'tempatcuci',
+    thumbnail: CCTV_THUMBNAILS.tempatcuci,
     fps: '30 FPS',
     aiStatus: 'Sanitasi Deterjen Sesuai',
   },
@@ -150,8 +165,8 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z5',
     zonaNama: 'Zona 5: Washing Bay & Sanitasi',
     label: 'CAM 11 - Sterilisasi Sinar UV & Dryer Ompreng',
-    localMp4Url: '',
-    thumbnail: 'https://images.unsplash.com/photo-1584634731339-252c581abfc5?w=600&auto=format&fit=crop&q=80',
+    videoKey: 'tempatcuci',
+    thumbnail: CCTV_THUMBNAILS.tempatcuci,
     fps: '30 FPS',
     aiStatus: 'Sinar UV Stereo 100%',
   },
@@ -162,8 +177,8 @@ export const CCTV_FEEDS: CctvFeedItem[] = [
     zonaId: 'z6',
     zonaNama: 'Zona 6: Loading Gate Armada',
     label: 'CAM 12 - Dispatch Armada Kendaraan Penyalur',
-    localMp4Url: '',
-    thumbnail: 'https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=600&auto=format&fit=crop&q=80',
+    videoKey: 'garasi',
+    thumbnail: CCTV_THUMBNAILS.garasi,
     fps: '30 FPS',
     aiStatus: 'Armada Ready 6 Unit',
   },
@@ -178,7 +193,7 @@ export default function CctvMonitorScreen() {
   const [selectedEvent, setSelectedEvent] = useState<CctvEvent | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [selectedZona, setSelectedZona] = useState('all');
-  const videoUri = useLocalVideoUri(require('../../assets/sppg.mp4'));
+  const videoUri = useLocalVideoUri(CCTV_VIDEO_ASSETS[activeFeed?.videoKey ?? 'dapur']);
 
   const filteredFeeds = useMemo(() => {
     if (selectedZona === 'all') return CCTV_FEEDS;
@@ -240,7 +255,7 @@ export default function CctvMonitorScreen() {
             style={[styles.cameraBox, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.md, overflow: 'hidden' }]}
           >
             <View style={{ width: '100%', height: 100, position: 'relative' }}>
-              <Image source={{ uri: feed.thumbnail }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+              <Image source={feed.thumbnail} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
               <View style={{ position: 'absolute', top: 6, left: 6, backgroundColor: 'rgba(220,38,38,0.85)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                 <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#FFFFFF' }} />
                 <Text style={{ color: '#FFFFFF', fontSize: 9, fontWeight: '800' }}>LIVE STREAM</Text>
@@ -471,8 +486,9 @@ export default function CctvMonitorScreen() {
                     style={{ width: '100%', height: 190 }}
                     resizeMode="cover"
                   />
-                  <View style={{ position: 'absolute', top: 8, left: 8, backgroundColor: 'rgba(220,38,38,0.9)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 }}>
-                    <Text style={{ color: '#FFF', fontSize: 10, fontWeight: '800' }}>📸 SNAPSHOT OTOMATIS AI</Text>
+                  <View style={{ position: 'absolute', top: 8, left: 8, flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(220,38,38,0.9)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 }}>
+                    <Feather name="camera" size={11} color="#FFF" />
+                    <Text style={{ color: '#FFF', fontSize: 10, fontWeight: '800' }}>SNAPSHOT OTOMATIS AI</Text>
                   </View>
                 </View>
 

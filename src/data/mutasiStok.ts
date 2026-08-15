@@ -2,7 +2,7 @@ import { MutasiStok } from '../types';
 import { bahanBakuList } from './bahanBaku';
 import { mitraList } from './mitra';
 
-// Phase D — ledger mutasi stok satu minggu terakhir (2026-08-04 s.d. 2026-08-09),
+// Phase D — ledger mutasi stok satu minggu terakhir (2026-08-03 s.d. 2026-08-10),
 // dibangun dari bahanBakuList supaya jumlahnya proporsional terhadap stok saat
 // ini (bukan ledger akuntansi presisi — sekadar riwayat yang masuk akal untuk
 // setiap SPPG: satu pengiriman masuk + dua pemakaian produksi keluar).
@@ -23,7 +23,7 @@ function buildMutasiStok(): MutasiStok[] {
       id: nextId(),
       bahanId: b.id,
       sppgId: b.sppgId,
-      tanggal: '2026-08-04',
+      tanggal: '2026-08-03',
       jenis: 'masuk',
       jumlah: jumlahMasuk,
       keterangan: mitra ? `Pengiriman dari ${mitra.nama}` : 'Pengiriman rutin mingguan',
@@ -32,7 +32,7 @@ function buildMutasiStok(): MutasiStok[] {
       id: nextId(),
       bahanId: b.id,
       sppgId: b.sppgId,
-      tanggal: '2026-08-07',
+      tanggal: '2026-08-06',
       jenis: 'keluar',
       jumlah: jumlahKeluarHarian,
       keterangan: 'Dipakai untuk produksi harian',
@@ -41,7 +41,7 @@ function buildMutasiStok(): MutasiStok[] {
       id: nextId(),
       bahanId: b.id,
       sppgId: b.sppgId,
-      tanggal: '2026-08-09',
+      tanggal: '2026-08-10',
       jenis: 'keluar',
       jumlah: Math.max(1, Math.round(jumlahKeluarHarian * 0.6)),
       keterangan: 'Dipakai untuk produksi harian',

@@ -1,4 +1,14 @@
-export type Role = 'KEPALA_SPPG' | 'PETUGAS_LAPANGAN' | 'DRIVER' | 'SUPERVISOR_POLRES' | 'SUPERVISOR_POLDA';
+export type Role =
+  | 'KEPALA_SPPG'
+  | 'AHLI_GIZI'
+  | 'CHEF_UTAMA'
+  | 'PEMORSI_PACKING'
+  | 'PETUGAS_LOGISTIK'
+  | 'PETUGAS_SANITASI'
+  | 'DRIVER'
+  | 'PETUGAS_LAPANGAN'
+  | 'SUPERVISOR_POLRES'
+  | 'SUPERVISOR_POLDA';
 
 export type JobdeskType =
   | 'ahli_gizi'
@@ -37,6 +47,14 @@ export type AnggaranKategori =
   | 'kebersihan_apd'
   | 'lainnya';
 
+export interface ItemPembelian {
+  namaBarang: string;
+  jumlah: number;
+  satuan: string;
+  hargaSatuan: number;
+  totalHarga: number;
+}
+
 export interface AnggaranLog {
   id: string;
   sppgId: string;
@@ -47,7 +65,13 @@ export interface AnggaranLog {
   keterangan: string;
   buktiNota?: string | null;
   dibuatOleh: string;
+  // Detail Pengadaan & Transaksi untuk Audit Pusat
+  mitraId?: string | null;
+  namaSupplier?: string;
+  noInvoice?: string;
+  items?: ItemPembelian[];
 }
+
 
 export type StatusPengajuanSekolah = 'diajukan' | 'disetujui' | 'ditolak';
 
@@ -138,6 +162,7 @@ export interface PublicReport {
 }
 
 export type LaporanStatus = 'draft' | 'terkirim' | 'diverifikasi';
+export type QcStatus = 'MENUNGGU_QC' | 'READY' | 'HOLD' | 'REJECTED';
 
 export interface LaporanProduksiFoto {
   id: string;
@@ -161,6 +186,137 @@ export interface LaporanProduksi {
   status: LaporanStatus;
   dibuatOleh: string;
   timestamp: string;
+  // Workflow & Traceability Fields
+  batchId?: string;
+  preparationTimestamp?: string;
+  cookingTimestamp?: string;
+  qcTimestamp?: string;
+  packingTimestamp?: string;
+  readyTimestamp?: string;
+  qcStatus?: QcStatus;
+  qcNotes?: string;
+  qcApprovedBy?: string;
+  catatanYield?: string;
+}
+
+export interface LaporanPacking {
+  id: string;
+  sppgId: string;
+  tanggal: string;
+  petugasId: string;
+  petugasNama: string;
+  totalOmprengDipacking: number;
+  totalThermalBox: number;
+  suhuHoldingRataRata: number;
+  statusSealing: 'rapat_sempurna' | 'ada_retur';
+  fotoDokumentasi: string[];
+  catatan: string;
+  status: 'draft' | 'terkirim' | 'diverifikasi';
+  alokasiSekolah: { sekolahId: string; sekolahNama: string; jumlahOmpreng: number; jumlahBox: number }[];
+  createdAt: string;
+}
+
+export interface LaporanSanitasi {
+  id: string;
+  sppgId: string;
+  tanggal: string;
+  petugasId: string;
+  petugasNama: string;
+  totalOmprengDicuci: number;
+  suhuAirDishwasher: number;
+  desinfektanDigunakan: string;
+  kepatuhanApdPct: number;
+  statusGreaseTrap: 'bersih_lancar' | 'perlu_kurasi' | 'tersumbat';
+  fotoDokumentasi: string[];
+  catatan: string;
+  status: 'draft' | 'terkirim' | 'diverifikasi';
+  createdAt: string;
+}
+
+// ============================================================
+// SINGLE-SPPG KITCHEN OS INNOVATION TYPES
+// ============================================================
+
+export interface BatchTraceabilityStep {
+  stage: 'supplier_bahan' | 'dapur_masak' | 'uji_qc' | 'pemorsian_packing' | 'armada_kirim' | 'penerimaan_sekolah';
+  title: string;
+  timestamp: string;
+  picName: string;
+  picRole: string;
+  lokasi: string;
+  status: 'selesai' | 'berjalan' | 'tertunda';
+  detail: Record<string, string | number>;
+  verified: boolean;
+}
+
+export interface BatchTraceabilityRecord {
+  batchId: string;
+  sppgId: string;
+  tanggal: string;
+  menuNama: string;
+  totalPorsi: number;
+  status: 'dalam_proses' | 'siap_kirim' | 'terdistribusi';
+  steps: BatchTraceabilityStep[];
+}
+
+export interface FoodQualityPassport {
+  id: string;
+  batchId: string;
+  sppgId: string;
+  tanggal: string;
+  menuNama: string;
+  score: number; // 0-100
+  grade: 'A+' | 'A' | 'B' | 'C';
+  verifierName: string;
+  verifierRole: string;
+  parameters: {
+    titikMatang: { value: number; unit: string; passed: boolean; note: string };
+    organoleptik: { passed: boolean; note: string; rasa: string; aroma: string; tekstur: string };
+    gramasiPorsi: { passed: boolean; note: string; nasi: number; protein: number; sayur: number; buah: number };
+    suhuHolding: { value: number; unit: string; passed: boolean; note: string };
+    sealingTutup: { passed: boolean; note: string };
+    higieneApd: { passed: boolean; note: string };
+  };
+  certifiedAt: string;
+}
+
+export interface CostPerMealBreakdown {
+  sppgId: string;
+  tanggal: string;
+  targetPorsi: number;
+  bahanBaku: number;
+  bumbuMinyak: number;
+  kemasanSeal: number;
+  energiDapur: number;
+  transportBbm: number;
+  totalCostPerPorsi: number;
+  paguStandarBgn: number;
+  hematEfisiensiPct: number;
+}
+
+export interface KitchenReadinessScore {
+  score: number; // 0-100
+  grade: 'SANGAT PRIMA' | 'PRIMA' | 'PERLU PERHATIAN';
+  subScores: {
+    presensiTim: number; // 100
+    produksiSop: number; // 98
+    foodSafety: number; // 100
+    distribusiArmada: number; // 96
+    sanitasiHigiene: number; // 98
+  };
+  lastEvaluated: string;
+}
+
+export interface AiKitchenEarlyWarning {
+  id: string;
+  tingkat: 'critical' | 'warning' | 'info';
+  kategori: 'waktu_masak' | 'suhu_holding' | 'stok_fefo' | 'distribusi' | 'anggaran';
+  pesan: string;
+  rekomendasiAksi: string;
+  actionRoute?: string;
+  actionLabel?: string;
+  targetRole: Role[];
+  timestamp: string;
 }
 
 export type PresensiStatus = 'hadir' | 'belum_presensi';
@@ -178,13 +334,21 @@ export interface Presensi {
   status: PresensiStatus;
 }
 
-export type ChecklistKategori = 'kebersihan' | 'peralatan' | 'keamanan_pangan';
+export type ChecklistKategori =
+  | 'kebersihan'
+  | 'peralatan'
+  | 'keamanan_pangan'
+  | 'produksi_masak'
+  | 'pemorsian_packing'
+  | 'gudang_logistik'
+  | 'distribusi_driver';
 
 export interface ChecklistItem {
   id: string;
   kategori: ChecklistKategori;
   item: string;
   levelKritis: boolean;
+  targetRole?: Role;
   status: 'ya' | 'tidak' | null;
   catatan: string | null;
   foto: string | null;
@@ -384,3 +548,57 @@ export interface Peralatan {
   catatanKondisi: string;
   terakhirDiperiksa: string;
 }
+
+export type IncidentCategory =
+  | 'kecelakaan_kerja'
+  | 'kerusakan_alat'
+  | 'keterlambatan_bahan'
+  | 'keterlambatan_distribusi'
+  | 'listrik_air_padam'
+  | 'kontaminasi_pangan'
+  | 'lainnya';
+
+export type IncidentStatus = 'OPEN' | 'INVESTIGASI' | 'RESOLVED';
+export type IncidentSeverity = 'rendah' | 'sedang' | 'kritis';
+
+export interface IncidentReport {
+  id: string;
+  sppgId: string;
+  tanggal: string;
+  timestamp: string;
+  kategori: IncidentCategory;
+  tingkatKeparahan: IncidentSeverity;
+  judul: string;
+  deskripsi: string;
+  fotoBukti?: string | null;
+  lokasi?: string;
+  pelaporNama: string;
+  pelaporRole: Role;
+  status: IncidentStatus;
+  tindakanPerbaikan?: string;
+  diselesaikanOleh?: string;
+  resolvedTimestamp?: string;
+}
+
+export interface KandunganGiziHarian {
+  id: string;
+  sppgId: string;
+  tanggal: string;
+  namaPaketMenu: string;
+  targetPenerima: 'SD Kelas 1-3' | 'SD Kelas 4-6' | 'SMP & MTs' | 'SMA / SMK' | 'Balita & Ibu Hamil';
+  kalori: number; // kkal
+  karbohidrat: number; // gram
+  proteinHewani: number; // gram
+  proteinNabati: number; // gram
+  lemak: number; // gram
+  serat: number; // gram
+  kalsium: number; // mg
+  zatBesi: number; // mg
+  bebasAlergen: boolean;
+  statusKesesuaianAkg: 'sesuai' | 'perhatian' | 'tidak_sesuai';
+  catatanAhliGizi: string;
+  namaAhliGizi: string;
+  fotoSampelMenu?: string;
+  createdAt: string;
+}
+

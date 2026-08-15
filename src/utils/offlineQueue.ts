@@ -1,6 +1,6 @@
 export interface QueuedItem {
   id: string;
-  type: 'laporan_produksi' | 'presensi' | 'checklist_harian' | 'food_safety_log';
+  type: 'laporan_produksi' | 'presensi' | 'checklist_harian' | 'food_safety_log' | 'laporan_packing' | 'laporan_sanitasi';
   payload: any;
   createdAt: string;
   synced: boolean;

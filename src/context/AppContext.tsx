@@ -22,6 +22,8 @@ import {
   initialBroadcastList,
   initialAnggaranLogs,
   initialPengajuanSekolahList,
+  initialIncidentList,
+  initialKandunganGiziList,
   CCTV_ANOMALI_LABEL,
   findAccount,
 } from '../data';
@@ -52,8 +54,24 @@ import {
   User,
   MasterMenu,
   UsulanMenu,
+  QcStatus,
+  IncidentReport,
+  IncidentStatus,
+  KandunganGiziHarian,
+  LaporanPacking,
+  LaporanSanitasi,
+  BatchTraceabilityRecord,
+  FoodQualityPassport,
+  CostPerMealBreakdown,
+  KitchenReadinessScore,
+  AiKitchenEarlyWarning,
 } from '../types';
 import { MASTER_MENU_CATALOG } from '../data/masterMenu';
+import { INITIAL_LAPORAN_PACKING } from '../data/laporanPacking';
+import { INITIAL_LAPORAN_SANITASI } from '../data/laporanSanitasi';
+import { INITIAL_BATCH_TRACEABILITY } from '../data/batchTraceability';
+import { INITIAL_QUALITY_PASSPORTS } from '../data/qualityPassport';
+import { INITIAL_COST_PER_MEAL, INITIAL_KITCHEN_READINESS, INITIAL_AI_EARLY_WARNINGS } from '../data/kitchenAi';
 
 // Fase 2 (simulasi) — daftar jenis anomali CCTV yang dipakai simulateCctvDetection
 // untuk memilih anomali secara berputar (tanpa dependency random).
@@ -117,6 +135,8 @@ interface AppContextValue {
   mutasiStokList: MutasiStok[];
   masterMenuList: MasterMenu[];
   addMasterMenu: (menu: Omit<MasterMenu, 'id'>) => void;
+  updateMasterMenu: (menu: MasterMenu) => void;
+  deleteMasterMenu: (id: string) => void;
   catatMutasiStok: (payload: Omit<MutasiStok, 'id' | 'tanggal'>) => void;
   reviewCctvEvent: (id: string) => void;
   simulateCctvDetection: (sppgId: string) => void;
@@ -131,12 +151,29 @@ interface AppContextValue {
   saveLaporanDraft: (laporan: (Omit<LaporanProduksi, 'id' | 'timestamp' | 'status'> & { id?: string })) => void;
   submitLaporan: (laporanId: string) => void;
   verifyLaporan: (laporanId: string) => void;
+  approveQcLaporan: (laporanId: string, qcStatus: QcStatus, qcNotes?: string, qcApprovedBy?: string) => void;
+  updateProductionStage: (laporanId: string, stage: 'preparation' | 'cooking' | 'qc' | 'packing' | 'ready') => void;
   submitChecklist: (checklist: ChecklistHarian) => void;
   submitFoodSafetyLog: (log: FoodSafetyLog) => void;
   addAlert: (alert: Omit<AlertLog, 'id' | 'timestamp' | 'statusTindakLanjut'>) => void;
   resolveAlert: (alertId: string) => void;
   followUpAlert: (alertId: string) => void;
   eskalasiAlert: (alertId: string) => void;
+  incidentList: IncidentReport[];
+  submitIncident: (incident: Omit<IncidentReport, 'id' | 'timestamp' | 'status'>) => void;
+  updateIncidentStatus: (id: string, status: IncidentStatus, tindakanPerbaikan?: string) => void;
+  kandunganGiziList: KandunganGiziHarian[];
+  addKandunganGiziLog: (payload: Omit<KandunganGiziHarian, 'id' | 'createdAt'>) => void;
+  laporanPackingList: LaporanPacking[];
+  submitLaporanPacking: (payload: Omit<LaporanPacking, 'id' | 'createdAt'>) => void;
+  laporanSanitasiList: LaporanSanitasi[];
+  submitLaporanSanitasi: (payload: Omit<LaporanSanitasi, 'id' | 'createdAt'>) => void;
+  batchTraceabilityList: BatchTraceabilityRecord[];
+  qualityPassportList: FoodQualityPassport[];
+  costPerMeal: CostPerMealBreakdown;
+  kitchenReadinessScore: KitchenReadinessScore;
+  aiEarlyWarnings: AiKitchenEarlyWarning[];
+  updateCostPerMeal: (payload: Partial<CostPerMealBreakdown>) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -169,6 +206,45 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [broadcastList, setBroadcastList] = useState<BroadcastMessage[]>(initialBroadcastList);
   const [anggaranLogs, setAnggaranLogs] = useState<AnggaranLog[]>(initialAnggaranLogs);
   const [pengajuanSekolahList, setPengajuanSekolahList] = useState<PengajuanSekolah[]>(initialPengajuanSekolahList);
+  const [incidentList, setIncidentList] = useState<IncidentReport[]>(initialIncidentList);
+  const [kandunganGiziList, setKandunganGiziList] = useState<KandunganGiziHarian[]>(initialKandunganGiziList);
+  const [laporanPackingList, setLaporanPackingList] = useState<LaporanPacking[]>(INITIAL_LAPORAN_PACKING);
+  const [laporanSanitasiList, setLaporanSanitasiList] = useState<LaporanSanitasi[]>(INITIAL_LAPORAN_SANITASI);
+  const [batchTraceabilityList, setBatchTraceabilityList] = useState<BatchTraceabilityRecord[]>(INITIAL_BATCH_TRACEABILITY);
+  const [qualityPassportList, setQualityPassportList] = useState<FoodQualityPassport[]>(INITIAL_QUALITY_PASSPORTS);
+  const [costPerMeal, setCostPerMeal] = useState<CostPerMealBreakdown>(INITIAL_COST_PER_MEAL);
+  const [kitchenReadinessScore, setKitchenReadinessScore] = useState<KitchenReadinessScore>(INITIAL_KITCHEN_READINESS);
+  const [aiEarlyWarnings, setAiEarlyWarnings] = useState<AiKitchenEarlyWarning[]>(INITIAL_AI_EARLY_WARNINGS);
+
+  const updateCostPerMeal: AppContextValue['updateCostPerMeal'] = (payload) => {
+    setCostPerMeal((prev) => {
+      const updated = { ...prev, ...payload };
+      const totalCostPerPorsi =
+        updated.bahanBaku + updated.bumbuMinyak + updated.kemasanSeal + updated.energiDapur + updated.transportBbm;
+      const hematEfisiensiPct = Math.round(((updated.paguStandarBgn - totalCostPerPorsi) / updated.paguStandarBgn) * 1000) / 10;
+      return { ...updated, totalCostPerPorsi, hematEfisiensiPct };
+    });
+  };
+
+  const submitLaporanPacking: AppContextValue['submitLaporanPacking'] = (payload) => {
+    const id = `LPK-${Date.now().toString().slice(-8)}`;
+    const createdAt = nowTimestamp();
+    const newLaporan: LaporanPacking = { ...payload, id, createdAt };
+    setLaporanPackingList((prev) => [newLaporan, ...prev.filter((p) => p.tanggal !== payload.tanggal || p.sppgId !== payload.sppgId)]);
+  };
+
+  const submitLaporanSanitasi: AppContextValue['submitLaporanSanitasi'] = (payload) => {
+    const id = `LSN-${Date.now().toString().slice(-8)}`;
+    const createdAt = nowTimestamp();
+    const newLaporan: LaporanSanitasi = { ...payload, id, createdAt };
+    setLaporanSanitasiList((prev) => [newLaporan, ...prev.filter((s) => s.tanggal !== payload.tanggal || s.sppgId !== payload.sppgId)]);
+  };
+
+  const addKandunganGiziLog: AppContextValue['addKandunganGiziLog'] = (payload) => {
+    const id = `GZI-${Date.now().toString().slice(-8)}`;
+    const createdAt = nowTimestamp();
+    setKandunganGiziList((prev) => [{ ...payload, id, createdAt }, ...prev]);
+  };
 
   const sendBroadcast: AppContextValue['sendBroadcast'] = (msg) => {
     const id = `BC-${String(broadcastList.length + 1).padStart(3, '0')}`;
@@ -214,6 +290,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addMasterMenu: AppContextValue['addMasterMenu'] = (menu) => {
     const id = `MM-${String(masterMenuList.length + 1).padStart(3, '0')}`;
     setMasterMenuList((prev) => [ { ...menu, id }, ...prev]);
+  };
+
+  const updateMasterMenu: AppContextValue['updateMasterMenu'] = (menu) => {
+    setMasterMenuList((prev) => prev.map((m) => (m.id === menu.id ? menu : m)));
+  };
+
+  const deleteMasterMenu: AppContextValue['deleteMasterMenu'] = (id) => {
+    setMasterMenuList((prev) => prev.filter((m) => m.id !== id));
   };
 
   const updatePeralatanStatus: AppContextValue['updatePeralatanStatus'] = (id, status, catatanKondisi) => {
@@ -380,11 +464,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const saveLaporanDraft: AppContextValue['saveLaporanDraft'] = (laporan) => {
     setLaporanList((prev) => {
+      const batchId =
+        laporan.batchId ||
+        `BATCH-${laporan.sppgId}-${(laporan.tanggal || todayDate()).replace(/-/g, '')}-01`;
       if (laporan.id) {
-        return prev.map((l) => (l.id === laporan.id ? { ...l, ...laporan, id: laporan.id!, status: 'draft' } : l));
+        return prev.map((l) => (l.id === laporan.id ? { ...l, ...laporan, batchId, id: laporan.id!, status: 'draft' } : l));
       }
       const id = `LAP-${String(prev.length + 1).padStart(3, '0')}`;
-      return [...prev, { ...laporan, id, status: 'draft', timestamp: nowTimestamp() }];
+      return [
+        ...prev,
+        {
+          ...laporan,
+          id,
+          batchId,
+          status: 'draft',
+          timestamp: nowTimestamp(),
+          preparationTimestamp: nowTime(),
+          qcStatus: 'MENUNGGU_QC',
+        },
+      ];
     });
   };
 
@@ -397,6 +495,49 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const verifyLaporan: AppContextValue['verifyLaporan'] = (laporanId) => {
     setLaporanList((prev) =>
       prev.map((l) => (l.id === laporanId && l.status === 'terkirim' ? { ...l, status: 'diverifikasi' } : l)),
+    );
+  };
+
+  const approveQcLaporan: AppContextValue['approveQcLaporan'] = (laporanId, qcStatus, qcNotes, qcApprovedBy) => {
+    const timestamp = nowTimestamp();
+    setLaporanList((prev) =>
+      prev.map((l) => {
+        if (l.id !== laporanId) return l;
+        return {
+          ...l,
+          qcStatus,
+          qcNotes: qcNotes ?? l.qcNotes,
+          qcApprovedBy: qcApprovedBy ?? currentUser?.nama ?? 'Tim QC Gizi',
+          qcTimestamp: nowTime(),
+        };
+      }),
+    );
+
+    const targetLap = laporanList.find((l) => l.id === laporanId);
+    if (qcStatus === 'HOLD' || qcStatus === 'REJECTED') {
+      addAlert({
+        sppgId: targetLap?.sppgId || currentUser?.sppgId || 'SPPG-001',
+        jenis: 'checklist_kritis',
+        sumber: 'command_center',
+        tingkat: qcStatus === 'REJECTED' ? 'emergency' : 'perhatian',
+        judul: `QC Batch ${qcStatus}: ${targetLap?.menu || 'Menu MBG'}`,
+        deskripsi: `Pemeriksaan QC Gizi memberikan status ${qcStatus} pada Batch ${targetLap?.batchId || laporanId}. Catatan: ${qcNotes || 'Perlu evaluasi kelayakan makanan sebelum distribusi'}.`,
+      });
+    }
+  };
+
+  const updateProductionStage: AppContextValue['updateProductionStage'] = (laporanId, stage) => {
+    const time = nowTime();
+    setLaporanList((prev) =>
+      prev.map((l) => {
+        if (l.id !== laporanId) return l;
+        if (stage === 'preparation') return { ...l, preparationTimestamp: time };
+        if (stage === 'cooking') return { ...l, cookingTimestamp: time };
+        if (stage === 'qc') return { ...l, qcTimestamp: time };
+        if (stage === 'packing') return { ...l, packingTimestamp: time };
+        if (stage === 'ready') return { ...l, readyTimestamp: time };
+        return l;
+      }),
     );
   };
 
@@ -574,6 +715,45 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     ]);
   };
 
+  const submitIncident: AppContextValue['submitIncident'] = (payload) => {
+    const id = `INC-${String(incidentList.length + 1).padStart(3, '0')}`;
+    const timestamp = nowTimestamp();
+    const newIncident: IncidentReport = {
+      ...payload,
+      id,
+      timestamp,
+      status: 'OPEN',
+    };
+    setIncidentList((prev) => [newIncident, ...prev]);
+
+    // Auto-raise alert if severity is kritis or sedang
+    if (payload.tingkatKeparahan === 'kritis' || payload.tingkatKeparahan === 'sedang') {
+      addAlert({
+        sppgId: payload.sppgId,
+        jenis: 'manual',
+        sumber: 'manual',
+        tingkat: payload.tingkatKeparahan === 'kritis' ? 'emergency' : 'perhatian',
+        judul: `Laporan Insiden: ${payload.judul}`,
+        deskripsi: `Kategori: ${payload.kategori} di ${payload.lokasi || 'Dapur'}. ${payload.deskripsi}`,
+      });
+    }
+  };
+
+  const updateIncidentStatus: AppContextValue['updateIncidentStatus'] = (id, status, tindakanPerbaikan) => {
+    setIncidentList((prev) =>
+      prev.map((inc) => {
+        if (inc.id !== id) return inc;
+        return {
+          ...inc,
+          status,
+          tindakanPerbaikan: tindakanPerbaikan ?? inc.tindakanPerbaikan,
+          diselesaikanOleh: status === 'RESOLVED' ? (currentUser?.nama ?? 'Kepala SPPG') : inc.diselesaikanOleh,
+          resolvedTimestamp: status === 'RESOLVED' ? nowTimestamp() : inc.resolvedTimestamp,
+        };
+      }),
+    );
+  };
+
   const value = useMemo(
     () => ({
       progressProduksiRealtime,
@@ -615,6 +795,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       menuHarianPlanList,
       masterMenuList,
       addMasterMenu,
+      updateMasterMenu,
+      deleteMasterMenu,
       mitraList,
       mutasiStokList,
       catatMutasiStok,
@@ -632,12 +814,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       saveLaporanDraft,
       submitLaporan,
       verifyLaporan,
+      approveQcLaporan,
+      updateProductionStage,
       submitChecklist,
       submitFoodSafetyLog,
       addAlert,
       resolveAlert,
       followUpAlert,
       eskalasiAlert,
+      incidentList,
+      submitIncident,
+      updateIncidentStatus,
+      kandunganGiziList,
+      addKandunganGiziLog,
+      laporanPackingList,
+      submitLaporanPacking,
+      laporanSanitasiList,
+      submitLaporanSanitasi,
+      batchTraceabilityList,
+      qualityPassportList,
+      costPerMeal,
+      kitchenReadinessScore,
+      aiEarlyWarnings,
+      updateCostPerMeal,
     }),
     [
       progressProduksiRealtime,
@@ -646,6 +845,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       broadcastList,
       anggaranLogs,
       pengajuanSekolahList,
+      incidentList,
+      kandunganGiziList,
+      laporanPackingList,
+      laporanSanitasiList,
+      batchTraceabilityList,
+      qualityPassportList,
+      costPerMeal,
+      kitchenReadinessScore,
+      aiEarlyWarnings,
       role,
       loggedIn,
       currentUser,

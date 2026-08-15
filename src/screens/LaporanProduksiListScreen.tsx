@@ -14,7 +14,7 @@ const STATUS_TONE: Record<LaporanStatus, 'neutral' | 'info' | 'success'> = {
   diverifikasi: 'success',
 };
 const STATUS_LABEL: Record<LaporanStatus, string> = {
-  draft: 'Draft',
+  draft: 'Belum Dikirim',
   terkirim: 'Terkirim',
   diverifikasi: 'Diverifikasi',
 };
@@ -75,22 +75,40 @@ export default function LaporanProduksiListScreen({ navigation }: any) {
         ) : (
           filtered.map((l: LaporanProduksi) => {
             const canVerify = role && currentUser ? canVerifyLaporan(role, currentUser.sppgId, l) : false;
+            const batchLabel = l.batchId || `BATCH-${l.sppgId}-${l.tanggal.replace(/-/g, '')}-01`;
+            const qcTone =
+              l.qcStatus === 'READY'
+                ? 'success'
+                : l.qcStatus === 'HOLD'
+                ? 'warning'
+                : l.qcStatus === 'REJECTED'
+                ? 'danger'
+                : 'neutral';
+
             return (
               <Card key={l.id} style={{ gap: spacing.xs }} onPress={() => navigation.navigate('LaporanForm', { laporanId: l.id })}>
                 <View style={styles.rowTop}>
-                  <Text style={{ color: colors.text, fontWeight: '800', fontSize: fontSize.sm }}>{l.tanggal}</Text>
-                  <Pill label={STATUS_LABEL[l.status]} tone={STATUS_TONE[l.status]} />
+                  <View style={{ gap: 2 }}>
+                    <Text style={{ color: colors.text, fontWeight: '800', fontSize: fontSize.sm }}>{l.tanggal}</Text>
+                    <Text style={{ color: colors.primary, fontSize: 10, fontWeight: '700' }}>{batchLabel}</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
+                    {l.qcStatus && <Pill label={`QC: ${l.qcStatus}`} tone={qcTone} />}
+                    <Pill label={STATUS_LABEL[l.status]} tone={STATUS_TONE[l.status]} />
+                  </View>
                 </View>
-                <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }} numberOfLines={1}>
+                <Text style={{ color: colors.text, fontWeight: '700', fontSize: fontSize.xs }} numberOfLines={1}>
                   {l.menu}
                 </Text>
                 <View style={styles.rowBottom}>
                   <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>
-                    Realisasi {l.realisasiPorsi}/{l.targetPorsi} porsi • {l.foto.length} foto
+                    {l.realisasiPorsi > 0
+                      ? `Hasil Pemorsian: ${l.realisasiPorsi}/${l.targetPorsi} tray (${l.realisasiPorsi >= l.targetPorsi ? '+' + (l.realisasiPorsi - l.targetPorsi) + ' surplus' : (l.realisasiPorsi - l.targetPorsi) + ' defisit'}) • ${l.foto.length} foto`
+                      : `Target Order: ${l.targetPorsi} porsi • Masih proses masak • ${l.foto.length} foto`}
                   </Text>
                   <Feather name="chevron-right" size={16} color={colors.textMuted} strokeWidth={iconStrokeWidth} />
                 </View>
-                {canVerify && (
+                {canVerify && l.status === 'terkirim' && (
                   <PrimaryButton
                     label="Verifikasi Laporan"
                     icon="check-circle"
