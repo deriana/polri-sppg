@@ -274,6 +274,11 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
 export function scopeSppgForUser(user: User, allSppg: Sppg[]): Sppg[] {
   switch (user.role) {
     case 'KEPALA_SPPG':
+    case 'AHLI_GIZI':
+    case 'CHEF_UTAMA':
+    case 'PEMORSI_PACKING':
+    case 'PETUGAS_LOGISTIK':
+    case 'PETUGAS_SANITASI':
       return allSppg.filter((s) => s.id === user.sppgId);
     case 'PETUGAS_LAPANGAN':
     case 'DRIVER': {
@@ -285,7 +290,7 @@ export function scopeSppgForUser(user: User, allSppg: Sppg[]): Sppg[] {
     case 'SUPERVISOR_POLDA':
       return allSppg.filter((s) => s.wilayahPolda === user.wilayahPolda);
     default:
-      return [];
+      return allSppg.filter((s) => s.id === user.sppgId);
   }
 }
 

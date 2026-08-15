@@ -245,7 +245,7 @@ export default function GudangKondisiScreen({ navigation }: any) {
       <SectionTitle
         action={
           <Pill
-            label={isCctvPlaying ? '🔴 LIVE STREAM' : '⚪ STANDBY'}
+            label={isCctvPlaying ? 'LIVE STREAM' : 'STANDBY'}
             tone={isCctvPlaying ? 'danger' : 'neutral'}
           />
         }
@@ -279,7 +279,8 @@ export default function GudangKondisiScreen({ navigation }: any) {
               </Text>
 
               <PrimaryButton
-                label="▶️ Putar Live Feed CCTV Gudang"
+                label="Putar Live Feed CCTV Gudang"
+                icon="play"
                 onPress={() => setIsCctvPlaying(true)}
                 style={{ marginTop: 6, minWidth: 220 }}
               />

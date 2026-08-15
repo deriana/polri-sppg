@@ -42,7 +42,7 @@ export default function CctvPlayer({
 <body>
   <div class="container">
     <video src="${videoUri}" ${autoPlay ? 'autoplay' : ''} loop playsinline controls></video>
-    <div class="hud-top-left"><div class="rec-dot"></div>● REC LIVE</div>
+    <div class="hud-top-left"><div class="rec-dot"></div>REC LIVE</div>
     <div class="hud-bottom-left">${label.toUpperCase()}</div>
   </div>
 </body>
