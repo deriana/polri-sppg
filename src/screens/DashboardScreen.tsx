@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { Card, KpiCard, Pill, PrimaryButton, SectionTitle, StatusBadge, SyncStatusBadge, EmptyState } from '../components/ui';
+import { Card, KpiCard, Pill, PrimaryButton, SecondaryButton, SectionTitle, StatusBadge, SyncStatusBadge, EmptyState } from '../components/ui';
 import { useScopedData, usePendingSyncCount } from '../hooks';
 import { AlertLog, AlertTingkat } from '../types';
 import { ROLE_LABEL, ROLE_PERMISSIONS, roleScopeLabel, scopePolresInPolda } from '../utils/scope';
@@ -293,6 +293,7 @@ export default function DashboardScreen({ navigation }: any) {
   } = useScopedData();
   const [pendingCount, setPendingCount] = usePendingSyncCount();
   const [syncing, setSyncing] = React.useState(false);
+  const [showReadinessModal, setShowReadinessModal] = useState(false);
   const today = todayDate();
 
   const handleSync = async () => {
@@ -1467,17 +1468,20 @@ export default function DashboardScreen({ navigation }: any) {
       {(isKepala || role === 'AHLI_GIZI') && (
         <Card
           style={{
-            backgroundColor: isDark ? 'rgba(15,23,42,0.95)' : '#0F172A',
+            backgroundColor: colors.surface,
             borderRadius: radius.xl,
             gap: spacing.sm,
-            borderColor: colors.gold || '#D97706',
-            borderWidth: 1.2,
+            borderColor: isDark ? colors.border : '#F59E0B',
+            borderWidth: 1.5,
           }}
+          onPress={() => setShowReadinessModal(true)}
         >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Feather name="shield" size={15} color="#FBBF24" />
-              <Text style={{ fontSize: 10, fontWeight: '900', color: '#F8FAFC', letterSpacing: 0.8 }}>
+              <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: isDark ? 'rgba(245,158,11,0.2)' : '#FEF3C7', alignItems: 'center', justifyContent: 'center' }}>
+                <Feather name="shield" size={14} color="#D97706" />
+              </View>
+              <Text style={{ fontSize: 11, fontWeight: '900', color: colors.text, letterSpacing: 0.6 }}>
                 SPPG KITCHEN READINESS INDEX
               </Text>
             </View>
@@ -1486,29 +1490,32 @@ export default function DashboardScreen({ navigation }: any) {
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 2 }}>
             <View>
-              <Text style={{ fontSize: 10.5, color: '#94A3B8' }}>Skor Kesiapan & Mutu Dapur</Text>
+              <Text style={{ fontSize: 11, color: colors.textMuted }}>Skor Kesiapan & Mutu Dapur Hari Ini</Text>
               <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4, marginTop: 1 }}>
-                <Text style={{ fontSize: 32, fontWeight: '900', color: '#10B981' }}>
+                <Text style={{ fontSize: 32, fontWeight: '900', color: colors.success }}>
                   {kitchenReadinessScore.score}
                 </Text>
-                <Text style={{ fontSize: 14, fontWeight: '800', color: '#94A3B8' }}>/ 100</Text>
+                <Text style={{ fontSize: 14, fontWeight: '800', color: colors.textMuted }}>/ 100</Text>
               </View>
             </View>
-            <Pressable
-              onPress={() => navigation.navigate('FoodQualityPassport')}
+            <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
                 gap: 4,
                 paddingHorizontal: 10,
                 paddingVertical: 6,
-                borderRadius: 8,
-                backgroundColor: 'rgba(255,255,255,0.1)',
+                borderRadius: radius.pill,
+                backgroundColor: isDark ? 'rgba(245,158,11,0.15)' : '#FEF3C7',
+                borderWidth: 1,
+                borderColor: '#F59E0B',
               }}
             >
-              <Text style={{ fontSize: 10.5, fontWeight: '800', color: '#FBBF24' }}>Paspor Mutu Porsi</Text>
-              <Feather name="arrow-right" size={12} color="#FBBF24" />
-            </Pressable>
+              <Text style={{ fontSize: 10.5, fontWeight: '800', color: isDark ? '#FBBF24' : '#B45309' }}>
+                Lihat Analisis Skor
+              </Text>
+              <Feather name="chevron-right" size={12} color={isDark ? '#FBBF24' : '#B45309'} />
+            </View>
           </View>
 
           {/* Subscores Strip */}
@@ -1516,39 +1523,41 @@ export default function DashboardScreen({ navigation }: any) {
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
-              backgroundColor: 'rgba(255,255,255,0.06)',
+              backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : colors.background,
               borderRadius: radius.md,
-              padding: 8,
+              padding: 10,
               marginTop: 2,
+              borderWidth: 1,
+              borderColor: colors.border,
             }}
           >
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ fontSize: 9.5, color: '#94A3B8' }}>Presensi</Text>
-              <Text style={{ fontSize: 11, fontWeight: '800', color: '#F8FAFC' }}>
+              <Text style={{ fontSize: 10, color: colors.textMuted }}>Presensi</Text>
+              <Text style={{ fontSize: 12, fontWeight: '900', color: colors.text }}>
                 {kitchenReadinessScore.subScores.presensiTim}%
               </Text>
             </View>
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ fontSize: 9.5, color: '#94A3B8' }}>Masak SOP</Text>
-              <Text style={{ fontSize: 11, fontWeight: '800', color: '#F8FAFC' }}>
+              <Text style={{ fontSize: 10, color: colors.textMuted }}>SOP Masak</Text>
+              <Text style={{ fontSize: 12, fontWeight: '900', color: colors.text }}>
                 {kitchenReadinessScore.subScores.produksiSop}%
               </Text>
             </View>
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ fontSize: 9.5, color: '#94A3B8' }}>Food Safety</Text>
-              <Text style={{ fontSize: 11, fontWeight: '800', color: '#10B981' }}>
+              <Text style={{ fontSize: 10, color: colors.textMuted }}>Food Safety</Text>
+              <Text style={{ fontSize: 12, fontWeight: '900', color: colors.success }}>
                 {kitchenReadinessScore.subScores.foodSafety}%
               </Text>
             </View>
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ fontSize: 9.5, color: '#94A3B8' }}>Distribusi</Text>
-              <Text style={{ fontSize: 11, fontWeight: '800', color: '#F8FAFC' }}>
+              <Text style={{ fontSize: 10, color: colors.textMuted }}>Distribusi</Text>
+              <Text style={{ fontSize: 12, fontWeight: '900', color: colors.text }}>
                 {kitchenReadinessScore.subScores.distribusiArmada}%
               </Text>
             </View>
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ fontSize: 9.5, color: '#94A3B8' }}>Sanitasi</Text>
-              <Text style={{ fontSize: 11, fontWeight: '800', color: '#F8FAFC' }}>
+              <Text style={{ fontSize: 10, color: colors.textMuted }}>Sanitasi</Text>
+              <Text style={{ fontSize: 12, fontWeight: '900', color: colors.text }}>
                 {kitchenReadinessScore.subScores.sanitasiHigiene}%
               </Text>
             </View>
@@ -1560,7 +1569,7 @@ export default function DashboardScreen({ navigation }: any) {
       {aiEarlyWarnings.filter((w) => w.targetRole.includes(role)).length > 0 && (
         <Card
           style={{
-            backgroundColor: isDark ? 'rgba(59,130,246,0.12)' : '#EFF6FF',
+            backgroundColor: isDark ? 'rgba(59,130,246,0.08)' : '#F0F9FF',
             borderColor: colors.primary,
             borderWidth: 1.2,
             borderRadius: radius.xl,
@@ -1590,6 +1599,8 @@ export default function DashboardScreen({ navigation }: any) {
                   gap: 4,
                   borderLeftWidth: 3,
                   borderLeftColor: warn.tingkat === 'warning' ? colors.warning : colors.primary,
+                  borderWidth: 1,
+                  borderColor: colors.border,
                 }}
               >
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1622,6 +1633,147 @@ export default function DashboardScreen({ navigation }: any) {
             ))}
         </Card>
       )}
+
+      {/* MODAL DETAIL SPPG KITCHEN READINESS INDEX */}
+      <Modal
+        visible={showReadinessModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowReadinessModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <Card style={[styles.modalCard, { backgroundColor: colors.surface, borderRadius: radius.xl, maxHeight: '85%' }]}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingBottom: 16 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: isDark ? 'rgba(245,158,11,0.2)' : '#FEF3C7', alignItems: 'center', justifyContent: 'center' }}>
+                    <Feather name="shield" size={16} color="#D97706" />
+                  </View>
+                  <View>
+                    <Text style={{ fontSize: fontSize.md, fontWeight: '900', color: colors.text }}>
+                      Detail Analisis Skor Dapur
+                    </Text>
+                    <Text style={{ fontSize: 11, color: colors.textMuted }}>
+                      Evaluasi Kesiapan & Mutu SPPG-001 Hari Ini
+                    </Text>
+                  </View>
+                </View>
+                <Pressable onPress={() => setShowReadinessModal(false)} hitSlop={8}>
+                  <Feather name="x" size={20} color={colors.textMuted} />
+                </Pressable>
+              </View>
+
+              {/* Score Hero */}
+              <View style={{ backgroundColor: isDark ? 'rgba(16,185,129,0.15)' : '#ECFDF5', borderRadius: radius.lg, padding: 14, alignItems: 'center', gap: 2 }}>
+                <Text style={{ fontSize: 11, fontWeight: '800', color: colors.success }}>
+                  TOTAL KITCHEN READINESS SCORE
+                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
+                  <Text style={{ fontSize: 36, fontWeight: '900', color: colors.success }}>{kitchenReadinessScore.score}</Text>
+                  <Text style={{ fontSize: 16, fontWeight: '800', color: colors.textMuted }}>/ 100</Text>
+                </View>
+                <Pill label={kitchenReadinessScore.grade} tone="success" />
+              </View>
+
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text, marginTop: 4 }}>
+                Rincian Evaluasi 5 Pilar Operasional:
+              </Text>
+
+              {/* 1. Presensi */}
+              <View style={{ backgroundColor: colors.background, borderRadius: radius.md, padding: 12, gap: 4, borderWidth: 1, borderColor: colors.border }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Feather name="users" size={14} color={colors.primary} />
+                    <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.text }}>
+                      1. Presensi & Kesiapan Tim
+                    </Text>
+                  </View>
+                  <Pill label="100% (Sempurna)" tone="success" />
+                </View>
+                <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
+                  15 dari 15 personil SPPG (Chef, Pemorsi, Logistik, Sanitasi, Driver) telah presensi tepat waktu sebelum pukul 05:00 WIB terverifikasi geotag GPS & foto selfie.
+                </Text>
+              </View>
+
+              {/* 2. SOP Masak */}
+              <View style={{ backgroundColor: colors.background, borderRadius: radius.md, padding: 12, gap: 4, borderWidth: 1, borderColor: colors.border }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Feather name="coffee" size={14} color={colors.warning} />
+                    <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.text }}>
+                      2. Kepatuhan SOP Masak & Bumbu
+                    </Text>
+                  </View>
+                  <Pill label="98% (Sangat Baik)" tone="warning" />
+                </View>
+                <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
+                  Produksi Batch 1 dan 2 selesai sesuai jadwal SOP. Terdapat 1 penyesuaian takaran garam pada sop batch 1 saat uji rasa awal oleh Chef sebelum masuk tahap pemorsian (-2%).
+                </Text>
+              </View>
+
+              {/* 3. Food Safety */}
+              <View style={{ backgroundColor: colors.background, borderRadius: radius.md, padding: 12, gap: 4, borderWidth: 1, borderColor: colors.border }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Feather name="shield" size={14} color={colors.success} />
+                    <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.text }}>
+                      3. Food Safety & Rantai Suhu
+                    </Text>
+                  </View>
+                  <Pill label="100% (Sempurna)" tone="success" />
+                </View>
+                <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
+                  Suhu inti daging matang 84.5°C (Standar BGN ≥75°C), cold storage stabil 3.2°C, dan holding box rata-rata 64.2°C. Zero defect dan nihil kontaminasi benda asing.
+                </Text>
+              </View>
+
+              {/* 4. Distribusi */}
+              <View style={{ backgroundColor: colors.background, borderRadius: radius.md, padding: 12, gap: 4, borderWidth: 1, borderColor: colors.border }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Feather name="truck" size={14} color={colors.primary} />
+                    <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.text }}>
+                      4. Ketepatan Waktu Distribusi
+                    </Text>
+                  </View>
+                  <Pill label="96% (Baik)" tone="info" />
+                </View>
+                <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
+                  Armada 1 dan 2 tiba tepat waktu di sekolah tujuan. Armada 3 sempat mengalami perlambatan 4 menit akibat kepadatan lalu lintas (-4%) namun tetap tiba sebelum jam makan siang.
+                </Text>
+              </View>
+
+              {/* 5. Sanitasi */}
+              <View style={{ backgroundColor: colors.background, borderRadius: radius.md, padding: 12, gap: 4, borderWidth: 1, borderColor: colors.border }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Feather name="check-circle" size={14} color={colors.success} />
+                    <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.text }}>
+                      5. Higiene, Sterilisasi & APD
+                    </Text>
+                  </View>
+                  <Pill label="98% (Sangat Baik)" tone="success" />
+                </View>
+                <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
+                  Dishwasher air panas 85°C berhasil mensterilisasi 1.500 ompreng, kepatuhan APD kru 100%, saluran grease trap bersih lancar (-2% residu air bilas tahap awal).
+                </Text>
+              </View>
+
+              <View style={{ gap: spacing.xs, marginTop: 6 }}>
+                <PrimaryButton
+                  label="Buka Digital Food Quality Passport"
+                  icon="award"
+                  onPress={() => {
+                    setShowReadinessModal(false);
+                    navigation.navigate('FoodQualityPassport');
+                  }}
+                />
+                <SecondaryButton label="Tutup Rincian" onPress={() => setShowReadinessModal(false)} />
+              </View>
+            </ScrollView>
+          </Card>
+        </View>
+      </Modal>
 
       {/* 3. Role-Specific Tasks / Daily Operational Hub */}
       <Card variant="accent" style={{ gap: spacing.sm, marginVertical: spacing.xs }}>
@@ -1948,6 +2100,18 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 480,
+    padding: 18,
   },
 });
 
