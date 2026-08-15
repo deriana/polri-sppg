@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
@@ -626,6 +626,7 @@ export default function DashboardScreen({ navigation }: any) {
 
   const targetKapasitas = currentSppg?.kapasitasProduksi || 1500;
   const currentSppgName = currentSppg?.nama ?? sppgList.find((s) => s.id === currentUser.sppgId)?.nama ?? 'SPPG Unit';
+  const [isBroadcastHidden, setIsBroadcastHidden] = useState(false);
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
@@ -641,7 +642,49 @@ export default function DashboardScreen({ navigation }: any) {
 
       <SyncStatusBadge pendingCount={pendingCount} onSyncPress={handleSync} syncing={syncing} />
 
-      {/* 2. SPPG Daily Operational Workflow Hub (Work Order Aggregator) */}
+      {/* 2. BROADCAST KOMANDO MABES / BGN (PALING ATAS & BISA DI-HIDE) */}
+      {broadcastInScope.length > 0 && !isBroadcastHidden && (
+        <Card style={{ backgroundColor: isDark ? 'rgba(217,119,6,0.15)' : '#FFFBEB', borderColor: colors.warning, gap: 8, borderWidth: 1.5 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
+              <Feather name="radio" size={16} color={colors.warning} />
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.warning }}>
+                ARAHAN KOMANDO PUSAT (MABES/BGN)
+              </Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Pill label={broadcastInScope[0].tingkat.toUpperCase()} tone="warning" />
+              <Pressable
+                onPress={() => setIsBroadcastHidden(true)}
+                hitSlop={8}
+                style={{ padding: 4, borderRadius: 12, backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)' }}
+              >
+                <Feather name="x" size={14} color={colors.textMuted} />
+              </Pressable>
+            </View>
+          </View>
+          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
+            {broadcastInScope[0].judul}
+          </Text>
+          <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
+            {broadcastInScope[0].isi}
+          </Text>
+        </Card>
+      )}
+
+      {broadcastInScope.length > 0 && isBroadcastHidden && (
+        <Pressable
+          onPress={() => setIsBroadcastHidden(false)}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 2, paddingHorizontal: 4 }}
+        >
+          <Feather name="radio" size={12} color={colors.warning} />
+          <Text style={{ fontSize: 11, fontWeight: '700', color: colors.warning }}>
+            📢 1 Arahan Mabes Disembunyikan • <Text style={{ textDecorationLine: 'underline' }}>Tampilkan Pengumuman</Text>
+          </Text>
+        </Pressable>
+      )}
+
+      {/* 3. SPPG Daily Operational Workflow Hub (Work Order Aggregator) */}
       <Card variant="accent" style={{ gap: spacing.sm }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -751,35 +794,8 @@ export default function DashboardScreen({ navigation }: any) {
         <ProductionStageBar progress={progressProduksiRealtime} target={targetKapasitas} />
       )}
 
-      {/* Broadcast Alert Banner */}
-      {broadcastInScope.length > 0 && (
-        <Card style={{ backgroundColor: isDark ? 'rgba(217,119,6,0.15)' : '#FFFBEB', borderColor: colors.warning, gap: 6 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <Feather name="radio" size={16} color={colors.warning} />
-            <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.warning, flex: 1 }}>
-              BROADCAST INSTRUKSI PENGUMUMAN
-            </Text>
-            <Pill label={broadcastInScope[0].tingkat.toUpperCase()} tone="warning" />
-          </View>
-          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
-            {broadcastInScope[0].judul}
-          </Text>
-          <Text style={{ fontSize: 11, color: colors.textMuted }}>
-            {broadcastInScope[0].isi}
-          </Text>
-        </Card>
-      )}
-
-      {/* 4. Aksi Cepat & Shortcut Favorit */}
-      <SectionTitle
-        action={
-          <Text style={{ color: colors.primary, fontWeight: '700', fontSize: fontSize.xs }}>
-            1-Tap Langsung
-          </Text>
-        }
-      >
-        ⚡ Shortcut Fitur Sering Dipakai
-      </SectionTitle>
+      {/* 4. Quick Menu */}
+      <SectionTitle>⚡ Quick Menu</SectionTitle>
       <QuickActionGrid items={quickActions} />
 
       {/* 5. Executive Metrics Grid — Horizontal Scrollable */}
