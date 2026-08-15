@@ -59,7 +59,17 @@ export default function PeralatanScreen() {
     setSanitasiTodos((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
   };
 
-  const canEdit = role ? ROLE_PERMISSIONS[role].canManageGudang : false;
+  const canEditEquipment = (eq?: Peralatan | null) => {
+    if (!role) return false;
+    if (role === 'KEPALA_SPPG' || role === 'SUPERVISOR_POLRES' || role === 'SUPERVISOR_POLDA') return true;
+    if (role === 'PETUGAS_LOGISTIK') return true;
+    if (role === 'PEMORSI_PACKING' && (eq?.kategori === 'kontainer_suhu' || eq?.kategori === 'ompreng_tray' || eq?.kategori === 'sealing_packaging')) return true;
+    if (role === 'AHLI_GIZI' && (eq?.kategori === 'kontainer_suhu' || eq?.kategori === 'kebersihan_apd')) return true;
+    if (role === 'CHEF_UTAMA' && eq?.kategori === 'alat_masak') return true;
+    if (role === 'PETUGAS_SANITASI' && (eq?.kategori === 'kebersihan_apd' || eq?.kategori === 'ompreng_tray')) return true;
+    if (role === 'DRIVER' && eq?.kategori === 'kendaraan') return true;
+    return false;
+  };
 
   const filtered = peralatanInScope.filter(
     (eq) => activeKategori === 'semua' || eq.kategori === activeKategori,
@@ -69,6 +79,7 @@ export default function PeralatanScreen() {
   const totalBermasalah = peralatanInScope.reduce((acc, curr) => acc + curr.jumlahBermasalah, 0);
 
   const openStatusModal = (eq: Peralatan) => {
+    if (!canEditEquipment(eq)) return;
     setSelectedEq(eq);
     setEditStatus(eq.status);
     setCatatanText(eq.catatanKondisi);
@@ -339,13 +350,29 @@ export default function PeralatanScreen() {
               </Text>
             </View>
 
-            {canEdit && (
+            {eq.kategori === 'kontainer_suhu' && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                <Feather name="thermometer" size={13} color={colors.success} />
+                <Text style={{ fontSize: 11, fontWeight: '700', color: colors.success }}>
+                  Uji Holding Suhu: Min 60°C saat pengiriman (Khusus Pemorsi & QC)
+                </Text>
+              </View>
+            )}
+
+            {canEditEquipment(eq) ? (
               <SecondaryButton
-                label="Perbarui Status & Kondisi"
-                icon="edit-3"
+                label={eq.kategori === 'kontainer_suhu' ? 'Uji Suhu & Perbarui Status' : 'Perbarui Status & Kondisi'}
+                icon={eq.kategori === 'kontainer_suhu' ? 'thermometer' : 'edit-3'}
                 onPress={() => openStatusModal(eq)}
                 style={{ marginTop: 4 }}
               />
+            ) : (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6, opacity: 0.7 }}>
+                <Feather name="lock" size={12} color={colors.textMuted} />
+                <Text style={{ fontSize: 10.5, color: colors.textMuted, fontStyle: 'italic' }}>
+                  Akses audit/uji kondisi alat ini dibatasi untuk divisi yang berwenang.
+                </Text>
+              </View>
             )}
           </Card>
         ))

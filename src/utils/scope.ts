@@ -152,7 +152,7 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canManageDistribusi: false,
     canManageMenu: false,
     canManageGizi: false,
-    canManageAnggaran: false,
+    canManageAnggaran: true,
     canManageBroadcast: false,
     canFollowUpAlert: false,
     canResolveAlert: false,
@@ -160,7 +160,7 @@ export const ROLE_PERMISSIONS: Record<Role, RolePermission> = {
     canExportLaporan: false,
     isDriver: false,
     isViewOnly: false,
-    scopeLevel: 'assigned',
+    scopeLevel: 'sppg',
   },
   PETUGAS_SANITASI: {
     canCreate: true,
