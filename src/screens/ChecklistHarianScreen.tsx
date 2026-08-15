@@ -6,30 +6,53 @@ import { useTheme } from '../context/ThemeContext';
 import { Card, DropdownPicker, EmptyState, Input, Modal, Pill, PrimaryButton, SectionTitle } from '../components/ui';
 import { useScopedData } from '../hooks';
 import { CHECKLIST_CATALOG } from '../data/checklistHarian';
-import { ChecklistItem, ChecklistKategori } from '../types';
-import { ROLE_PERMISSIONS } from '../utils/scope';
+import { ChecklistItem, ChecklistKategori, Role } from '../types';
+import { ROLE_LABEL, ROLE_PERMISSIONS } from '../utils/scope';
 import { pickMedia } from '../utils/pickImage';
 import { addToOfflineQueue } from '../utils/offlineQueue';
 
 const KATEGORI_LABEL: Record<ChecklistKategori, string> = {
-  kebersihan: 'Kebersihan & Sanitasi',
-  peralatan: 'Peralatan & Container',
-  keamanan_pangan: 'Keamanan Pangan & Suhu',
+  keamanan_pangan: 'Keamanan Pangan & Uji Gizi (Ahli Gizi)',
+  produksi_masak: 'Dapur & Pengolahan Masakan (Chef Utama)',
+  pemorsian_packing: 'Pemorsian & Kesiapan Box (Pemorsi & Packing)',
+  gudang_logistik: 'Penerimaan Pasokan & FEFO (Logistik Gudang)',
+  kebersihan: 'Sanitasi, Dishwasher & APD (Petugas Sanitasi)',
+  distribusi_driver: 'Kelayakan Armada & Distribusi (Driver Armada)',
+  peralatan: 'Peralatan & Fasilitas',
 };
-const KATEGORI_ORDER: ChecklistKategori[] = ['kebersihan', 'peralatan', 'keamanan_pangan'];
+
+const KATEGORI_ORDER: ChecklistKategori[] = [
+  'keamanan_pangan',
+  'produksi_masak',
+  'pemorsian_packing',
+  'gudang_logistik',
+  'kebersihan',
+  'distribusi_driver',
+  'peralatan',
+];
 
 function todayDate(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function freshItems(): ChecklistItem[] {
-  return CHECKLIST_CATALOG.map((c) => ({ ...c, status: null, catatan: null, foto: null }));
+function freshItems(userRole?: Role | null): ChecklistItem[] {
+  if (!userRole || userRole === 'KEPALA_SPPG' || userRole === 'SUPERVISOR_POLRES' || userRole === 'SUPERVISOR_POLDA') {
+    return CHECKLIST_CATALOG.map((c) => ({ ...c, status: null, catatan: null, foto: null }));
+  }
+  const roleItems = CHECKLIST_CATALOG.filter((c) => c.targetRole === userRole);
+  if (roleItems.length === 0) {
+    return CHECKLIST_CATALOG.map((c) => ({ ...c, status: null, catatan: null, foto: null }));
+  }
+  return roleItems.map((c) => ({ ...c, status: null, catatan: null, foto: null }));
 }
 
 export default function ChecklistHarianScreen() {
   const { role, currentUser, currentSppg, submitChecklist } = useApp();
   const { checklistInScope } = useScopedData();
   const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark } = useTheme();
+
+  const isKepala = role === 'KEPALA_SPPG' || role === 'SUPERVISOR_POLRES' || role === 'SUPERVISOR_POLDA';
+  const [divisionFilter, setDivisionFilter] = useState<string>('semua');
 
   const today = todayDate();
   const [selectedDate, setSelectedDate] = useState<string>(today);
@@ -48,7 +71,12 @@ export default function ChecklistHarianScreen() {
   }, []);
 
   const existing = checklistInScope.find((c) => c.tanggal === selectedDate);
-  const [items, setItems] = useState<ChecklistItem[]>(existing ? existing.items : freshItems());
+  const [items, setItems] = useState<ChecklistItem[]>(() => {
+    if (existing && existing.items.length > 0) {
+      return existing.items;
+    }
+    return freshItems(role);
+  });
   const [submitted, setSubmitted] = useState(false);
 
   // Modal State for Adding Custom Checklist Item
@@ -58,16 +86,29 @@ export default function ChecklistHarianScreen() {
   const [newItemKritis, setNewItemKritis] = useState(false);
 
   React.useEffect(() => {
-    setItems(existing ? existing.items : freshItems());
+    if (existing && existing.items.length > 0) {
+      setItems(existing.items);
+    } else {
+      setItems(freshItems(role));
+    }
     setSubmitted(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate, existing?.id]);
+  }, [selectedDate, existing?.id, role]);
 
   if (!role || !currentUser || !currentSppg) return null;
 
   const isPastDate = selectedDate !== today;
   const readOnly = ROLE_PERMISSIONS[role].isViewOnly || isPastDate;
   const checklistId = existing?.id ?? `CHK-${currentSppg.id}-${selectedDate}`;
+
+  // Filter items based on active role or division tab
+  const displayItems = useMemo(() => {
+    if (isKepala) {
+      if (divisionFilter === 'semua') return items;
+      return items.filter((i) => i.targetRole === divisionFilter);
+    }
+    // For operational roles: only display items tailored for this role
+    return items.filter((i) => !i.targetRole || i.targetRole === role);
+  }, [items, role, isKepala, divisionFilter]);
 
   const updateItem = (id: string, patch: Partial<ChecklistItem>) => {
     if (readOnly) return;
@@ -86,6 +127,7 @@ export default function ChecklistHarianScreen() {
       kategori: newItemKategori,
       item: newItemText.trim(),
       levelKritis: newItemKritis,
+      targetRole: role,
       status: null,
       catatan: null,
       foto: null,
@@ -96,16 +138,16 @@ export default function ChecklistHarianScreen() {
     setShowAddModal(false);
   };
 
-  const invalidItems = items.filter((i) => i.status === 'tidak' && !i.catatan?.trim());
-  const allAnswered = items.every((i) => i.status !== null);
-  const completedCount = items.filter((i) => i.status === 'ya').length;
+  const invalidItems = displayItems.filter((i) => i.status === 'tidak' && !i.catatan?.trim());
+  const allAnswered = displayItems.every((i) => i.status !== null);
+  const completedCount = displayItems.filter((i) => i.status === 'ya').length;
 
   const handleSubmit = async () => {
     if (invalidItems.length > 0) {
       Alert.alert('Catatan Wajib Diisi', 'Isi catatan untuk setiap item yang dijawab "Tidak".');
       return;
     }
-    const kritisGagal = items.filter((i) => i.levelKritis && i.status === 'tidak');
+    const kritisGagal = displayItems.filter((i) => i.levelKritis && i.status === 'tidak');
     const checklist = { id: checklistId, sppgId: currentSppg.id, tanggal: selectedDate, items };
     submitChecklist(checklist);
     await addToOfflineQueue('checklist_harian', checklist);
@@ -128,15 +170,52 @@ export default function ChecklistHarianScreen() {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <Feather name="check-square" size={18} color={isDark ? colors.gold : colors.primary} />
             <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
-              CHECKLIST HARIAN KEBERSIHAN & HIGIENE
+              {isKepala ? 'CHECKLIST OPERASIONAL SPPG (SEMUA DIVISI)' : `CHECKLIST HARIAN (${ROLE_LABEL[role]?.toUpperCase() || 'STAF'})`}
             </Text>
           </View>
-          <Pill label={`${completedCount}/${items.length} Selesai`} tone={allAnswered ? 'success' : 'warning'} />
+          <Pill label={`${completedCount}/${displayItems.length} Selesai`} tone={allAnswered ? 'success' : 'warning'} />
         </View>
         <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, marginTop: 2 }}>
-          Panduan pemeriksaan higiene personel, sanitasi dapur, & sterilitas ompreng sebelum distribusi.
+          {isKepala
+            ? 'Monitoring audit kepatuhan SOP harian seluruh divisi (Gizi, Dapur, Packing, Logistik, Sanitasi, Driver).'
+            : `Pemeriksaan standar operasional prosedur harian sesuai tanggung jawab jabatan Anda (${ROLE_LABEL[role]}).`}
         </Text>
       </Card>
+
+      {/* Division Selector Tabs for Kepala SPPG */}
+      {isKepala && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, marginVertical: 2 }}>
+          {[
+            { id: 'semua', label: 'Semua Divisi' },
+            { id: 'AHLI_GIZI', label: 'Ahli Gizi & QC' },
+            { id: 'CHEF_UTAMA', label: 'Chef & Cook' },
+            { id: 'PEMORSI_PACKING', label: 'Pemorsi & Box' },
+            { id: 'PETUGAS_LOGISTIK', label: 'Gudang & FEFO' },
+            { id: 'PETUGAS_SANITASI', label: 'Sanitasi & APD' },
+            { id: 'DRIVER', label: 'Armada Driver' },
+          ].map((div) => {
+            const isActive = divisionFilter === div.id;
+            return (
+              <Pressable
+                key={div.id}
+                onPress={() => setDivisionFilter(div.id)}
+                style={[
+                  styles.divisionTab,
+                  {
+                    backgroundColor: isActive ? colors.primary : colors.surface,
+                    borderColor: isActive ? colors.primary : colors.border,
+                    borderRadius: radius.pill,
+                  },
+                ]}
+              >
+                <Text style={{ fontSize: 11, fontWeight: '700', color: isActive ? colors.textInverse : colors.text }}>
+                  {div.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      )}
 
       {/* Date History Selector */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.xs, marginVertical: 2 }}>
@@ -174,7 +253,7 @@ export default function ChecklistHarianScreen() {
       )}
 
       {KATEGORI_ORDER.map((kategori) => {
-        const kategoriItems = items.filter((i) => i.kategori === kategori);
+        const kategoriItems = displayItems.filter((i) => i.kategori === kategori);
         if (kategoriItems.length === 0) return null;
 
         return (
@@ -250,7 +329,7 @@ export default function ChecklistHarianScreen() {
                   {/* Mandatory Note when "Tidak" */}
                   {isFailed && (
                     <Input
-                      label="Catatan Kondisi (Wajib diisi bila Tidak)"
+                      label="Catatan Kendala (Wajib diisi bila Tidak)"
                       value={item.catatan ?? ''}
                       onChangeText={(t) => updateItem(item.id, { catatan: t })}
                       placeholder="Jelaskan kendala/temuan..."
@@ -274,9 +353,13 @@ export default function ChecklistHarianScreen() {
             label="Kategori Checklist"
             value={newItemKategori}
             options={[
-              { label: 'Kebersihan & Sanitasi', value: 'kebersihan' },
-              { label: 'Peralatan & Container', value: 'peralatan' },
-              { label: 'Keamanan Pangan & Suhu', value: 'keamanan_pangan' },
+              { label: 'Keamanan Pangan & Uji Gizi', value: 'keamanan_pangan' },
+              { label: 'Dapur & Pengolahan Masakan', value: 'produksi_masak' },
+              { label: 'Pemorsian & Kesiapan Box', value: 'pemorsian_packing' },
+              { label: 'Penerimaan Pasokan & FEFO', value: 'gudang_logistik' },
+              { label: 'Sanitasi, Dishwasher & APD', value: 'kebersihan' },
+              { label: 'Kelayakan Armada & Distribusi', value: 'distribusi_driver' },
+              { label: 'Peralatan & Fasilitas', value: 'peralatan' },
             ]}
             onSelect={(val) => setNewItemKategori(val as any)}
             icon="folder"
@@ -313,6 +396,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: { padding: 16, gap: 14, paddingBottom: 120 },
   dateChip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1 },
+  divisionTab: { paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1 },
   todoCard: { padding: 12, borderWidth: 1, gap: 8 },
   todoRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   todoText: { fontWeight: '700', flex: 1 },

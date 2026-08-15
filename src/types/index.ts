@@ -214,13 +214,21 @@ export interface Presensi {
   status: PresensiStatus;
 }
 
-export type ChecklistKategori = 'kebersihan' | 'peralatan' | 'keamanan_pangan';
+export type ChecklistKategori =
+  | 'kebersihan'
+  | 'peralatan'
+  | 'keamanan_pangan'
+  | 'produksi_masak'
+  | 'pemorsian_packing'
+  | 'gudang_logistik'
+  | 'distribusi_driver';
 
 export interface ChecklistItem {
   id: string;
   kategori: ChecklistKategori;
   item: string;
   levelKritis: boolean;
+  targetRole?: Role;
   status: 'ya' | 'tidak' | null;
   catatan: string | null;
   foto: string | null;
