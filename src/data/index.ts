@@ -20,4 +20,5 @@ export * from './peralatan';
 export * from './usulanMenu';
 export * from './additionalFeatures';
 export * from './incidents';
+export * from './kandunganGizi';
 

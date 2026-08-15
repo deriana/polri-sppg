@@ -569,6 +569,15 @@ export default function DashboardScreen({ navigation }: any) {
       onPress: () => navigation.navigate('IncidentReportForm'),
     },
     {
+      key: 'gizi',
+      icon: 'activity',
+      title: 'Kandungan Gizi',
+      subtitle: 'Evaluasi AKG & porsi harian',
+      badge: 'Ahli Gizi',
+      tone: 'success',
+      onPress: () => navigation.navigate('KandunganGiziHarian'),
+    },
+    {
       key: 'produksi',
       icon: 'layers',
       title: 'Produksi & QC',
@@ -765,7 +774,7 @@ export default function DashboardScreen({ navigation }: any) {
         </View>
       </Card>
 
-      {/* 3. Role-based 'My Work' Card for Driver or Petugas */}
+      {/* 3. Role-based 'My Work' Card for Driver or Operational Roles */}
       {isDriver ? (
         <Card variant="accent" style={{ gap: spacing.xs, marginVertical: spacing.xs }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -787,6 +796,114 @@ export default function DashboardScreen({ navigation }: any) {
             label="Buka Live GPS & Serah Terima Sekolah"
             icon="navigation"
             onPress={() => navigation.navigate('Distribusi')}
+            style={{ marginTop: 8 }}
+          />
+        </Card>
+      ) : role === 'AHLI_GIZI' ? (
+        <Card variant="accent" style={{ gap: spacing.xs, marginVertical: spacing.xs }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Feather name="activity" size={18} color={colors.primary} />
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
+                TUGAS AHLI GIZI SPPG HARI INI
+              </Text>
+            </View>
+            <Pill label="Standar AKG BGN" tone="success" />
+          </View>
+          <Text style={{ fontSize: fontSize.xs, color: colors.text, fontWeight: '700', marginTop: 4 }}>
+            Evaluasi kandungan energi pokok makanan (kalori, karbohidrat, protein hewani/nabati, lemak, serat) untuk sajian siswa hari ini.
+          </Text>
+          <Text style={{ fontSize: 11, color: colors.textMuted }}>
+            Pastikan porsi makanan memenuhi standar gizi seimbang dan bebas kontaminasi alergen.
+          </Text>
+          <PrimaryButton
+            label="Input & Validasi Kandungan Gizi Sajian Hari Ini"
+            icon="edit-3"
+            onPress={() => navigation.navigate('KandunganGiziHarian')}
+            style={{ marginTop: 8 }}
+          />
+        </Card>
+      ) : role === 'CHEF_UTAMA' ? (
+        <Card variant="accent" style={{ gap: spacing.xs, marginVertical: spacing.xs }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Feather name="layers" size={18} color={colors.primary} />
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
+                TUGAS CHEF UTAMA & COOK HARI INI
+              </Text>
+            </View>
+            <Pill label="5 Tahap Masak" tone="warning" />
+          </View>
+          <Text style={{ fontSize: fontSize.xs, color: colors.text, fontWeight: '700', marginTop: 4 }}>
+            Pengolahan masakan dapur SPPG sesuai takaran resep standar, pencatatan titik suhu masak (min 75°C), dan sampling uji organoleptik rasa.
+          </Text>
+          <PrimaryButton
+            label="Mulai / Lanjutkan Laporan Masak Batch"
+            icon="file-text"
+            onPress={() => navigation.navigate('ProduksiList')}
+            style={{ marginTop: 8 }}
+          />
+        </Card>
+      ) : role === 'PEMORSI_PACKING' ? (
+        <Card variant="accent" style={{ gap: spacing.xs, marginVertical: spacing.xs }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Feather name="box" size={18} color={colors.primary} />
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
+                TUGAS PEMORSI & PACKING HARI INI
+              </Text>
+            </View>
+            <Pill label="Ompreng & Box" tone="primary" />
+          </View>
+          <Text style={{ fontSize: fontSize.xs, color: colors.text, fontWeight: '700', marginTop: 4 }}>
+            Penimbangan gramasi porsi ompreng stainless steel, perapatan tutup wadah, dan penataan ke dalam thermal box tahan panas (min 60°C).
+          </Text>
+          <PrimaryButton
+            label="Cek Kesiapan Ompreng & Checklist"
+            icon="check-square"
+            onPress={() => navigation.navigate('Checklist')}
+            style={{ marginTop: 8 }}
+          />
+        </Card>
+      ) : role === 'PETUGAS_LOGISTIK' ? (
+        <Card variant="accent" style={{ gap: spacing.xs, marginVertical: spacing.xs }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Feather name="package" size={18} color={colors.primary} />
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
+                TUGAS LOGISTIK & GUDANG HARI INI
+              </Text>
+            </View>
+            <Pill label="Scan DO & FEFO" tone="success" />
+          </View>
+          <Text style={{ fontSize: fontSize.xs, color: colors.text, fontWeight: '700', marginTop: 4 }}>
+            Penerimaan pasokan bahan baku (scan QR surat jalan), kontrol kadaluarsa bahan FEFO, dan pemantauan suhu cold storage IoT.
+          </Text>
+          <PrimaryButton
+            label="Penerimaan Pasokan & Scan QR"
+            icon="camera"
+            onPress={() => navigation.navigate('PengadaanBahan', { initialTab: 'terima' })}
+            style={{ marginTop: 8 }}
+          />
+        </Card>
+      ) : role === 'PETUGAS_SANITASI' ? (
+        <Card variant="accent" style={{ gap: spacing.xs, marginVertical: spacing.xs }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Feather name="shield" size={18} color={colors.primary} />
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
+                TUGAS SANITASI & KELAYAKAN APD
+              </Text>
+            </View>
+            <Pill label="Steril & Higienis" tone="success" />
+          </View>
+          <Text style={{ fontSize: fontSize.xs, color: colors.text, fontWeight: '700', marginTop: 4 }}>
+            Sterilisasi ompreng makan, pembersihan area dapur & grease trap, serta checklist kelayakan APD staf pengolah makanan.
+          </Text>
+          <PrimaryButton
+            label="Isi Checklist Sanitasi & APD"
+            icon="check-square"
+            onPress={() => navigation.navigate('Checklist')}
             style={{ marginTop: 8 }}
           />
         </Card>

@@ -23,6 +23,7 @@ import {
   initialAnggaranLogs,
   initialPengajuanSekolahList,
   initialIncidentList,
+  initialKandunganGiziList,
   CCTV_ANOMALI_LABEL,
   findAccount,
 } from '../data';
@@ -56,6 +57,7 @@ import {
   QcStatus,
   IncidentReport,
   IncidentStatus,
+  KandunganGiziHarian,
 } from '../types';
 import { MASTER_MENU_CATALOG } from '../data/masterMenu';
 
@@ -146,6 +148,8 @@ interface AppContextValue {
   incidentList: IncidentReport[];
   submitIncident: (incident: Omit<IncidentReport, 'id' | 'timestamp' | 'status'>) => void;
   updateIncidentStatus: (id: string, status: IncidentStatus, tindakanPerbaikan?: string) => void;
+  kandunganGiziList: KandunganGiziHarian[];
+  addKandunganGiziLog: (payload: Omit<KandunganGiziHarian, 'id' | 'createdAt'>) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -179,6 +183,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [anggaranLogs, setAnggaranLogs] = useState<AnggaranLog[]>(initialAnggaranLogs);
   const [pengajuanSekolahList, setPengajuanSekolahList] = useState<PengajuanSekolah[]>(initialPengajuanSekolahList);
   const [incidentList, setIncidentList] = useState<IncidentReport[]>(initialIncidentList);
+  const [kandunganGiziList, setKandunganGiziList] = useState<KandunganGiziHarian[]>(initialKandunganGiziList);
+
+  const addKandunganGiziLog: AppContextValue['addKandunganGiziLog'] = (payload) => {
+    const id = `GZI-${Date.now().toString().slice(-8)}`;
+    const createdAt = nowTimestamp();
+    setKandunganGiziList((prev) => [{ ...payload, id, createdAt }, ...prev]);
+  };
 
   const sendBroadcast: AppContextValue['sendBroadcast'] = (msg) => {
     const id = `BC-${String(broadcastList.length + 1).padStart(3, '0')}`;
@@ -749,6 +760,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       incidentList,
       submitIncident,
       updateIncidentStatus,
+      kandunganGiziList,
+      addKandunganGiziLog,
     }),
     [
       progressProduksiRealtime,
@@ -758,6 +771,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       anggaranLogs,
       pengajuanSekolahList,
       incidentList,
+      kandunganGiziList,
       role,
       loggedIn,
       currentUser,

@@ -1,4 +1,14 @@
-export type Role = 'KEPALA_SPPG' | 'PETUGAS_LAPANGAN' | 'DRIVER' | 'SUPERVISOR_POLRES' | 'SUPERVISOR_POLDA';
+export type Role =
+  | 'KEPALA_SPPG'
+  | 'AHLI_GIZI'
+  | 'CHEF_UTAMA'
+  | 'PEMORSI_PACKING'
+  | 'PETUGAS_LOGISTIK'
+  | 'PETUGAS_SANITASI'
+  | 'DRIVER'
+  | 'PETUGAS_LAPANGAN'
+  | 'SUPERVISOR_POLRES'
+  | 'SUPERVISOR_POLDA';
 
 export type JobdeskType =
   | 'ahli_gizi'
@@ -439,5 +449,27 @@ export interface IncidentReport {
   tindakanPerbaikan?: string;
   diselesaikanOleh?: string;
   resolvedTimestamp?: string;
+}
+
+export interface KandunganGiziHarian {
+  id: string;
+  sppgId: string;
+  tanggal: string;
+  namaPaketMenu: string;
+  targetPenerima: 'SD Kelas 1-3' | 'SD Kelas 4-6' | 'SMP & MTs' | 'SMA / SMK' | 'Balita & Ibu Hamil';
+  kalori: number; // kkal
+  karbohidrat: number; // gram
+  proteinHewani: number; // gram
+  proteinNabati: number; // gram
+  lemak: number; // gram
+  serat: number; // gram
+  kalsium: number; // mg
+  zatBesi: number; // mg
+  bebasAlergen: boolean;
+  statusKesesuaianAkg: 'sesuai' | 'perhatian' | 'tidak_sesuai';
+  catatanAhliGizi: string;
+  namaAhliGizi: string;
+  fotoSampelMenu?: string;
+  createdAt: string;
 }
 
