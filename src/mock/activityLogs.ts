@@ -142,3 +142,16 @@ export const INITIAL_ACTIVITY_LOGS: SystemActivityLog[] = [
     deviceInfo: 'Realme 11 Pro',
   },
 ];
+
+export const ACTIVITY_CATEGORY_TABS: { key: import('../types').ActivityCategory | 'all'; label: string; icon: any }[] = [
+  { key: 'all', label: 'Semua', icon: 'layers' },
+  { key: 'autentikasi', label: 'Autentikasi', icon: 'shield' },
+  { key: 'presensi', label: 'Presensi', icon: 'user-check' },
+  { key: 'produksi', label: 'Produksi', icon: 'coffee' },
+  { key: 'food_safety', label: 'Food Safety', icon: 'check-circle' },
+  { key: 'logistik', label: 'Logistik & Stok', icon: 'box' },
+  { key: 'distribusi', label: 'Distribusi', icon: 'truck' },
+  { key: 'keuangan', label: 'Keuangan HPP', icon: 'credit-card' },
+  { key: 'insiden', label: 'Insiden & Kendala', icon: 'alert-triangle' },
+  { key: 'pengaturan', label: 'Pengaturan', icon: 'settings' },
+];

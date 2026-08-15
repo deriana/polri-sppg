@@ -5,24 +5,12 @@ import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Card, DropdownPicker, Input, PrimaryButton, SectionTitle } from '../components/ui';
 import { IncidentCategory, IncidentSeverity } from '../types';
+import {
+  KATEGORI_INCIDENT_OPTIONS as KATEGORI_OPTIONS,
+  SEVERITY_INCIDENT_OPTIONS as SEVERITY_OPTIONS,
+} from '../mock/incidents';
 import { pickMedia } from '../utils/pickImage';
 import { getCurrentGeotag } from '../utils/geotag';
-
-const KATEGORI_OPTIONS: Array<{ label: string; value: IncidentCategory }> = [
-  { label: 'Kecelakaan Kerja / K3 Dapur', value: 'kecelakaan_kerja' },
-  { label: 'Kerusakan Peralatan Dapur / Chiller / Kompor', value: 'kerusakan_alat' },
-  { label: 'Keterlambatan Pasokan Bahan Baku', value: 'keterlambatan_bahan' },
-  { label: 'Kendala Armada Distribusi / Mogok', value: 'keterlambatan_distribusi' },
-  { label: 'Pemadaman Listrik PLN / Gangguan Air Bersih', value: 'listrik_air_padam' },
-  { label: 'Isu Kontaminasi & Higienitas Makanan', value: 'kontaminasi_pangan' },
-  { label: 'Insiden Lapangan Lainnya', value: 'lainnya' },
-];
-
-const SEVERITY_OPTIONS: Array<{ label: string; value: IncidentSeverity; color: string; desc: string }> = [
-  { label: 'Rendah', value: 'rendah', color: '#16A34A', desc: 'Tidak menghentikan proses operasional' },
-  { label: 'Sedang', value: 'sedang', color: '#D97706', desc: 'Menghambat sebagian alur kerja dapur' },
-  { label: 'Kritis', value: 'kritis', color: '#DC2626', desc: 'Darurat! Menghentikan produksi/distribusi' },
-];
 
 function todayDate(): string {
   return new Date().toISOString().slice(0, 10);

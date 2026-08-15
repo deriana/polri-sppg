@@ -10,7 +10,7 @@ import { pickMedia } from '../utils/pickImage';
 import { getCurrentGeotag } from '../utils/geotag';
 import { addToOfflineQueue } from '../utils/offlineQueue';
 import { useScopedData } from '../hooks';
-import { MENU_OPTIONS } from '../data/laporanProduksi';
+import { MENU_OPTIONS } from '../mock/laporanProduksi';
 
 const MANUAL_MENU_VALUE = '__manual__';
 

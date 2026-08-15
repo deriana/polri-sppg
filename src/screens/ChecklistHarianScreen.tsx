@@ -5,31 +5,15 @@ import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Card, DropdownPicker, EmptyState, Input, Modal, Pill, PrimaryButton, SectionTitle } from '../components/ui';
 import { useScopedData } from '../hooks';
-import { CHECKLIST_CATALOG } from '../data/checklistHarian';
+import {
+  CHECKLIST_CATALOG,
+  CHECKLIST_KATEGORI_LABEL as KATEGORI_LABEL,
+  KATEGORI_CHECKLIST_ORDER as KATEGORI_ORDER,
+} from '../mock/checklistHarian';
 import { ChecklistItem, ChecklistKategori, Role } from '../types';
 import { ROLE_LABEL, ROLE_PERMISSIONS } from '../utils/scope';
 import { pickMedia } from '../utils/pickImage';
 import { addToOfflineQueue } from '../utils/offlineQueue';
-
-const KATEGORI_LABEL: Record<ChecklistKategori, string> = {
-  keamanan_pangan: 'Keamanan Pangan & Uji Gizi (Ahli Gizi)',
-  produksi_masak: 'Dapur & Pengolahan Masakan (Chef Utama)',
-  pemorsian_packing: 'Pemorsian & Kesiapan Box (Pemorsi & Packing)',
-  gudang_logistik: 'Penerimaan Pasokan & FEFO (Logistik Gudang)',
-  kebersihan: 'Sanitasi, Dishwasher & APD (Petugas Sanitasi)',
-  distribusi_driver: 'Kelayakan Armada & Distribusi (Driver Armada)',
-  peralatan: 'Peralatan & Fasilitas',
-};
-
-const KATEGORI_ORDER: ChecklistKategori[] = [
-  'keamanan_pangan',
-  'produksi_masak',
-  'pemorsian_packing',
-  'gudang_logistik',
-  'kebersihan',
-  'distribusi_driver',
-  'peralatan',
-];
 
 function todayDate(): string {
   return new Date().toISOString().slice(0, 10);

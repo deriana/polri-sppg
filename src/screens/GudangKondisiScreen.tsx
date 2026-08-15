@@ -7,7 +7,7 @@ import { Card, EmptyState, Input, Modal, Pill, PrimaryButton, SectionTitle } fro
 import { useScopedData } from '../hooks';
 import { scopeBahanBaku } from '../utils/scope';
 import CctvPlayer from '../components/CctvPlayer';
-import { CCTV_FEEDS, CCTV_VIDEO_ASSETS } from './CctvMonitorScreen';
+import { CCTV_FEEDS, CCTV_VIDEO_ASSETS } from '../mock/cctvEvents';
 import { useLocalVideoUri } from '../utils/localVideoAsset';
 import { BahanBaku, BahanKategori } from '../types';
 

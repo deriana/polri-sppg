@@ -72,3 +72,23 @@ export const checklistList: ChecklistHarian[] = CHECKLIST_DATES.map((tanggal, id
     ),
   };
 });
+
+export const KATEGORI_CHECKLIST_ORDER: import('../types').ChecklistKategori[] = [
+  'keamanan_pangan',
+  'produksi_masak',
+  'pemorsian_packing',
+  'gudang_logistik',
+  'kebersihan',
+  'distribusi_driver',
+  'peralatan',
+];
+
+export const CHECKLIST_KATEGORI_LABEL: Record<import('../types').ChecklistKategori, string> = {
+  keamanan_pangan: 'Keamanan Pangan & Uji Gizi (Ahli Gizi)',
+  produksi_masak: 'Dapur & Pengolahan Masakan (Chef Utama)',
+  pemorsian_packing: 'Pemorsian & Kesiapan Box (Pemorsi & Packing)',
+  gudang_logistik: 'Penerimaan Pasokan & FEFO (Logistik Gudang)',
+  kebersihan: 'Sanitasi, Dishwasher & APD (Petugas Sanitasi)',
+  distribusi_driver: 'Kelayakan Armada & Distribusi (Driver Armada)',
+  peralatan: 'Peralatan & Fasilitas',
+};

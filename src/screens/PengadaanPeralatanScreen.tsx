@@ -19,40 +19,15 @@ import { useScopedData } from '../hooks';
 import { JalurPengadaanAset, PengajuanAset, PeralatanKategori, StatusPengajuanAset } from '../types';
 import { ROLE_PERMISSIONS } from '../utils/scope';
 import { pickImage } from '../utils/pickImage';
+import {
+  KATEGORI_ASET_OPTIONS,
+  SATUAN_OPTIONS,
+  URGENSI_OPTIONS,
+} from '../mock/peralatan';
 
 // Batas nominal belanja mandiri satu transaksi. Di atas ini unit tidak boleh
 // memotong anggarannya sendiri — pengadaan wajib lewat jalur BGN Pusat.
 const PLAFON_BELANJA_MANDIRI = 50000000;
-
-const KATEGORI_ASET_OPTIONS: Array<{ label: string; value: PeralatanKategori }> = [
-  { label: 'Alat Masak (kompor, kettle, steamer)', value: 'alat_masak' },
-  { label: 'Penyimpanan Bahan (chiller, freezer, rak)', value: 'penyimpanan' },
-  { label: 'Ompreng & Tray Penyajian', value: 'ompreng_tray' },
-  { label: 'Kontainer Suhu / Thermal Box', value: 'kontainer_suhu' },
-  { label: 'Sealing & Packaging', value: 'sealing_packaging' },
-  { label: 'Sterilisasi Alat & Ompreng', value: 'sterilisasi' },
-  { label: 'Kebersihan & APD Kru', value: 'kebersihan_apd' },
-  { label: 'Alat Ukur & QC Pangan', value: 'ukur_qc' },
-  { label: 'K3 & Peralatan Darurat', value: 'k3_darurat' },
-  { label: 'Kendaraan & Armada Distribusi', value: 'kendaraan' },
-];
-
-// Satuan aset dapur dibatasi daftar baku supaya laporan pengadaan lintas unit
-// bisa dijumlahkan — sebelumnya teks bebas ("unit"/"Unit"/"pcs"/"buah").
-const SATUAN_OPTIONS: Array<{ label: string; value: string }> = [
-  { label: 'Unit', value: 'unit' },
-  { label: 'Pcs (buah)', value: 'pcs' },
-  { label: 'Set', value: 'set' },
-  { label: 'Lusin', value: 'lusin' },
-  { label: 'Paket', value: 'paket' },
-  { label: 'Roll', value: 'roll' },
-];
-
-const URGENSI_OPTIONS: Array<{ label: string; value: PengajuanAset['urgensi']; desc: string }> = [
-  { label: 'Rutin', value: 'rutin', desc: 'Penggantian terjadwal' },
-  { label: 'Mendesak', value: 'mendesak', desc: 'Menghambat produksi' },
-  { label: 'Darurat', value: 'darurat', desc: 'Produksi berhenti' },
-];
 
 const STATUS_LABEL: Record<StatusPengajuanAset, string> = {
   diajukan: 'Menunggu Keputusan Pusat',

@@ -17,15 +17,7 @@ const KATEGORI_LABEL: Record<BahanKategori, string> = {
   lainnya: 'Lainnya',
 };
 
-const KATEGORI_LIST: Array<BahanKategori | 'semua'> = [
-  'semua',
-  'bahan_pokok',
-  'protein',
-  'sayur_buah',
-  'bumbu',
-  'kemasan',
-  'lainnya',
-];
+import { KATEGORI_BAHAN_LIST as KATEGORI_LIST } from '../mock/bahanBaku';
 
 // Ambang peringatan kadaluarsa FEFO (3 hari)
 const EXPIRY_WARNING_DAYS = 3;

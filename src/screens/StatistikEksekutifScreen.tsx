@@ -15,9 +15,9 @@ import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Card, Pill, PrimaryButton, SecondaryButton, SectionTitle } from '../components/ui';
 import { useScopedData } from '../hooks';
-import { initialIncidentList } from '../data/incidents';
-import { publicReportList } from '../data/publicReports';
-import { sekolahList } from '../data/sekolah';
+import { initialIncidentList } from '../mock/incidents';
+import { publicReportList } from '../mock/publicReports';
+import { sekolahList } from '../mock/sekolah';
 import { formatRupiah } from '../utils/payroll';
 
 type PeriodeOption = '7_hari' | '30_hari' | 'bulan_ini' | 'custom';

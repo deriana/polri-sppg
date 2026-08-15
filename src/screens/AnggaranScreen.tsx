@@ -8,7 +8,7 @@ import { useScopedData } from '../hooks';
 import { AnggaranKategori, AnggaranLog, ItemPembelian } from '../types';
 import { ROLE_PERMISSIONS } from '../utils/scope';
 import { pickMedia } from '../utils/pickImage';
-import { SPPG_ASSET_MAP } from '../data/sppgAssetMap';
+import { SPPG_ASSET_MAP } from '../mock/sppgAssetMap';
 
 const KATEGORI_LABEL: Record<AnggaranKategori, string> = {
   alokasi_pusat: 'Alokasi Pusat / BGN',

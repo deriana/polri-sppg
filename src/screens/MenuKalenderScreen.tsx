@@ -9,7 +9,7 @@ import { resolveHpp } from '../utils/hpp';
 import { useScopedData } from '../hooks';
 import { scopeDistribusi, scopeMenuHarianPlan, scopeSekolah, ROLE_PERMISSIONS } from '../utils/scope';
 import { DistribusiRute } from '../types';
-import { MASTER_MENU_CATALOG } from '../data/masterMenu';
+import { MASTER_MENU_CATALOG } from '../mock/masterMenu';
 
 const WEEKDAY_LABELS = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 const MONTH_LABELS = [

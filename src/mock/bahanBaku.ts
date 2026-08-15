@@ -317,3 +317,13 @@ export const bahanBakuList: BahanBaku[] = [
     fotoBahan: SPPG_ASSET_MAP.np04_sambal_goreng,
   },
 ];
+
+export const KATEGORI_BAHAN_LIST: Array<import('../types').BahanKategori | 'semua'> = [
+  'semua',
+  'bahan_pokok',
+  'protein',
+  'sayur_buah',
+  'bumbu',
+  'kemasan',
+  'lainnya',
+];

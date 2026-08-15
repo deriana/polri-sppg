@@ -14,19 +14,7 @@ import { useTheme } from '../context/ThemeContext';
 import { Card, EmptyState, Input, Pill, PrimaryButton, SecondaryButton, SectionTitle } from '../components/ui';
 import { ActivityCategory, SystemActivityLog } from '../types';
 import { ROLE_LABEL } from '../utils/scope';
-
-const CATEGORY_TABS: { key: ActivityCategory | 'all'; label: string; icon: keyof typeof Feather.glyphMap }[] = [
-  { key: 'all', label: 'Semua', icon: 'layers' },
-  { key: 'autentikasi', label: 'Autentikasi', icon: 'shield' },
-  { key: 'presensi', label: 'Presensi', icon: 'user-check' },
-  { key: 'produksi', label: 'Produksi', icon: 'coffee' },
-  { key: 'food_safety', label: 'Food Safety', icon: 'check-circle' },
-  { key: 'logistik', label: 'Logistik & Stok', icon: 'box' },
-  { key: 'distribusi', label: 'Distribusi', icon: 'truck' },
-  { key: 'keuangan', label: 'Keuangan HPP', icon: 'credit-card' },
-  { key: 'insiden', label: 'Insiden & Kendala', icon: 'alert-triangle' },
-  { key: 'pengaturan', label: 'Pengaturan', icon: 'settings' },
-];
+import { ACTIVITY_CATEGORY_TABS as CATEGORY_TABS } from '../mock/activityLogs';
 
 export default function LogAktivitasScreen() {
   const { activityLogs, currentSppg } = useApp();

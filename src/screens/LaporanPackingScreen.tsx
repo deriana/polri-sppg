@@ -4,7 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Card, EmptyState, Input, Pill, PrimaryButton, SectionTitle } from '../components/ui';
-import { SPPG_ASSET_MAP } from '../data/sppgAssetMap';
+import { SPPG_ASSET_MAP } from '../mock/sppgAssetMap';
 import { pickMedia } from '../utils/pickImage';
 import { addToOfflineQueue } from '../utils/offlineQueue';
 import { LaporanPacking } from '../types';

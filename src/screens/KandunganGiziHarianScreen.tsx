@@ -25,67 +25,9 @@ import {
 } from '../components/ui';
 import { useScopedData } from '../hooks';
 import { KandunganGiziHarian } from '../types';
-import { SPPG_ASSET_MAP } from '../data/sppgAssetMap';
+import { SPPG_ASSET_MAP } from '../mock/sppgAssetMap';
+import { MENU_PAKET_PRESETS, TARGET_GIZI_OPTIONS as TARGET_OPTIONS } from '../mock/kandunganGizi';
 import { pickImage } from '../utils/pickImage';
-
-const TARGET_OPTIONS: Array<{ label: string; value: KandunganGiziHarian['targetPenerima']; standardKcal: string }> = [
-  { label: 'SD Kelas 1-3 (Usia 7-9 thn)', value: 'SD Kelas 1-3', standardKcal: '450 - 550 kkal' },
-  { label: 'SD Kelas 4-6 (Usia 10-12 thn)', value: 'SD Kelas 4-6', standardKcal: '550 - 650 kkal' },
-  { label: 'SMP & MTs (Usia 13-15 thn)', value: 'SMP & MTs', standardKcal: '650 - 750 kkal' },
-  { label: 'SMA / SMK (Usia 16-18 thn)', value: 'SMA / SMK', standardKcal: '700 - 800 kkal' },
-  { label: 'Balita & Ibu Hamil (Program Khusus)', value: 'Balita & Ibu Hamil', standardKcal: '500 - 600 kkal' },
-];
-
-const MENU_PAKET_PRESETS = [
-  {
-    nama: 'Paket Nasi Liwet Ayam Bakar Madu + Tahu Bacem + Sup Bayam + Buah Jeruk',
-    foto: SPPG_ASSET_MAP.paket_nasi_liwet,
-    defaultKalori: '615',
-    defaultKarbo: '78',
-    defaultProtHewani: '24',
-    defaultProtNabati: '10',
-    defaultLemak: '18',
-    defaultSerat: '6.5',
-    defaultKalsium: '240',
-    defaultZatBesi: '4.8',
-  },
-  {
-    nama: 'Paket Nasi Kuning Rendang Daging Sapi + Tempe Orek + Sayur Capcay + Buah Pisang',
-    foto: SPPG_ASSET_MAP.paket_nasi_kuning,
-    defaultKalori: '640',
-    defaultKarbo: '82',
-    defaultProtHewani: '26',
-    defaultProtNabati: '11',
-    defaultLemak: '19',
-    defaultSerat: '7.0',
-    defaultKalsium: '260',
-    defaultZatBesi: '5.2',
-  },
-  {
-    nama: 'Paket Nasi Gurame Bakar + Perkedel Kentang + Cah Buncis Jagung + Buah Apel',
-    foto: SPPG_ASSET_MAP.paket_nasi_gurame,
-    defaultKalori: '630',
-    defaultKarbo: '80',
-    defaultProtHewani: '25',
-    defaultProtNabati: '9',
-    defaultLemak: '17',
-    defaultSerat: '6.8',
-    defaultKalsium: '250',
-    defaultZatBesi: '4.6',
-  },
-  {
-    nama: 'Paket Nasi Uduk Semur Bola Daging + Sambal Goreng Kentang + Sup Wortel + Buah Semangka',
-    foto: SPPG_ASSET_MAP.paket_nasi_uduk,
-    defaultKalori: '625',
-    defaultKarbo: '79',
-    defaultProtHewani: '23',
-    defaultProtNabati: '10',
-    defaultLemak: '18',
-    defaultSerat: '6.2',
-    defaultKalsium: '230',
-    defaultZatBesi: '4.9',
-  },
-];
 
 export default function KandunganGiziHarianScreen({ navigation }: any) {
   const { currentUser, currentSppg, kandunganGiziList, addKandunganGiziLog, masterMenuList, costPerMeal } = useApp();

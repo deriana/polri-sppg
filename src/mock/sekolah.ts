@@ -138,3 +138,11 @@ export const sekolahList: Sekolah[] = [
     fotoSekolah: SPPG_ASSET_MAP.sekolah_1,
   },
 ];
+
+export const NEARBY_SCHOOL_CANDIDATES = [
+  { nama: 'SD Negeri 3 Coblong', alamat: 'Jl. Ir. H. Juanda No. 142, Dago, Bandung', siswa: 320, jarak: 1.4 },
+  { nama: 'SMP Negeri 5 Bandung', alamat: 'Jl. Belitung No. 8, Merdeka, Sumur Bandung', siswa: 480, jarak: 2.8 },
+  { nama: 'SD IT Al-Azhar Dago', alamat: 'Jl. Dago Asri No. 15, Bandung', siswa: 350, jarak: 3.2 },
+  { nama: 'SD Negeri 1 Cisitu', alamat: 'Jl. Cisitu Indah No. 4, Coblong, Bandung', siswa: 290, jarak: 1.8 },
+  { nama: 'SMA Negeri 1 Bandung', alamat: 'Jl. Ir. H. Juanda No. 93, Dago, Bandung', siswa: 620, jarak: 4.1 },
+];

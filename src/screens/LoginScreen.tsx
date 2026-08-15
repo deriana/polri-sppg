@@ -14,7 +14,7 @@ import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Card, Input, Pill, PrimaryButton, SecondaryButton } from '../components/ui';
-import { ACCOUNTS } from '../data/accounts';
+import { ACCOUNTS } from '../mock/accounts';
 import { BRAND_ASSETS } from '../data/images';
 import { ROLE_LABEL } from '../utils/scope';
 

@@ -8,20 +8,7 @@ import { Card, EmptyState, Input, Pill, PrimaryButton, SecondaryButton, SectionT
 import AssetQrModal from '../components/AssetQrModal';
 import { useScopedData } from '../hooks';
 import { Peralatan, PeralatanKategori, PeralatanStatus } from '../types';
-
-const KATEGORI_OPTIONS: { id: PeralatanKategori | 'semua'; label: string; icon: keyof typeof Feather.glyphMap }[] = [
-  { id: 'semua', label: 'Semua Alat', icon: 'layers' },
-  { id: 'kendaraan', label: 'Mobil & Motor Box', icon: 'truck' },
-  { id: 'ompreng_tray', label: 'Ompreng Stainless', icon: 'grid' },
-  { id: 'kontainer_suhu', label: 'Thermal Container', icon: 'box' },
-  { id: 'alat_masak', label: 'Kettle & Kompor', icon: 'coffee' },
-  { id: 'penyimpanan', label: 'Penyimpanan Bahan', icon: 'thermometer' },
-  { id: 'sealing_packaging', label: 'Sealer & Packing', icon: 'package' },
-  { id: 'sterilisasi', label: 'Sterilisasi Alat', icon: 'droplet' },
-  { id: 'kebersihan_apd', label: 'Kebersihan & APD', icon: 'shield' },
-  { id: 'ukur_qc', label: 'Alat Ukur & QC', icon: 'activity' },
-  { id: 'k3_darurat', label: 'K3 & Darurat', icon: 'alert-octagon' },
-];
+import { KATEGORI_PERALATAN_OPTIONS as KATEGORI_OPTIONS } from '../mock/peralatan';
 
 export default function PeralatanScreen() {
   const { peralatanInScope } = useScopedData();
@@ -316,7 +303,7 @@ export default function PeralatanScreen() {
                 },
               ]}
             >
-              <Feather name={kat.icon} size={14} color={isActive ? colors.textInverse : colors.textMuted} strokeWidth={iconStrokeWidth} />
+              <Feather name={kat.icon as any} size={14} color={isActive ? colors.textInverse : colors.textMuted} strokeWidth={iconStrokeWidth} />
               <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: isActive ? colors.textInverse : colors.text }}>
                 {kat.label}
               </Text>

@@ -28,7 +28,7 @@ import {
   INITIAL_ACTIVITY_LOGS,
   CCTV_ANOMALI_LABEL,
   findAccount,
-} from '../data';
+} from '../mock';
 import {
   AlertLog,
   AnggaranLog,
@@ -72,12 +72,12 @@ import {
   AiKitchenEarlyWarning,
   SystemActivityLog,
 } from '../types';
-import { MASTER_MENU_CATALOG } from '../data/masterMenu';
-import { INITIAL_LAPORAN_PACKING } from '../data/laporanPacking';
-import { INITIAL_LAPORAN_SANITASI } from '../data/laporanSanitasi';
-import { INITIAL_BATCH_TRACEABILITY } from '../data/batchTraceability';
-import { INITIAL_QUALITY_PASSPORTS } from '../data/qualityPassport';
-import { INITIAL_COST_PER_MEAL, INITIAL_KITCHEN_READINESS, INITIAL_AI_EARLY_WARNINGS } from '../data/kitchenAi';
+import { MASTER_MENU_CATALOG } from '../mock/masterMenu';
+import { INITIAL_LAPORAN_PACKING } from '../mock/laporanPacking';
+import { INITIAL_LAPORAN_SANITASI } from '../mock/laporanSanitasi';
+import { INITIAL_BATCH_TRACEABILITY } from '../mock/batchTraceability';
+import { INITIAL_QUALITY_PASSPORTS } from '../mock/qualityPassport';
+import { INITIAL_COST_PER_MEAL, INITIAL_KITCHEN_READINESS, INITIAL_AI_EARLY_WARNINGS } from '../mock/kitchenAi';
 
 // Fase 2 (simulasi) — daftar jenis anomali CCTV yang dipakai simulateCctvDetection
 // untuk memilih anomali secara berputar (tanpa dependency random).

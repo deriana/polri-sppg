@@ -299,3 +299,9 @@ export const users: User[] = [
     fotoProfil: SPPG_ASSET_MAP.profil_wanita_paruh_baya,
   },
 ];
+
+export const SHIFT_OPTIONS = [
+  { label: 'Pagi', value: 'Pagi' },
+  { label: 'Siang', value: 'Siang' },
+  { label: 'Malam', value: 'Malam' },
+];

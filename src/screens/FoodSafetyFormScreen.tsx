@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Card, DropdownPicker, EmptyState, Input, Pill, PrimaryButton, SectionTitle, StatusBadge, Stepper } from '../components/ui';
 import { AlertTingkat } from '../types';
-import { JENIS_MAKANAN_MASA_SIMPAN } from '../data/foodSafetyLog';
+import { JENIS_MAKANAN_MASA_SIMPAN } from '../mock/foodSafetyLog';
 import { estimateKadaluarsa } from '../utils/foodSafety';
 import { ROLE_PERMISSIONS } from '../utils/scope';
 import { addToOfflineQueue } from '../utils/offlineQueue';

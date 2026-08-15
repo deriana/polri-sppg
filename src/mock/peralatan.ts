@@ -1,4 +1,5 @@
-import { Peralatan } from '../types';
+import { Feather } from '@expo/vector-icons';
+import { Peralatan, PeralatanKategori } from '../types';
 import { SPPG_ASSET_MAP } from './sppgAssetMap';
 
 export const peralatanList: Peralatan[] = [
@@ -775,4 +776,46 @@ export const peralatanList: Peralatan[] = [
     catatanKondisi: '34 set siap pakai. Pemakaian APD dicatat harian oleh petugas sanitasi.',
     terakhirDiperiksa: '2026-08-14',
   },
+];
+
+export const KATEGORI_PERALATAN_OPTIONS: { id: PeralatanKategori | 'semua'; label: string; icon: keyof typeof Feather.glyphMap }[] = [
+  { id: 'semua', label: 'Semua Alat', icon: 'layers' },
+  { id: 'kendaraan', label: 'Mobil & Motor Box', icon: 'truck' },
+  { id: 'ompreng_tray', label: 'Ompreng Stainless', icon: 'grid' },
+  { id: 'kontainer_suhu', label: 'Thermal Container', icon: 'box' },
+  { id: 'alat_masak', label: 'Kettle & Kompor', icon: 'coffee' },
+  { id: 'penyimpanan', label: 'Penyimpanan Bahan', icon: 'thermometer' },
+  { id: 'sealing_packaging', label: 'Sealer & Packing', icon: 'package' },
+  { id: 'sterilisasi', label: 'Sterilisasi Alat', icon: 'droplet' },
+  { id: 'kebersihan_apd', label: 'Kebersihan & APD', icon: 'shield' },
+  { id: 'ukur_qc', label: 'Alat Ukur & QC', icon: 'activity' },
+  { id: 'k3_darurat', label: 'K3 & Darurat', icon: 'alert-octagon' },
+];
+
+export const KATEGORI_ASET_OPTIONS: Array<{ label: string; value: PeralatanKategori }> = [
+  { label: 'Alat Masak (kompor, kettle, steamer)', value: 'alat_masak' },
+  { label: 'Penyimpanan Bahan (chiller, freezer, rak)', value: 'penyimpanan' },
+  { label: 'Ompreng & Tray Penyajian', value: 'ompreng_tray' },
+  { label: 'Kontainer Suhu / Thermal Box', value: 'kontainer_suhu' },
+  { label: 'Sealing & Packaging', value: 'sealing_packaging' },
+  { label: 'Sterilisasi Alat & Ompreng', value: 'sterilisasi' },
+  { label: 'Kebersihan & APD Kru', value: 'kebersihan_apd' },
+  { label: 'Alat Ukur & QC Pangan', value: 'ukur_qc' },
+  { label: 'K3 & Peralatan Darurat', value: 'k3_darurat' },
+  { label: 'Kendaraan & Armada Distribusi', value: 'kendaraan' },
+];
+
+export const SATUAN_OPTIONS: Array<{ label: string; value: string }> = [
+  { label: 'Unit', value: 'unit' },
+  { label: 'Pcs (buah)', value: 'pcs' },
+  { label: 'Set', value: 'set' },
+  { label: 'Lusin', value: 'lusin' },
+  { label: 'Paket', value: 'paket' },
+  { label: 'Roll', value: 'roll' },
+];
+
+export const URGENSI_OPTIONS: Array<{ label: string; value: 'rutin' | 'mendesak' | 'darurat'; desc: string }> = [
+  { label: 'Rutin', value: 'rutin', desc: 'Penggantian terjadwal' },
+  { label: 'Mendesak', value: 'mendesak', desc: 'Menghambat produksi' },
+  { label: 'Darurat', value: 'darurat', desc: 'Produksi berhenti' },
 ];

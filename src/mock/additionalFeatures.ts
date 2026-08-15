@@ -216,3 +216,11 @@ export const initialPengajuanSekolahList: PengajuanSekolah[] = [
     tanggapan: 'Sedang dalam evaluasi kapasitas dapur oleh Polres Metro Bandung.',
   },
 ];
+
+export const KATEGORI_ANGGARAN_OPTIONS: Array<{ label: string; value: import('../types').AnggaranKategori }> = [
+  { label: 'Bahan Baku Makanan', value: 'bahan_baku' },
+  { label: 'Operasional & Armada MBG', value: 'operasional_armada' },
+  { label: 'Peralatan & Kemasan Dapur', value: 'peralatan_dapur' },
+  { label: 'Kebersihan & Sanitasi APD', value: 'kebersihan_apd' },
+  { label: 'Lain-lain / Tak Terduga', value: 'lainnya' },
+];

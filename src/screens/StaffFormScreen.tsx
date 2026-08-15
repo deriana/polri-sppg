@@ -7,12 +7,7 @@ import { Card, DropdownPicker, EmptyState, Input, PrimaryButton, SectionTitle } 
 import { ROLE_PERMISSIONS } from '../utils/scope';
 import { pickImage } from '../utils/pickImage';
 import { Jobdesk, JOBDESK_OPTIONS } from '../utils/jobdesk';
-
-const SHIFT_OPTIONS = [
-  { label: 'Pagi', value: 'Pagi' },
-  { label: 'Siang', value: 'Siang' },
-  { label: 'Malam', value: 'Malam' },
-];
+import { SHIFT_OPTIONS } from '../mock/users';
 
 export default function StaffFormScreen({ navigation }: any) {
   const { role, currentUser, addStaff } = useApp();

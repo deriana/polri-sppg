@@ -27,7 +27,7 @@ import {
 import { useScopedData } from '../hooks';
 import { AnggaranKategori, AnggaranLog, ItemPembelian, PermintaanBahan } from '../types';
 import { ROLE_PERMISSIONS } from '../utils/scope';
-import { SPPG_ASSET_MAP } from '../data/sppgAssetMap';
+import { SPPG_ASSET_MAP } from '../mock/sppgAssetMap';
 import { pickImage } from '../utils/pickImage';
 
 const STATUS_PERMINTAAN_LABEL: Record<PermintaanBahan['status'], string> = {
@@ -37,13 +37,7 @@ const STATUS_PERMINTAAN_LABEL: Record<PermintaanBahan['status'], string> = {
   selesai: 'Selesai',
 };
 
-const KATEGORI_OPTIONS: Array<{ label: string; value: AnggaranKategori }> = [
-  { label: 'Bahan Baku Makanan', value: 'bahan_baku' },
-  { label: 'Operasional & Armada MBG', value: 'operasional_armada' },
-  { label: 'Peralatan & Kemasan Dapur', value: 'peralatan_dapur' },
-  { label: 'Kebersihan & Sanitasi APD', value: 'kebersihan_apd' },
-  { label: 'Lain-lain / Tak Terduga', value: 'lainnya' },
-];
+import { KATEGORI_ANGGARAN_OPTIONS as KATEGORI_OPTIONS } from '../mock/additionalFeatures';
 
 interface FormItemRow {
   id: string;

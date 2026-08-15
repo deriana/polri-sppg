@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Card, EmptyState, Pill, PrimaryButton, SecondaryButton, SectionTitle } from '../components/ui';
 import { BatchTraceabilityStep } from '../types';
-import { SPPG_ASSET_MAP } from '../data/sppgAssetMap';
+import { SPPG_ASSET_MAP } from '../mock/sppgAssetMap';
 import { toWhatsAppNumber } from '../utils/contact';
 
 const STAGE_ICON_MAP: Record<BatchTraceabilityStep['stage'], keyof typeof Feather.glyphMap> = {

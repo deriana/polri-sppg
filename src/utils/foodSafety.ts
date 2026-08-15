@@ -1,4 +1,4 @@
-import { JENIS_MAKANAN_MASA_SIMPAN } from '../data/foodSafetyLog';
+import { JENIS_MAKANAN_MASA_SIMPAN } from '../mock/foodSafetyLog';
 
 export interface FoodSafetyEstimate {
   estimasiKadaluarsa: string;
