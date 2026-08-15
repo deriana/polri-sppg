@@ -473,6 +473,8 @@ export interface UsulanMenu {
   tanggal: string; // YYYY-MM-DD
   status: UsulanMenuStatus;
   tanggapan?: string | null;
+  fotoMenu?: string | null;
+  pengusulNama?: string;
 }
 
 // ==========================================

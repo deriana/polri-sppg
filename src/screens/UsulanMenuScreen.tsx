@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
@@ -115,18 +115,37 @@ export default function UsulanMenuScreen({ navigation }: any) {
                 <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>{u.tanggal}</Text>
               </View>
 
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                <Feather name="home" size={13} color={colors.primary} />
-                <Text style={{ color: colors.text, fontSize: fontSize.xs, fontWeight: '700' }}>
-                  {sekolah?.nama ?? u.sekolahId}
-                </Text>
+              <View style={{ flexDirection: 'row', gap: 10, marginTop: 4 }}>
+                {u.fotoMenu ? (
+                  <Image
+                    source={typeof u.fotoMenu === 'string' ? { uri: u.fotoMenu } : u.fotoMenu}
+                    style={{ width: 72, height: 72, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border }}
+                    resizeMode="cover"
+                  />
+                ) : null}
+
+                <View style={{ flex: 1, gap: 2 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Feather name="home" size={12} color={colors.primary} />
+                    <Text style={{ color: colors.text, fontSize: fontSize.xs, fontWeight: '700' }} numberOfLines={1}>
+                      {sekolah?.nama ?? u.sekolahId}
+                    </Text>
+                  </View>
+
+                  <Text style={{ color: colors.text, fontWeight: '900', fontSize: fontSize.sm }} numberOfLines={2}>
+                    {u.usulanMenu}
+                  </Text>
+
+                  {u.pengusulNama && (
+                    <Text style={{ color: colors.textMuted, fontSize: 10.5 }} numberOfLines={1}>
+                      Oleh: {u.pengusulNama}
+                    </Text>
+                  )}
+                </View>
               </View>
 
-              <Text style={{ color: colors.text, fontWeight: '900', fontSize: fontSize.sm, marginTop: 2 }}>
-                {u.usulanMenu}
-              </Text>
               {u.alasan && (
-                <Text style={{ color: colors.textMuted, fontSize: 11.5 }} numberOfLines={2}>
+                <Text style={{ color: colors.textMuted, fontSize: 11.5, marginTop: 2 }} numberOfLines={2}>
                   Alasan: {u.alasan}
                 </Text>
               )}
@@ -139,7 +158,7 @@ export default function UsulanMenuScreen({ navigation }: any) {
               )}
 
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 4, marginTop: 4 }}>
-                <Text style={{ fontSize: 10.5, fontWeight: '700', color: colors.primary }}>Ketuk untuk Lihat Detail</Text>
+                <Text style={{ fontSize: 10.5, fontWeight: '700', color: colors.primary }}>Ketuk untuk Lihat Detail & Foto</Text>
                 <Feather name="chevron-right" size={13} color={colors.primary} />
               </View>
             </Card>
@@ -176,8 +195,8 @@ export default function UsulanMenuScreen({ navigation }: any) {
                   </Text>
                 </View>
 
-                {/* School Information */}
-                <View style={[styles.infoBlock, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                {/* School & Submitter Information */}
+                <View style={[styles.infoBlock, { backgroundColor: colors.background, borderColor: colors.border, gap: 6 }]}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                     <Feather name="home" size={16} color={colors.primary} />
                     <View style={{ flex: 1 }}>
@@ -185,11 +204,52 @@ export default function UsulanMenuScreen({ navigation }: any) {
                         {sekolahList.find((s) => s.id === selectedUsulan.sekolahId)?.nama ?? selectedUsulan.sekolahId}
                       </Text>
                       <Text style={{ fontSize: 11, color: colors.textMuted }}>
-                        Sekolah Penerima Manfaat MBG SPPG-001
+                        Sekolah Penerima Manfaat MBG
                       </Text>
                     </View>
                   </View>
+                  {selectedUsulan.pengusulNama && (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingTop: 4, borderTopWidth: 1, borderTopColor: colors.border }}>
+                      <Feather name="user-check" size={13} color={colors.primary} />
+                      <Text style={{ fontSize: 11, fontWeight: '700', color: colors.text }}>
+                        Pengusul: {selectedUsulan.pengusulNama}
+                      </Text>
+                    </View>
+                  )}
                 </View>
+
+                {/* Photo Preview in Modal */}
+                {selectedUsulan.fotoMenu ? (
+                  <View style={{ borderRadius: radius.md, overflow: 'hidden', borderWidth: 1, borderColor: colors.border }}>
+                    <Image
+                      source={typeof selectedUsulan.fotoMenu === 'string' ? { uri: selectedUsulan.fotoMenu } : selectedUsulan.fotoMenu}
+                      style={{ width: '100%', height: 180 }}
+                      resizeMode="cover"
+                    />
+                    <View
+                      style={{
+                        position: 'absolute',
+                        bottom: 8,
+                        left: 8,
+                        backgroundColor: 'rgba(0,0,0,0.65)',
+                        paddingHorizontal: 8,
+                        paddingVertical: 4,
+                        borderRadius: radius.sm,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 5,
+                      }}
+                    >
+                      <Feather name="camera" size={11} color="#FFF" />
+                      <Text style={{ color: '#FFF', fontSize: 10.5, fontWeight: '800' }}>Foto Contoh / Referensi Usulan</Text>
+                    </View>
+                  </View>
+                ) : (
+                  <View style={{ padding: 12, backgroundColor: colors.background, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, alignItems: 'center', flexDirection: 'row', gap: 8 }}>
+                    <Feather name="image" size={16} color={colors.textMuted} />
+                    <Text style={{ fontSize: 11, color: colors.textMuted }}>Pengusul tidak menyertakan foto referensi.</Text>
+                  </View>
+                )}
 
                 {/* Proposal Reason */}
                 <View style={{ gap: 4 }}>
