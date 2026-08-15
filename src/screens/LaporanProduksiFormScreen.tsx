@@ -31,6 +31,7 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
     currentUser,
     currentSppg,
     laporanList,
+    sekolahList,
     menuHarianPlanList,
     saveLaporanDraft,
     submitLaporan,
@@ -38,6 +39,10 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
     updateProductionStage,
   } = useApp();
   const { sppgInScope } = useScopedData();
+
+  const affiliatedSchools = currentSppg ? sekolahList.filter((s) => s.sppgId === currentSppg.id) : [];
+  const totalSiswaSekolah = affiliatedSchools.reduce((acc, curr) => acc + curr.jumlahSiswa, 0);
+  const [showSchoolBreakdown, setShowSchoolBreakdown] = useState(true);
 
   const existing = params.laporanId ? laporanList.find((l) => l.id === params.laporanId) : undefined;
 
@@ -385,7 +390,7 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
         </View>
 
         {/* Target Kebutuhan Sekolah */}
-        <View style={{ gap: 4 }}>
+        <View style={{ gap: 6 }}>
           <Stepper
             label="Target Kebutuhan Sekolah (Order Porsi)"
             value={targetPorsi}
@@ -394,9 +399,71 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
             min={0}
             disabled={readOnly}
           />
-          <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
-            * Jumlah ompreng yang dibutuhkan untuk seluruh siswa sekolah penerima manfaat hari ini.
-          </Text>
+
+          {/* Quick Auto-fill Button if target differs */}
+          {targetPorsi !== totalSiswaSekolah && totalSiswaSekolah > 0 && !readOnly && (
+            <Pressable
+              onPress={() => setTargetPorsi(totalSiswaSekolah)}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4 }}
+            >
+              <Feather name="refresh-cw" size={12} color={colors.primary} />
+              <Text style={{ fontSize: 11, fontWeight: '700', color: colors.primary }}>
+                Set Target Otomatis Sesuai Total Siswa: {totalSiswaSekolah.toLocaleString('id-ID')} Porsi
+              </Text>
+            </Pressable>
+          )}
+
+          {/* Rincian Pembagian Alokasi per Sekolah */}
+          {affiliatedSchools.length > 0 && (
+            <View style={[styles.schoolBreakdownBox, { backgroundColor: colors.background, borderColor: colors.border, borderRadius: radius.md }]}>
+              <Pressable
+                onPress={() => setShowSchoolBreakdown(!showSchoolBreakdown)}
+                style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
+                  <Feather name="map-pin" size={14} color={colors.primary} />
+                  <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }}>
+                    Rincian Alokasi {affiliatedSchools.length} Sekolah Penerima ({totalSiswaSekolah.toLocaleString('id-ID')} Siswa)
+                  </Text>
+                </View>
+                <Feather name={showSchoolBreakdown ? 'chevron-up' : 'chevron-down'} size={16} color={colors.textMuted} />
+              </Pressable>
+
+              {showSchoolBreakdown && (
+                <View style={{ gap: 8, marginTop: 8 }}>
+                  {affiliatedSchools.map((sch, idx) => {
+                    const pct = totalSiswaSekolah > 0 ? ((sch.jumlahSiswa / totalSiswaSekolah) * 100).toFixed(0) : '0';
+                    return (
+                      <View
+                        key={sch.id}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          paddingVertical: 6,
+                          borderBottomWidth: idx < affiliatedSchools.length - 1 ? 1 : 0,
+                          borderColor: colors.border,
+                        }}
+                      >
+                        <View style={{ flex: 1, gap: 2, paddingRight: 8 }}>
+                          <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }} numberOfLines={1}>
+                            {sch.nama}
+                          </Text>
+                          <Text style={{ fontSize: 10.5, color: colors.textMuted }} numberOfLines={1}>
+                            {sch.alamat}
+                          </Text>
+                        </View>
+                        <View style={{ alignItems: 'flex-end', gap: 2 }}>
+                          <Pill label={`${sch.jumlahSiswa} Porsi`} tone="primary" />
+                          <Text style={{ fontSize: 9.5, color: colors.textMuted }}>{pct}% dari total</Text>
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
+            </View>
+          )}
         </View>
 
         {/* Toggle Status Pemorsian */}
@@ -740,6 +807,12 @@ const styles = StyleSheet.create({
     padding: 12,
     borderWidth: 1,
     gap: 8,
+  },
+  schoolBreakdownBox: {
+    padding: 12,
+    borderWidth: 1,
+    gap: 6,
+    marginTop: 4,
   },
 });
 
