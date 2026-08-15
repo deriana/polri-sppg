@@ -53,6 +53,8 @@ import PengadaanBahanScreen from '../screens/PengadaanBahanScreen';
 import KandunganGiziHarianScreen from '../screens/KandunganGiziHarianScreen';
 import LaporanPackingScreen from '../screens/LaporanPackingScreen';
 import LaporanSanitasiScreen from '../screens/LaporanSanitasiScreen';
+import BatchTraceabilityScreen from '../screens/BatchTraceabilityScreen';
+import FoodQualityPassportScreen from '../screens/FoodQualityPassportScreen';
 
 const Stack = createNativeStackNavigator<any>();
 
@@ -109,6 +111,8 @@ const DETAIL_SCREENS: Array<{ name: string; component: React.ComponentType<any>;
   { name: 'IncidentForm', component: IncidentFormScreen, title: 'Formulir Lapor Insiden' },
   { name: 'LaporanPacking', component: LaporanPackingScreen, title: 'Laporan Packing & Pemorsian' },
   { name: 'LaporanSanitasi', component: LaporanSanitasiScreen, title: 'Laporan Sanitasi & Sterilisasi' },
+  { name: 'BatchTraceability', component: BatchTraceabilityScreen, title: 'Pelacakan Rantai Pangan (Traceability)' },
+  { name: 'FoodQualityPassport', component: FoodQualityPassportScreen, title: 'Digital Food Quality Passport' },
 ];
 
 export function buildDetailStack(homeName: string, HomeComponent: React.ComponentType<any>, homeTitle: string) {

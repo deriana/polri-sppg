@@ -39,7 +39,7 @@ interface FormItemRow {
 }
 
 export default function AnggaranScreen({ navigation }: any) {
-  const { role, currentUser, currentSppg, addAnggaranLog, mitraList, bahanBakuList, catatMutasiStok } = useApp();
+  const { role, currentUser, currentSppg, addAnggaranLog, mitraList, bahanBakuList, catatMutasiStok, costPerMeal } = useApp();
   const { colors, fontSize, iconStrokeWidth, radius, spacing, shadow, isDark } = useTheme();
   const { anggaranInScope } = useScopedData();
 
@@ -226,6 +226,75 @@ export default function AnggaranScreen({ navigation }: any) {
             <Text style={{ fontSize: 11, color: colors.textMuted }}>Total Belanja Bahan & Aset</Text>
             <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.danger }}>
               - Rp {totalPengeluaran.toLocaleString('id-ID')}
+            </Text>
+          </View>
+        </View>
+      </Card>
+
+      {/* Cost per Meal Calculator Widget */}
+      <Card style={{ gap: spacing.sm, borderRadius: radius.xl }}>
+        <View style={styles.rowBetween}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: isDark ? 'rgba(16,185,129,0.2)' : '#ECFDF5', alignItems: 'center', justifyContent: 'center' }}>
+              <Feather name="pie-chart" size={16} color={colors.success} />
+            </View>
+            <View>
+              <Text style={{ fontSize: fontSize.sm, fontWeight: '900', color: colors.text }}>
+                Kalkulator Real Cost per Meal
+              </Text>
+              <Text style={{ fontSize: 11, color: colors.textMuted }}>
+                Perhitungan Riil Biaya Produksi per Porsi MBG
+              </Text>
+            </View>
+          </View>
+          <Pill label={`Hemat +${costPerMeal.hematEfisiensiPct}%`} tone="success" />
+        </View>
+
+        <View style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : colors.background, borderRadius: radius.lg, padding: 12, gap: 8 }}>
+          <View style={styles.rowBetween}>
+            <View>
+              <Text style={{ fontSize: 10.5, color: colors.textMuted, fontWeight: '700' }}>TOTAL BIAYA RIIL / PORSI</Text>
+              <Text style={{ fontSize: 24, fontWeight: '900', color: colors.primary, marginTop: 2 }}>
+                Rp {costPerMeal.totalCostPerPorsi.toLocaleString('id-ID')}
+                <Text style={{ fontSize: 12, fontWeight: '600', color: colors.textMuted }}> / porsi</Text>
+              </Text>
+            </View>
+            <View style={{ alignItems: 'flex-end' }}>
+              <Text style={{ fontSize: 10.5, color: colors.textMuted }}>Pagu Standar BGN</Text>
+              <Text style={{ fontSize: 14, fontWeight: '800', color: colors.text }}>
+                Rp {costPerMeal.paguStandarBgn.toLocaleString('id-ID')}
+              </Text>
+              <Text style={{ fontSize: 10, color: colors.success, fontWeight: '700' }}>Efisiensi Anggaran Aman</Text>
+            </View>
+          </View>
+
+          {/* Cost Items Breakdown */}
+          <View style={{ gap: 6, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 8 }}>
+            {[
+              { label: 'Bahan Pokok (Beras, Ayam, Telur, Sayur)', value: costPerMeal.bahanBaku, icon: 'package' as const },
+              { label: 'Bumbu Dapur & Minyak Masak', value: costPerMeal.bumbuMinyak, icon: 'coffee' as const },
+              { label: 'Kemasan Ompreng & Sealing', value: costPerMeal.kemasanSeal, icon: 'box' as const },
+              { label: 'Energi Dapur (Gas Elpiji & Listrik)', value: costPerMeal.energiDapur, icon: 'zap' as const },
+              { label: 'Transport & BBM Armada Mobil Box', value: costPerMeal.transportBbm, icon: 'truck' as const },
+            ].map((item) => (
+              <View key={item.label} style={styles.rowBetween}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
+                  <Feather name={item.icon} size={12} color={colors.textMuted} />
+                  <Text style={{ fontSize: 11, color: colors.textMuted, flex: 1 }}>{item.label}</Text>
+                </View>
+                <Text style={{ fontSize: 11.5, fontWeight: '800', color: colors.text }}>
+                  Rp {item.value.toLocaleString('id-ID')}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 6, marginTop: 2 }}>
+            <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }}>
+              Total Biaya 1.500 Porsi Hari Ini:
+            </Text>
+            <Text style={{ fontSize: 12, fontWeight: '900', color: colors.primary }}>
+              Rp {(costPerMeal.totalCostPerPorsi * costPerMeal.targetPorsi).toLocaleString('id-ID')}
             </Text>
           </View>
         </View>

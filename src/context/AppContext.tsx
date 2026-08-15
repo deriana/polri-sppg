@@ -60,10 +60,18 @@ import {
   KandunganGiziHarian,
   LaporanPacking,
   LaporanSanitasi,
+  BatchTraceabilityRecord,
+  FoodQualityPassport,
+  CostPerMealBreakdown,
+  KitchenReadinessScore,
+  AiKitchenEarlyWarning,
 } from '../types';
 import { MASTER_MENU_CATALOG } from '../data/masterMenu';
 import { INITIAL_LAPORAN_PACKING } from '../data/laporanPacking';
 import { INITIAL_LAPORAN_SANITASI } from '../data/laporanSanitasi';
+import { INITIAL_BATCH_TRACEABILITY } from '../data/batchTraceability';
+import { INITIAL_QUALITY_PASSPORTS } from '../data/qualityPassport';
+import { INITIAL_COST_PER_MEAL, INITIAL_KITCHEN_READINESS, INITIAL_AI_EARLY_WARNINGS } from '../data/kitchenAi';
 
 // Fase 2 (simulasi) — daftar jenis anomali CCTV yang dipakai simulateCctvDetection
 // untuk memilih anomali secara berputar (tanpa dependency random).
@@ -158,6 +166,12 @@ interface AppContextValue {
   submitLaporanPacking: (payload: Omit<LaporanPacking, 'id' | 'createdAt'>) => void;
   laporanSanitasiList: LaporanSanitasi[];
   submitLaporanSanitasi: (payload: Omit<LaporanSanitasi, 'id' | 'createdAt'>) => void;
+  batchTraceabilityList: BatchTraceabilityRecord[];
+  qualityPassportList: FoodQualityPassport[];
+  costPerMeal: CostPerMealBreakdown;
+  kitchenReadinessScore: KitchenReadinessScore;
+  aiEarlyWarnings: AiKitchenEarlyWarning[];
+  updateCostPerMeal: (payload: Partial<CostPerMealBreakdown>) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -194,6 +208,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [kandunganGiziList, setKandunganGiziList] = useState<KandunganGiziHarian[]>(initialKandunganGiziList);
   const [laporanPackingList, setLaporanPackingList] = useState<LaporanPacking[]>(INITIAL_LAPORAN_PACKING);
   const [laporanSanitasiList, setLaporanSanitasiList] = useState<LaporanSanitasi[]>(INITIAL_LAPORAN_SANITASI);
+  const [batchTraceabilityList, setBatchTraceabilityList] = useState<BatchTraceabilityRecord[]>(INITIAL_BATCH_TRACEABILITY);
+  const [qualityPassportList, setQualityPassportList] = useState<FoodQualityPassport[]>(INITIAL_QUALITY_PASSPORTS);
+  const [costPerMeal, setCostPerMeal] = useState<CostPerMealBreakdown>(INITIAL_COST_PER_MEAL);
+  const [kitchenReadinessScore, setKitchenReadinessScore] = useState<KitchenReadinessScore>(INITIAL_KITCHEN_READINESS);
+  const [aiEarlyWarnings, setAiEarlyWarnings] = useState<AiKitchenEarlyWarning[]>(INITIAL_AI_EARLY_WARNINGS);
+
+  const updateCostPerMeal: AppContextValue['updateCostPerMeal'] = (payload) => {
+    setCostPerMeal((prev) => {
+      const updated = { ...prev, ...payload };
+      const totalCostPerPorsi =
+        updated.bahanBaku + updated.bumbuMinyak + updated.kemasanSeal + updated.energiDapur + updated.transportBbm;
+      const hematEfisiensiPct = Math.round(((updated.paguStandarBgn - totalCostPerPorsi) / updated.paguStandarBgn) * 1000) / 10;
+      return { ...updated, totalCostPerPorsi, hematEfisiensiPct };
+    });
+  };
 
   const submitLaporanPacking: AppContextValue['submitLaporanPacking'] = (payload) => {
     const id = `LPK-${Date.now().toString().slice(-8)}`;
@@ -790,6 +819,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       submitLaporanPacking,
       laporanSanitasiList,
       submitLaporanSanitasi,
+      batchTraceabilityList,
+      qualityPassportList,
+      costPerMeal,
+      kitchenReadinessScore,
+      aiEarlyWarnings,
+      updateCostPerMeal,
     }),
     [
       progressProduksiRealtime,
@@ -802,6 +837,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       kandunganGiziList,
       laporanPackingList,
       laporanSanitasiList,
+      batchTraceabilityList,
+      qualityPassportList,
+      costPerMeal,
+      kitchenReadinessScore,
+      aiEarlyWarnings,
       role,
       loggedIn,
       currentUser,

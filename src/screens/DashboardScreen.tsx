@@ -274,6 +274,11 @@ export default function DashboardScreen({ navigation }: any) {
     distribusiList,
     bahanBakuList,
     kandunganGiziList,
+    kitchenReadinessScore,
+    aiEarlyWarnings,
+    batchTraceabilityList,
+    qualityPassportList,
+    costPerMeal,
   } = useApp();
   const { colors, spacing, fontSize, radius, iconStrokeWidth, isDark } = useTheme();
   const {
@@ -1296,6 +1301,24 @@ export default function DashboardScreen({ navigation }: any) {
         onPress: () => navigation.navigate('PengadaanBahan', { initialTab: 'beli' }),
       },
       {
+        key: 'traceability',
+        icon: 'archive',
+        title: 'Lacak Batch Makanan',
+        subtitle: 'Farm-to-fork supply chain',
+        badge: 'Traceability',
+        tone: 'primary',
+        onPress: () => navigation.navigate('BatchTraceability'),
+      },
+      {
+        key: 'quality_passport',
+        icon: 'award',
+        title: 'Paspor Mutu Porsi',
+        subtitle: 'Quality score & lab QC',
+        badge: 'Score 96',
+        tone: 'success',
+        onPress: () => navigation.navigate('FoodQualityPassport'),
+      },
+      {
         key: 'gizi',
         icon: 'activity',
         title: 'Kandungan Gizi',
@@ -1438,6 +1461,166 @@ export default function DashboardScreen({ navigation }: any) {
             1 Arahan Mabes Disembunyikan • <Text style={{ textDecorationLine: 'underline' }}>Tampilkan Pengumuman</Text>
           </Text>
         </Pressable>
+      )}
+
+      {/* 2.5 SPPG KITCHEN READINESS INDEX BANNER (Executive Quality & Performance) */}
+      {(isKepala || role === 'AHLI_GIZI') && (
+        <Card
+          style={{
+            backgroundColor: isDark ? 'rgba(15,23,42,0.95)' : '#0F172A',
+            borderRadius: radius.xl,
+            gap: spacing.sm,
+            borderColor: colors.gold || '#D97706',
+            borderWidth: 1.2,
+          }}
+        >
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Feather name="shield" size={15} color="#FBBF24" />
+              <Text style={{ fontSize: 10, fontWeight: '900', color: '#F8FAFC', letterSpacing: 0.8 }}>
+                SPPG KITCHEN READINESS INDEX
+              </Text>
+            </View>
+            <Pill label={kitchenReadinessScore.grade} tone="success" />
+          </View>
+
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 2 }}>
+            <View>
+              <Text style={{ fontSize: 10.5, color: '#94A3B8' }}>Skor Kesiapan & Mutu Dapur</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4, marginTop: 1 }}>
+                <Text style={{ fontSize: 32, fontWeight: '900', color: '#10B981' }}>
+                  {kitchenReadinessScore.score}
+                </Text>
+                <Text style={{ fontSize: 14, fontWeight: '800', color: '#94A3B8' }}>/ 100</Text>
+              </View>
+            </View>
+            <Pressable
+              onPress={() => navigation.navigate('FoodQualityPassport')}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 4,
+                paddingHorizontal: 10,
+                paddingVertical: 6,
+                borderRadius: 8,
+                backgroundColor: 'rgba(255,255,255,0.1)',
+              }}
+            >
+              <Text style={{ fontSize: 10.5, fontWeight: '800', color: '#FBBF24' }}>Paspor Mutu Porsi</Text>
+              <Feather name="arrow-right" size={12} color="#FBBF24" />
+            </Pressable>
+          </View>
+
+          {/* Subscores Strip */}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              backgroundColor: 'rgba(255,255,255,0.06)',
+              borderRadius: radius.md,
+              padding: 8,
+              marginTop: 2,
+            }}
+          >
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 9.5, color: '#94A3B8' }}>Presensi</Text>
+              <Text style={{ fontSize: 11, fontWeight: '800', color: '#F8FAFC' }}>
+                {kitchenReadinessScore.subScores.presensiTim}%
+              </Text>
+            </View>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 9.5, color: '#94A3B8' }}>Masak SOP</Text>
+              <Text style={{ fontSize: 11, fontWeight: '800', color: '#F8FAFC' }}>
+                {kitchenReadinessScore.subScores.produksiSop}%
+              </Text>
+            </View>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 9.5, color: '#94A3B8' }}>Food Safety</Text>
+              <Text style={{ fontSize: 11, fontWeight: '800', color: '#10B981' }}>
+                {kitchenReadinessScore.subScores.foodSafety}%
+              </Text>
+            </View>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 9.5, color: '#94A3B8' }}>Distribusi</Text>
+              <Text style={{ fontSize: 11, fontWeight: '800', color: '#F8FAFC' }}>
+                {kitchenReadinessScore.subScores.distribusiArmada}%
+              </Text>
+            </View>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 9.5, color: '#94A3B8' }}>Sanitasi</Text>
+              <Text style={{ fontSize: 11, fontWeight: '800', color: '#F8FAFC' }}>
+                {kitchenReadinessScore.subScores.sanitasiHigiene}%
+              </Text>
+            </View>
+          </View>
+        </Card>
+      )}
+
+      {/* 2.6 AI KITCHEN EARLY WARNING & TACTICAL ADVISOR */}
+      {aiEarlyWarnings.filter((w) => w.targetRole.includes(role)).length > 0 && (
+        <Card
+          style={{
+            backgroundColor: isDark ? 'rgba(59,130,246,0.12)' : '#EFF6FF',
+            borderColor: colors.primary,
+            borderWidth: 1.2,
+            borderRadius: radius.xl,
+            gap: 8,
+          }}
+        >
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Feather name="cpu" size={15} color={colors.primary} />
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary }}>
+                AI KITCHEN TACTICAL ADVISOR
+              </Text>
+            </View>
+            <Pill label="Live Analysis" tone="primary" />
+          </View>
+
+          {aiEarlyWarnings
+            .filter((w) => w.targetRole.includes(role))
+            .slice(0, 2)
+            .map((warn) => (
+              <View
+                key={warn.id}
+                style={{
+                  backgroundColor: colors.surface,
+                  borderRadius: radius.md,
+                  padding: 10,
+                  gap: 4,
+                  borderLeftWidth: 3,
+                  borderLeftColor: warn.tingkat === 'warning' ? colors.warning : colors.primary,
+                }}
+              >
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }}>
+                    {warn.pesan}
+                  </Text>
+                  <Text style={{ fontSize: 10, color: colors.textMuted }}>{warn.timestamp}</Text>
+                </View>
+                <Text style={{ fontSize: 10.5, color: colors.textMuted, lineHeight: 15 }}>
+                  💡 Rekomendasi: {warn.rekomendasiAksi}
+                </Text>
+                {warn.actionRoute && warn.actionLabel && (
+                  <Pressable
+                    onPress={() => navigation.navigate(warn.actionRoute)}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 4,
+                      alignSelf: 'flex-start',
+                      marginTop: 2,
+                    }}
+                  >
+                    <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.primary }}>
+                      {warn.actionLabel}
+                    </Text>
+                    <Feather name="arrow-right" size={12} color={colors.primary} />
+                  </Pressable>
+                )}
+              </View>
+            ))}
+        </Card>
       )}
 
       {/* 3. Role-Specific Tasks / Daily Operational Hub */}

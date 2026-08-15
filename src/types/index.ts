@@ -233,6 +233,92 @@ export interface LaporanSanitasi {
   createdAt: string;
 }
 
+// ============================================================
+// SINGLE-SPPG KITCHEN OS INNOVATION TYPES
+// ============================================================
+
+export interface BatchTraceabilityStep {
+  stage: 'supplier_bahan' | 'dapur_masak' | 'uji_qc' | 'pemorsian_packing' | 'armada_kirim' | 'penerimaan_sekolah';
+  title: string;
+  timestamp: string;
+  picName: string;
+  picRole: string;
+  lokasi: string;
+  status: 'selesai' | 'berjalan' | 'tertunda';
+  detail: Record<string, string | number>;
+  verified: boolean;
+}
+
+export interface BatchTraceabilityRecord {
+  batchId: string;
+  sppgId: string;
+  tanggal: string;
+  menuNama: string;
+  totalPorsi: number;
+  status: 'dalam_proses' | 'siap_kirim' | 'terdistribusi';
+  steps: BatchTraceabilityStep[];
+}
+
+export interface FoodQualityPassport {
+  id: string;
+  batchId: string;
+  sppgId: string;
+  tanggal: string;
+  menuNama: string;
+  score: number; // 0-100
+  grade: 'A+' | 'A' | 'B' | 'C';
+  verifierName: string;
+  verifierRole: string;
+  parameters: {
+    titikMatang: { value: number; unit: string; passed: boolean; note: string };
+    organoleptik: { passed: boolean; note: string; rasa: string; aroma: string; tekstur: string };
+    gramasiPorsi: { passed: boolean; note: string; nasi: number; protein: number; sayur: number; buah: number };
+    suhuHolding: { value: number; unit: string; passed: boolean; note: string };
+    sealingTutup: { passed: boolean; note: string };
+    higieneApd: { passed: boolean; note: string };
+  };
+  certifiedAt: string;
+}
+
+export interface CostPerMealBreakdown {
+  sppgId: string;
+  tanggal: string;
+  targetPorsi: number;
+  bahanBaku: number;
+  bumbuMinyak: number;
+  kemasanSeal: number;
+  energiDapur: number;
+  transportBbm: number;
+  totalCostPerPorsi: number;
+  paguStandarBgn: number;
+  hematEfisiensiPct: number;
+}
+
+export interface KitchenReadinessScore {
+  score: number; // 0-100
+  grade: 'SANGAT PRIMA' | 'PRIMA' | 'PERLU PERHATIAN';
+  subScores: {
+    presensiTim: number; // 100
+    produksiSop: number; // 98
+    foodSafety: number; // 100
+    distribusiArmada: number; // 96
+    sanitasiHigiene: number; // 98
+  };
+  lastEvaluated: string;
+}
+
+export interface AiKitchenEarlyWarning {
+  id: string;
+  tingkat: 'critical' | 'warning' | 'info';
+  kategori: 'waktu_masak' | 'suhu_holding' | 'stok_fefo' | 'distribusi' | 'anggaran';
+  pesan: string;
+  rekomendasiAksi: string;
+  actionRoute?: string;
+  actionLabel?: string;
+  targetRole: Role[];
+  timestamp: string;
+}
+
 export type PresensiStatus = 'hadir' | 'belum_presensi';
 
 export interface Presensi {
