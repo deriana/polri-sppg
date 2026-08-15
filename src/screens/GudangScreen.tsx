@@ -118,7 +118,7 @@ export default function GudangScreen({ navigation }: any) {
           </Text>
         </View>
         {canRequest && (
-          <PrimaryButton label="+ Ajukan Bahan" icon="plus" fullWidth={false} onPress={() => navigation.navigate('RequestBahanForm')} />
+          <PrimaryButton label="+ Ajukan Bahan" icon="plus" fullWidth={false} onPress={() => navigation.navigate('PengadaanBahan', { initialTab: 'ajuin' })} />
         )}
       </View>
 
@@ -381,39 +381,37 @@ export default function GudangScreen({ navigation }: any) {
 
       {/* 7. Action Shortcuts Panel */}
       <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
-        <SectionTitle style={{ marginBottom: 0 }}>Aksi Cepat Manajemen Gudang</SectionTitle>
+        <SectionTitle style={{ marginBottom: 0 }}>Aksi Cepat Logistik & Pengadaan</SectionTitle>
 
         {canRequest && (
           <>
             <PrimaryButton
-              label="+ Belanja Bahan Pokok Mandiri (Log Anggaran)"
-              icon="shopping-cart"
-              onPress={() => navigation.navigate('Anggaran')}
+              label="Pusat Pengadaan & Logistik Bahan (Satu Pintu)"
+              icon="layers"
+              onPress={() => navigation.navigate('PengadaanBahan')}
             />
             <PrimaryButton
-              label="Catat Mutasi Keluar / Masuk Manual"
-              icon="repeat"
+              label="+ Belanja Bahan Pokok Mandiri (Input Nota)"
+              icon="shopping-cart"
               variant="secondary"
-              onPress={() => navigation.navigate('MutasiStokForm')}
+              onPress={() => navigation.navigate('PengadaanBahan', { initialTab: 'beli' })}
             />
           </>
         )}
 
         <PrimaryButton
-          label="Riwayat Permintaan Bahan ke Pusat"
-          icon="clipboard"
-          variant="outline"
-          onPress={() => navigation.navigate('RiwayatPermintaan')}
+          label="Pindai QR Penerimaan Barang / Surat Jalan"
+          icon="camera"
+          variant="secondary"
+          onPress={() => navigation.navigate('PengadaanBahan', { initialTab: 'terima' })}
         />
 
-        {!isWilayah && (
-          <PrimaryButton
-            label="Pindai QR Penerimaan Barang / Surat Jalan"
-            icon="camera"
-            variant="secondary"
-            onPress={() => navigation.navigate('QrScan')}
-          />
-        )}
+        <PrimaryButton
+          label="Catat Mutasi Stok Keluar / Masuk Manual"
+          icon="repeat"
+          variant="outline"
+          onPress={() => navigation.navigate('MutasiStokForm')}
+        />
 
         <Card onPress={() => navigation.navigate('MitraList')} style={styles.row}>
           <View style={[styles.iconWrap, { backgroundColor: colors.primaryLight }]}>

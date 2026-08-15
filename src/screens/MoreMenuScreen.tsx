@@ -47,6 +47,7 @@ export default function MoreMenuScreen({ navigation }: any) {
 
   const operasionalItems: MenuItem[] = [];
   if (permissions.canManageAnggaran) {
+    operasionalItems.push({ key: 'PengadaanBahan', icon: 'shopping-cart', label: 'Pengadaan & Logistik Bahan', desc: 'Satu pintu: beli bahan (nota), ajuin ke pusat, & scan QR terima barang' });
     operasionalItems.push({ key: 'Anggaran', icon: 'pie-chart', label: 'Log Anggaran & Financial', desc: 'Pantau alokasi dana BGN/Polri, saldo, & log pengeluaran' });
   }
   if (permissions.canManageBroadcast) {

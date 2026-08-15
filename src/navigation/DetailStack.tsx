@@ -49,6 +49,7 @@ import AnggaranScreen from '../screens/AnggaranScreen';
 import BroadcastScreen from '../screens/BroadcastScreen';
 import IncidentListScreen from '../screens/IncidentListScreen';
 import IncidentFormScreen from '../screens/IncidentFormScreen';
+import PengadaanBahanScreen from '../screens/PengadaanBahanScreen';
 
 const Stack = createNativeStackNavigator<any>();
 
@@ -98,6 +99,7 @@ const DETAIL_SCREENS: Array<{ name: string; component: React.ComponentType<any>;
   { name: 'MitraList', component: MitraListScreen, title: 'Mitra Pemasok' },
   { name: 'MutasiStokForm', component: MutasiStokFormScreen, title: 'Catat Mutasi Stok' },
   { name: 'Anggaran', component: AnggaranScreen, title: 'Log Anggaran & Pengeluaran' },
+  { name: 'PengadaanBahan', component: PengadaanBahanScreen, title: 'Pengadaan & Logistik Bahan' },
   { name: 'Broadcast', component: BroadcastScreen, title: 'Pusat Broadcast Pengumuman' },
   { name: 'IncidentList', component: IncidentListScreen, title: 'Manajemen Insiden Lapangan' },
   { name: 'IncidentForm', component: IncidentFormScreen, title: 'Formulir Lapor Insiden' },
