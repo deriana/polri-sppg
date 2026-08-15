@@ -225,6 +225,8 @@ export interface LaporanProduksi {
   packingTimestamp?: string;
   readyTimestamp?: string;
   qcStatus?: QcStatus;
+  qcGrade?: 'A+' | 'A' | 'B' | 'C';
+  qcScore?: number;
   qcNotes?: string;
   qcApprovedBy?: string;
   catatanYield?: string;
@@ -404,9 +406,19 @@ export interface FoodSafetyLog {
   jenisMakanan: string;
   estimasiKadaluarsa: string;
   statusKadaluarsa: 'aman' | 'mendekati_batas' | 'lewat_batas';
-  // Fase 2: rancang skema data agar field ini nantinya bisa diisi otomatis dari sensor
-  // IoT tanpa perlu ubah struktur data. Undefined/'manual' = diisi tangan (default saat ini).
   sumberSuhu?: 'manual' | 'sensor_iot';
+  // Rapid Test Kit & Lab Safety Parameters (Khusus Ahli Gizi)
+  rapidTestFormalin?: 'negatif' | 'positif';
+  rapidTestBoraks?: 'negatif' | 'positif';
+  rapidTestPestisida?: 'negatif' | 'positif';
+  ujiBakteriEcoli?: 'negatif' | 'positif';
+  suhuIntiMatang?: number; // Suhu inti daging/sop ≥ 75°C
+  suhuHoldingBox?: number; // Suhu holding saat packing ≥ 60°C
+  organoleptikStatus?: 'layak' | 'perlu_revisi' | 'tidak_layak';
+  nomorLokerSampelRetensi?: string; // Wadah arsip 2x24 jam
+  fotoTestStrip?: string | null;
+  catatanLab?: string;
+  petugasLabName?: string;
 }
 
 export type AlertJenis = 'checklist_kritis' | 'suhu_tidak_normal' | 'laporan_terlambat' | 'manual' | 'info_pusat' | 'cctv_anomali' | 'aduan_warga';

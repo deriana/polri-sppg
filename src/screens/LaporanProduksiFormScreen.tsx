@@ -80,6 +80,8 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
 
   // QC Gate State
   const [qcStatus, setQcStatus] = useState<QcStatus>(existing?.qcStatus ?? 'MENUNGGU_QC');
+  const [qcGrade, setQcGrade] = useState<'A+' | 'A' | 'B' | 'C'>(existing?.qcGrade ?? 'A+');
+  const [qcScore, setQcScore] = useState<number>(existing?.qcScore ?? 98);
   const [qcNotes, setQcNotes] = useState(existing?.qcNotes ?? '');
   const [showQcModal, setShowQcModal] = useState(false);
 
@@ -122,16 +124,22 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
     }
   };
 
-  const handleSaveQcStatus = (status: QcStatus) => {
+  const handleSaveQcStatus = (
+    status: QcStatus,
+    grade: 'A+' | 'A' | 'B' | 'C' = qcGrade,
+    score: number = qcScore,
+  ) => {
     setQcStatus(status);
+    setQcGrade(grade);
+    setQcScore(score);
     setQcTime(nowTime());
     if (editId) {
-      approveQcLaporan(editId, status, qcNotes, currentUser.nama);
+      approveQcLaporan(editId, status, qcNotes, currentUser.nama, grade, score);
     }
     setShowQcModal(false);
     Alert.alert(
-      'Status QC Disimpan',
-      `Batch ${batchId} telah diset status QC: ${status}${status === 'HOLD' || status === 'REJECTED' ? ' — Alert otomatis dibuat!' : ''}`,
+      'Status & Grade QC Disimpan',
+      `Batch ${batchId} telah diset status QC: ${status} dengan Grade: ${grade} (Skor ${score})${status === 'HOLD' || status === 'REJECTED' ? ' — Alert otomatis dibuat!' : ''}`,
     );
   };
 
@@ -291,12 +299,23 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
               </Text>
             </View>
           </View>
-          <Pill label={qcStatus} tone={qcTone} />
+          <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
+            {qcStatus === 'READY' && (
+              <Pill label={`Grade ${qcGrade} (${qcScore})`} tone="success" />
+            )}
+            <Pill label={qcStatus} tone={qcTone} />
+          </View>
         </View>
 
         {/* QC Audit Details Box */}
         <View style={[styles.qcDetailBox, { backgroundColor: colors.background, borderRadius: radius.md, borderColor: colors.border, borderWidth: 1 }]}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 4, borderBottomWidth: 1, borderColor: colors.border }}>
+            <Text style={{ fontSize: 11, color: colors.textMuted }}>Hasil QC & Grade:</Text>
+            <Text style={{ fontSize: 11, fontWeight: '800', color: qcStatus === 'READY' ? colors.success : colors.text }}>
+              {qcStatus} • Grade {qcGrade} (Skor: {qcScore}/100)
+            </Text>
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 }}>
             <Text style={{ fontSize: 11, color: colors.textMuted }}>Petugas QC / Gizi:</Text>
             <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }}>
               {existing?.qcApprovedBy || (qcStatus !== 'MENUNGGU_QC' ? currentUser.nama : 'Ahli Gizi / Cook')}
@@ -778,6 +797,59 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
               </View>
             </View>
 
+            {/* Grade Selector */}
+            <View style={{ gap: 6 }}>
+              <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }}>
+                Penetapan Grade Mutu Hasil Uji Ahli Gizi:
+              </Text>
+              <View style={{ flexDirection: 'row', gap: 6 }}>
+                {[
+                  { grade: 'A+' as const, score: 98, desc: 'Grade A+ (98)' },
+                  { grade: 'A' as const, score: 92, desc: 'Grade A (92)' },
+                  { grade: 'B' as const, score: 82, desc: 'Grade B (82)' },
+                  { grade: 'C' as const, score: 65, desc: 'Grade C (65)' },
+                ].map((g) => (
+                  <Pressable
+                    key={g.grade}
+                    onPress={() => {
+                      setQcGrade(g.grade);
+                      setQcScore(g.score);
+                    }}
+                    style={[
+                      {
+                        flex: 1,
+                        paddingVertical: 8,
+                        alignItems: 'center',
+                        borderRadius: radius.sm,
+                        borderWidth: 1.5,
+                        borderColor: qcGrade === g.grade ? colors.primary : colors.border,
+                        backgroundColor: qcGrade === g.grade ? colors.primaryLight : colors.background,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        fontWeight: '900',
+                        color: qcGrade === g.grade ? colors.primary : colors.text,
+                      }}
+                    >
+                      {g.grade}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 9.5,
+                        color: qcGrade === g.grade ? colors.primary : colors.textMuted,
+                        marginTop: 1,
+                      }}
+                    >
+                      Skor {g.score}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+
             <Input
               label="Catatan Tim QC Gizi"
               value={qcNotes}
@@ -787,21 +859,21 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
 
             <View style={{ gap: 8 }}>
               <PrimaryButton
-                label="APPROVE (READY TO DISTRIBUTE)"
+                label={`APPROVE (READY - GRADE ${qcGrade})`}
                 icon="check-circle"
-                onPress={() => handleSaveQcStatus('READY')}
+                onPress={() => handleSaveQcStatus('READY', qcGrade, qcScore)}
               />
               <PrimaryButton
                 label="HOLD BATCH (Tahan Sementara)"
                 icon="alert-circle"
                 variant="secondary"
-                onPress={() => handleSaveQcStatus('HOLD')}
+                onPress={() => handleSaveQcStatus('HOLD', 'B', 75)}
               />
               <PrimaryButton
                 label="REJECT BATCH (Tolak Kelayakan)"
                 icon="x-circle"
                 variant="outline"
-                onPress={() => handleSaveQcStatus('REJECTED')}
+                onPress={() => handleSaveQcStatus('REJECTED', 'C', 45)}
               />
             </View>
           </View>

@@ -161,7 +161,14 @@ interface AppContextValue {
   saveLaporanDraft: (laporan: (Omit<LaporanProduksi, 'id' | 'timestamp' | 'status'> & { id?: string })) => void;
   submitLaporan: (laporanId: string) => void;
   verifyLaporan: (laporanId: string) => void;
-  approveQcLaporan: (laporanId: string, qcStatus: QcStatus, qcNotes?: string, qcApprovedBy?: string) => void;
+  approveQcLaporan: (
+    laporanId: string,
+    qcStatus: QcStatus,
+    qcNotes?: string,
+    qcApprovedBy?: string,
+    qcGrade?: 'A+' | 'A' | 'B' | 'C',
+    qcScore?: number,
+  ) => void;
   updateProductionStage: (laporanId: string, stage: 'preparation' | 'cooking' | 'qc' | 'packing' | 'ready') => void;
   submitChecklist: (checklist: ChecklistHarian) => void;
   submitFoodSafetyLog: (log: FoodSafetyLog) => void;
@@ -602,14 +609,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const approveQcLaporan: AppContextValue['approveQcLaporan'] = (laporanId, qcStatus, qcNotes, qcApprovedBy) => {
+  const approveQcLaporan: AppContextValue['approveQcLaporan'] = (
+    laporanId,
+    qcStatus,
+    qcNotes,
+    qcApprovedBy,
+    qcGrade,
+    qcScore,
+  ) => {
     const timestamp = nowTimestamp();
     setLaporanList((prev) =>
       prev.map((l) => {
         if (l.id !== laporanId) return l;
+        const resolvedGrade =
+          qcGrade ?? l.qcGrade ?? (qcStatus === 'READY' ? 'A+' : qcStatus === 'HOLD' ? 'B' : 'C');
+        const resolvedScore =
+          qcScore ?? l.qcScore ?? (qcStatus === 'READY' ? 98 : qcStatus === 'HOLD' ? 75 : 50);
         return {
           ...l,
           qcStatus,
+          qcGrade: resolvedGrade,
+          qcScore: resolvedScore,
           qcNotes: qcNotes ?? l.qcNotes,
           qcApprovedBy: qcApprovedBy ?? currentUser?.nama ?? 'Tim QC Gizi',
           qcTimestamp: nowTime(),

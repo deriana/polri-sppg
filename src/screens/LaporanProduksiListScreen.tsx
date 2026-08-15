@@ -116,7 +116,12 @@ export default function LaporanProduksiListScreen({ navigation }: any) {
                     </View>
                   </View>
                   <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
-                    {l.qcStatus && <Pill label={`QC: ${l.qcStatus}`} tone={qcTone} />}
+                    {l.qcStatus && (
+                      <Pill
+                        label={l.qcGrade ? `QC: ${l.qcStatus} (${l.qcGrade})` : `QC: ${l.qcStatus}`}
+                        tone={qcTone}
+                      />
+                    )}
                     <Pill label={STATUS_LABEL[l.status]} tone={STATUS_TONE[l.status]} />
                   </View>
                 </View>

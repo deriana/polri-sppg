@@ -59,8 +59,8 @@ const STAGE_DOCS_MAP: Record<BatchTraceabilityStep['stage'], { photos: string[];
   },
   penerimaan_sekolah: {
     photos: [SPPG_ASSET_MAP.sekolah_1, SPPG_ASSET_MAP.profil_guru],
-    caption: 'Serah terima ompreng hangat di gerbang SDN 01 Merdeka diverifikasi oleh Ibu Guru Ratna Kusuma, S.Pd.',
-    standardDoc: 'Berita Acara Serah Terima (BAST) Digital MBG',
+    caption: 'Serah terima ompreng hangat di 3 sekolah penerima (SDN 01 Merdeka, SMPN 03 Cibitung, SDN 05 Sukadanau) diverifikasi lengkap oleh Satgas Guru MBG.',
+    standardDoc: 'Berita Acara Serah Terima (BAST) Digital Multisekolah',
     picPhone: '0812-9900-1122',
   },
 };
@@ -144,7 +144,7 @@ export default function BatchTraceabilityScreen({ navigation, route }: any) {
           </View>
           <View style={styles.gridCol}>
             <Text style={{ fontSize: 10, color: colors.textMuted }}>Paspor Mutu</Text>
-            <Text style={{ fontSize: 12, fontWeight: '900', color: isDark ? '#FBBF24' : '#B45309' }}>Grade A+ (96/100)</Text>
+            <Text style={{ fontSize: 12, fontWeight: '900', color: isDark ? '#FBBF24' : '#B45309' }}>Grade A+ (98/100)</Text>
           </View>
         </View>
       </Card>
@@ -207,24 +207,30 @@ export default function BatchTraceabilityScreen({ navigation, route }: any) {
                 style={{ flex: 1, gap: spacing.xs, marginBottom: 8, borderColor: colors.border }}
                 onPress={() => setSelectedStepModal(step)}
               >
-                <View style={styles.rowBetween}>
-                  <View style={{ flex: 1 }}>
+                <View style={[styles.rowBetween, { alignItems: 'flex-start', gap: 8 }]}>
+                  <View style={{ flex: 1, paddingRight: 4 }}>
                     <Text style={{ fontSize: fontSize.sm, fontWeight: '900', color: colors.text }}>
                       {step.title}
                     </Text>
-                    <Text style={{ fontSize: 11, color: colors.primary, fontWeight: '700', marginTop: 1 }}>
-                      {step.timestamp} · {step.lokasi}
+                    <Text style={{ fontSize: 11, color: colors.primary, fontWeight: '700', marginTop: 2 }}>
+                      {step.timestamp}
+                    </Text>
+                    <Text style={{ fontSize: 11, color: colors.textMuted, marginTop: 1 }} numberOfLines={2}>
+                      {step.lokasi}
                     </Text>
                   </View>
                   <Pill label={step.status.toUpperCase()} tone="success" />
                 </View>
 
                 {/* PIC Responsible Badge */}
-                <View style={[styles.picBox, { backgroundColor: colors.background, borderRadius: radius.sm }]}>
+                <View style={[styles.picBox, { backgroundColor: colors.background, borderRadius: radius.sm, flexWrap: 'wrap', gap: 4 }]}>
                   <Feather name="user" size={13} color={colors.textMuted} />
-                  <Text style={{ fontSize: 11, color: colors.textMuted }}>Penanggung Jawab:</Text>
-                  <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }}>
-                    {step.picName} ({step.picRole})
+                  <Text style={{ fontSize: 11, color: colors.textMuted }}>PIC:</Text>
+                  <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text, flexShrink: 1 }}>
+                    {step.picName}
+                  </Text>
+                  <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
+                    · {step.picRole}
                   </Text>
                 </View>
 
@@ -259,21 +265,24 @@ export default function BatchTraceabilityScreen({ navigation, route }: any) {
             {selectedStepModal && modalDocs && (
               <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingBottom: 20 }}>
                 {/* Modal Header */}
-                <View style={styles.rowBetween}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 }}>
-                    <View style={[styles.modalIconWrap, { backgroundColor: colors[STAGE_COLOR_MAP[selectedStepModal.stage]] || colors.primary }]}>
+                <View style={[styles.rowBetween, { alignItems: 'flex-start', gap: 8 }]}>
+                  <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8, flex: 1 }}>
+                    <View style={[styles.modalIconWrap, { backgroundColor: colors[STAGE_COLOR_MAP[selectedStepModal.stage]] || colors.primary, marginTop: 2 }]}>
                       <Feather name={STAGE_ICON_MAP[selectedStepModal.stage]} size={18} color="#FFFFFF" />
                     </View>
-                    <View style={{ flex: 1 }}>
+                    <View style={{ flex: 1, paddingRight: 4 }}>
                       <Text style={{ fontSize: fontSize.md, fontWeight: '900', color: colors.text }}>
                         {selectedStepModal.title}
                       </Text>
-                      <Text style={{ fontSize: 11, color: colors.primary, fontWeight: '700' }}>
-                        {selectedStepModal.timestamp} · {selectedStepModal.lokasi}
+                      <Text style={{ fontSize: 11, color: colors.primary, fontWeight: '700', marginTop: 2 }}>
+                        {selectedStepModal.timestamp}
+                      </Text>
+                      <Text style={{ fontSize: 11, color: colors.textMuted, marginTop: 1 }}>
+                        {selectedStepModal.lokasi}
                       </Text>
                     </View>
                   </View>
-                  <Pressable onPress={() => setSelectedStepModal(null)} hitSlop={8}>
+                  <Pressable onPress={() => setSelectedStepModal(null)} hitSlop={8} style={{ padding: 4 }}>
                     <Feather name="x" size={22} color={colors.textMuted} />
                   </Pressable>
                 </View>
@@ -281,7 +290,7 @@ export default function BatchTraceabilityScreen({ navigation, route }: any) {
                 {/* PIC Info Card & Quick Call */}
                 <View style={[styles.picCard, { backgroundColor: colors.background, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border }]}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <View style={{ gap: 2 }}>
+                    <View style={{ gap: 2, flex: 1, paddingRight: 8 }}>
                       <Text style={{ fontSize: 10, color: colors.textMuted, fontWeight: '700' }}>PENANGGUNG JAWAB TAHAP INI</Text>
                       <Text style={{ fontSize: 13, fontWeight: '900', color: colors.text }}>{selectedStepModal.picName}</Text>
                       <Text style={{ fontSize: 11, color: colors.primary, fontWeight: '700' }}>{selectedStepModal.picRole}</Text>
@@ -331,8 +340,8 @@ export default function BatchTraceabilityScreen({ navigation, route }: any) {
                   <View style={[styles.tableBox, { backgroundColor: colors.background, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border }]}>
                     {Object.entries(selectedStepModal.detail).map(([k, v], rIdx) => (
                       <View key={k} style={[styles.tableRow, rIdx > 0 && { borderTopWidth: 1, borderTopColor: colors.border }]}>
-                        <Text style={{ fontSize: 11, color: colors.textMuted, width: '44%' }}>{k}</Text>
-                        <Text style={{ fontSize: 11.5, fontWeight: '800', color: colors.text, flex: 1 }}>{String(v)}</Text>
+                        <Text style={{ fontSize: 11, color: colors.textMuted, width: '38%', flexShrink: 0 }}>{k}</Text>
+                        <Text style={{ fontSize: 11.5, fontWeight: '800', color: colors.text, flex: 1, flexWrap: 'wrap' }}>{String(v)}</Text>
                       </View>
                     ))}
                   </View>

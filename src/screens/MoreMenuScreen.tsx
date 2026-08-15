@@ -79,7 +79,7 @@ export default function MoreMenuScreen({ navigation }: any) {
     operasionalItems.push({ key: 'MasterMenu', icon: 'book-open', label: 'Master Katalog & Resep Gizi', desc: 'Kelola master resep makanan, standar AKG, & porsi' });
     operasionalItems.push({ key: 'MenuKalender', icon: 'calendar', label: 'Kalender Menu Harian', desc: 'Tinjau kalender menu terencana per tanggal' });
     operasionalItems.push({ key: 'UsulanMenu', icon: 'edit-3', label: 'Usulan Menu Sekolah', desc: 'Evaluasi usulan menu bergizi dari pihak sekolah' });
-    operasionalItems.push({ key: 'FoodSafetyForm', icon: 'thermometer', label: 'Pemeriksaan Food Safety', desc: 'Cek suhu cold storage & suhu makanan matang' });
+    operasionalItems.push({ key: 'FoodSafetyForm', icon: 'shield', label: 'Uji Lab & Rapid Test Pangan', desc: 'Uji formalin, boraks, pestisida, titik matang, & sampel arsip 2x24 jam' });
     operasionalItems.push({ key: 'IncidentList', icon: 'alert-octagon', label: 'Manajemen Insiden Lapangan', desc: 'Lapor & pantau insiden kelayakan pangan' });
     operasionalItems.push({ key: 'Notifikasi', icon: 'bell', label: 'Notifikasi & Alarm', desc: 'Pengingat tugas & info gizi' });
 

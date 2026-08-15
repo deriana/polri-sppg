@@ -78,7 +78,7 @@ const DETAIL_SCREENS: Array<{ name: string; component: React.ComponentType<any>;
   { name: 'StaffList', component: StaffListScreen, title: 'Data Staf' },
   { name: 'StaffForm', component: StaffFormScreen, title: 'Tambah Staf' },
   { name: 'LaporanForm', component: LaporanProduksiFormScreen, title: 'Formulir Laporan Produksi' },
-  { name: 'FoodSafetyForm', component: FoodSafetyFormScreen, title: 'Keamanan Pangan' },
+  { name: 'FoodSafetyForm', component: FoodSafetyFormScreen, title: 'Uji Lab & Rapid Test Pangan' },
   { name: 'AlertDetail', component: AlertDetailScreen, title: 'Detail Alert' },
   { name: 'Notifikasi', component: NotifikasiScreen, title: 'Notifikasi' },
   { name: 'SppgProfile', component: SppgProfileScreen, title: 'Profil SPPG' },

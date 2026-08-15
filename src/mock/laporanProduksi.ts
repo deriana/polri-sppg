@@ -294,6 +294,8 @@ export const laporanList: LaporanProduksi[] = [
     packingTimestamp: '07:30',
     readyTimestamp: '08:15',
     qcStatus: 'READY',
+    qcGrade: 'A+',
+    qcScore: 98,
     qcNotes: 'Suhu inti daging matang 84.5°C (Lolos ≥75°C). Rasa gurih pas & AKG 100% presisi.',
     qcApprovedBy: 'Dr. Tri Wibowo, S.Gz',
     catatanYield: '1.500 Porsi tercapai tanpa retur',
