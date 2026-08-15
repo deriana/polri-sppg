@@ -40,11 +40,15 @@ const MENU_ROTATION: { menu: string; kategoriGizi: string; fotoMenu: string }[] 
   },
 ];
 
-const PLAN_DATES = dateRange('2026-08-01', '2026-09-05');
+// Exclude Saturday (6) and Sunday (0) from default auto-generation (Hari Libur Sekolah MBG)
+const SCHOOL_DAYS_DATES = dateRange('2026-08-01', '2026-09-05').filter((d) => {
+  const day = new Date(d).getDay();
+  return day !== 0 && day !== 6;
+});
 
 let seq = 0;
 export const menuHarianPlanList: MenuHarianPlan[] = sppgList.flatMap((sppg, sppgIdx) =>
-  PLAN_DATES.map((tanggal, dayIdx) => {
+  SCHOOL_DAYS_DATES.map((tanggal, dayIdx) => {
     seq += 1;
     const combo = MENU_ROTATION[(dayIdx + sppgIdx) % MENU_ROTATION.length];
     const plan: MenuHarianPlan = {
