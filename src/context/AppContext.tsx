@@ -135,6 +135,8 @@ interface AppContextValue {
   mutasiStokList: MutasiStok[];
   masterMenuList: MasterMenu[];
   addMasterMenu: (menu: Omit<MasterMenu, 'id'>) => void;
+  updateMasterMenu: (menu: MasterMenu) => void;
+  deleteMasterMenu: (id: string) => void;
   catatMutasiStok: (payload: Omit<MutasiStok, 'id' | 'tanggal'>) => void;
   reviewCctvEvent: (id: string) => void;
   simulateCctvDetection: (sppgId: string) => void;
@@ -288,6 +290,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addMasterMenu: AppContextValue['addMasterMenu'] = (menu) => {
     const id = `MM-${String(masterMenuList.length + 1).padStart(3, '0')}`;
     setMasterMenuList((prev) => [ { ...menu, id }, ...prev]);
+  };
+
+  const updateMasterMenu: AppContextValue['updateMasterMenu'] = (menu) => {
+    setMasterMenuList((prev) => prev.map((m) => (m.id === menu.id ? menu : m)));
+  };
+
+  const deleteMasterMenu: AppContextValue['deleteMasterMenu'] = (id) => {
+    setMasterMenuList((prev) => prev.filter((m) => m.id !== id));
   };
 
   const updatePeralatanStatus: AppContextValue['updatePeralatanStatus'] = (id, status, catatanKondisi) => {
@@ -785,6 +795,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       menuHarianPlanList,
       masterMenuList,
       addMasterMenu,
+      updateMasterMenu,
+      deleteMasterMenu,
       mitraList,
       mutasiStokList,
       catatMutasiStok,
