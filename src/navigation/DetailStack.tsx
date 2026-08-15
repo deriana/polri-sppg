@@ -51,6 +51,8 @@ import IncidentListScreen from '../screens/IncidentListScreen';
 import IncidentFormScreen from '../screens/IncidentFormScreen';
 import PengadaanBahanScreen from '../screens/PengadaanBahanScreen';
 import KandunganGiziHarianScreen from '../screens/KandunganGiziHarianScreen';
+import LaporanPackingScreen from '../screens/LaporanPackingScreen';
+import LaporanSanitasiScreen from '../screens/LaporanSanitasiScreen';
 
 const Stack = createNativeStackNavigator<any>();
 
@@ -105,6 +107,8 @@ const DETAIL_SCREENS: Array<{ name: string; component: React.ComponentType<any>;
   { name: 'Broadcast', component: BroadcastScreen, title: 'Pusat Broadcast Pengumuman' },
   { name: 'IncidentList', component: IncidentListScreen, title: 'Manajemen Insiden Lapangan' },
   { name: 'IncidentForm', component: IncidentFormScreen, title: 'Formulir Lapor Insiden' },
+  { name: 'LaporanPacking', component: LaporanPackingScreen, title: 'Laporan Packing & Pemorsian' },
+  { name: 'LaporanSanitasi', component: LaporanSanitasiScreen, title: 'Laporan Sanitasi & Sterilisasi' },
 ];
 
 export function buildDetailStack(homeName: string, HomeComponent: React.ComponentType<any>, homeTitle: string) {

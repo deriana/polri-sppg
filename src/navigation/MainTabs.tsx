@@ -21,6 +21,8 @@ import MasterMenuScreen from '../screens/MasterMenuScreen';
 import PeralatanScreen from '../screens/PeralatanScreen';
 import GudangScreen from '../screens/GudangScreen';
 import PengadaanBahanScreen from '../screens/PengadaanBahanScreen';
+import LaporanPackingScreen from '../screens/LaporanPackingScreen';
+import LaporanSanitasiScreen from '../screens/LaporanSanitasiScreen';
 
 const Tab = createBottomTabNavigator<any>();
 
@@ -37,6 +39,8 @@ const MasterMenuStack = buildDetailStack('MasterMenu', MasterMenuScreen, 'Master
 const PeralatanStack = buildDetailStack('Peralatan', PeralatanScreen, 'Peralatan & Aset');
 const GudangStack = buildDetailStack('Gudang', GudangScreen, 'Gudang & Stok');
 const PengadaanStack = buildDetailStack('PengadaanBahan', PengadaanBahanScreen, 'Pengadaan & Logistik');
+const LaporanPackingStack = buildDetailStack('LaporanPacking', LaporanPackingScreen, 'Laporan Packing');
+const LaporanSanitasiStack = buildDetailStack('LaporanSanitasi', LaporanSanitasiScreen, 'Laporan Sanitasi');
 
 // 1. Kepala SPPG (Komandan Unit Dapur)
 const KEPALA_TABS = [
@@ -68,9 +72,9 @@ const CHEF_UTAMA_TABS = [
 // 4. Petugas Pemorsi & Packing (Gramasi Ompreng, Seal, & Box)
 const PEMORSI_PACKING_TABS = [
   { name: 'DashboardTab', component: DashboardStack, label: 'Dashboard', icon: 'home' as const },
-  { name: 'ChecklistTab', component: ChecklistStack, label: 'Porsi & Seal', icon: 'check-square' as const },
+  { name: 'LaporanPackingTab', component: LaporanPackingStack, label: 'Lap. Packing', icon: 'package' as const },
   { name: 'PeralatanTab', component: PeralatanStack, label: 'Ompreng & Box', icon: 'box' as const },
-  { name: 'PresensiTab', component: PresensiStack, label: 'Presensi', icon: 'user-check' as const },
+  { name: 'ChecklistTab', component: ChecklistStack, label: 'Checklist', icon: 'check-square' as const },
   { name: 'LainnyaTab', component: LainnyaStack, label: 'Lainnya', icon: 'more-horizontal' as const },
 ];
 
@@ -86,9 +90,9 @@ const PETUGAS_LOGISTIK_TABS = [
 // 6. Petugas Sanitasi & APD (Sterilisasi, Higiene, & Limbah)
 const PETUGAS_SANITASI_TABS = [
   { name: 'DashboardTab', component: DashboardStack, label: 'Dashboard', icon: 'home' as const },
-  { name: 'ChecklistTab', component: ChecklistStack, label: 'Sanitasi & APD', icon: 'shield' as const },
+  { name: 'LaporanSanitasiTab', component: LaporanSanitasiStack, label: 'Lap. Sanitasi', icon: 'shield' as const },
   { name: 'PeralatanTab', component: PeralatanStack, label: 'Alat Steril', icon: 'box' as const },
-  { name: 'PresensiTab', component: PresensiStack, label: 'Presensi', icon: 'user-check' as const },
+  { name: 'ChecklistTab', component: ChecklistStack, label: 'Checklist', icon: 'check-square' as const },
   { name: 'LainnyaTab', component: LainnyaStack, label: 'Lainnya', icon: 'more-horizontal' as const },
 ];
 
@@ -104,7 +108,8 @@ const DRIVER_TABS = [
 const PETUGAS_LAPANGAN_TABS = [
   { name: 'DashboardTab', component: DashboardStack, label: 'Dashboard', icon: 'home' as const },
   { name: 'PresensiTab', component: PresensiStack, label: 'Presensi', icon: 'user-check' as const },
-  { name: 'ChecklistTab', component: ChecklistStack, label: 'Checklist', icon: 'check-square' as const },
+  { name: 'ChecklistTab', component: ChecklistStack, label: 'Checklist SOP', icon: 'check-square' as const },
+  { name: 'PeralatanTab', component: PeralatanStack, label: 'Peralatan', icon: 'box' as const },
   { name: 'LainnyaTab', component: LainnyaStack, label: 'Lainnya', icon: 'more-horizontal' as const },
 ];
 

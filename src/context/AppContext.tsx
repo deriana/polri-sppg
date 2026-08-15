@@ -58,8 +58,12 @@ import {
   IncidentReport,
   IncidentStatus,
   KandunganGiziHarian,
+  LaporanPacking,
+  LaporanSanitasi,
 } from '../types';
 import { MASTER_MENU_CATALOG } from '../data/masterMenu';
+import { INITIAL_LAPORAN_PACKING } from '../data/laporanPacking';
+import { INITIAL_LAPORAN_SANITASI } from '../data/laporanSanitasi';
 
 // Fase 2 (simulasi) — daftar jenis anomali CCTV yang dipakai simulateCctvDetection
 // untuk memilih anomali secara berputar (tanpa dependency random).
@@ -150,6 +154,10 @@ interface AppContextValue {
   updateIncidentStatus: (id: string, status: IncidentStatus, tindakanPerbaikan?: string) => void;
   kandunganGiziList: KandunganGiziHarian[];
   addKandunganGiziLog: (payload: Omit<KandunganGiziHarian, 'id' | 'createdAt'>) => void;
+  laporanPackingList: LaporanPacking[];
+  submitLaporanPacking: (payload: Omit<LaporanPacking, 'id' | 'createdAt'>) => void;
+  laporanSanitasiList: LaporanSanitasi[];
+  submitLaporanSanitasi: (payload: Omit<LaporanSanitasi, 'id' | 'createdAt'>) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -184,6 +192,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [pengajuanSekolahList, setPengajuanSekolahList] = useState<PengajuanSekolah[]>(initialPengajuanSekolahList);
   const [incidentList, setIncidentList] = useState<IncidentReport[]>(initialIncidentList);
   const [kandunganGiziList, setKandunganGiziList] = useState<KandunganGiziHarian[]>(initialKandunganGiziList);
+  const [laporanPackingList, setLaporanPackingList] = useState<LaporanPacking[]>(INITIAL_LAPORAN_PACKING);
+  const [laporanSanitasiList, setLaporanSanitasiList] = useState<LaporanSanitasi[]>(INITIAL_LAPORAN_SANITASI);
+
+  const submitLaporanPacking: AppContextValue['submitLaporanPacking'] = (payload) => {
+    const id = `LPK-${Date.now().toString().slice(-8)}`;
+    const createdAt = nowTimestamp();
+    const newLaporan: LaporanPacking = { ...payload, id, createdAt };
+    setLaporanPackingList((prev) => [newLaporan, ...prev.filter((p) => p.tanggal !== payload.tanggal || p.sppgId !== payload.sppgId)]);
+  };
+
+  const submitLaporanSanitasi: AppContextValue['submitLaporanSanitasi'] = (payload) => {
+    const id = `LSN-${Date.now().toString().slice(-8)}`;
+    const createdAt = nowTimestamp();
+    const newLaporan: LaporanSanitasi = { ...payload, id, createdAt };
+    setLaporanSanitasiList((prev) => [newLaporan, ...prev.filter((s) => s.tanggal !== payload.tanggal || s.sppgId !== payload.sppgId)]);
+  };
 
   const addKandunganGiziLog: AppContextValue['addKandunganGiziLog'] = (payload) => {
     const id = `GZI-${Date.now().toString().slice(-8)}`;
@@ -762,6 +786,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateIncidentStatus,
       kandunganGiziList,
       addKandunganGiziLog,
+      laporanPackingList,
+      submitLaporanPacking,
+      laporanSanitasiList,
+      submitLaporanSanitasi,
     }),
     [
       progressProduksiRealtime,
@@ -772,6 +800,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       pengajuanSekolahList,
       incidentList,
       kandunganGiziList,
+      laporanPackingList,
+      laporanSanitasiList,
       role,
       loggedIn,
       currentUser,

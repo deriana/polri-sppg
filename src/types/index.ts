@@ -199,6 +199,40 @@ export interface LaporanProduksi {
   catatanYield?: string;
 }
 
+export interface LaporanPacking {
+  id: string;
+  sppgId: string;
+  tanggal: string;
+  petugasId: string;
+  petugasNama: string;
+  totalOmprengDipacking: number;
+  totalThermalBox: number;
+  suhuHoldingRataRata: number;
+  statusSealing: 'rapat_sempurna' | 'ada_retur';
+  fotoDokumentasi: string[];
+  catatan: string;
+  status: 'draft' | 'terkirim' | 'diverifikasi';
+  alokasiSekolah: { sekolahId: string; sekolahNama: string; jumlahOmpreng: number; jumlahBox: number }[];
+  createdAt: string;
+}
+
+export interface LaporanSanitasi {
+  id: string;
+  sppgId: string;
+  tanggal: string;
+  petugasId: string;
+  petugasNama: string;
+  totalOmprengDicuci: number;
+  suhuAirDishwasher: number;
+  desinfektanDigunakan: string;
+  kepatuhanApdPct: number;
+  statusGreaseTrap: 'bersih_lancar' | 'perlu_kurasi' | 'tersumbat';
+  fotoDokumentasi: string[];
+  catatan: string;
+  status: 'draft' | 'terkirim' | 'diverifikasi';
+  createdAt: string;
+}
+
 export type PresensiStatus = 'hadir' | 'belum_presensi';
 
 export interface Presensi {
