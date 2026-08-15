@@ -24,6 +24,8 @@ interface QuickAction {
   icon: keyof typeof Feather.glyphMap;
   title: string;
   subtitle: string;
+  badge?: string;
+  tone?: 'primary' | 'success' | 'warning' | 'danger' | 'info';
   onPress: () => void;
 }
 
@@ -39,15 +41,48 @@ function QuickActionGrid({ items }: { items: QuickAction[] }) {
             styles.gridCard,
             {
               backgroundColor: colors.surface,
-              borderColor: colors.border,
+              borderColor: item.tone === 'danger' ? colors.danger : item.tone === 'warning' ? colors.warning : colors.border,
               borderRadius: radius.lg,
               ...shadow.card,
             },
             pressed && { opacity: 0.85, transform: [{ scale: 0.975 }] },
           ]}
         >
-          <View style={[styles.gridIconWrap, { backgroundColor: colors.primaryLight }]}>
-            <Feather name={item.icon} size={20} color={isDark ? colors.gold : colors.primary} strokeWidth={iconStrokeWidth} />
+          <View style={styles.gridCardTopRow}>
+            <View
+              style={[
+                styles.gridIconWrap,
+                {
+                  backgroundColor:
+                    item.tone === 'danger'
+                      ? colors.dangerBg
+                      : item.tone === 'warning'
+                      ? colors.warningBg
+                      : colors.primaryLight,
+                },
+              ]}
+            >
+              <Feather
+                name={item.icon}
+                size={20}
+                color={
+                  item.tone === 'danger'
+                    ? colors.danger
+                    : item.tone === 'warning'
+                    ? colors.warning
+                    : isDark
+                    ? colors.gold
+                    : colors.primary
+                }
+                strokeWidth={iconStrokeWidth}
+              />
+            </View>
+            {item.badge && (
+              <Pill
+                label={item.badge}
+                tone={item.tone ?? 'neutral'}
+              />
+            )}
           </View>
           <Text style={[styles.gridTitle, { color: colors.text, fontSize: fontSize.sm }]} numberOfLines={1}>
             {item.title}
@@ -497,21 +532,96 @@ export default function DashboardScreen({ navigation }: any) {
   const operationalProgressPct = Math.round((completedStepsCount / workflowSteps.length) * 100);
 
   const quickActions: QuickAction[] = [
-    { key: 'checkin', icon: 'user-check', title: 'Presensi Saya', subtitle: 'Selfie & GPS akun', onPress: () => navigation.navigate('CheckIn') },
-    { key: 'presensi', icon: 'users', title: 'Rekap Presensi Staf', subtitle: 'Rekap & selfie tim', onPress: () => navigation.navigate('Presensi') },
-    { key: 'checklist', icon: 'check-square', title: 'Checklist Harian', subtitle: 'Checklist harian dapur', onPress: () => navigation.navigate('Checklist') },
     {
-      key: 'laporan',
-      icon: 'file-text',
-      title: isKepala ? 'Laporan' : 'Dokumentasi Laporan',
-      subtitle: isKepala ? 'Kelola laporan produksi' : 'Isi dokumentasi',
-      onPress: () =>
-        isKepala
-          ? navigation.navigate('Laporan')
-          : navigation.navigate('LaporanForm', { laporanId: laporanHariIni?.id, tanggal: today }),
+      key: 'anggaran',
+      icon: 'shopping-cart',
+      title: 'Beli Bahan Pokok',
+      subtitle: 'Input nota & belanja',
+      badge: 'Nota & Audit',
+      tone: 'primary',
+      onPress: () => navigation.navigate('Anggaran'),
     },
-    { key: 'foodsafety', icon: 'thermometer', title: 'Keamanan Pangan', subtitle: 'Catat suhu & uji', onPress: () => navigation.navigate('FoodSafetyForm') },
-    { key: 'peralatan', icon: 'truck', title: 'Aset & Armada', subtitle: 'Check ompreng & mobil', onPress: () => navigation.navigate('Peralatan') },
+    {
+      key: 'qrscan',
+      icon: 'camera',
+      title: 'Scan QR Terima',
+      subtitle: 'Surat jalan supplier/DO',
+      badge: 'Surat Jalan',
+      tone: 'success',
+      onPress: () => navigation.navigate('QrScan'),
+    },
+    {
+      key: 'request_bahan',
+      icon: 'package',
+      title: 'Ajukan ke Pusat',
+      subtitle: 'Minta pasokan bahan BGN',
+      badge: 'Gudang Pusat',
+      tone: 'info',
+      onPress: () => navigation.navigate('RequestBahanForm'),
+    },
+    {
+      key: 'insiden',
+      icon: 'alert-triangle',
+      title: 'Lapor Insiden',
+      subtitle: 'Darurat dapur/distribusi',
+      badge: 'Darurat',
+      tone: 'danger',
+      onPress: () => navigation.navigate('IncidentReportForm'),
+    },
+    {
+      key: 'produksi',
+      icon: 'layers',
+      title: 'Produksi & QC',
+      subtitle: 'Batch ID & 5 tahap masak',
+      badge: '5 Tahap',
+      tone: 'warning',
+      onPress: () => navigation.navigate('ProduksiList'),
+    },
+    {
+      key: 'gudang_kondisi',
+      icon: 'thermometer',
+      title: 'Kondisi Gudang',
+      subtitle: 'Suhu IoT & stok FEFO',
+      badge: 'Sensor IoT',
+      tone: 'info',
+      onPress: () => navigation.navigate('GudangKondisi'),
+    },
+    {
+      key: 'distribusi',
+      icon: 'truck',
+      title: 'Kirim Sekolah',
+      subtitle: 'Rute & serah terima kurir',
+      badge: 'Kurir/Driver',
+      tone: 'primary',
+      onPress: () => navigation.navigate('Distribusi'),
+    },
+    {
+      key: 'broadcast',
+      icon: 'radio',
+      title: 'Arahan Mabes',
+      subtitle: 'Broadcast komando BGN',
+      badge: 'Mabes/BGN',
+      tone: 'primary',
+      onPress: () => navigation.navigate('Broadcast'),
+    },
+    {
+      key: 'checkin',
+      icon: 'user-check',
+      title: 'Presensi Selfie',
+      subtitle: 'Selfie & GPS akun',
+      badge: 'Presensi',
+      tone: 'primary',
+      onPress: () => navigation.navigate('CheckIn'),
+    },
+    {
+      key: 'checklist',
+      icon: 'check-square',
+      title: 'Checklist Dapur',
+      subtitle: 'Kesiapan harian alat/ruang',
+      badge: 'Harian',
+      tone: 'primary',
+      onPress: () => navigation.navigate('Checklist'),
+    },
   ];
 
   const targetKapasitas = currentSppg?.kapasitasProduksi || 1500;
@@ -660,7 +770,19 @@ export default function DashboardScreen({ navigation }: any) {
         </Card>
       )}
 
-      {/* 4. Executive Metrics Grid — Horizontal Scrollable */}
+      {/* 4. Aksi Cepat & Shortcut Favorit */}
+      <SectionTitle
+        action={
+          <Text style={{ color: colors.primary, fontWeight: '700', fontSize: fontSize.xs }}>
+            1-Tap Langsung
+          </Text>
+        }
+      >
+        ⚡ Shortcut Fitur Sering Dipakai
+      </SectionTitle>
+      <QuickActionGrid items={quickActions} />
+
+      {/* 5. Executive Metrics Grid — Horizontal Scrollable */}
       <SectionTitle>Ringkasan Status Cepat</SectionTitle>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingBottom: 4 }}>
         <View style={{ width: 136 }}>
@@ -692,18 +814,17 @@ export default function DashboardScreen({ navigation }: any) {
         </View>
         <View style={{ width: 136 }}>
           <KpiCard
-            label="Food Safety"
-            value={foodSafetyHariIni ? (foodSafetyAman ? 'Aman' : 'Bahaya') : 'Belum'}
-            tone={foodSafetyHariIni && foodSafetyAman ? colors.success : colors.warning}
-            icon="thermometer"
-            onPress={() => navigation.navigate('FoodSafetyForm')}
+            label="Distribusi Sekolah"
+            value={ruteDistribusi.length > 0 ? `${ruteTiba}/${ruteDistribusi.length}` : '0/0'}
+            tone={ruteDistribusi.length > 0 && ruteTiba === ruteDistribusi.length ? colors.success : colors.warning}
+            icon="truck"
+            onPress={() => navigation.navigate('Distribusi')}
           />
         </View>
       </ScrollView>
 
-
-      {/* 4. Sekolah Afiliasi SPPG Card */}
-      {!!role && ROLE_PERMISSIONS[role].canManageStaff && (
+      {/* 6. Daftar Sekolah Bina SPPG */}
+      {!!role && ROLE_PERMISSIONS[role].canManageStaff && sekolahBina.length > 0 && (
         <Card style={{ gap: spacing.sm }}>
           <SectionTitle
             style={{ marginBottom: 0 }}
@@ -713,11 +834,8 @@ export default function DashboardScreen({ navigation }: any) {
               </Pressable>
             }
           >
-            Sekolah Afiliasi SPPG ({sekolahBina.length} Sekolah)
+            Sekolah Penerima MBG ({sekolahBina.length})
           </SectionTitle>
-          {sekolahBina.length === 0 && (
-            <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Belum ada sekolah afiliasi. Tambahkan sekolah pertama SPPG ini.</Text>
-          )}
           {sekolahBina.map((sch) => (
             <Pressable
               key={sch.id}
@@ -748,11 +866,7 @@ export default function DashboardScreen({ navigation }: any) {
         </Card>
       )}
 
-      {/* 5. Aksi Cepat Hub */}
-      <SectionTitle>Aksi Cepat Operasional</SectionTitle>
-      <QuickActionGrid items={quickActions} />
-
-      {/* 6. Alert Preview List */}
+      {/* 7. Alert Preview List */}
       <AlertPreviewList
         alerts={activeAlerts}
         onSeeAll={() => navigation.navigate('Alert')}
@@ -833,16 +947,22 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between' },
   gridCard: {
     width: '48.5%',
-    padding: 14,
+    padding: 12,
     borderWidth: 1,
-    gap: 8,
+    gap: 6,
     minHeight: 110,
     justifyContent: 'flex-start',
   },
+  gridCardTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
   gridIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     alignItems: 'center',
     justifyContent: 'center',
   },
