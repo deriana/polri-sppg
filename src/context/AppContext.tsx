@@ -733,7 +733,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         jenis: 'manual',
         sumber: 'manual',
         tingkat: payload.tingkatKeparahan === 'kritis' ? 'emergency' : 'perhatian',
-        judul: `🚨 Laporan Insiden: ${payload.judul}`,
+        judul: `Laporan Insiden: ${payload.judul}`,
         deskripsi: `Kategori: ${payload.kategori} di ${payload.lokasi || 'Dapur'}. ${payload.deskripsi}`,
       });
     }

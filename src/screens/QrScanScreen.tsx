@@ -114,7 +114,7 @@ export default function QrScanScreen() {
                 style={[styles.demoChip, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}
               >
                 <Feather name="zap" size={13} color={colors.primary} />
-                <Text style={{ color: colors.primary, fontSize: 11, fontWeight: '800' }}>⚡ Scan QR PMB-002 (Ayam)</Text>
+                <Text style={{ color: colors.primary, fontSize: 11, fontWeight: '800' }}>Scan QR PMB-002 (Ayam)</Text>
               </Pressable>
 
               <Pressable
@@ -122,7 +122,7 @@ export default function QrScanScreen() {
                 style={[styles.demoChip, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}
               >
                 <Feather name="zap" size={13} color={colors.primary} />
-                <Text style={{ color: colors.primary, fontSize: 11, fontWeight: '800' }}>⚡ Scan QR PMB-001 (Beras)</Text>
+                <Text style={{ color: colors.primary, fontSize: 11, fontWeight: '800' }}>Scan QR PMB-001 (Beras)</Text>
               </Pressable>
             </View>
 

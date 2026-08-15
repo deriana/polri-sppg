@@ -73,8 +73,8 @@ export default function PermintaanBahanDetailScreen({ navigation, route }: any) 
           destLng={sppg.lng}
           destLabel={sppg.nama}
           status={TRIP_STATUS[permintaan.status]}
-          originGlyph="🏭"
-          destGlyph="🍳"
+          originIcon="factory"
+          destIcon="home"
           colors={colors}
           height={380}
         />

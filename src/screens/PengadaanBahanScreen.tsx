@@ -337,7 +337,7 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
       </View>
 
       {/* ========================================================================= */}
-      {/* TAB 1: 🛒 BELANJA BAHAN MANDIRI & LOG ANGGARAN                            */}
+      {/* TAB 1: BELANJA BAHAN MANDIRI & LOG ANGGARAN                               */}
       {/* ========================================================================= */}
       {activeTab === 'beli' && (
         <View style={{ gap: spacing.md }}>

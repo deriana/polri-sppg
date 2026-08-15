@@ -191,11 +191,11 @@ export default function MasterMenuScreen() {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.xs }}>
           {[
             { id: 'semua', label: 'Semua' },
-            { id: 'ayam', label: '🍗 Daging Ayam' },
-            { id: 'sapi', label: '🥩 Daging Sapi' },
-            { id: 'ikan', label: '🐟 Fillet Ikan' },
-            { id: 'sayur', label: '🥦 Sayuran' },
-            { id: 'telur', label: '🥚 Telur' },
+            { id: 'ayam', label: 'Daging Ayam' },
+            { id: 'sapi', label: 'Daging Sapi' },
+            { id: 'ikan', label: 'Fillet Ikan' },
+            { id: 'sayur', label: 'Sayuran' },
+            { id: 'telur', label: 'Telur' },
           ].map((tab) => {
             const active = activeTab === tab.id;
             return (

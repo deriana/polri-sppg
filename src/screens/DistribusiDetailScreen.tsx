@@ -121,7 +121,8 @@ export default function DistribusiDetailScreen({ navigation, route }: any) {
               <Text style={{ fontSize: fontSize.sm, fontWeight: '900', color: colors.text }}>
                 {driver?.nama ?? 'Bripda Agus Prasetyo'}
               </Text>
-              <Text style={{ fontSize: 11, fontWeight: '800', color: colors.gold }}>★ 4.9</Text>
+              <Feather name="star" size={11} color={colors.gold} />
+              <Text style={{ fontSize: 11, fontWeight: '800', color: colors.gold }}>4.9</Text>
             </View>
             <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, marginTop: 1 }}>
               Armada: {mobilBox?.nama ?? 'Mobil Box Thermal MBG'} • Plat: {mobilBox?.noPlat ?? 'D-8801-SPP'}

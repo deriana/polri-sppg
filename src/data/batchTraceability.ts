@@ -102,7 +102,7 @@ export const INITIAL_BATCH_TRACEABILITY: BatchTraceabilityRecord[] = [
           'Porsi Diterima': '450 Porsi Lengkap',
           'Kondisi Makanan': 'Hangat Segar & Segel Utuh',
           'Verifikasi Digital': 'Foto Geotag GPS & Tanda Tangan Digital',
-          'Rating Kepuasan Guru': '⭐⭐⭐⭐⭐ (5.0 / 5.0)',
+          'Rating Kepuasan Guru': '5.0 / 5.0 (Sangat Puas)',
         },
         verified: true,
       },
@@ -201,7 +201,7 @@ export const INITIAL_BATCH_TRACEABILITY: BatchTraceabilityRecord[] = [
         detail: {
           'Porsi Diterima': '600 Porsi Lengkap',
           'Kondisi Makanan': 'Hangat Segar & Segel Utuh',
-          'Rating Kepuasan Guru': '⭐⭐⭐⭐⭐ (5.0 / 5.0)',
+          'Rating Kepuasan Guru': '5.0 / 5.0 (Sangat Puas)',
         },
         verified: true,
       },

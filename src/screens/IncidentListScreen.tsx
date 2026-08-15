@@ -189,7 +189,7 @@ export default function IncidentListScreen({ navigation }: any) {
                     {selectedIncident.deskripsi}
                   </Text>
                   <Text style={{ fontSize: 10.5, color: colors.textMuted, marginTop: 4 }}>
-                    📍 Lokasi: {selectedIncident.lokasi || 'Dapur Utama'} • 👤 Pelapor: {selectedIncident.pelaporNama}
+                    Lokasi: {selectedIncident.lokasi || 'Dapur Utama'} • Pelapor: {selectedIncident.pelaporNama}
                   </Text>
                 </View>
 

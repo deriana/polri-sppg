@@ -486,8 +486,9 @@ export default function CctvMonitorScreen() {
                     style={{ width: '100%', height: 190 }}
                     resizeMode="cover"
                   />
-                  <View style={{ position: 'absolute', top: 8, left: 8, backgroundColor: 'rgba(220,38,38,0.9)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 }}>
-                    <Text style={{ color: '#FFF', fontSize: 10, fontWeight: '800' }}>📸 SNAPSHOT OTOMATIS AI</Text>
+                  <View style={{ position: 'absolute', top: 8, left: 8, flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(220,38,38,0.9)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 }}>
+                    <Feather name="camera" size={11} color="#FFF" />
+                    <Text style={{ color: '#FFF', fontSize: 10, fontWeight: '800' }}>SNAPSHOT OTOMATIS AI</Text>
                   </View>
                 </View>
 

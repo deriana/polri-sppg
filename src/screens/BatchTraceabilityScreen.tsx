@@ -306,7 +306,7 @@ export default function BatchTraceabilityScreen({ navigation, route }: any) {
                 {/* Gallery Documentation */}
                 <View style={{ gap: 6 }}>
                   <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
-                    📸 Dokumentasi Fisik & Bukti Lapangan:
+                    Dokumentasi Fisik & Bukti Lapangan:
                   </Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
                     {modalDocs.photos.map((uri, pIdx) => (
@@ -326,7 +326,7 @@ export default function BatchTraceabilityScreen({ navigation, route }: any) {
                 {/* Audit Key-Value Table */}
                 <View style={{ gap: 6 }}>
                   <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
-                    📋 Parameter Audit Rantai Pasok:
+                    Parameter Audit Rantai Pasok:
                   </Text>
                   <View style={[styles.tableBox, { backgroundColor: colors.background, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border }]}>
                     {Object.entries(selectedStepModal.detail).map(([k, v], rIdx) => (

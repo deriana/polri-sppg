@@ -1627,7 +1627,7 @@ export default function DashboardScreen({ navigation }: any) {
                 {/* Recommendation box */}
                 <View style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : colors.background, padding: 8, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border }}>
                   <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
-                    💡 <Text style={{ fontWeight: '800', color: colors.text }}>Rekomendasi AI:</Text> {warn.rekomendasiAksi}
+                    <Text style={{ fontWeight: '800', color: colors.text }}>Rekomendasi AI:</Text> {warn.rekomendasiAksi}
                   </Text>
                 </View>
 

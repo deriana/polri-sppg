@@ -7,6 +7,27 @@ import { BRAND_ASSETS } from '../data/images';
 export type RouteTripStatus = 'idle' | 'moving' | 'arrived' | 'problem';
 const TICK_MS = 600;
 
+// Marker pin memakai path Feather sebagai inline SVG karena isi pin dirender
+// di dalam WebView (Leaflet divIcon), di luar jangkauan komponen <Feather />.
+export type RouteMarkerIcon = 'home' | 'school' | 'factory' | 'truck' | 'alert';
+
+const MARKER_PATHS: Record<RouteMarkerIcon, string> = {
+  home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />',
+  school:
+    '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />',
+  factory:
+    '<path d="M16.5 9.4L7.5 4.21" /><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" />',
+  truck:
+    '<rect x="1" y="3" width="15" height="13" /><polygon points="16 8 20 8 23 11 23 16 16 16 16 8" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" />',
+  alert:
+    '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />',
+};
+
+function markerSvg(icon: RouteMarkerIcon, size: number) {
+  const px = Math.round(size * 0.52);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${px}" height="${px}" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${MARKER_PATHS[icon]}</svg>`;
+}
+
 export interface RouteMapViewProps {
   originLat: number;
   originLng: number;
@@ -16,10 +37,10 @@ export interface RouteMapViewProps {
   destLabel: string;
   status: RouteTripStatus;
   height?: number;
-  originGlyph?: string;
-  destGlyph?: string;
-  vehicleGlyph?: string;
-  problemGlyph?: string;
+  originIcon?: RouteMarkerIcon;
+  destIcon?: RouteMarkerIcon;
+  vehicleIcon?: RouteMarkerIcon;
+  problemIcon?: RouteMarkerIcon;
   colors: {
     primary: string;
     danger: string;
@@ -40,10 +61,10 @@ export default function RouteMapView({
   destLabel,
   status,
   height = 300,
-  originGlyph = '🏢',
-  destGlyph = '🏫',
-  vehicleGlyph = '🚚',
-  problemGlyph = '⚠️',
+  originIcon = 'home',
+  destIcon = 'school',
+  vehicleIcon = 'truck',
+  problemIcon = 'alert',
   colors,
 }: RouteMapViewProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -90,26 +111,26 @@ export default function RouteMapView({
     var map = L.map('map', { zoomControl:false, attributionControl:true }).setView(origin, 15);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19 }).addTo(map);
 
-    function makeIcon(glyph, bgColor, size, isVehicle) {
-      var inner = isVehicle 
-        ? '<img src="${truckImgUri}" style="width:34px;height:34px;object-fit:contain" />' 
-        : glyph;
-      var html = '<div class="pin-badge" style="width:' + size + 'px;height:' + size + 'px;background:' + bgColor + ';font-size:' + Math.round(size*0.55) + 'px;box-shadow:0 3px 8px rgba(0,0,0,0.35);border:2px solid #fff;overflow:hidden;display:flex;align-items:center;justify-content:center">' + inner + '</div>';
+    function makeIcon(markup, bgColor, size, isVehicle) {
+      var inner = isVehicle
+        ? '<img src="${truckImgUri}" style="width:34px;height:34px;object-fit:contain" />'
+        : markup;
+      var html = '<div class="pin-badge" style="width:' + size + 'px;height:' + size + 'px;background:' + bgColor + ';box-shadow:0 3px 8px rgba(0,0,0,0.35);border:2px solid #fff;overflow:hidden;display:flex;align-items:center;justify-content:center">' + inner + '</div>';
       return L.divIcon({ html: html, className:'', iconSize:[size,size], iconAnchor:[size/2, size/2] });
     }
 
-    var glyphOrigin = ${JSON.stringify(originGlyph)};
-    var glyphDest = ${JSON.stringify(destGlyph)};
-    var glyphVehicle = ${JSON.stringify(vehicleGlyph)};
-    var glyphProblem = ${JSON.stringify(problemGlyph)};
+    var svgOrigin = ${JSON.stringify(markerSvg(originIcon, 36))};
+    var svgDest = ${JSON.stringify(markerSvg(destIcon, 38))};
+    var svgVehicle = ${JSON.stringify(markerSvg(vehicleIcon, 44))};
+    var svgProblem = ${JSON.stringify(markerSvg(problemIcon, 44))};
 
-    // Origin: Dapur SPPG (Gedung Unit SPPG 🏢)
-    L.marker(origin, { icon: makeIcon(glyphOrigin, '${colors.primary}', 36, false) }).addTo(map).bindTooltip('<b>Dapur SPPG:</b> ' + originLabel, { permanent: false, direction: 'top' });
-    
-    // Dest: Sekolah Tujuan (Gedung Sekolah 🏫)
-    L.marker(dest, { icon: makeIcon(glyphDest, '${colors.success ?? "#10b981"}', 38, false) }).addTo(map).bindTooltip('<b>Sekolah Tujuan:</b> ' + destLabel, { permanent: false, direction: 'top' });
+    // Origin: Dapur SPPG
+    L.marker(origin, { icon: makeIcon(svgOrigin, '${colors.primary}', 36, false) }).addTo(map).bindTooltip('<b>Dapur SPPG:</b> ' + originLabel, { permanent: false, direction: 'top' });
 
-    var vehicleIconGlyph = status === 'problem' ? glyphProblem : glyphVehicle;
+    // Dest: Sekolah Tujuan
+    L.marker(dest, { icon: makeIcon(svgDest, '${colors.success ?? "#10b981"}', 38, false) }).addTo(map).bindTooltip('<b>Sekolah Tujuan:</b> ' + destLabel, { permanent: false, direction: 'top' });
+
+    var vehicleIconGlyph = status === 'problem' ? svgProblem : svgVehicle;
     var vehicleColor = status === 'problem' ? '${colors.danger}' : '${colors.primary}';
     var vehicleMarker = L.marker(origin, { icon: makeIcon(vehicleIconGlyph, vehicleColor, 44, true) }).addTo(map);
 
@@ -208,7 +229,7 @@ export default function RouteMapView({
   </script>
 </body>
 </html>`,
-    [originLat, originLng, originLabel, destLat, destLng, destLabel, status, colors, originGlyph, destGlyph, vehicleGlyph, problemGlyph, truckImgUri],
+    [originLat, originLng, originLabel, destLat, destLng, destLabel, status, colors, originIcon, destIcon, vehicleIcon, problemIcon, truckImgUri],
   );
 
   const source = useMemo(() => ({ html }), [html]);
