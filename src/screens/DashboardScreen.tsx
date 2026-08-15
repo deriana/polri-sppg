@@ -966,6 +966,7 @@ export default function DashboardScreen({ navigation }: any) {
   const targetKapasitas = currentSppg?.kapasitasProduksi || 1500;
   const currentSppgName = currentSppg?.nama ?? sppgList.find((s) => s.id === currentUser.sppgId)?.nama ?? 'SPPG Unit';
   const [isBroadcastHidden, setIsBroadcastHidden] = useState(false);
+  const [isWorkflowExpanded, setIsWorkflowExpanded] = useState(false);
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
@@ -1023,20 +1024,26 @@ export default function DashboardScreen({ navigation }: any) {
         </Pressable>
       )}
 
-      {/* 3. SPPG Daily Operational Workflow Hub (Work Order Aggregator) */}
+      {/* 3. SPPG Daily Operational Workflow Hub (Work Order Aggregator - Collapsible) */}
       <Card variant="accent" style={{ gap: spacing.sm, marginVertical: spacing.xs }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+        <Pressable
+          onPress={() => setIsWorkflowExpanded(!isWorkflowExpanded)}
+          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
             <Feather name="layers" size={16} color={colors.primary} />
             <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.4 }}>
               ALUR OPERASIONAL HARI INI
             </Text>
           </View>
-          <Pill
-            label={`${operationalProgressPct}% Selesai (${completedStepsCount}/${workflowSteps.length})`}
-            tone={operationalProgressPct >= 100 ? 'success' : operationalProgressPct > 50 ? 'primary' : 'warning'}
-          />
-        </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Pill
+              label={`${operationalProgressPct}% (${completedStepsCount}/${workflowSteps.length})`}
+              tone={operationalProgressPct >= 100 ? 'success' : operationalProgressPct > 50 ? 'primary' : 'warning'}
+            />
+            <Feather name={isWorkflowExpanded ? 'chevron-up' : 'chevron-down'} size={18} color={colors.primary} />
+          </View>
+        </Pressable>
 
         {/* Progress Bar Track */}
         <View style={{ height: 6, backgroundColor: colors.background, borderRadius: radius.pill, overflow: 'hidden', marginVertical: 2 }}>
@@ -1050,58 +1057,86 @@ export default function DashboardScreen({ navigation }: any) {
           />
         </View>
 
-        <Text style={{ fontSize: 11, color: colors.textMuted }}>
-          Pantau dan jalankan seluruh rantai kerja dapur MBG dari persiapan hingga serah terima sekolah:
-        </Text>
+        {/* Collapsed State Summary or Expanded List */}
+        {!isWorkflowExpanded ? (
+          <Pressable
+            onPress={() => setIsWorkflowExpanded(true)}
+            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 2 }}
+          >
+            <Text style={{ fontSize: 11, color: colors.textMuted, flex: 1 }}>
+              {operationalProgressPct >= 100
+                ? 'Semua 6 tahapan kerja dapur hari ini telah tuntas diverifikasi.'
+                : `${completedStepsCount} dari 6 tahap selesai • Ketuk untuk membuka rincian alur.`}
+            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Text style={{ fontSize: 11, fontWeight: '800', color: colors.primary }}>Buka Rincian</Text>
+              <Feather name="chevron-down" size={14} color={colors.primary} />
+            </View>
+          </Pressable>
+        ) : (
+          <>
+            <Text style={{ fontSize: 11, color: colors.textMuted }}>
+              Pantau dan jalankan seluruh rantai kerja dapur MBG dari persiapan hingga serah terima sekolah:
+            </Text>
 
-        {/* Task Steps Pipeline List */}
-        <View style={{ gap: 8, marginTop: 4 }}>
-          {workflowSteps.map((step) => (
+            {/* Task Steps Pipeline List */}
+            <View style={{ gap: 8, marginTop: 4 }}>
+              {workflowSteps.map((step) => (
+                <Pressable
+                  key={step.id}
+                  onPress={step.onPress}
+                  style={({ pressed }) => [
+                    styles.workflowRow,
+                    {
+                      backgroundColor: colors.surface,
+                      borderColor: step.isDone ? colors.success : colors.border,
+                      borderRadius: radius.md,
+                    },
+                    pressed && { opacity: 0.8 },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.workflowIconWrap,
+                      {
+                        backgroundColor: step.isDone ? colors.successBg : colors.primaryLight,
+                      },
+                    ]}
+                  >
+                    <Feather
+                      name={step.isDone ? 'check' : step.icon}
+                      size={15}
+                      color={step.isDone ? colors.success : colors.primary}
+                      strokeWidth={2.4}
+                    />
+                  </View>
+
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
+                      {step.title}
+                    </Text>
+                    <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
+                      PIC: <Text style={{ fontWeight: '600', color: colors.text }}>{step.pic}</Text>
+                    </Text>
+                  </View>
+
+                  <View style={{ alignItems: 'flex-end', gap: 4 }}>
+                    <Pill label={step.status} tone={step.tone} />
+                    <Text style={{ fontSize: 9.5, fontWeight: '700', color: colors.primary }}>Buka</Text>
+                  </View>
+                </Pressable>
+              ))}
+            </View>
+
             <Pressable
-              key={step.id}
-              onPress={step.onPress}
-              style={({ pressed }) => [
-                styles.workflowRow,
-                {
-                  backgroundColor: colors.surface,
-                  borderColor: step.isDone ? colors.success : colors.border,
-                  borderRadius: radius.md,
-                },
-                pressed && { opacity: 0.8 },
-              ]}
+              onPress={() => setIsWorkflowExpanded(false)}
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingTop: 4 }}
             >
-              <View
-                style={[
-                  styles.workflowIconWrap,
-                  {
-                    backgroundColor: step.isDone ? colors.successBg : colors.primaryLight,
-                  },
-                ]}
-              >
-                <Feather
-                  name={step.isDone ? 'check' : step.icon}
-                  size={15}
-                  color={step.isDone ? colors.success : colors.primary}
-                  strokeWidth={2.4}
-                />
-              </View>
-
-              <View style={{ flex: 1, gap: 2 }}>
-                <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
-                  {step.title}
-                </Text>
-                <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
-                  PIC: <Text style={{ fontWeight: '600', color: colors.text }}>{step.pic}</Text>
-                </Text>
-              </View>
-
-              <View style={{ alignItems: 'flex-end', gap: 4 }}>
-                <Pill label={step.status} tone={step.tone} />
-                <Text style={{ fontSize: 9.5, fontWeight: '700', color: colors.primary }}>Buka</Text>
-              </View>
+              <Text style={{ fontSize: 11, fontWeight: '800', color: colors.textMuted }}>Sembunyikan Rincian Alur</Text>
+              <Feather name="chevron-up" size={14} color={colors.textMuted} />
             </Pressable>
-          ))}
-        </View>
+          </>
+        )}
       </Card>
 
       {/* 3. Role-based 'My Work' Card for Driver or Operational Roles */}
