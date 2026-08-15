@@ -13,8 +13,9 @@ const KATEGORI_OPTIONS: { id: PeralatanKategori | 'semua'; label: string; icon: 
   { id: 'kendaraan', label: 'Mobil & Motor Box', icon: 'truck' },
   { id: 'ompreng_tray', label: 'Ompreng Stainless', icon: 'grid' },
   { id: 'kontainer_suhu', label: 'Thermal Container', icon: 'box' },
-  { id: 'alat_masak', label: 'Kettle & Freezer', icon: 'coffee' },
+  { id: 'alat_masak', label: 'Kettle & Kompor', icon: 'coffee' },
   { id: 'sealing_packaging', label: 'Sealer & Packing', icon: 'package' },
+  { id: 'kebersihan_apd', label: 'Steril & Sanitasi', icon: 'shield' },
 ];
 
 export default function PeralatanScreen() {
