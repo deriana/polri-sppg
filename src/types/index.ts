@@ -37,6 +37,14 @@ export type AnggaranKategori =
   | 'kebersihan_apd'
   | 'lainnya';
 
+export interface ItemPembelian {
+  namaBarang: string;
+  jumlah: number;
+  satuan: string;
+  hargaSatuan: number;
+  totalHarga: number;
+}
+
 export interface AnggaranLog {
   id: string;
   sppgId: string;
@@ -47,7 +55,13 @@ export interface AnggaranLog {
   keterangan: string;
   buktiNota?: string | null;
   dibuatOleh: string;
+  // Detail Pengadaan & Transaksi untuk Audit Pusat
+  mitraId?: string | null;
+  namaSupplier?: string;
+  noInvoice?: string;
+  items?: ItemPembelian[];
 }
+
 
 export type StatusPengajuanSekolah = 'diajukan' | 'disetujui' | 'ditolak';
 

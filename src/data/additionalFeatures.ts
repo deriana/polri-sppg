@@ -45,6 +45,8 @@ export const initialAnggaranLogs: AnggaranLog[] = [
     nominal: 450000000,
     keterangan: 'Alokasi Dana Operasional Dapur SPPG Bulan Agustus 2026 dari BGN / POLRI',
     buktiNota: 'SK-ALOKASI-AUG-2026.pdf',
+    noInvoice: 'INV/BGN-POLRI/2026/08/001',
+    namaSupplier: 'Kemenko Pangan & Badan Gizi Nasional (BGN)',
     dibuatOleh: 'Rian Hidayat, S.Ak',
   },
   {
@@ -54,9 +56,17 @@ export const initialAnggaranLogs: AnggaranLog[] = [
     jenis: 'pengeluaran',
     kategori: 'bahan_baku',
     nominal: 78500000,
-    keterangan: 'Pembelian Beras 2 Ton, Daging Ayam Segar 500kg & Telur dari PT Daging Segar Utama',
+    keterangan: 'Pembelian Beras Premium, Daging Ayam Broiler Segar, & Telur Ayam Ras',
     buktiNota: 'NOTA-PASOK-001.jpg',
+    noInvoice: 'INV-MTR-001-20260803',
+    mitraId: 'MTR-001',
+    namaSupplier: 'PT Daging Segar Utama',
     dibuatOleh: 'Rian Hidayat, S.Ak',
+    items: [
+      { namaBarang: 'Beras Ramos Super (50kg/sak)', jumlah: 40, satuan: 'sak', hargaSatuan: 675000, totalHarga: 27000000 },
+      { namaBarang: 'Daging Ayam Broiler Utuh Higienis', jumlah: 900, satuan: 'kg', hargaSatuan: 38000, totalHarga: 34200000 },
+      { namaBarang: 'Telur Ayam Ras Segar (Peti)', jumlah: 600, satuan: 'kg', hargaSatuan: 28833, totalHarga: 17300000 },
+    ],
   },
   {
     id: 'ANG-003',
@@ -67,6 +77,8 @@ export const initialAnggaranLogs: AnggaranLog[] = [
     nominal: 12400000,
     keterangan: 'BBM Dexlite & Perawatan Mobil Box Thermal MBG Plat D-8801-SPP & D-8802-SPP',
     buktiNota: 'SPBU-NOTA-778.jpg',
+    noInvoice: 'SPBU-PERTAMINA-34401',
+    namaSupplier: 'SPBU Pertamina Pasteur',
     dibuatOleh: 'Rian Hidayat, S.Ak',
   },
   {
@@ -78,7 +90,13 @@ export const initialAnggaranLogs: AnggaranLog[] = [
     nominal: 24500000,
     keterangan: 'Pengadaan 250 Tray Ompreng Stainless Steel 5 Sekat & 4 Thermal Insulated Box',
     buktiNota: 'NOTA-OMPRENG-044.jpg',
+    noInvoice: 'INV-EQP-2026-089',
+    namaSupplier: 'CV Dapur Prima Stainless',
     dibuatOleh: 'Rian Hidayat, S.Ak',
+    items: [
+      { namaBarang: 'Tray Ompreng MBG Stainless 304 (5 Sekat)', jumlah: 250, satuan: 'pcs', hargaSatuan: 68000, totalHarga: 17000000 },
+      { namaBarang: 'Thermal Box Insulated 80L', jumlah: 5, satuan: 'unit', hargaSatuan: 1500000, totalHarga: 7500000 },
+    ],
   },
   {
     id: 'ANG-005',
@@ -89,6 +107,8 @@ export const initialAnggaranLogs: AnggaranLog[] = [
     nominal: 115000000,
     keterangan: 'Pembayaran Gaji Pokok & Insentif 48 Petugas & Relawan Dapur SPPG Periode Agustus (Tahap 1)',
     buktiNota: 'SLIP-REKAP-08.pdf',
+    noInvoice: 'PAYROLL-SPPG-2026-08-1',
+    namaSupplier: 'Payroll Internal SPPG',
     dibuatOleh: 'Rian Hidayat, S.Ak',
   },
   {
@@ -98,9 +118,17 @@ export const initialAnggaranLogs: AnggaranLog[] = [
     jenis: 'pengeluaran',
     kategori: 'bahan_baku',
     nominal: 42300000,
-    keterangan: 'Pembelian Sayur & Buah Segar Mingguan dari Mitra Lokal Pasar Induk',
+    keterangan: 'Pembelian Sayur & Buah Segar Mingguan dari Mitra Petani Lokal',
     buktiNota: 'NOTA-PASOK-002.jpg',
+    noInvoice: 'INV-SAYUR-002-88',
+    mitraId: 'MTR-002',
+    namaSupplier: 'Koperasi Tani Makmur Sayur',
     dibuatOleh: 'Rian Hidayat, S.Ak',
+    items: [
+      { namaBarang: 'Wortel Brastagi Segar', jumlah: 350, satuan: 'kg', hargaSatuan: 18000, totalHarga: 6300000 },
+      { namaBarang: 'Buncis & Sayur Mayur Campur', jumlah: 600, satuan: 'kg', hargaSatuan: 22000, totalHarga: 13200000 },
+      { namaBarang: 'Pisang Ambon & Semangka Manis', jumlah: 1200, satuan: 'kg', hargaSatuan: 19000, totalHarga: 22800000 },
+    ],
   },
   {
     id: 'ANG-007',

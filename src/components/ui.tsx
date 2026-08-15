@@ -88,7 +88,7 @@ export function Card({
         return {
           backgroundColor: colors.surface,
           borderWidth: 1,
-          borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(15, 23, 42, 0.05)',
+          borderColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(15, 23, 42, 0.08)',
           ...shadow.md,
         };
       case 'glass':
@@ -99,19 +99,19 @@ export function Card({
         };
       case 'accent':
         return {
-          backgroundColor: colors.surface,
+          backgroundColor: isDark ? colors.surface : '#FFFFFF',
           borderWidth: 1,
-          borderColor: colors.border,
-          borderLeftWidth: 4,
+          borderColor: isDark ? colors.border : 'rgba(224, 230, 237, 0.95)',
+          borderLeftWidth: 4.5,
           borderLeftColor: colors.gold || colors.primary,
           ...shadow.card,
         };
       case 'default':
       default:
         return {
-          backgroundColor: colors.surface,
+          backgroundColor: isDark ? colors.surface : '#FFFFFF',
           borderWidth: 1,
-          borderColor: colors.border,
+          borderColor: isDark ? colors.border : 'rgba(226, 232, 240, 0.9)',
           ...shadow.card,
         };
     }
@@ -663,10 +663,12 @@ export function KpiCard({
 }: KpiCardProps) {
   const { colors, fontSize, iconStrokeWidth, spacing } = useTheme();
 
+  const isLongValue = typeof value === 'string' && value.length > 7;
+
   return (
     <Card onPress={onPress} style={[styles.kpiCard, style]}>
       <View style={styles.kpiHeaderRow}>
-        <Text style={[styles.kpiLabel, { color: colors.textMuted, fontSize: fontSize.xs }]}>
+        <Text style={[styles.kpiLabel, { color: colors.textMuted, fontSize: fontSize.xs }]} numberOfLines={1}>
           {label}
         </Text>
 
@@ -676,12 +678,22 @@ export function KpiCard({
 
         {icon && !badge && (
           <View style={[styles.kpiIconWrap, { backgroundColor: colors.primaryLight }]}>
-            <Feather name={icon} size={14} color={colors.primary} strokeWidth={iconStrokeWidth} />
+            <Feather name={icon} size={13} color={colors.primary} strokeWidth={iconStrokeWidth} />
           </View>
         )}
       </View>
 
-      <Text style={[styles.kpiValue, { color: tone || colors.text, fontSize: fontSize.xxl }]}>
+      <Text
+        style={[
+          styles.kpiValue,
+          {
+            color: tone || colors.text,
+            fontSize: isLongValue ? 17 : 24,
+            letterSpacing: -0.5,
+          },
+        ]}
+        numberOfLines={1}
+      >
         {value}
       </Text>
 
