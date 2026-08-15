@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { Card, EmptyState, Pill, SectionTitle } from '../components/ui';
+import { Card, EmptyState, Pill, SchoolCarouselCard, SectionTitle } from '../components/ui';
+import RouteMapView from '../components/RouteMapView';
 import { useScopedData } from '../hooks';
 import { scopeDistribusi } from '../utils/scope';
 import { DistribusiRute } from '../types';
@@ -20,11 +21,24 @@ const todayDateStr = () => new Date().toISOString().slice(0, 10);
 export default function DistribusiScreen({ navigation }: any) {
   const { sekolahList, distribusiList } = useApp();
   const { sppgInScope } = useScopedData();
-  const { colors, spacing, fontSize, iconStrokeWidth, radius } = useTheme();
+  const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark } = useTheme();
 
   const inScope = useMemo(() => scopeDistribusi(sppgInScope, distribusiList), [sppgInScope, distribusiList]);
   const todayInScope = useMemo(() => inScope.filter((r) => r.tanggal === todayDateStr()), [inScope]);
   const isMultiSppg = sppgInScope.length > 1;
+
+  const [selectedRuteId, setSelectedRuteId] = useState<string | null>(() => todayInScope[0]?.id || null);
+
+  const selectedRute = useMemo(
+    () => todayInScope.find((r) => r.id === selectedRuteId) || todayInScope[0] || null,
+    [todayInScope, selectedRuteId],
+  );
+
+  const selectedSekolah = useMemo(
+    () => (selectedRute ? sekolahList.find((s) => s.id === selectedRute.sekolahId) : null),
+    [selectedRute, sekolahList],
+  );
+
   const groupedBySppg = useMemo(() => {
     if (!isMultiSppg) return null;
     return sppgInScope
@@ -32,16 +46,25 @@ export default function DistribusiScreen({ navigation }: any) {
       .filter((g) => g.rutes.length > 0);
   }, [isMultiSppg, sppgInScope, todayInScope]);
 
-  // Advance/kendala actions live in DistribusiDetailScreen now (that's also
-  // where the "tiba" confirm + bukti-foto capture happens) — this list is a
-  // tap-through index, not where status gets changed.
   const renderRuteCard = (rute: DistribusiRute) => {
     const isKendala = rute.status === 'kendala';
     const sekolahItem = sekolahList.find((s) => s.id === rute.sekolahId);
     const sekolahNama = sekolahItem?.nama ?? rute.sekolahId;
+    const isSelected = rute.id === selectedRute?.id;
 
     return (
-      <Card key={rute.id} style={{ gap: spacing.sm }} onPress={() => navigation.navigate('DistribusiDetail', { ruteId: rute.id })}>
+      <Card
+        key={rute.id}
+        style={{
+          gap: spacing.sm,
+          borderWidth: isSelected ? 2 : 1,
+          borderColor: isSelected ? colors.primary : colors.border,
+        }}
+        onPress={() => {
+          setSelectedRuteId(rute.id);
+          navigation.navigate('DistribusiDetail', { ruteId: rute.id });
+        }}
+      >
         <View style={styles.rowTop}>
           <Text style={{ color: colors.text, fontWeight: '800', fontSize: fontSize.sm, flex: 1 }} numberOfLines={1}>
             {sekolahNama}
@@ -58,9 +81,18 @@ export default function DistribusiScreen({ navigation }: any) {
             </View>
           )}
           <View style={{ flex: 1, gap: 2 }}>
-            <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Target: {sekolahItem?.jumlahSiswa ?? 350} siswa</Text>
-            <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Jam Tiba: {rute.estimasiTiba}</Text>
-            <Text style={{ color: colors.primary, fontSize: 10, fontWeight: '700' }}>Klik untuk Detail Tracking Log ➔</Text>
+            <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>
+              Target: {sekolahItem?.jumlahSiswa ?? 350} siswa ({sekolahItem?.jumlahSiswa ?? 350} porsi)
+            </Text>
+            <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>
+              Estimasi Tiba: {rute.estimasiTiba || '11:00 WIB'}
+            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 }}>
+              <Text style={{ color: colors.primary, fontSize: 10.5, fontWeight: '800' }}>
+                Buka Log Tracking Detail
+              </Text>
+              <Feather name="chevron-right" size={12} color={colors.primary} />
+            </View>
           </View>
         </View>
       </Card>
@@ -69,13 +101,72 @@ export default function DistribusiScreen({ navigation }: any) {
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
-      <View style={[styles.disclaimer, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
-        <Feather name="navigation" size={16} color={colors.primary} strokeWidth={iconStrokeWidth} />
-        <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>
-          Pelacakan GPS Armada Live — Klik pada card rute untuk membuka **Log Pengiriman Detail (Style Shopee / Online Tracking)**.
-        </Text>
-      </View>
+      {/* 1. TACTICAL GPS MAP VIEW */}
+      {selectedRute && (
+        <View style={[styles.mapContainer, { borderRadius: radius.xl, borderColor: colors.border, overflow: 'hidden' }]}>
+          <RouteMapView
+            originLat={-6.9147}
+            originLng={107.6098}
+            originLabel="Dapur Sentral SPPG Polri"
+            destLat={selectedRute?.lat ?? -6.9038}
+            destLng={selectedRute?.lng ?? 107.6186}
+            destLabel={selectedSekolah?.nama ?? 'Sekolah Afiliasi'}
+            status={
+              selectedRute.status === 'kendala'
+                ? 'problem'
+                : selectedRute.status === 'tiba'
+                ? 'arrived'
+                : selectedRute.status === 'dalam_perjalanan'
+                ? 'moving'
+                : 'idle'
+            }
+            height={240}
+            colors={colors}
+          />
+        </View>
+      )}
 
+      {/* 2. HORIZONTAL SCHOOL CAROUSEL SLIDER */}
+      {todayInScope.length > 0 && (
+        <View style={{ gap: 8 }}>
+          <SectionTitle
+            style={{ marginBottom: 0 }}
+            action={
+              <Text style={{ color: colors.textMuted, fontSize: 10.5, fontWeight: '700' }}>
+                {todayInScope.length} Titik Sekolah
+              </Text>
+            }
+          >
+            Radar Sekolah Afiliasi Hari Ini
+          </SectionTitle>
+
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 4 }}>
+            {todayInScope.map((r) => {
+              const sch = sekolahList.find((s) => s.id === r.sekolahId);
+              const isSelected = (selectedRuteId || todayInScope[0]?.id) === r.id;
+              return (
+                <SchoolCarouselCard
+                  key={r.id}
+                  nama={sch?.nama ?? r.sekolahId}
+                  alamat={sch?.alamat}
+                  siswaCount={sch?.jumlahSiswa ?? 350}
+                  targetPorsi={sch?.jumlahSiswa ?? 350}
+                  status={r.status}
+                  eta={r.estimasiTiba || '10:45 WIB'}
+                  suhuKedatangan={64.5}
+                  isSelected={isSelected}
+                  onPress={() => {
+                    setSelectedRuteId(r.id);
+                    navigation.navigate('DistribusiDetail', { ruteId: r.id });
+                  }}
+                />
+              );
+            })}
+          </ScrollView>
+        </View>
+      )}
+
+      {/* 3. DAFTAR RUTE DISTRIBUSI */}
       <SectionTitle
         action={
           <Pressable onPress={() => navigation.navigate('RiwayatDistribusi')} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
@@ -84,8 +175,9 @@ export default function DistribusiScreen({ navigation }: any) {
           </Pressable>
         }
       >
-        Distribusi Armada GPS Hari Ini ({todayInScope.length} Rute)
+        Daftar Rute Pengiriman ({todayInScope.length})
       </SectionTitle>
+
       {todayInScope.length === 0 ? (
         <EmptyState icon="truck" title="Belum Ada Rute" body="Belum ada rute distribusi untuk hari ini." />
       ) : groupedBySppg ? (
@@ -110,8 +202,10 @@ export default function DistribusiScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
-  disclaimer: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 10 },
+  content: { padding: 16, gap: 14, paddingBottom: 40 },
+  mapContainer: {
+    borderWidth: 1.2,
+  },
   rowTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   sppgHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, padding: 8 },
 });

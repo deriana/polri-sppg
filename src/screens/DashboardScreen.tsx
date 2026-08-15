@@ -3,7 +3,21 @@ import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'rea
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { Card, KpiCard, Pill, PrimaryButton, SecondaryButton, SectionTitle, StatusBadge, SyncStatusBadge, EmptyState } from '../components/ui';
+import {
+  BentoCard,
+  Card,
+  CircularProgressGauge,
+  KpiCard,
+  Pill,
+  PrimaryButton,
+  SecondaryButton,
+  SectionTitle,
+  Sparkline,
+  StatusBadge,
+  SyncStatusBadge,
+  TacticalTimeline,
+  EmptyState,
+} from '../components/ui';
 import { useScopedData, usePendingSyncCount } from '../hooks';
 import { AlertLog, AlertTingkat } from '../types';
 import { ROLE_LABEL, ROLE_PERMISSIONS, roleScopeLabel, scopePolresInPolda } from '../utils/scope';
@@ -1651,105 +1665,22 @@ export default function DashboardScreen({ navigation }: any) {
         </Pressable>
       )}
 
-      {/* 2.5 SPPG KITCHEN READINESS INDEX BANNER (Executive Quality & Performance) */}
+      {/* 2.5 SPPG KITCHEN READINESS INDEX BANNER (Modern Multi-Metric Circular Progress Gauge) */}
       {(isKepala || role === 'AHLI_GIZI') && (
-        <Card
-          style={{
-            backgroundColor: colors.surface,
-            borderRadius: radius.xl,
-            gap: spacing.sm,
-            borderColor: isDark ? colors.border : '#F59E0B',
-            borderWidth: 1.5,
-          }}
+        <CircularProgressGauge
+          score={kitchenReadinessScore.score}
+          maxScore={100}
+          grade={kitchenReadinessScore.grade}
+          label="Kesiapan & Kepatuhan Dapur MBG Hari Ini"
           onPress={() => setShowReadinessModal(true)}
-        >
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: isDark ? 'rgba(245,158,11,0.2)' : '#FEF3C7', alignItems: 'center', justifyContent: 'center' }}>
-                <Feather name="shield" size={14} color="#D97706" />
-              </View>
-              <Text style={{ fontSize: 11, fontWeight: '900', color: colors.text, letterSpacing: 0.6 }}>
-                SPPG KITCHEN READINESS INDEX
-              </Text>
-            </View>
-            <Pill label={kitchenReadinessScore.grade} tone="success" />
-          </View>
-
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 2 }}>
-            <View>
-              <Text style={{ fontSize: 11, color: colors.textMuted }}>Skor Kesiapan & Mutu Dapur Hari Ini</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4, marginTop: 1 }}>
-                <Text style={{ fontSize: 32, fontWeight: '900', color: colors.success }}>
-                  {kitchenReadinessScore.score}
-                </Text>
-                <Text style={{ fontSize: 14, fontWeight: '800', color: colors.textMuted }}>/ 100</Text>
-              </View>
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 4,
-                paddingHorizontal: 10,
-                paddingVertical: 6,
-                borderRadius: radius.pill,
-                backgroundColor: isDark ? 'rgba(245,158,11,0.15)' : '#FEF3C7',
-                borderWidth: 1,
-                borderColor: '#F59E0B',
-              }}
-            >
-              <Text style={{ fontSize: 10.5, fontWeight: '800', color: isDark ? '#FBBF24' : '#B45309' }}>
-                Lihat Analisis Skor
-              </Text>
-              <Feather name="chevron-right" size={12} color={isDark ? '#FBBF24' : '#B45309'} />
-            </View>
-          </View>
-
-          {/* Subscores Strip */}
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : colors.background,
-              borderRadius: radius.md,
-              padding: 10,
-              marginTop: 2,
-              borderWidth: 1,
-              borderColor: colors.border,
-            }}
-          >
-            <View style={{ alignItems: 'center' }}>
-              <Text style={{ fontSize: 10, color: colors.textMuted }}>Presensi</Text>
-              <Text style={{ fontSize: 12, fontWeight: '900', color: colors.text }}>
-                {kitchenReadinessScore.subScores.presensiTim}%
-              </Text>
-            </View>
-            <View style={{ alignItems: 'center' }}>
-              <Text style={{ fontSize: 10, color: colors.textMuted }}>SOP Masak</Text>
-              <Text style={{ fontSize: 12, fontWeight: '900', color: colors.text }}>
-                {kitchenReadinessScore.subScores.produksiSop}%
-              </Text>
-            </View>
-            <View style={{ alignItems: 'center' }}>
-              <Text style={{ fontSize: 10, color: colors.textMuted }}>Food Safety</Text>
-              <Text style={{ fontSize: 12, fontWeight: '900', color: colors.success }}>
-                {kitchenReadinessScore.subScores.foodSafety}%
-              </Text>
-            </View>
-            <View style={{ alignItems: 'center' }}>
-              <Text style={{ fontSize: 10, color: colors.textMuted }}>Distribusi</Text>
-              <Text style={{ fontSize: 12, fontWeight: '900', color: colors.text }}>
-                {kitchenReadinessScore.subScores.distribusiArmada}%
-              </Text>
-            </View>
-            <View style={{ alignItems: 'center' }}>
-              <Text style={{ fontSize: 10, color: colors.textMuted }}>Sanitasi</Text>
-              <Text style={{ fontSize: 12, fontWeight: '900', color: colors.text }}>
-                {kitchenReadinessScore.subScores.sanitasiHigiene}%
-              </Text>
-            </View>
-          </View>
-        </Card>
+          subScores={[
+            { label: 'Presensi', score: kitchenReadinessScore.subScores.presensiTim },
+            { label: 'SOP Masak', score: kitchenReadinessScore.subScores.produksiSop },
+            { label: 'Food Safety', score: kitchenReadinessScore.subScores.foodSafety },
+            { label: 'Distribusi', score: kitchenReadinessScore.subScores.distribusiArmada },
+            { label: 'Sanitasi', score: kitchenReadinessScore.subScores.sanitasiHigiene },
+          ]}
+        />
       )}
 
       {/* 2.55 EXECUTIVE STATISTIK & REKAP BERKALA (Khusus Kepala SPPG) */}
@@ -1791,8 +1722,7 @@ export default function DashboardScreen({ navigation }: any) {
         <Card
           style={{
             backgroundColor: isDark ? 'rgba(59,130,246,0.08)' : '#F0F9FF',
-            borderColor: colors.primary,
-            borderWidth: 1.2,
+            borderWidth: 0,
             borderRadius: radius.xl,
             gap: 10,
           }}
@@ -2143,29 +2073,72 @@ export default function DashboardScreen({ navigation }: any) {
       <SectionTitle style={{ marginTop: spacing.sm }}>Quick Menu</SectionTitle>
       <QuickActionGrid items={quickActions} />
 
-      {/* 5. Executive Metrics Grid — Horizontal Scrollable */}
+      {/* 5. Executive Bento Grid — Status Kinerja Dinamis */}
       <SectionTitle
         action={
-          <Text style={{ color: colors.textMuted, fontSize: 10.5, fontWeight: '700' }}>
-            Sesuai peran {ROLE_LABEL[role as keyof typeof ROLE_LABEL] ?? role}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.success }} />
+            <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: '700' }}>
+              Monitoring Real-Time
+            </Text>
+          </View>
         }
       >
-        Ringkasan Status Cepat
+        Status Kinerja Operasional
       </SectionTitle>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingBottom: 4 }}>
+
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
         {statusCards.map((c) => (
-          <View key={c.key} style={{ width: 136 }}>
-            <KpiCard
-              label={c.label}
-              value={c.value}
-              tone={c.ok ? colors.success : colors.warning}
-              icon={c.icon}
-              onPress={c.onPress}
-            />
-          </View>
+          <Pressable
+            key={c.key}
+            onPress={c.onPress}
+            style={({ pressed }) => [
+              styles.simpleStatusCard,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+                borderRadius: radius.xl,
+              },
+              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+            ]}
+          >
+            <View style={styles.simpleStatusTopRow}>
+              <View
+                style={[
+                  styles.simpleStatusIconWrap,
+                  {
+                    backgroundColor: c.ok
+                      ? (isDark ? 'rgba(13,148,136,0.15)' : '#F0FDF4')
+                      : (isDark ? 'rgba(217,119,6,0.15)' : '#FFFBEB'),
+                  },
+                ]}
+              >
+                <Feather
+                  name={c.icon}
+                  size={17}
+                  color={c.ok ? colors.success : colors.warning}
+                  strokeWidth={iconStrokeWidth}
+                />
+              </View>
+              <View
+                style={[
+                  styles.simpleStatusDot,
+                  { backgroundColor: c.ok ? colors.success : colors.warning },
+                ]}
+              />
+            </View>
+
+            <View style={{ gap: 2, marginTop: 8 }}>
+              <Text style={{ fontSize: 18, fontWeight: '900', color: colors.text }}>
+                {c.value}
+              </Text>
+              <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: '600' }} numberOfLines={1}>
+                {c.label}
+              </Text>
+            </View>
+          </Pressable>
         ))}
-      </ScrollView>
+      </View>
 
       {/* 6. Daftar Sekolah Bina SPPG */}
       {!!role && ROLE_PERMISSIONS[role].canManageStaff && sekolahBina.length > 0 && (
@@ -2201,7 +2174,10 @@ export default function DashboardScreen({ navigation }: any) {
                   <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>
                     Target: {sch.jumlahSiswa.toLocaleString('id-ID')} siswa • {sch.alamat}
                   </Text>
-                  <Text style={{ fontSize: 10, color: colors.primary, fontWeight: '700' }}>Lihat Detail Pengiriman ➔</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 }}>
+                    <Text style={{ fontSize: 10.5, color: colors.primary, fontWeight: '800' }}>Lihat Detail Pengiriman</Text>
+                    <Feather name="chevron-right" size={12} color={colors.primary} />
+                  </View>
                 </View>
                 <Feather name="chevron-right" size={18} color={colors.textMuted} />
               </View>
@@ -2342,6 +2318,30 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 480,
     padding: 18,
+  },
+  // Minimal & Clean Status Cards
+  simpleStatusCard: {
+    width: '48.5%',
+    padding: 14,
+    borderWidth: 1.2,
+    justifyContent: 'space-between',
+  },
+  simpleStatusTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  simpleStatusIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  simpleStatusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
 });
 

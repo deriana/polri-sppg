@@ -1252,6 +1252,174 @@ const styles = StyleSheet.create({
   syncBannerSub: {
     marginTop: 1,
   },
+  rowBetween: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  // Modern Bento & Gauge Styles
+  bentoCardContainer: {
+    overflow: 'hidden',
+  },
+  bentoHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  bentoIconBadge: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sparklineContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 4,
+    width: '100%',
+    marginTop: 4,
+  },
+  sparklineCol: {
+    flex: 1,
+    height: '100%',
+    justifyContent: 'flex-end',
+  },
+  sparklineBar: {
+    width: '100%',
+    borderRadius: 3,
+  },
+  gaugeContainer: {
+    borderWidth: 1.5,
+    gap: 12,
+  },
+  gaugeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  gaugeShieldIcon: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gaugeCenterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  ringContainer: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  ringFill: {
+    position: 'absolute',
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 6,
+  },
+  ringCenterText: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gaugeSubGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingTop: 10,
+    borderTopWidth: 1,
+  },
+  gaugeSubItem: {
+    alignItems: 'center',
+    gap: 2,
+  },
+  timelineContainer: {
+    gap: 0,
+  },
+  timelineStepRow: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    gap: 12,
+    marginBottom: 8,
+  },
+  timelineNodeCol: {
+    alignItems: 'center',
+    width: 32,
+  },
+  timelineNode: {
+    width: 28,
+    height: 28,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
+  },
+  timelineLine: {
+    width: 2,
+    flex: 1,
+    marginVertical: 2,
+  },
+  timelineCard: {
+    flex: 1,
+    padding: 10,
+    borderWidth: 1,
+    gap: 2,
+  },
+  sheetOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+  },
+  sheetScrim: {
+    flex: 1,
+  },
+  sheetContainer: {
+    width: '100%',
+    paddingBottom: 24,
+    borderTopWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  sheetHandleWrap: {
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  sheetHandleBar: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+  },
+  sheetHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+  },
+  sheetCloseBtn: {
+    padding: 4,
+  },
+  carouselCard: {
+    width: 280,
+    padding: 14,
+    gap: 8,
+    marginRight: 10,
+  },
+  carouselInfoRow: {
+    flexDirection: 'row',
+    padding: 8,
+    gap: 8,
+  },
+  carouselInfoCol: {
+    flex: 1,
+    gap: 1,
+  },
 });
 
 // ==========================================
@@ -1389,5 +1557,624 @@ export function DropdownPicker({
         </View>
       </RNModal>
     </View>
+  );
+}
+
+// ==========================================
+// 1. BENTO CARD (Modern Modular Bento Container)
+// ==========================================
+export interface BentoCardProps {
+  title?: string;
+  badge?: string;
+  badgeTone?: 'primary' | 'success' | 'warning' | 'danger' | 'info';
+  icon?: keyof typeof Feather.glyphMap;
+  iconColor?: string;
+  value?: string | number;
+  subtitle?: string;
+  trend?: string;
+  trendPositive?: boolean;
+  sparklineData?: number[];
+  children?: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
+  onPress?: () => void;
+  variant?: 'default' | 'accent' | 'glass' | 'highlight';
+}
+
+export function BentoCard({
+  title,
+  badge,
+  badgeTone = 'primary',
+  icon,
+  iconColor,
+  value,
+  subtitle,
+  trend,
+  trendPositive,
+  sparklineData,
+  children,
+  style,
+  onPress,
+  variant = 'default',
+}: BentoCardProps) {
+  const { colors, isDark, radius, spacing, fontSize, iconStrokeWidth, shadow } = useTheme();
+
+  const getVariantStyles = (): ViewStyle => {
+    switch (variant) {
+      case 'accent':
+        return {
+          backgroundColor: isDark ? 'rgba(245, 158, 11, 0.08)' : '#FFFBEB',
+          borderColor: isDark ? 'rgba(245, 158, 11, 0.3)' : '#FDE68A',
+        };
+      case 'glass':
+        return {
+          backgroundColor: isDark ? 'rgba(11, 30, 56, 0.75)' : 'rgba(255, 255, 255, 0.85)',
+          borderColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(15, 23, 42, 0.08)',
+        };
+      case 'highlight':
+        return {
+          backgroundColor: isDark ? 'rgba(13, 148, 136, 0.08)' : '#F0FDF4',
+          borderColor: isDark ? 'rgba(13, 148, 136, 0.3)' : '#BBF7D0',
+        };
+      default:
+        return {
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+        };
+    }
+  };
+
+  const Content = (
+    <View
+      style={[
+        styles.bentoCardContainer,
+        {
+          borderRadius: radius.xl,
+          borderWidth: 1.2,
+          padding: spacing.md,
+          gap: spacing.sm,
+          ...shadow.card,
+        },
+        getVariantStyles(),
+        style,
+      ]}
+    >
+      {(icon || badge) && (
+        <View style={styles.bentoHeaderRow}>
+          {icon ? (
+            <View
+              style={[
+                styles.bentoIconBadge,
+                {
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : colors.primaryLight,
+                  borderRadius: radius.md,
+                },
+              ]}
+            >
+              <Feather
+                name={icon}
+                size={15}
+                color={iconColor || (isDark ? colors.gold : colors.primary)}
+                strokeWidth={iconStrokeWidth}
+              />
+            </View>
+          ) : (
+            <View />
+          )}
+          {badge && (
+            <Pill
+              label={badge}
+              tone={badgeTone}
+              style={{ paddingHorizontal: 7, paddingVertical: 2 }}
+            />
+          )}
+        </View>
+      )}
+
+      {title && (
+        <Text
+          style={{
+            fontSize: 10.5,
+            fontWeight: '800',
+            color: colors.textMuted,
+            letterSpacing: 0.3,
+            textTransform: 'uppercase',
+            marginTop: 1,
+          }}
+          numberOfLines={1}
+        >
+          {title}
+        </Text>
+      )}
+
+      {(value !== undefined || subtitle || trend) && (
+        <View style={{ gap: 2 }}>
+          {value !== undefined && (
+            <Text style={{ fontSize: 24, fontWeight: '900', color: colors.text, letterSpacing: -0.5 }}>
+              {value}
+            </Text>
+          )}
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            {subtitle && (
+              <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: '500' }}>
+                {subtitle}
+              </Text>
+            )}
+            {trend && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                <Feather
+                  name={trendPositive ? 'trending-up' : 'trending-down'}
+                  size={12}
+                  color={trendPositive ? colors.success : colors.danger}
+                />
+                <Text
+                  style={{
+                    fontSize: 10.5,
+                    fontWeight: '800',
+                    color: trendPositive ? colors.success : colors.danger,
+                  }}
+                >
+                  {trend}
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
+      )}
+
+      {sparklineData && sparklineData.length > 0 && (
+        <Sparkline data={sparklineData} color={trendPositive === false ? colors.danger : colors.primary} />
+      )}
+
+      {children}
+    </View>
+  );
+
+  if (onPress) {
+    return (
+      <Pressable onPress={onPress} style={({ pressed }) => [pressed && { opacity: 0.9, transform: [{ scale: 0.985 }] }]}>
+        {Content}
+      </Pressable>
+    );
+  }
+
+  return Content;
+}
+
+// ==========================================
+// 2. SPARKLINE (Compact 7-Bar Trend Visualization)
+// ==========================================
+export interface SparklineProps {
+  data: number[];
+  color?: string;
+  height?: number;
+}
+
+export function Sparkline({ data, color, height = 24 }: SparklineProps) {
+  const { colors } = useTheme();
+  const barColor = color || colors.primary;
+  const max = Math.max(...data, 1);
+  const min = Math.min(...data, 0);
+  const range = max - min || 1;
+
+  return (
+    <View style={[styles.sparklineContainer, { height }]}>
+      {data.map((val, idx) => {
+        const heightPct = Math.max(15, Math.round(((val - min) / range) * 100));
+        return (
+          <View key={idx} style={styles.sparklineCol}>
+            <View
+              style={[
+                styles.sparklineBar,
+                {
+                  height: `${heightPct}%`,
+                  backgroundColor: barColor,
+                  opacity: idx === data.length - 1 ? 1 : 0.45 + (idx / data.length) * 0.45,
+                },
+              ]}
+            />
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+// ==========================================
+// 3. CIRCULAR PROGRESS GAUGE (Bento Multi-Metric)
+// ==========================================
+export interface CircularProgressGaugeProps {
+  score: number;
+  maxScore?: number;
+  grade?: string;
+  label?: string;
+  subScores?: Array<{ label: string; score: number; max?: number; icon?: keyof typeof Feather.glyphMap }>;
+  onPress?: () => void;
+}
+
+export function CircularProgressGauge({
+  score,
+  maxScore = 100,
+  grade = 'Grade A+',
+  label = 'Kesiapan & Kepatuhan Dapur',
+  subScores = [],
+  onPress,
+}: CircularProgressGaugeProps) {
+  const { colors, isDark, radius, spacing, fontSize } = useTheme();
+  const pct = Math.min(100, Math.round((score / maxScore) * 100));
+
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={!onPress}
+      style={({ pressed }) => [
+        styles.gaugeContainer,
+        {
+          backgroundColor: isDark ? 'rgba(11, 30, 56, 0.85)' : '#FFFFFF',
+          borderColor: isDark ? 'rgba(245, 158, 11, 0.4)' : '#FDE68A',
+          borderRadius: radius.xl,
+          padding: spacing.md,
+        },
+        pressed && { opacity: 0.9 },
+      ]}
+    >
+      <View style={styles.gaugeHeader}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <View style={[styles.gaugeShieldIcon, { backgroundColor: isDark ? 'rgba(245,158,11,0.2)' : '#FEF3C7' }]}>
+            <Feather name="shield" size={14} color="#D97706" />
+          </View>
+          <Text style={{ fontSize: 11, fontWeight: '900', color: colors.text, letterSpacing: 0.6 }}>
+            SPPG KITCHEN READINESS INDEX
+          </Text>
+        </View>
+        <Pill label={grade} tone="success" />
+      </View>
+
+      <View style={styles.gaugeCenterRow}>
+        {/* Visual Progress Arc Ring Simulation */}
+        <View style={[styles.ringContainer, { borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0' }]}>
+          <View
+            style={[
+              styles.ringFill,
+              {
+                borderColor: pct >= 85 ? colors.success : pct >= 70 ? colors.warning : colors.danger,
+                borderTopColor: 'transparent',
+                borderLeftColor: 'transparent',
+                transform: [{ rotate: `${(pct / 100) * 360}deg` }],
+              },
+            ]}
+          />
+          <View style={styles.ringCenterText}>
+            <Text style={{ fontSize: 26, fontWeight: '900', color: colors.text }}>{score}</Text>
+            <Text style={{ fontSize: 9.5, fontWeight: '800', color: colors.textMuted }}>/ {maxScore}</Text>
+          </View>
+        </View>
+
+        <View style={{ flex: 1, gap: 4 }}>
+          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>{label}</Text>
+          <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
+            Terverifikasi IoT suhu, SOP masak 5 tahap, dan inspeksi HACCP aktif.
+          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
+            <Feather name="check-circle" size={12} color={colors.success} />
+            <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.success }}>
+              {pct}% Target Kesiapan Optimal
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {subScores.length > 0 && (
+        <View style={[styles.gaugeSubGrid, { borderTopColor: colors.border }]}>
+          {subScores.map((sub, idx) => (
+            <View key={idx} style={styles.gaugeSubItem}>
+              <Text style={{ fontSize: 10, color: colors.textMuted, fontWeight: '600' }} numberOfLines={1}>
+                {sub.label}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 13,
+                  fontWeight: '900',
+                  color: sub.score >= 85 ? colors.success : colors.text,
+                }}
+              >
+                {sub.score}%
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
+    </Pressable>
+  );
+}
+
+// ==========================================
+// 4. TACTICAL TIMELINE (5-Stage Visual Stepper)
+// ==========================================
+export interface TacticalTimelineStep {
+  id: string;
+  title: string;
+  subtitle?: string;
+  status: 'selesai' | 'proses' | 'menunggu';
+  time?: string;
+  icon: keyof typeof Feather.glyphMap;
+}
+
+export interface TacticalTimelineProps {
+  steps: TacticalTimelineStep[];
+  onStepPress?: (step: TacticalTimelineStep) => void;
+}
+
+export function TacticalTimeline({ steps, onStepPress }: TacticalTimelineProps) {
+  const { colors, radius, spacing, fontSize, iconStrokeWidth, isDark } = useTheme();
+
+  return (
+    <View style={styles.timelineContainer}>
+      {steps.map((step, idx) => {
+        const isCompleted = step.status === 'selesai';
+        const isCurrent = step.status === 'proses';
+        const isLast = idx === steps.length - 1;
+
+        return (
+          <Pressable
+            key={step.id}
+            disabled={!onStepPress}
+            onPress={() => onStepPress && onStepPress(step)}
+            style={styles.timelineStepRow}
+          >
+            {/* Left Node & Line */}
+            <View style={styles.timelineNodeCol}>
+              <View
+                style={[
+                  styles.timelineNode,
+                  {
+                    backgroundColor: isCompleted ? colors.success : isCurrent ? colors.primary : colors.background,
+                    borderColor: isCompleted ? colors.success : isCurrent ? colors.primary : colors.border,
+                    borderRadius: 16,
+                  },
+                ]}
+              >
+                <Feather
+                  name={isCompleted ? 'check' : step.icon}
+                  size={13}
+                  color={isCompleted || isCurrent ? '#FFFFFF' : colors.textMuted}
+                  strokeWidth={iconStrokeWidth}
+                />
+              </View>
+              {!isLast && (
+                <View
+                  style={[
+                    styles.timelineLine,
+                    {
+                      backgroundColor: isCompleted ? colors.success : colors.border,
+                    },
+                  ]}
+                />
+              )}
+            </View>
+
+            {/* Right Details Card */}
+            <View
+              style={[
+                styles.timelineCard,
+                {
+                  backgroundColor: isCurrent
+                    ? isDark
+                      ? 'rgba(11, 34, 64, 0.6)'
+                      : colors.primaryLight
+                    : colors.surface,
+                  borderColor: isCurrent ? colors.primary : colors.border,
+                  borderRadius: radius.md,
+                },
+              ]}
+            >
+              <View style={styles.rowBetween}>
+                <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text, flex: 1 }}>
+                  {step.title}
+                </Text>
+                {step.time && (
+                  <Text style={{ fontSize: 10, color: colors.textMuted, fontWeight: '700' }}>
+                    {step.time}
+                  </Text>
+                )}
+              </View>
+              {step.subtitle && (
+                <Text style={{ fontSize: 11, color: colors.textMuted, marginTop: 1 }}>
+                  {step.subtitle}
+                </Text>
+              )}
+              <View style={{ marginTop: 4 }}>
+                <Pill
+                  label={isCompleted ? 'Selesai' : isCurrent ? 'Sedang Berlangsung' : 'Menunggu Jadwal'}
+                  tone={isCompleted ? 'success' : isCurrent ? 'primary' : 'info'}
+                />
+              </View>
+            </View>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+// ==========================================
+// 5. BOTTOM SHEET MODAL (Modern Tactical Sheet)
+// ==========================================
+export interface BottomSheetModalProps {
+  visible: boolean;
+  onClose: () => void;
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+  maxHeight?: number;
+}
+
+export function BottomSheetModal({
+  visible,
+  onClose,
+  title,
+  subtitle,
+  children,
+  maxHeight = 560,
+}: BottomSheetModalProps) {
+  const { colors, radius, spacing, fontSize, iconStrokeWidth } = useTheme();
+
+  return (
+    <RNModal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={styles.sheetOverlay}>
+        <Pressable style={styles.sheetScrim} onPress={onClose} />
+        <View
+          style={[
+            styles.sheetContainer,
+            {
+              backgroundColor: colors.surface,
+              borderTopLeftRadius: radius.xl,
+              borderTopRightRadius: radius.xl,
+              maxHeight,
+            },
+          ]}
+        >
+          <View style={styles.sheetHandleWrap}>
+            <View style={[styles.sheetHandleBar, { backgroundColor: colors.border }]} />
+          </View>
+
+          <View style={[styles.sheetHeader, { borderBottomColor: colors.border }]}>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text style={{ fontSize: fontSize.md, fontWeight: '900', color: colors.text }}>
+                {title}
+              </Text>
+              {subtitle && (
+                <Text style={{ fontSize: 11, color: colors.textMuted }}>{subtitle}</Text>
+              )}
+            </View>
+            <Pressable onPress={onClose} hitSlop={10} style={styles.sheetCloseBtn}>
+              <Feather name="x" size={20} color={colors.text} strokeWidth={iconStrokeWidth} />
+            </Pressable>
+          </View>
+
+          <ScrollView contentContainerStyle={{ padding: spacing.md, gap: spacing.md }}>
+            {children}
+          </ScrollView>
+        </View>
+      </View>
+    </RNModal>
+  );
+}
+
+// ==========================================
+// 6. SCHOOL CAROUSEL CARD (Horizontal Map Slider)
+// ==========================================
+export interface SchoolCarouselCardProps {
+  nama: string;
+  alamat?: string;
+  siswaCount: number;
+  targetPorsi: number;
+  status: 'persiapan' | 'menunggu' | 'dalam_perjalanan' | 'tiba' | 'kendala';
+  eta?: string;
+  suhuKedatangan?: number;
+  onPress?: () => void;
+  isSelected?: boolean;
+}
+
+export function SchoolCarouselCard({
+  nama,
+  alamat,
+  siswaCount,
+  targetPorsi,
+  status,
+  eta = '10:45 WIB',
+  suhuKedatangan = 64.5,
+  onPress,
+  isSelected,
+}: SchoolCarouselCardProps) {
+  const { colors, radius, spacing, fontSize, iconStrokeWidth, isDark } = useTheme();
+
+  const getStatusTone = () => {
+    switch (status) {
+      case 'tiba':
+        return 'success';
+      case 'dalam_perjalanan':
+        return 'primary';
+      case 'kendala':
+        return 'danger';
+      default:
+        return 'warning';
+    }
+  };
+
+  const getStatusLabel = () => {
+    switch (status) {
+      case 'tiba':
+        return 'Tiba di Sekolah';
+      case 'dalam_perjalanan':
+        return 'Armada Menuju Lokasi';
+      case 'kendala':
+        return 'Kendala Rute';
+      case 'menunggu':
+      case 'persiapan':
+      default:
+        return 'Menunggu Jadwal';
+    }
+  };
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.carouselCard,
+        {
+          backgroundColor: isSelected
+            ? isDark
+              ? 'rgba(11, 34, 64, 0.95)'
+              : '#EFF6FF'
+            : colors.surface,
+          borderColor: isSelected ? colors.primary : colors.border,
+          borderRadius: radius.xl,
+          borderWidth: isSelected ? 2 : 1,
+        },
+        pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+      ]}
+    >
+      <View style={styles.rowBetween}>
+        <View style={{ flex: 1, gap: 1 }}>
+          <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.text }} numberOfLines={1}>
+            {nama}
+          </Text>
+          {alamat && (
+            <Text style={{ fontSize: 10, color: colors.textMuted }} numberOfLines={1}>
+              {alamat}
+            </Text>
+          )}
+        </View>
+        <Pill label={getStatusLabel()} tone={getStatusTone() as any} />
+      </View>
+
+      <View style={[styles.carouselInfoRow, { backgroundColor: colors.background, borderRadius: radius.md }]}>
+        <View style={styles.carouselInfoCol}>
+          <Text style={{ fontSize: 9.5, color: colors.textMuted, fontWeight: '600' }}>Alokasi Porsi</Text>
+          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
+            {targetPorsi} porsi ({siswaCount} anak)
+          </Text>
+        </View>
+        <View style={styles.carouselInfoCol}>
+          <Text style={{ fontSize: 9.5, color: colors.textMuted, fontWeight: '600' }}>Estimasi Tiba</Text>
+          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.primary }}>
+            {eta}
+          </Text>
+        </View>
+      </View>
+
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 2 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <Feather name="thermometer" size={12} color={colors.success} strokeWidth={iconStrokeWidth} />
+          <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.success }}>
+            Suhu Box: {suhuKedatangan}°C
+          </Text>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+          <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.primary }}>Lacak Detail</Text>
+          <Feather name="chevron-right" size={12} color={colors.primary} />
+        </View>
+      </View>
+    </Pressable>
   );
 }

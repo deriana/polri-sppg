@@ -51,7 +51,7 @@ export default function LaporanProduksiListScreen({ navigation }: any) {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { padding: spacing.lg, paddingBottom: 0 }]}>
+      <View style={[styles.header, { paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.sm, gap: 12 }]}>
         <View style={styles.headerRow}>
           <SectionTitle style={{ marginBottom: 0 }}>Laporan Produksi</SectionTitle>
           <PrimaryButton label="Baru" icon="plus" fullWidth={false} onPress={() => navigation.navigate('LaporanForm', {})} />
@@ -71,7 +71,10 @@ export default function LaporanProduksiListScreen({ navigation }: any) {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: 120 }]}>
+      <ScrollView
+        contentContainerStyle={[styles.content, { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: 120, gap: 14 }]}
+        showsVerticalScrollIndicator={false}
+      >
         {filtered.length === 0 ? (
           <EmptyState icon="file-text" title="Belum Ada Laporan" body="Tidak ada laporan produksi pada rentang ini." />
         ) : (
@@ -87,41 +90,130 @@ export default function LaporanProduksiListScreen({ navigation }: any) {
                 ? 'danger'
                 : 'neutral';
 
+            const pctRealisasi = l.targetPorsi > 0 ? Math.min(100, Math.round(((l.realisasiPorsi || l.targetPorsi) / l.targetPorsi) * 100)) : 100;
+            const productionSteps = [
+              { label: 'Persiapan', icon: 'clipboard' as const, isDone: true },
+              { label: 'Masak', icon: 'zap' as const, isDone: true },
+              { label: 'Packing', icon: 'package' as const, isDone: l.realisasiPorsi > 0 },
+              { label: 'QC', icon: 'shield' as const, isDone: l.qcStatus === 'READY' },
+              { label: 'Distribusi', icon: 'truck' as const, isDone: l.status === 'diverifikasi' },
+            ];
+
             return (
-              <Card key={l.id} style={{ gap: spacing.xs }} onPress={() => navigation.navigate('LaporanForm', { laporanId: l.id })}>
+              <Card
+                key={l.id}
+                style={{ gap: spacing.sm, borderWidth: 1.2, borderColor: l.status === 'diverifikasi' ? colors.success : colors.border }}
+                onPress={() => navigation.navigate('LaporanForm', { laporanId: l.id })}
+              >
                 <View style={styles.rowTop}>
                   <View style={{ gap: 2 }}>
-                    <Text style={{ color: colors.text, fontWeight: '800', fontSize: fontSize.sm }}>{l.tanggal}</Text>
-                    <Text style={{ color: colors.primary, fontSize: 10, fontWeight: '700' }}>{batchLabel}</Text>
+                    <Text style={{ color: colors.text, fontWeight: '900', fontSize: fontSize.sm }}>{l.tanggal}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <View style={[styles.batchBadge, { backgroundColor: colors.primaryLight }]}>
+                        <Feather name="hash" size={11} color={colors.primary} />
+                        <Text style={{ color: colors.primary, fontSize: 10.5, fontWeight: '800' }}>{batchLabel}</Text>
+                      </View>
+                    </View>
                   </View>
                   <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
                     {l.qcStatus && <Pill label={`QC: ${l.qcStatus}`} tone={qcTone} />}
                     <Pill label={STATUS_LABEL[l.status]} tone={STATUS_TONE[l.status]} />
                   </View>
                 </View>
-                <Text style={{ color: colors.text, fontWeight: '700', fontSize: fontSize.xs }} numberOfLines={1}>
-                  {l.menu}
-                </Text>
+
+                {/* Nama Paket Menu */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Feather name="layers" size={14} color={colors.primary} />
+                  <Text style={{ color: colors.text, fontWeight: '800', fontSize: fontSize.xs, flex: 1 }} numberOfLines={1}>
+                    {l.menu}
+                  </Text>
+                </View>
+
+                {/* 5-Step Visual Production Pipeline */}
+                <View style={[styles.timelineMiniRow, { backgroundColor: colors.background, borderRadius: radius.md }]}>
+                  {productionSteps.map((st, idx) => (
+                    <React.Fragment key={idx}>
+                      <View style={styles.stepItemMini}>
+                        <View
+                          style={[
+                            styles.stepCircleMini,
+                            {
+                              backgroundColor: st.isDone ? colors.success : colors.surface,
+                              borderColor: st.isDone ? colors.success : colors.border,
+                            },
+                          ]}
+                        >
+                          <Feather
+                            name={st.isDone ? 'check' : st.icon}
+                            size={10}
+                            color={st.isDone ? '#FFFFFF' : colors.textMuted}
+                            strokeWidth={2.4}
+                          />
+                        </View>
+                        <Text
+                          style={{
+                            fontSize: 9,
+                            fontWeight: st.isDone ? '800' : '500',
+                            color: st.isDone ? colors.success : colors.textMuted,
+                            marginTop: 2,
+                          }}
+                        >
+                          {st.label}
+                        </Text>
+                      </View>
+                      {idx < productionSteps.length - 1 && (
+                        <View
+                          style={[
+                            styles.stepConnectorMini,
+                            { backgroundColor: productionSteps[idx + 1].isDone ? colors.success : colors.border },
+                          ]}
+                        />
+                      )}
+                    </React.Fragment>
+                  ))}
+                </View>
+
+                {/* Target vs Realisasi Porsi Progress Bar */}
+                <View style={{ gap: 4 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: '600' }}>
+                      Realisasi: {l.realisasiPorsi || l.targetPorsi} / {l.targetPorsi} porsi
+                    </Text>
+                    <Text style={{ color: colors.success, fontSize: 11, fontWeight: '800' }}>
+                      {pctRealisasi}% Selesai
+                    </Text>
+                  </View>
+                  <View style={{ height: 6, backgroundColor: colors.background, borderRadius: 3, overflow: 'hidden' }}>
+                    <View style={{ width: `${pctRealisasi}%`, height: '100%', backgroundColor: colors.success }} />
+                  </View>
+                </View>
+
                 {(() => {
                   const hpp = resolveHpp(l.menu, masterMenuList, costPerMeal);
                   const porsi = l.realisasiPorsi > 0 ? l.realisasiPorsi : l.targetPorsi;
                   return (
-                    <View style={{ gap: 4 }}>
+                    <View style={{ gap: 4, marginTop: 2 }}>
                       <HppBadge info={hpp} />
                       <Text style={{ color: colors.textMuted, fontSize: 10.5 }}>
-                        Estimasi biaya batch: {formatRp(hpp.nilai * porsi)} untuk {porsi} porsi
+                        Estimasi HPP: {formatRp(hpp.nilai * porsi)} untuk {porsi} porsi • {l.foto.length} foto dapur
                       </Text>
                     </View>
                   );
                 })()}
-                <View style={styles.rowBottom}>
-                  <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>
-                    {l.realisasiPorsi > 0
-                      ? `Hasil Pemorsian: ${l.realisasiPorsi}/${l.targetPorsi} tray (${l.realisasiPorsi >= l.targetPorsi ? '+' + (l.realisasiPorsi - l.targetPorsi) + ' surplus' : (l.realisasiPorsi - l.targetPorsi) + ' defisit'}) • ${l.foto.length} foto`
-                      : `Target Order: ${l.targetPorsi} porsi • Masih proses masak • ${l.foto.length} foto`}
-                  </Text>
-                  <Feather name="chevron-right" size={16} color={colors.textMuted} strokeWidth={iconStrokeWidth} />
+
+                <View style={[styles.rowBottom, { borderTopColor: colors.border, borderTopWidth: 0.5, paddingTop: 6 }]}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <Feather name="camera" size={12} color={colors.textMuted} />
+                    <Text style={{ color: colors.textMuted, fontSize: 11 }}>
+                      {l.foto.length} Foto Dokumentasi Masak
+                    </Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                    <Text style={{ color: colors.primary, fontSize: 11, fontWeight: '800' }}>Buka Form</Text>
+                    <Feather name="chevron-right" size={14} color={colors.primary} strokeWidth={iconStrokeWidth} />
+                  </View>
                 </View>
+
                 {canVerify && l.status === 'terkirim' && (
                   <PrimaryButton
                     label="Verifikasi Laporan"
@@ -149,4 +241,36 @@ const styles = StyleSheet.create({
   content: { gap: 12, paddingBottom: 120 },
   rowTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   rowBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 },
+  batchBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  timelineMiniRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 8,
+    marginVertical: 2,
+  },
+  stepItemMini: {
+    alignItems: 'center',
+    gap: 2,
+  },
+  stepCircleMini: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepConnectorMini: {
+    flex: 1,
+    height: 2,
+    marginHorizontal: 4,
+  },
 });

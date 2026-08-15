@@ -3,7 +3,18 @@ import { Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'r
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { Card, EmptyState, Input, Modal, Pill, PrimaryButton, SecondaryButton, SectionTitle } from '../components/ui';
+import {
+  BentoCard,
+  BottomSheetModal,
+  Card,
+  EmptyState,
+  Input,
+  Modal,
+  Pill,
+  PrimaryButton,
+  SecondaryButton,
+  SectionTitle,
+} from '../components/ui';
 import { useScopedData } from '../hooks';
 import { ROLE_LABEL } from '../utils/scope';
 import { toWhatsAppNumber } from '../utils/contact';
@@ -465,79 +476,83 @@ export default function PresensiScreen({ navigation }: any) {
               const osmMapUrl = `https://static-maps.yandex.ru/1.x/?lang=en-US&ll=${geoLng},${geoLat}&z=16&l=map&size=500,140&pt=${geoLng},${geoLat},pm2rdm`;
 
               return (
-                <Card key={u.id} style={{ gap: spacing.sm }} onPress={() => setSelectedStaff(u)}>
-                  <View style={styles.row}>
-                    {u.fotoProfil ? (
-                      <Image source={{ uri: u.fotoProfil }} style={{ width: 44, height: 44, borderRadius: 22 }} />
+                <Pressable
+                  key={u.id}
+                  onPress={() => setSelectedStaff(u)}
+                  style={({ pressed }) => [
+                    styles.compactStaffCard,
+                    {
+                      backgroundColor: colors.surface,
+                      borderColor: isHadir ? colors.border : colors.borderStrong,
+                      borderRadius: radius.lg,
+                    },
+                    pressed && { opacity: 0.85, transform: [{ scale: 0.99 }] },
+                  ]}
+                >
+                  <View style={styles.compactStaffLeft}>
+                    <View style={styles.compactAvatarWrap}>
+                      {u.fotoProfil ? (
+                        <Image source={{ uri: u.fotoProfil }} style={styles.compactAvatar} />
+                      ) : (
+                        <View style={[styles.compactAvatarPlaceholder, { backgroundColor: colors.primaryLight }]}>
+                          <Feather name="user" size={18} color={colors.primary} strokeWidth={iconStrokeWidth} />
+                        </View>
+                      )}
+                      <View
+                        style={[
+                          styles.compactStatusDot,
+                          { backgroundColor: isHadir ? colors.success : colors.warning },
+                        ]}
+                      />
+                    </View>
+
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text style={[styles.compactStaffName, { color: colors.text, fontSize: fontSize.sm }]} numberOfLines={1}>
+                        {u.nama}
+                      </Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                        <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: '600' }}>
+                          {ROLE_LABEL[u.role] || u.role}
+                        </Text>
+                        <Text style={{ color: colors.textMuted, fontSize: 11 }}>•</Text>
+                        <Text style={{ color: colors.primary, fontSize: 11, fontWeight: '700' }}>
+                          Shift {u.shift ?? 'Pagi'}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  <View style={styles.compactStaffRight}>
+                    {isHadir ? (
+                      <View style={[styles.compactTimeChip, { backgroundColor: isDark ? 'rgba(13,148,136,0.15)' : '#F0FDF4', borderColor: colors.success }]}>
+                        <Feather name="check" size={11} color={colors.success} strokeWidth={2.4} />
+                        <Text style={{ fontSize: 11, fontWeight: '800', color: colors.success }}>
+                          {presensi?.jamMasuk || 'Hadir'}
+                        </Text>
+                      </View>
                     ) : (
-                      <View style={[styles.avatar, { backgroundColor: colors.primaryLight }]}>
-                        <Feather name="user" size={20} color={colors.primary} strokeWidth={iconStrokeWidth} />
+                      <View style={[styles.compactTimeChip, { backgroundColor: isDark ? 'rgba(217,119,6,0.15)' : '#FFFBEB', borderColor: colors.warning }]}>
+                        <Feather name="clock" size={11} color={colors.warning} strokeWidth={2.4} />
+                        <Text style={{ fontSize: 10.5, fontWeight: '700', color: colors.warning }}>
+                          Belum
+                        </Text>
                       </View>
                     )}
-                    <View style={{ flex: 1 }}>
-                      <Text style={[styles.name, { color: colors.text, fontSize: fontSize.sm }]}>{u.nama}</Text>
-                      <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>
-                        {ROLE_LABEL[u.role] || u.role} • Shift {u.shift ?? 'Pagi'}
-                      </Text>
-                    </View>
-                    <Pill label={isHadir ? 'Hadir' : 'Belum Presensi'} tone={isHadir ? 'success' : 'warning'} />
+                    <Feather name="chevron-right" size={16} color={colors.textMuted} />
                   </View>
-
-                  <View style={[styles.timeRow, { borderTopColor: colors.border }]}>
-                    <View style={styles.timeCol}>
-                      <Text style={{ color: colors.textMuted, fontSize: 11 }}>Jam Masuk</Text>
-                      <Text style={{ color: colors.text, fontSize: fontSize.xs, fontWeight: '800' }}>
-                        {presensi?.jamMasuk ? `${presensi.jamMasuk} WIB` : '—'}
-                      </Text>
-                    </View>
-                    <View style={styles.timeCol}>
-                      <Text style={{ color: colors.textMuted, fontSize: 11 }}>Jam Keluar</Text>
-                      <Text style={{ color: colors.text, fontSize: fontSize.xs, fontWeight: '800' }}>
-                        {presensi?.jamKeluar ? `${presensi.jamKeluar} WIB` : '—'}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Geotag Photos & Map */}
-                  {isHadir && (
-                    <View style={{ gap: 6, marginTop: 2 }}>
-                      <View style={{ flexDirection: 'row', gap: 8 }}>
-                        {presensi?.fotoSelfieMasuk && (
-                          <View style={{ flex: 1, gap: 2 }}>
-                            <Image source={{ uri: presensi.fotoSelfieMasuk }} style={{ width: '100%', height: 80, borderRadius: radius.sm }} />
-                            <Text style={{ fontSize: 9.5, color: colors.textMuted, textAlign: 'center' }}>Selfie Masuk ({presensi.jamMasuk})</Text>
-                          </View>
-                        )}
-                        {presensi?.fotoSelfieKeluar && (
-                          <View style={{ flex: 1, gap: 2 }}>
-                            <Image source={{ uri: presensi.fotoSelfieKeluar }} style={{ width: '100%', height: 80, borderRadius: radius.sm }} />
-                            <Text style={{ fontSize: 9.5, color: colors.textMuted, textAlign: 'center' }}>Selfie Keluar ({presensi.jamKeluar})</Text>
-                          </View>
-                        )}
-                      </View>
-                      <Image source={{ uri: osmMapUrl }} style={{ width: '100%', height: 90, borderRadius: radius.sm }} resizeMode="cover" />
-                    </View>
-                  )}
-
-                  <View style={[styles.tapHint, { borderTopColor: colors.border }]}>
-                    <Text style={{ fontSize: 10.5, color: colors.textMuted }}>NIK: {u.nik}</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                      <Text style={{ fontSize: 11, fontWeight: '800', color: colors.primary }}>Rincian Presensi</Text>
-                      <Feather name="chevron-right" size={14} color={colors.primary} />
-                    </View>
-                  </View>
-                </Card>
+                </Pressable>
               );
             })
           )}
         </>
       )}
 
-      {/* Modal Rincian Presensi Staf (Kepala SPPG) */}
-      <Modal
+      {/* Bottom Sheet Rincian Presensi Staf (Kepala SPPG) */}
+      <BottomSheetModal
         visible={!!selectedStaff}
         onClose={() => setSelectedStaff(null)}
-        title={selectedStaff ? `Rincian Presensi — ${selectedStaff.nama}` : ''}
+        title={selectedStaff ? selectedStaff.nama : ''}
+        subtitle={selectedStaff ? `${ROLE_LABEL[selectedStaff.role] || selectedStaff.role} • NIK ${selectedStaff.nik}` : undefined}
       >
         {selectedStaff && (() => {
           const p = presensiInScope.find((item) => item.userId === selectedStaff.id && item.tanggal === today);
@@ -652,7 +667,7 @@ export default function PresensiScreen({ navigation }: any) {
             </ScrollView>
           );
         })()}
-      </Modal>
+      </BottomSheetModal>
     </ScrollView>
   );
 }
@@ -682,4 +697,63 @@ const styles = StyleSheet.create({
   timeCol: { flex: 1, gap: 2 },
   tapHint: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, paddingTop: 8 },
   detailHero: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12 },
+  // Modern Compact Staff Card Styles
+  compactStaffCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 12,
+    borderWidth: 1,
+    gap: 10,
+  },
+  compactStaffLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  compactAvatarWrap: {
+    position: 'relative',
+    width: 42,
+    height: 42,
+  },
+  compactAvatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+  },
+  compactAvatarPlaceholder: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  compactStatusDot: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 11,
+    height: 11,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  compactStaffName: {
+    fontWeight: '800',
+  },
+  compactStaffRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  compactTimeChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
 });
