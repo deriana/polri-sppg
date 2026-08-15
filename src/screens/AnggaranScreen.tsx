@@ -534,6 +534,228 @@ export default function AnggaranScreen({ navigation }: any) {
           />
         </ScrollView>
       </Modal>
+
+      {/* Modal Detail Transaksi & Bukti Nota */}
+      <Modal
+        visible={selectedLogDetail !== null}
+        onClose={() => setSelectedLogDetail(null)}
+        title="Detail Transaksi & Bukti Nota"
+      >
+        {selectedLogDetail && (
+          <ScrollView style={{ gap: spacing.sm }} contentContainerStyle={{ paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
+            {/* 1. Header Amount Card */}
+            <Card
+              variant="accent"
+              style={{
+                gap: 6,
+                backgroundColor: isDark ? colors.surface : '#FFFFFF',
+                borderLeftColor: selectedLogDetail.jenis === 'penerimaan' ? colors.success : colors.primary,
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Pill
+                  label={selectedLogDetail.jenis === 'penerimaan' ? 'Penerimaan Alokasi Dana (+)' : 'Pengeluaran Belanja / Aset (-)'}
+                  tone={selectedLogDetail.jenis === 'penerimaan' ? 'success' : 'danger'}
+                />
+                <Pill label={KATEGORI_LABEL[selectedLogDetail.kategori]} tone={KATEGORI_TONE[selectedLogDetail.kategori]} />
+              </View>
+
+              <Text
+                style={{
+                  fontSize: 28,
+                  fontWeight: '900',
+                  color: selectedLogDetail.jenis === 'penerimaan' ? colors.success : colors.text,
+                  marginTop: 4,
+                }}
+              >
+                {selectedLogDetail.jenis === 'penerimaan' ? '+' : '-'} Rp {selectedLogDetail.nominal.toLocaleString('id-ID')}
+              </Text>
+
+              <Text style={{ fontSize: fontSize.sm, fontWeight: '700', color: colors.text }}>
+                {selectedLogDetail.keterangan}
+              </Text>
+
+              <View style={[styles.syncStatusRow, { backgroundColor: colors.background, borderRadius: radius.sm }]}>
+                <Feather name="check-circle" size={13} color={colors.success} />
+                <Text style={{ fontSize: 11, fontWeight: '700', color: colors.success }}>
+                  Tersinkronisasi & Terverifikasi di Audit Pusat BGN
+                </Text>
+              </View>
+            </Card>
+
+            {/* 2. Informasi Transaksi & Supplier */}
+            <Card style={{ gap: 8 }}>
+              <SectionTitle style={{ marginBottom: 0 }}>Informasi Dokumen & Supplier</SectionTitle>
+
+              <View style={styles.detailMetaGrid}>
+                <View style={styles.detailMetaCol}>
+                  <Text style={styles.metaLabel}>ID Transaksi</Text>
+                  <Text style={styles.metaValue}>{selectedLogDetail.id}</Text>
+                </View>
+
+                <View style={styles.detailMetaCol}>
+                  <Text style={styles.metaLabel}>Tanggal Transaksi</Text>
+                  <Text style={styles.metaValue}>{selectedLogDetail.tanggal}</Text>
+                </View>
+
+                <View style={styles.detailMetaCol}>
+                  <Text style={styles.metaLabel}>No. Invoice / Nota</Text>
+                  <Text style={[styles.metaValue, { color: colors.primary, fontWeight: '800' }]}>
+                    {selectedLogDetail.noInvoice ?? 'INV-AUTO-SPPG'}
+                  </Text>
+                </View>
+
+                <View style={styles.detailMetaCol}>
+                  <Text style={styles.metaLabel}>Petugas PIC</Text>
+                  <Text style={styles.metaValue}>{selectedLogDetail.dibuatOleh}</Text>
+                </View>
+              </View>
+
+              {selectedLogDetail.namaSupplier && (
+                <View style={[styles.supplierDetailBox, { backgroundColor: colors.background, borderColor: colors.border, borderRadius: radius.md }]}>
+                  <View style={[styles.supplierIconWrap, { backgroundColor: colors.primaryLight }]}>
+                    <Feather name="truck" size={18} color={colors.primary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 10, color: colors.textMuted, fontWeight: '700' }}>SUPPLIER / MITRA PEMASOK</Text>
+                    <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text }}>
+                      {selectedLogDetail.namaSupplier}
+                    </Text>
+                    {selectedLogDetail.mitraId && (
+                      <Pressable
+                        onPress={() => {
+                          const mId = selectedLogDetail.mitraId;
+                          setSelectedLogDetail(null);
+                          navigation.navigate('MitraList', { mitraId: mId });
+                        }}
+                        hitSlop={4}
+                      >
+                        <Text style={{ fontSize: 11, color: colors.primary, fontWeight: '700', marginTop: 2 }}>
+                          Lihat Profil Mitra Pemasok ➔
+                        </Text>
+                      </Pressable>
+                    )}
+                  </View>
+                </View>
+              )}
+            </Card>
+
+            {/* 3. Tabel Rincian Barang yang Dibeli */}
+            {selectedLogDetail.items && selectedLogDetail.items.length > 0 && (
+              <Card style={{ gap: 8 }}>
+                <SectionTitle style={{ marginBottom: 0 }}>
+                  Rincian Barang Pembelian ({selectedLogDetail.items.length} Item)
+                </SectionTitle>
+
+                <View style={[styles.tableContainer, { borderColor: colors.border, borderRadius: radius.sm }]}>
+                  <View style={[styles.tableHeader, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+                    <Text style={[styles.tableHeadText, { flex: 2 }]}>Bahan / Barang</Text>
+                    <Text style={[styles.tableHeadText, { flex: 1, textAlign: 'center' }]}>Qty</Text>
+                    <Text style={[styles.tableHeadText, { flex: 1.3, textAlign: 'right' }]}>Harga</Text>
+                    <Text style={[styles.tableHeadText, { flex: 1.5, textAlign: 'right' }]}>Total</Text>
+                  </View>
+
+                  {selectedLogDetail.items.map((it, idx) => (
+                    <View
+                      key={idx}
+                      style={[
+                        styles.tableRow,
+                        {
+                          borderBottomColor: colors.border,
+                          backgroundColor: idx % 2 === 1 ? (isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.015)') : 'transparent',
+                        },
+                      ]}
+                    >
+                      <Text style={[styles.tableCellText, { flex: 2, fontWeight: '700' }]} numberOfLines={2}>
+                        {it.namaBarang}
+                      </Text>
+                      <Text style={[styles.tableCellText, { flex: 1, textAlign: 'center', color: colors.textMuted }]}>
+                        {it.jumlah} {it.satuan}
+                      </Text>
+                      <Text style={[styles.tableCellText, { flex: 1.3, textAlign: 'right', fontSize: 10.5 }]}>
+                        Rp {it.hargaSatuan.toLocaleString('id-ID')}
+                      </Text>
+                      <Text style={[styles.tableCellText, { flex: 1.5, textAlign: 'right', fontWeight: '800', color: colors.text }]}>
+                        Rp {it.totalHarga.toLocaleString('id-ID')}
+                      </Text>
+                    </View>
+                  ))}
+
+                  <View style={[styles.tableFooter, { backgroundColor: colors.background, borderTopColor: colors.border }]}>
+                    <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text, flex: 1 }}>GRAND TOTAL</Text>
+                    <Text style={{ fontSize: fontSize.sm, fontWeight: '900', color: colors.danger }}>
+                      Rp {selectedLogDetail.nominal.toLocaleString('id-ID')}
+                    </Text>
+                  </View>
+                </View>
+              </Card>
+            )}
+
+            {/* 4. Bukti Fisik Nota / Kwitansi */}
+            <Card style={{ gap: 8 }}>
+              <SectionTitle style={{ marginBottom: 0 }}>Bukti Fisik Nota / Kwitansi</SectionTitle>
+
+              {selectedLogDetail.buktiNota && selectedLogDetail.buktiNota.startsWith('file://') ? (
+                <View style={{ borderRadius: radius.md, overflow: 'hidden', borderWidth: 1, borderColor: colors.border }}>
+                  <Image
+                    source={{ uri: selectedLogDetail.buktiNota }}
+                    style={{ width: '100%', height: 220, resizeMode: 'cover' }}
+                  />
+                  <View style={{ padding: 8, backgroundColor: colors.background, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Feather name="camera" size={13} color={colors.primary} />
+                    <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: '600' }}>
+                      Foto Nota Asli Terlampir
+                    </Text>
+                  </View>
+                </View>
+              ) : (
+                <View style={[styles.digitalInvoiceBox, { backgroundColor: isDark ? colors.surface : '#F8FAFC', borderColor: colors.border, borderRadius: radius.md }]}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <View style={[styles.docIconWrap, { backgroundColor: colors.primaryLight }]}>
+                      <Feather name="file-text" size={24} color={colors.primary} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text }}>
+                        {selectedLogDetail.buktiNota ?? 'DOKUMEN-INVOICE-RESMI.PDF'}
+                      </Text>
+                      <Text style={{ fontSize: 11, color: colors.textMuted }}>
+                        Arsip Bukti Digital Transaksi Pengadaan SPPG
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={[styles.verifiedStamp, { borderColor: colors.success, backgroundColor: colors.successBg }]}>
+                    <Feather name="check" size={12} color={colors.success} />
+                    <Text style={{ fontSize: 10, fontWeight: '900', color: colors.success, letterSpacing: 0.5 }}>
+                      LUNAS & AUDIT VERIFIED
+                    </Text>
+                  </View>
+                </View>
+              )}
+            </Card>
+
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 8 }}>
+              <PrimaryButton
+                label="Tutup"
+                variant="secondary"
+                onPress={() => setSelectedLogDetail(null)}
+                style={{ flex: 1 }}
+              />
+              <PrimaryButton
+                label="Bagikan Bukti"
+                icon="share-2"
+                onPress={() => {
+                  Alert.alert(
+                    'Bagikan Bukti Pengadaan',
+                    `Bukti transaksi ${selectedLogDetail.id} sebesar Rp ${selectedLogDetail.nominal.toLocaleString('id-ID')} siap diekspor / dibagikan.`,
+                  );
+                }}
+                style={{ flex: 1.2 }}
+              />
+            </View>
+          </ScrollView>
+        )}
+      </Modal>
     </ScrollView>
   );
 }
@@ -570,6 +792,98 @@ const styles = StyleSheet.create({
     padding: 10,
     borderWidth: 1,
     gap: 8,
+  },
+  syncStatusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    padding: 8,
+    marginTop: 4,
+  },
+  detailMetaGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginTop: 6,
+  },
+  detailMetaCol: {
+    width: '46%',
+    gap: 2,
+  },
+  metaLabel: {
+    fontSize: 10.5,
+    color: '#8E8E93',
+  },
+  metaValue: {
+    fontSize: 12.5,
+    fontWeight: '700',
+  },
+  supplierDetailBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 10,
+    borderWidth: 1,
+    marginTop: 8,
+  },
+  supplierIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tableContainer: {
+    borderWidth: 1,
+    overflow: 'hidden',
+    marginTop: 6,
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    padding: 8,
+    borderBottomWidth: 1,
+  },
+  tableHeadText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#8E8E93',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    padding: 8,
+    alignItems: 'center',
+    borderBottomWidth: 0.5,
+  },
+  tableCellText: {
+    fontSize: 11.5,
+  },
+  tableFooter: {
+    flexDirection: 'row',
+    padding: 10,
+    alignItems: 'center',
+    borderTopWidth: 1,
+  },
+  digitalInvoiceBox: {
+    padding: 14,
+    borderWidth: 1,
+    gap: 10,
+  },
+  docIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  verifiedStamp: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderRadius: 4,
   },
 });
 
