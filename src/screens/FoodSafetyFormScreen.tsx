@@ -17,7 +17,7 @@ import {
 import { FoodSafetyLog } from '../types';
 import { JENIS_MAKANAN_MASA_SIMPAN } from '../mock/foodSafetyLog';
 import { estimateKadaluarsa } from '../utils/foodSafety';
-import { ROLE_PERMISSIONS } from '../utils/scope';
+import { ROLE_LABEL, ROLE_PERMISSIONS } from '../utils/scope';
 import { addToOfflineQueue } from '../utils/offlineQueue';
 import { pickImage } from '../utils/pickImage';
 
