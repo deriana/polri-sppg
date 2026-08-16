@@ -328,22 +328,96 @@ export default function DashboardScreen({ navigation }: any) {
     return KITCHEN_DAILY_PERFORMANCES[currentSppg?.id || 'SPPG-001'] || KITCHEN_DAILY_PERFORMANCES['SPPG-001'];
   }, [currentSppg?.id]);
 
-  // Bahan baku gudang yang menipis / mencapai ambang batas minimum
+  // 1. Role-based visibility for warehouse stock alerts:
+  // Hanya Petugas Logistik/Gudang, Kepala SPPG, Chef Utama, Ahli Gizi, dan Supervisor
+  const canSeeGudangAlert = useMemo(() => {
+    if (!role) return false;
+    return (
+      role === 'PETUGAS_LOGISTIK' ||
+      role === 'KEPALA_SPPG' ||
+      role === 'CHEF_UTAMA' ||
+      role === 'AHLI_GIZI' ||
+      role === 'SUPERVISOR_POLRES' ||
+      role === 'SUPERVISOR_POLDA'
+    );
+  }, [role]);
+
+  // Bahan baku gudang yang menipis (khusus role terkait rantai pasok pangan)
   const lowStockMaterials = useMemo(() => {
+    if (!canSeeGudangAlert) return [];
     const activeSppgId = currentSppg?.id || 'SPPG-001';
     return bahanBakuList.filter((b) => b.sppgId === activeSppgId && b.stok <= b.ambangMinimum);
-  }, [bahanBakuList, currentSppg?.id]);
+  }, [bahanBakuList, currentSppg?.id, canSeeGudangAlert]);
 
-  // Peralatan dapur yang bermasalah / rusak / perlu servis
+  // 2. Peralatan yang bermasalah (disaring sesuai tupoksi/divisi masing-masing role)
   const problematicEquipment = useMemo(() => {
-    return peralatanInScope.filter(
+    if (!role) return [];
+
+    const broken = peralatanInScope.filter(
       (p) =>
         p.status === 'rusak' ||
         p.status === 'perlu_perbaikan' ||
         p.status === 'maintenance' ||
         p.jumlahBermasalah > 0,
     );
-  }, [peralatanInScope]);
+
+    // Pimpinan & Petugas Logistik mengawasi seluruh unit aset
+    if (
+      role === 'KEPALA_SPPG' ||
+      role === 'PETUGAS_LOGISTIK' ||
+      role === 'SUPERVISOR_POLRES' ||
+      role === 'SUPERVISOR_POLDA'
+    ) {
+      return broken;
+    }
+
+    // Driver hanya melihat alert armada kendaraan
+    if (role === 'DRIVER') {
+      return broken.filter((p) => p.kategori === 'kendaraan');
+    }
+
+    // Pemorsi & Packing hanya melihat alert wadah ompreng, sealing, & thermal container
+    if (role === 'PEMORSI_PACKING') {
+      return broken.filter(
+        (p) =>
+          p.kategori === 'ompreng_tray' ||
+          p.kategori === 'kontainer_suhu' ||
+          p.kategori === 'sealing_packaging',
+      );
+    }
+
+    // Chef Utama hanya melihat alert kompor, alat masak, chiller/penyimpanan, & alat ukur QC
+    if (role === 'CHEF_UTAMA') {
+      return broken.filter(
+        (p) =>
+          p.kategori === 'alat_masak' ||
+          p.kategori === 'penyimpanan' ||
+          p.kategori === 'ukur_qc',
+      );
+    }
+
+    // Petugas Sanitasi hanya melihat alert mesin cuci/dishwasher, sterilisasi, & APD
+    if (role === 'PETUGAS_SANITASI') {
+      return broken.filter(
+        (p) =>
+          p.kategori === 'sterilisasi' ||
+          p.kategori === 'kebersihan_apd' ||
+          p.kategori === 'ompreng_tray',
+      );
+    }
+
+    // Ahli Gizi hanya melihat alat ukur QC & penyimpanan suhu
+    if (role === 'AHLI_GIZI') {
+      return broken.filter(
+        (p) =>
+          p.kategori === 'ukur_qc' ||
+          p.kategori === 'penyimpanan' ||
+          p.kategori === 'kontainer_suhu',
+      );
+    }
+
+    return [];
+  }, [peralatanInScope, role]);
 
   const handleSync = async () => {
     setSyncing(true);
