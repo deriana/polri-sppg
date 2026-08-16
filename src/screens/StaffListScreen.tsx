@@ -16,7 +16,7 @@ function todayDate(): string {
 type StaffDivisionFilter = 'semua' | 'masak' | 'pemorsi' | 'driver' | 'logistik' | 'sanitasi' | 'gizi_inti';
 
 export default function StaffListScreen({ navigation }: any) {
-  const { role, removeStaff, presensiList, currentSppg } = useApp();
+  const { currentUser, role, removeStaff, presensiList, currentSppg } = useApp();
   const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark } = useTheme();
   const { usersInScope } = useScopedData();
   const today = todayDate();
@@ -311,6 +311,7 @@ export default function StaffListScreen({ navigation }: any) {
           const hadirHariIni = presensiHariIni?.status === 'hadir';
           const jobdeskIcon = u.jobdesk ? JOBDESK_ICON[u.jobdesk] : 'user';
           const roleDisplay = ROLE_LABEL[u.role] || 'Staf Operasional';
+          const isMe = currentUser?.id === u.id;
 
           return (
             <Card key={u.id} style={styles.rowCard} onPress={() => setSelectedStaff(u)}>
@@ -326,9 +327,16 @@ export default function StaffListScreen({ navigation }: any) {
                 <View style={{ flex: 1, gap: 3 }}>
                   {/* Name and Chevron */}
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Text style={[styles.name, { color: colors.text, fontSize: fontSize.sm }]} numberOfLines={1}>
-                      {u.nama}
-                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
+                      <Text style={[styles.name, { color: colors.text, fontSize: fontSize.sm }]} numberOfLines={1}>
+                        {u.nama}
+                      </Text>
+                      {isMe && (
+                        <View style={{ backgroundColor: isDark ? 'rgba(59,130,246,0.2)' : '#DBEAFE', paddingHorizontal: 6, paddingVertical: 1, borderRadius: 4 }}>
+                          <Text style={{ fontSize: 9.5, fontWeight: '800', color: colors.primary }}>Akun Anda</Text>
+                        </View>
+                      )}
+                    </View>
                     <Feather name="chevron-right" size={16} color={colors.textMuted} />
                   </View>
 
@@ -358,7 +366,12 @@ export default function StaffListScreen({ navigation }: any) {
 
               {/* Action Buttons: WhatsApp & Remove */}
               <View style={[styles.cardFooter, { borderTopColor: colors.border }]}>
-                {u.noHp ? (
+                {isMe ? (
+                  <View style={[styles.contactBtn, { backgroundColor: isDark ? 'rgba(59,130,246,0.12)' : '#EFF6FF', borderWidth: 1, borderColor: colors.primary }]}>
+                    <Feather name="user-check" size={12} color={colors.primary} />
+                    <Text style={{ fontSize: 11, fontWeight: '800', color: colors.primary }}>Akun Saya ({u.noHp || 'Login'})</Text>
+                  </View>
+                ) : u.noHp ? (
                   <Pressable
                     onPress={() => handleWhatsApp(u.noHp)}
                     style={[styles.contactBtn, { backgroundColor: '#25D366' }]}
@@ -370,7 +383,7 @@ export default function StaffListScreen({ navigation }: any) {
                   <View />
                 )}
 
-                {canManage && (
+                {canManage && !isMe && (
                   <Pressable
                     onPress={() => confirmRemove(u.id, u.nama)}
                     style={{ padding: 6 }}
@@ -400,6 +413,7 @@ export default function StaffListScreen({ navigation }: any) {
               const presensi = presensiList.find((p) => p.userId === selectedStaff.id && p.tanggal === today);
               const isHadir = presensi?.status === 'hadir';
               const jobIcon = selectedStaff.jobdesk ? JOBDESK_ICON[selectedStaff.jobdesk] : 'user';
+              const isStaffMe = currentUser?.id === selectedStaff.id;
 
               return (
                 <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
@@ -412,7 +426,14 @@ export default function StaffListScreen({ navigation }: any) {
                       </View>
                     )}
                     <View style={{ flex: 1, gap: 2 }}>
-                      <Text style={{ fontSize: fontSize.md, fontWeight: '800', color: colors.text }}>{selectedStaff.nama}</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Text style={{ fontSize: fontSize.md, fontWeight: '800', color: colors.text }}>{selectedStaff.nama}</Text>
+                        {isStaffMe && (
+                          <View style={{ backgroundColor: isDark ? 'rgba(59,130,246,0.2)' : '#DBEAFE', paddingHorizontal: 6, paddingVertical: 1, borderRadius: 4 }}>
+                            <Text style={{ fontSize: 9.5, fontWeight: '800', color: colors.primary }}>Akun Anda</Text>
+                          </View>
+                        )}
+                      </View>
                       <Text style={{ fontSize: fontSize.xs, color: colors.primary, fontWeight: '700' }}>
                         {selectedStaff.kategoriPegawai === 'inti_bgn' ? 'Pegawai Inti (ASN / PPPK BGN)' : 'Tenaga Operasional / Relawan Dapur'}
                       </Text>
@@ -451,13 +472,22 @@ export default function StaffListScreen({ navigation }: any) {
                     </View>
                   )}
 
-                  {selectedStaff.noHp && (
+                  {isStaffMe ? (
+                    <PrimaryButton
+                      label="Buka Profil Saya"
+                      icon="user"
+                      onPress={() => {
+                        setSelectedStaff(null);
+                        navigation.navigate('Profile');
+                      }}
+                    />
+                  ) : selectedStaff.noHp ? (
                     <PrimaryButton
                       label="Hubungi via WhatsApp"
                       icon="message-circle"
                       onPress={() => handleWhatsApp(selectedStaff.noHp)}
                     />
-                  )}
+                  ) : null}
 
                   <SecondaryButton label="Tutup" onPress={() => setSelectedStaff(null)} />
                 </View>
