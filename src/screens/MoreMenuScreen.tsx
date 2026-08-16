@@ -38,8 +38,8 @@ export default function MoreMenuScreen({ navigation }: any) {
 
   const sdmItems: MenuItem[] = [];
   if (permissions.canManageStaff) {
-    sdmItems.push({ key: 'Presensi', icon: 'users', label: 'Rekap Presensi Seluruh Staf', desc: 'Pantau rekap & foto selfie hadir seluruh tim SPPG' });
-    sdmItems.push({ key: 'StaffList', icon: 'user-plus', label: 'Data Staf Dapur', desc: 'Kelola 47-52 petugas lapangan & relawan SPPG' });
+    sdmItems.push({ key: 'Presensi', icon: 'user-check', label: 'Rekap Presensi Seluruh Staf', desc: 'Pantau rekap & foto selfie hadir seluruh tim SPPG' });
+    sdmItems.push({ key: 'StaffList', icon: 'users', label: 'Daftar & Data Seluruh Staf SPPG', desc: 'Direktori lengkap 48 staf: Chef, Ahli Gizi, Pemorsi, Driver, Logistik, & Sanitasi' });
     sdmItems.push({ key: 'Payroll', icon: 'credit-card', label: 'Payroll & Slip Gaji Staf', desc: 'Gaji pokok, tunjangan, & slip gaji tiap pegawai' });
     sdmItems.push({ key: 'LogAktivitas', icon: 'activity', label: 'Log Aktivitas & Audit Trail', desc: 'Rekam jejak seluruh aktivitas & forensik sistem SPPG' });
   }

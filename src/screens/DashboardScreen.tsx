@@ -322,6 +322,8 @@ export default function DashboardScreen({ navigation }: any) {
   const [pendingCount, setPendingCount] = usePendingSyncCount();
   const [syncing, setSyncing] = React.useState(false);
   const [showReadinessModal, setShowReadinessModal] = useState(false);
+  const [showPerformanceModal, setShowPerformanceModal] = useState(false);
+  const [selectedPillarKey, setSelectedPillarKey] = useState<string | null>(null);
   const today = todayDate();
 
   const kitchenPerformance = useMemo(() => {
@@ -1777,56 +1779,37 @@ export default function DashboardScreen({ navigation }: any) {
 
       <SyncStatusBadge pendingCount={pendingCount} onSyncPress={handleSync} syncing={syncing} />
 
-      {/* HERO STATUS CARD & 4 METRIC TILES (Guru Style) */}
-      <View style={[styles.guruHeroCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <View style={styles.guruHeroTopRow}>
-          <View style={[styles.guruHeroIconBox, { backgroundColor: colors.successBg }]}>
-            <Feather name="activity" size={20} color={colors.success} />
+      {/* BROADCAST KOMANDO MABES / BGN (Muncul di Semua Tab sebagai Alert Darurat) */}
+      {broadcastInScope.length > 0 && !isBroadcastHidden && (
+        <Card style={{ backgroundColor: colors.surface, borderColor: colors.warning, gap: 8, borderWidth: 1.5 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
+              <Feather name="radio" size={16} color={colors.warning} />
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.warning }}>
+                ARAHAN KOMANDO PUSAT (MABES/BGN)
+              </Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Pill label={broadcastInScope[0].tingkat.toUpperCase()} tone="warning" />
+              <Pressable
+                onPress={() => setIsBroadcastHidden(true)}
+                hitSlop={8}
+                style={{ padding: 4, borderRadius: 12, backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)' }}
+              >
+                <Feather name="x" size={14} color={colors.textMuted} />
+              </Pressable>
+            </View>
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.guruHeroTitle, { color: colors.text }]}>
-              Dapur Operasional Aktif
-            </Text>
-            <Text style={[styles.guruHeroSub, { color: colors.textMuted }]}>
-              Target {targetKapasitas.toLocaleString('id-ID')} Porsi • Rantai Mutu BGN & Presisi Polri
-            </Text>
-          </View>
-          <View style={[styles.guruHeroStatusBadge, { backgroundColor: colors.successBg, borderColor: colors.success }]}>
-            <Text style={[styles.guruHeroStatusBadgeText, { color: colors.success }]}>Normal</Text>
-          </View>
-        </View>
+          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
+            {broadcastInScope[0].judul}
+          </Text>
+          <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
+            {broadcastInScope[0].isi}
+          </Text>
+        </Card>
+      )}
 
-        {/* 4 Metric Tiles */}
-        <View style={styles.guruMetricGrid}>
-          <View style={[styles.guruMetricTile, { backgroundColor: colors.successBg }]}>
-            <Feather name="box" size={15} color={colors.success} />
-            <Text style={[styles.guruMetricVal, { color: colors.success }]}>
-              {progressProduksiRealtime.toLocaleString('id-ID')}/{targetKapasitas.toLocaleString('id-ID')}
-            </Text>
-            <Text style={[styles.guruMetricLabel, { color: colors.success }]}>Porsi Target</Text>
-          </View>
-
-          <View style={[styles.guruMetricTile, { backgroundColor: colors.primaryLight }]}>
-            <Feather name="thermometer" size={15} color={colors.primary} />
-            <Text style={[styles.guruMetricVal, { color: colors.primary }]}>62°C</Text>
-            <Text style={[styles.guruMetricLabel, { color: colors.primary }]}>Suhu Rata-rata</Text>
-          </View>
-
-          <View style={[styles.guruMetricTile, { backgroundColor: colors.warningBg }]}>
-            <Feather name="shield" size={15} color={colors.warning} />
-            <Text style={[styles.guruMetricVal, { color: colors.warning }]}>100% Utuh</Text>
-            <Text style={[styles.guruMetricLabel, { color: colors.warning }]}>Segel Higienis</Text>
-          </View>
-
-          <View style={[styles.guruMetricTile, { backgroundColor: colors.violetLight }]}>
-            <Feather name="check-circle" size={15} color={colors.violet} />
-            <Text style={[styles.guruMetricVal, { color: colors.violet }]}>{roleProgressPct}%</Text>
-            <Text style={[styles.guruMetricLabel, { color: colors.violet }]}>Kepatuhan SOP</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* 2. Segmented Navigation Tabs */}
+      {/* 2. Segmented Navigation Tabs (Menghindari Informasi Berjejal Menumpuk) */}
       <View
         style={[
           styles.dashTabRow,
@@ -1928,7 +1911,106 @@ export default function DashboardScreen({ navigation }: any) {
       {/* ========================================================================= */}
       {dashboardTab === 'operasional' && (
         <>
-          {/* COMPACT PERINGATAN LOGISTIK & ASET DI PALING ATAS (Prioritas Utama) */}
+          {/* 1. RAPOR MUTU OPERASIONAL DAPUR (ULTRA-COMPACT 3-KOLOM MICRO GRID DENGAN MODAL DETAIL) */}
+          <Card
+            onPress={() => {
+              setSelectedPillarKey(null);
+              setShowPerformanceModal(true);
+            }}
+            style={{ padding: 10, gap: 6 }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: isDark ? 'rgba(234,179,8,0.2)' : '#FEF9C3', alignItems: 'center', justifyContent: 'center' }}>
+                  <Feather name="award" size={12} color={isDark ? colors.gold : '#CA8A04'} />
+                </View>
+                <Text style={{ fontSize: 11, fontWeight: '900', color: colors.text, letterSpacing: 0.4 }}>
+                  RAPOR MUTU DAPUR
+                </Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: radius.pill, backgroundColor: isDark ? 'rgba(16,185,129,0.2)' : '#DCFCE7' }}>
+                  <Text style={{ fontSize: 11, fontWeight: '900', color: colors.success }}>
+                    Grade {kitchenPerformance.grade} ({kitchenPerformance.overallScore}/100)
+                  </Text>
+                </View>
+                <Feather name="chevron-right" size={14} color={colors.textMuted} />
+              </View>
+            </View>
+
+            {/* 6 Performance Pillars in 3-Column Micro Bento Grid */}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+              {kitchenPerformance.pillars.map((pillar) => {
+                const isPillarSuccess = pillar.score >= 90;
+                const isPillarWarning = pillar.score >= 75 && pillar.score < 90;
+                const scoreColor = isPillarSuccess ? colors.success : isPillarWarning ? colors.warning : colors.danger;
+                const shortLabels: Record<string, string> = {
+                  operasional_masak: 'Proses Masak',
+                  keamanan_uji_lab: 'Uji Lab QC',
+                  standar_gizi_alergi: 'Gizi AKG',
+                  ketepatan_distribusi: 'Distribusi',
+                  sanitasi_checklist: 'Kebersihan',
+                  presensi_staf: 'Staf Tim',
+                  masak: 'Proses Masak',
+                  organoleptik: 'Uji Lab QC',
+                  gizi: 'Gizi AKG',
+                  distribusi: 'Distribusi',
+                  sanitasi: 'Kebersihan',
+                  kehadiran: 'Staf Tim',
+                };
+
+                return (
+                  <Pressable
+                    key={pillar.key}
+                    onPress={() => {
+                      setSelectedPillarKey(pillar.key);
+                      setShowPerformanceModal(true);
+                    }}
+                    style={({ pressed }) => [
+                      {
+                        width: '31.6%',
+                        flexGrow: 1,
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC',
+                        borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#E2E8F0',
+                        borderWidth: 1,
+                        borderRadius: radius.md,
+                        paddingHorizontal: 8,
+                        paddingVertical: 5,
+                        gap: 2,
+                      },
+                      pressed && { opacity: 0.75, transform: [{ scale: 0.98 }] },
+                    ]}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Feather name={pillar.icon as any} size={11} color={colors.textMuted} />
+                      <Text style={{ fontSize: 12, fontWeight: '900', color: scoreColor }}>
+                        {pillar.score}%
+                      </Text>
+                    </View>
+
+                    <Text style={{ fontSize: 9.5, fontWeight: '800', color: colors.text }} numberOfLines={1}>
+                      {shortLabels[pillar.key] || pillar.label}
+                    </Text>
+
+                    {/* Micro 2.5px Track */}
+                    <View style={{ height: 2.5, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0', borderRadius: 1.5, overflow: 'hidden', marginTop: 1 }}>
+                      <View style={{ height: '100%', width: `${pillar.score}%`, backgroundColor: scoreColor, borderRadius: 1.5 }} />
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {/* 1-Line Compact Recommendation Ticker */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: isDark ? 'rgba(59,130,246,0.08)' : '#EFF6FF', paddingHorizontal: 8, paddingVertical: 4, borderRadius: radius.sm }}>
+              <Feather name="info" size={11} color={colors.primary} />
+              <Text style={{ fontSize: 10, color: colors.textMuted, flex: 1 }} numberOfLines={1}>
+                {kitchenPerformance.ringkasanEvaluasi}
+              </Text>
+            </View>
+          </Card>
+
+          {/* COMPACT PERINGATAN LOGISTIK & ASET (Prioritas Utama) */}
           {(lowStockMaterials.length > 0 || problematicEquipment.length > 0) && (
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
               {lowStockMaterials.length > 0 && (
@@ -2368,74 +2450,6 @@ export default function DashboardScreen({ navigation }: any) {
                 ))}
             </Card>
           )}
-
-          {/* WIDGET RAPOR MUTU KINERJA OPERASIONAL DAPUR (KITCHEN DAILY PERFORMANCE SCORE) */}
-          <Card
-            style={{
-              backgroundColor: isDark ? colors.surface : '#FFFFFF',
-              borderWidth: 0,
-              borderRadius: radius.xl,
-              gap: 12,
-            }}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, minWidth: 160 }}>
-                <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: isDark ? 'rgba(234,179,8,0.2)' : '#FEF9C3', alignItems: 'center', justifyContent: 'center' }}>
-                  <Feather name="award" size={16} color={isDark ? colors.gold : '#CA8A04'} />
-                </View>
-                <View>
-                  <Text style={{ fontSize: 11, fontWeight: '900', color: colors.text, letterSpacing: 0.5 }}>
-                    RAPOR MUTU OPERASIONAL DAPUR
-                  </Text>
-                  <Text style={{ fontSize: 10, color: colors.textMuted }}>
-                    Evaluasi Internal Harian • Update {kitchenPerformance.lastUpdated}
-                  </Text>
-                </View>
-              </View>
-              <Pill label={`Grade ${kitchenPerformance.grade} (${kitchenPerformance.overallScore}/100)`} tone="success" />
-            </View>
-
-            {/* 6 Performance Pillars Bars */}
-            <View style={{ gap: 8 }}>
-              {kitchenPerformance.pillars.map((pillar) => (
-                <View key={pillar.key} style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC', padding: 10, borderRadius: radius.md, gap: 4 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <Feather name={pillar.icon as any} size={12} color={colors.primary} />
-                      <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }}>
-                        {pillar.label}
-                      </Text>
-                    </View>
-                    <Text style={{ fontSize: 11.5, fontWeight: '900', color: colors.primary }}>
-                      {pillar.score}%
-                    </Text>
-                  </View>
-
-                  {/* Progress track */}
-                  <View style={{ height: 5, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0', borderRadius: 3, overflow: 'hidden' }}>
-                    <View style={{ height: '100%', width: `${pillar.score}%`, backgroundColor: colors.primary, borderRadius: 3 }} />
-                  </View>
-
-                  <Text style={{ fontSize: 10, color: colors.textMuted, marginTop: 1 }}>
-                    {pillar.status}
-                  </Text>
-                </View>
-              ))}
-            </View>
-
-            {/* Daily Continuous Improvement Recommendation Box */}
-            <View style={{ backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#EFF6FF', padding: 10, borderRadius: radius.md, gap: 4 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Feather name="info" size={13} color={colors.primary} />
-                <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.primary }}>
-                  Catatan Rekomendasi Evaluasi Hari Ini:
-                </Text>
-              </View>
-              <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
-                {kitchenPerformance.ringkasanEvaluasi}
-              </Text>
-            </View>
-          </Card>
         </>
       )}
 
@@ -2444,36 +2458,6 @@ export default function DashboardScreen({ navigation }: any) {
       {/* ========================================================================= */}
       {dashboardTab === 'pemantauan' && (
         <>
-          {/* BROADCAST KOMANDO MABES / BGN */}
-          {broadcastInScope.length > 0 && !isBroadcastHidden && (
-            <Card style={{ backgroundColor: colors.surface, borderColor: colors.warning, gap: 8, borderWidth: 1 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
-                  <Feather name="radio" size={16} color={colors.warning} />
-                  <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.warning }}>
-                    ARAHAN KOMANDO PUSAT (MABES/BGN)
-                  </Text>
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Pill label={broadcastInScope[0].tingkat.toUpperCase()} tone="warning" />
-                  <Pressable
-                    onPress={() => setIsBroadcastHidden(true)}
-                    hitSlop={8}
-                    style={{ padding: 4, borderRadius: 12, backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)' }}
-                  >
-                    <Feather name="x" size={14} color={colors.textMuted} />
-                  </Pressable>
-                </View>
-              </View>
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
-                {broadcastInScope[0].judul}
-              </Text>
-              <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
-                {broadcastInScope[0].isi}
-              </Text>
-            </Card>
-          )}
-
           {/* Active Emergency Alert List */}
           <AlertPreviewList
             alerts={activeAlerts}
@@ -2664,6 +2648,143 @@ export default function DashboardScreen({ navigation }: any) {
                     setShowReadinessModal(false);
                     navigation.navigate('FoodQualityPassport');
                   }}
+                />
+              </View>
+            </ScrollView>
+          </Card>
+        </View>
+      </Modal>
+
+      {/* MODAL DETAIL RAPOR MUTU OPERASIONAL DAPUR (6 PILAR EVALUASI) */}
+      <Modal
+        visible={showPerformanceModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowPerformanceModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <Card style={[styles.modalCard, { backgroundColor: colors.surface, borderRadius: radius.xl, maxHeight: '88%' }]}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingBottom: 16 }}>
+              {/* Modal Header */}
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 }}>
+                  <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: isDark ? 'rgba(234,179,8,0.2)' : '#FEF9C3', alignItems: 'center', justifyContent: 'center' }}>
+                    <Feather name="award" size={18} color={isDark ? colors.gold : '#CA8A04'} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: fontSize.md, fontWeight: '900', color: colors.text }}>
+                      Rapor Mutu Operasional SPPG
+                    </Text>
+                    <Text style={{ fontSize: 11, color: colors.textMuted }}>
+                      {currentSppgName || 'SPPG Unit'} • Update {kitchenPerformance.lastUpdated}
+                    </Text>
+                  </View>
+                </View>
+                <Pressable onPress={() => setShowPerformanceModal(false)} hitSlop={8}>
+                  <Feather name="x" size={20} color={colors.textMuted} />
+                </Pressable>
+              </View>
+
+              {/* Big Overall Grade Card */}
+              <View style={{ backgroundColor: isDark ? 'rgba(16,185,129,0.15)' : '#ECFDF5', borderRadius: radius.lg, padding: 16, alignItems: 'center', gap: 4, borderWidth: 1, borderColor: isDark ? 'rgba(16,185,129,0.3)' : '#A7F3D0' }}>
+                <Text style={{ fontSize: 11, fontWeight: '800', color: colors.success, letterSpacing: 0.5 }}>
+                  INDEKS MUTU KINERJA HARIAN (SPPG KPI)
+                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
+                  <Text style={{ fontSize: 40, fontWeight: '900', color: colors.success }}>
+                    {kitchenPerformance.overallScore}
+                  </Text>
+                  <Text style={{ fontSize: 18, fontWeight: '800', color: colors.textMuted }}>
+                    / 100
+                  </Text>
+                </View>
+                <Pill label={`Grade ${kitchenPerformance.grade} • Kategori Sangat Baik (BGN Standard)`} tone="success" />
+              </View>
+
+              {/* 6 Detail Pillars */}
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.text, marginTop: 4, letterSpacing: 0.4 }}>
+                RINCIAN EVALUASI 6 PILAR UTAMA:
+              </Text>
+
+              <View style={{ gap: 8 }}>
+                {kitchenPerformance.pillars.map((pillar) => {
+                  const isPillarSuccess = pillar.score >= 90;
+                  const isPillarWarning = pillar.score >= 75 && pillar.score < 90;
+                  const scoreTone = isPillarSuccess ? 'success' : isPillarWarning ? 'warning' : 'danger';
+                  const scoreColor = isPillarSuccess ? colors.success : isPillarWarning ? colors.warning : colors.danger;
+                  const isSelected = selectedPillarKey === pillar.key;
+
+                  return (
+                    <View
+                      key={pillar.key}
+                      style={{
+                        backgroundColor: isSelected ? (isDark ? 'rgba(59,130,246,0.1)' : '#EFF6FF') : colors.background,
+                        borderRadius: radius.md,
+                        padding: 12,
+                        gap: 6,
+                        borderWidth: 1.5,
+                        borderColor: isSelected ? colors.primary : colors.border,
+                      }}
+                    >
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 }}>
+                          <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: isDark ? 'rgba(59,130,246,0.15)' : '#EFF6FF', alignItems: 'center', justifyContent: 'center' }}>
+                            <Feather name={pillar.icon as any} size={14} color={colors.primary} />
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={{ fontSize: 12, fontWeight: '800', color: colors.text }}>
+                              {pillar.label}
+                            </Text>
+                            <Text style={{ fontSize: 10, color: colors.textMuted }}>
+                              Standar SOP & Pengawasan Mutu BGN
+                            </Text>
+                          </View>
+                        </View>
+                        <Pill label={`${pillar.score}%`} tone={scoreTone} />
+                      </View>
+
+                      {/* Progress Bar */}
+                      <View style={{ height: 5, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0', borderRadius: 3, overflow: 'hidden' }}>
+                        <View style={{ height: '100%', width: `${pillar.score}%`, backgroundColor: scoreColor, borderRadius: 3 }} />
+                      </View>
+
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2 }}>
+                        <Feather name="check-circle" size={12} color={colors.success} />
+                        <Text style={{ fontSize: 11, color: colors.text, flex: 1, fontWeight: '600' }}>
+                          {pillar.status}
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+
+              {/* Continuous Improvement Recommendation Card */}
+              <View style={{ backgroundColor: isDark ? 'rgba(59,130,246,0.12)' : '#EFF6FF', borderRadius: radius.md, padding: 12, gap: 6, borderWidth: 1, borderColor: isDark ? 'rgba(59,130,246,0.25)' : '#BFDBFE' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Feather name="trending-up" size={14} color={colors.primary} />
+                  <Text style={{ fontSize: 11.5, fontWeight: '900', color: colors.primary }}>
+                    Rekomendasi Continuous Improvement:
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 11, color: colors.text, lineHeight: 16 }}>
+                  {kitchenPerformance.ringkasanEvaluasi}
+                </Text>
+              </View>
+
+              {/* Quick Nav Actions */}
+              <View style={{ gap: 8, marginTop: 4 }}>
+                <PrimaryButton
+                  label="Lihat Data Staf & Jobdesk"
+                  icon="users"
+                  onPress={() => {
+                    setShowPerformanceModal(false);
+                    navigation.navigate('StaffList');
+                  }}
+                />
+                <SecondaryButton
+                  label="Tutup Rapor"
+                  onPress={() => setShowPerformanceModal(false)}
                 />
               </View>
             </ScrollView>
