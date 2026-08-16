@@ -146,22 +146,20 @@ export default function RiwayatPermintaanScreen({ navigation }: any) {
                 </View>
               )}
 
-              <View style={{ flexDirection: canAdvance && nextStatus ? 'row' : 'column', gap: 8, marginTop: 4 }}>
+              <View style={{ gap: 6, marginTop: 4 }}>
                 <PrimaryButton
-                  label="Lacak Pengiriman Truk"
+                  label="Lacak Pengiriman Truk (Peta Live)"
                   icon="truck"
                   variant="secondary"
                   onPress={() => navigation.navigate('PermintaanBahanDetail', { permintaanId: p.id })}
-                  style={{ flex: 1 }}
                 />
 
                 {canAdvance && nextStatus && (
                   <PrimaryButton
-                    label={`Lanjut: ${STATUS_LABEL[nextStatus]}`}
+                    label={`Lanjutkan Status ➔ ${STATUS_LABEL[nextStatus]}`}
                     icon="arrow-right"
                     variant="primary"
                     onPress={() => updatePermintaanStatus(p.id, nextStatus)}
-                    style={{ flex: 1 }}
                   />
                 )}
               </View>
