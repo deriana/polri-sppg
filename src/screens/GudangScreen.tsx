@@ -480,7 +480,7 @@ export default function GudangScreen({ navigation }: any) {
 
                       {canRequest && (
                         <Pressable
-                          onPress={() => navigation.navigate('MutasiStokForm', { initialBahanId: b.id, jenis: 'keluar' })}
+                          onPress={() => navigation.navigate('MutasiStokForm', { initialBahanId: b.id, jenis: 'keluar', mode: 'pemakaian' })}
                           style={[styles.fefoUseBtn, { backgroundColor: colors.primaryLight, borderColor: colors.primary, borderRadius: radius.pill }]}
                         >
                           <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.primary }}>
@@ -685,7 +685,7 @@ export default function GudangScreen({ navigation }: any) {
                       </View>
                       {canRequest && (
                         <Pressable
-                          onPress={() => navigation.navigate('MutasiStokForm', { initialBahanId: b.id, jenis: 'keluar' })}
+                          onPress={() => navigation.navigate('MutasiStokForm', { initialBahanId: b.id, jenis: 'keluar', mode: 'pemakaian' })}
                           style={[
                             styles.fefoUseBtn,
                             {
