@@ -147,6 +147,37 @@ export interface Sppg {
   lng: number;
 }
 
+export interface SiswaAlergiProfile {
+  id: string; // ID Anonim Terenkripsi (e.g. SISWA-0412)
+  namaInisial: string; // e.g. "Ahmad R. (NISN: ***3819)"
+  kelas: string; // e.g. "Kelas 4B"
+  jenisAlergi:
+    | 'alergi_telur'
+    | 'alergi_seafood'
+    | 'intoleransi_laktosa'
+    | 'alergi_kacang'
+    | 'alergi_gluten'
+    | 'diet_khusus';
+  labelAlergi: string; // e.g. "Alergi Telur Ayam"
+  menuSubstitusi: string; // e.g. "Tahu & Tempe Bacem Gurih"
+  catatanKhusus?: string;
+  verifikasiMedis: boolean;
+}
+
+export interface BeneficiaryDailyRekap {
+  sekolahId: string;
+  tanggal: string;
+  totalSiswaTerdaftar: number;
+  porsiDisiapkan: number;
+  siswaHadirMenerima: number;
+  siswaTidakHadir: number;
+  alasanTidakHadir: { sakit: number; izin: number; tanpaKeterangan: number };
+  penangananSisaPorsi: string;
+  totalSiswaAlergi: number;
+  porsiSubstitusiTersalurkan: number;
+  daftarAlergi: SiswaAlergiProfile[];
+}
+
 export interface Sekolah {
   id: string;
   sppgId: string;
@@ -154,6 +185,7 @@ export interface Sekolah {
   alamat: string;
   jumlahSiswa: number;
   fotoSekolah?: string | null;
+  beneficiarySummary?: BeneficiaryDailyRekap;
 }
 
 export interface User {
