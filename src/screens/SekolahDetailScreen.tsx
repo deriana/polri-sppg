@@ -85,31 +85,37 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
       <View style={{ flexDirection: 'row', gap: 8 }}>
         <Pressable
           onPress={() => setActiveTab('ringkasan')}
-          style={[
+          style={({ pressed }) => [
             styles.tabBtn,
             {
-              backgroundColor: activeTab === 'ringkasan' ? colors.primary : colors.surface,
+              backgroundColor: activeTab === 'ringkasan' ? (isDark ? colors.gold : '#0A2342') : colors.surface,
+              borderColor: activeTab === 'ringkasan' ? (isDark ? colors.gold : '#0A2342') : colors.border,
+              borderWidth: 1,
             },
+            pressed && { opacity: 0.85 },
           ]}
         >
-          <Feather name="info" size={14} color={activeTab === 'ringkasan' ? '#FFF' : colors.text} />
-          <Text style={{ fontSize: 12, fontWeight: '800', color: activeTab === 'ringkasan' ? '#FFF' : colors.text }}>
+          <Feather name="info" size={14} color={activeTab === 'ringkasan' ? (isDark ? '#07101E' : '#FFF') : colors.text} />
+          <Text style={{ fontSize: 12, fontWeight: '800', color: activeTab === 'ringkasan' ? (isDark ? '#07101E' : '#FFF') : colors.text }}>
             Profil Sekolah
           </Text>
         </Pressable>
 
         <Pressable
           onPress={() => setActiveTab('beneficiary')}
-          style={[
+          style={({ pressed }) => [
             styles.tabBtn,
             {
-              backgroundColor: activeTab === 'beneficiary' ? colors.primary : colors.surface,
+              backgroundColor: activeTab === 'beneficiary' ? (isDark ? colors.gold : '#0A2342') : colors.surface,
+              borderColor: activeTab === 'beneficiary' ? (isDark ? colors.gold : '#0A2342') : colors.border,
+              borderWidth: 1,
             },
+            pressed && { opacity: 0.85 },
           ]}
         >
-          <Feather name="bar-chart-2" size={14} color={activeTab === 'beneficiary' ? '#FFF' : colors.text} />
-          <Text style={{ fontSize: 12, fontWeight: '800', color: activeTab === 'beneficiary' ? '#FFF' : colors.text }}>
-            Summary MBG & Presensi Hari Ini
+          <Feather name="bar-chart-2" size={14} color={activeTab === 'beneficiary' ? (isDark ? '#07101E' : '#FFF') : colors.text} />
+          <Text style={{ fontSize: 12, fontWeight: '800', color: activeTab === 'beneficiary' ? (isDark ? '#07101E' : '#FFF') : colors.text }}>
+            Summary MBG & Presensi
           </Text>
         </Pressable>
       </View>
@@ -186,8 +192,10 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
           <Card
             style={{
               backgroundColor: isDark ? colors.surface : '#FFFFFF',
-              borderWidth: 0,
+              borderWidth: 1,
+              borderColor: colors.border,
               gap: 12,
+              borderRadius: radius.xl,
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
@@ -202,7 +210,7 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
 
             {/* 4 Stat Box Grid */}
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC' }]}>
+              <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', borderColor: colors.border, borderWidth: 1 }]}>
                 <Text style={styles.statBoxLabel}>Terdaftar</Text>
                 <Text style={[styles.statBoxVal, { color: colors.text }]}>
                   {totalTerdaftar}
@@ -210,7 +218,7 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
                 <Text style={styles.statBoxSub}>Siswa Sekolah</Text>
               </View>
 
-              <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#EFF6FF' }]}>
+              <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', borderColor: colors.border, borderWidth: 1 }]}>
                 <Text style={styles.statBoxLabel}>Disiapkan</Text>
                 <Text style={[styles.statBoxVal, { color: colors.primary }]}>
                   {porsiDisiapkan}
@@ -218,8 +226,8 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
                 <Text style={styles.statBoxSub}>Porsi MBG</Text>
               </View>
 
-              <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(16,185,129,0.1)' : '#ECFDF5' }]}>
-                <Text style={styles.statBoxLabel}>Menerima</Text>
+              <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(16,185,129,0.1)' : '#ECFDF5', borderColor: isDark ? 'rgba(16,185,129,0.3)' : '#A7F3D0', borderWidth: 1 }]}>
+                <Text style={[styles.statBoxLabel, { color: colors.success }]}>Menerima</Text>
                 <Text style={[styles.statBoxVal, { color: colors.success }]}>
                   {hadirMenerima}
                 </Text>
@@ -228,8 +236,8 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
                 </Text>
               </View>
 
-              <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(239,68,68,0.1)' : '#FEF2F2' }]}>
-                <Text style={styles.statBoxLabel}>Tidak Hadir</Text>
+              <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(239,68,68,0.1)' : '#FEF2F2', borderColor: isDark ? 'rgba(239,68,68,0.3)' : '#FECACA', borderWidth: 1 }]}>
+                <Text style={[styles.statBoxLabel, { color: tidakHadir === 0 ? colors.textMuted : colors.danger }]}>Tidak Hadir</Text>
                 <Text style={[styles.statBoxVal, { color: tidakHadir === 0 ? colors.textMuted : colors.danger }]}>
                   {tidakHadir}
                 </Text>
@@ -260,7 +268,7 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
           </Card>
 
           {/* Section: Allergy & Nutrition Profiling */}
-          <Card style={{ gap: 10, borderWidth: 0, backgroundColor: isDark ? colors.surface : '#FFFFFF' }}>
+          <Card style={{ gap: 10, borderWidth: 1, borderColor: colors.border, backgroundColor: isDark ? colors.surface : '#FFFFFF', borderRadius: radius.xl }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, minWidth: 150 }}>
                 <Feather name="alert-circle" size={16} color={colors.warning} />
@@ -292,11 +300,13 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
                     style={[
                       styles.allergyChip,
                       {
-                        backgroundColor: active ? colors.primary : isDark ? colors.surface : '#F1F5F9',
+                        backgroundColor: active ? (isDark ? colors.gold : '#0A2342') : isDark ? colors.surface : '#F1F5F9',
+                        borderColor: active ? (isDark ? colors.gold : '#0A2342') : colors.border,
+                        borderWidth: 1,
                       },
                     ]}
                   >
-                    <Text style={{ fontSize: 11, fontWeight: '800', color: active ? '#FFF' : colors.text }}>
+                    <Text style={{ fontSize: 11, fontWeight: '800', color: active ? (isDark ? '#07101E' : '#FFF') : colors.text }}>
                       {chip.label}
                     </Text>
                   </Pressable>
@@ -315,14 +325,16 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
                     styles.allergyCard,
                     {
                       backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC',
+                      borderColor: colors.border,
+                      borderWidth: 1,
                       borderRadius: radius.md,
                     },
                   ]}
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, minWidth: 120 }}>
-                      <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
-                        <Feather name="user" size={12} color={colors.primary} />
+                      <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: isDark ? '#1E3250' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
+                        <Feather name="user" size={12} color={isDark ? '#FBBF24' : '#0A2342'} />
                       </View>
                       <Text style={{ fontSize: 12, fontWeight: '800', color: colors.text }}>
                         {item.namaInisial}
@@ -335,7 +347,7 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
                   </View>
 
                   {/* Substitution Meal Info Box */}
-                  <View style={{ backgroundColor: isDark ? 'rgba(16,185,129,0.1)' : '#ECFDF5', padding: 8, borderRadius: radius.sm, gap: 2 }}>
+                  <View style={{ backgroundColor: isDark ? 'rgba(16,185,129,0.1)' : '#ECFDF5', borderColor: isDark ? 'rgba(16,185,129,0.3)' : '#A7F3D0', borderWidth: 1, padding: 8, borderRadius: radius.sm, gap: 2 }}>
                     <Text style={{ fontSize: 10, fontWeight: '800', color: colors.success }}>
                       MENU SUBSTITUSI GIZI KHUSUS:
                     </Text>
@@ -364,10 +376,10 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
           </Card>
 
           {/* Privacy & Governance Notice */}
-          <Card style={{ backgroundColor: isDark ? colors.surface : '#F8FAFC', borderWidth: 0, gap: 6 }}>
+          <Card style={{ backgroundColor: isDark ? colors.surface : '#F8FAFC', borderWidth: 1, borderColor: colors.border, borderRadius: radius.xl, gap: 6 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Feather name="lock" size={14} color={colors.primary} />
-              <Text style={{ fontSize: 11, fontWeight: '900', color: colors.primary }}>
+              <Feather name="lock" size={14} color={isDark ? colors.gold : colors.primary} />
+              <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? colors.gold : colors.primary }}>
                 KEBIJAKAN PRIVASI & PERLINDUNGAN DATA SISWA (UU PDP)
               </Text>
             </View>

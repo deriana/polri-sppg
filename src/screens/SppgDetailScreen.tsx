@@ -36,13 +36,13 @@ export default function SppgDetailScreen({ route }: any) {
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
-      <View style={[styles.headerCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <View style={[styles.headerCard, { backgroundColor: isDark ? '#0F1D33' : '#0A2342', borderColor: isDark ? '#1E3250' : '#1E293B', borderWidth: 1 }]}>
         {sppg.fotoDapur && (
           <Image source={{ uri: sppg.fotoDapur }} style={{ width: '100%', height: 160, borderRadius: radius.md, marginBottom: 8 }} />
         )}
-        <Text style={{ color: colors.text, fontWeight: '800', fontSize: fontSize.lg }}>{sppg.nama}</Text>
-        <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>{sppg.alamat}</Text>
-        <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>{sppg.wilayahPolres} • {sppg.wilayahPolda}</Text>
+        <Text style={{ color: '#FFFFFF', fontWeight: '900', fontSize: fontSize.lg }}>{sppg.nama}</Text>
+        <Text style={{ color: '#CBD5E1', fontSize: fontSize.xs }}>{sppg.alamat}</Text>
+        <Text style={{ color: '#94A3B8', fontSize: fontSize.xs }}>{sppg.wilayahPolres} • {sppg.wilayahPolda}</Text>
         <View style={styles.headerRow}>
           <Pill label={sppg.status === 'aktif' ? 'Aktif' : 'Nonaktif'} tone={sppg.status === 'aktif' ? 'success' : 'neutral'} />
           <Pill label={`${sppg.kapasitasProduksi} porsi/hari`} tone="info" />
@@ -55,7 +55,8 @@ export default function SppgDetailScreen({ route }: any) {
       <Card
         style={{
           backgroundColor: isDark ? colors.surface : '#FFFFFF',
-          borderWidth: 0,
+          borderWidth: 1,
+          borderColor: colors.border,
           borderRadius: radius.xl,
           gap: 12,
         }}
@@ -80,7 +81,7 @@ export default function SppgDetailScreen({ route }: any) {
         {/* 6 Performance Pillars Bars */}
         <View style={{ gap: 8 }}>
           {kitchenPerformance.pillars.map((pillar) => (
-            <View key={pillar.key} style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC', padding: 10, borderRadius: radius.md, gap: 4 }}>
+            <View key={pillar.key} style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC', borderColor: colors.border, borderWidth: 1, padding: 10, borderRadius: radius.md, gap: 4 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                   <Feather name={pillar.icon as any} size={12} color={colors.primary} />
@@ -94,7 +95,7 @@ export default function SppgDetailScreen({ route }: any) {
               </View>
 
               {/* Progress track */}
-              <View style={{ height: 5, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0', borderRadius: 3, overflow: 'hidden' }}>
+              <View style={{ height: 6, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0', borderRadius: 3, overflow: 'hidden' }}>
                 <View style={{ height: '100%', width: `${pillar.score}%`, backgroundColor: colors.primary, borderRadius: 3 }} />
               </View>
 
@@ -106,10 +107,10 @@ export default function SppgDetailScreen({ route }: any) {
         </View>
 
         {/* Continuous Improvement Recommendation */}
-        <View style={{ backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#EFF6FF', padding: 10, borderRadius: radius.md, gap: 4 }}>
+        <View style={{ backgroundColor: isDark ? 'rgba(245,158,11,0.1)' : '#FEF3C7', borderColor: isDark ? 'rgba(245,158,11,0.3)' : '#FDE68A', borderWidth: 1, padding: 10, borderRadius: radius.md, gap: 4 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <Feather name="info" size={13} color={colors.primary} />
-            <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.primary }}>
+            <Feather name="info" size={13} color={isDark ? colors.gold : '#B45309'} />
+            <Text style={{ fontSize: 10.5, fontWeight: '800', color: isDark ? colors.gold : '#B45309' }}>
               Catatan Rekomendasi Evaluasi Unit:
             </Text>
           </View>

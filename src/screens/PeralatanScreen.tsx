@@ -164,39 +164,45 @@ export default function PeralatanScreen({ route }: any) {
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       {/* Header Summary */}
-      <Card style={{ backgroundColor: colors.primary, gap: spacing.xs }}>
+      <Card style={{ backgroundColor: isDark ? '#0F1D33' : '#0A2342', borderColor: isDark ? '#1E3250' : '#1E293B', borderWidth: 1, gap: spacing.sm, borderRadius: radius.xl }}>
         <View style={styles.rowBetween}>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: fontSize.lg, fontWeight: '800', color: colors.textInverse }}>
+          <View style={{ flex: 1, gap: 2 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#F59E0B' }} />
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: '#FBBF24', letterSpacing: 0.5 }}>
+                INVENTARIS PRESISI SPPG
+              </Text>
+            </View>
+            <Text style={{ fontSize: fontSize.lg, fontWeight: '900', color: '#FFFFFF' }}>
               Aset & Peralatan Dapur
             </Text>
-            <Text style={{ fontSize: fontSize.xs, color: colors.primaryLight, marginTop: 2 }}>
+            <Text style={{ fontSize: fontSize.xs, color: '#94A3B8' }}>
               Manajemen Armada, Ompreng Stainless, & Alat Produksi Ber-QR
             </Text>
           </View>
-          <View style={[styles.iconBox, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-            <Feather name="truck" size={24} color={colors.textInverse} strokeWidth={iconStrokeWidth} />
+          <View style={[styles.iconBox, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
+            <Feather name="truck" size={22} color="#FBBF24" strokeWidth={iconStrokeWidth} />
           </View>
         </View>
 
-        <View style={[styles.statRow, { marginTop: spacing.xs }]}>
-          <View style={styles.statCol}>
-            <Text style={{ color: colors.textInverse, fontSize: fontSize.xl, fontWeight: '800' }}>
+        <View style={[styles.statRow, { marginTop: 2, gap: 8 }]}>
+          <View style={[styles.statColBox, { backgroundColor: 'rgba(255,255,255,0.06)' }]}>
+            <Text style={{ color: '#FFFFFF', fontSize: fontSize.lg, fontWeight: '900' }}>
               {peralatanInScope.length}
             </Text>
-            <Text style={{ color: colors.primaryLight, fontSize: fontSize.xs }}>Kategori Unit</Text>
+            <Text style={{ color: '#94A3B8', fontSize: 10.5, fontWeight: '600' }}>Kategori Unit</Text>
           </View>
-          <View style={styles.statCol}>
-            <Text style={{ color: '#86EFAC', fontSize: fontSize.xl, fontWeight: '800' }}>
+          <View style={[styles.statColBox, { backgroundColor: 'rgba(16, 185, 129, 0.12)' }]}>
+            <Text style={{ color: '#34D399', fontSize: fontSize.lg, fontWeight: '900' }}>
               {totalReady.toLocaleString('id-ID')}
             </Text>
-            <Text style={{ color: colors.primaryLight, fontSize: fontSize.xs }}>Unit Ready</Text>
+            <Text style={{ color: '#A7F3D0', fontSize: 10.5, fontWeight: '600' }}>Unit Ready</Text>
           </View>
-          <View style={styles.statCol}>
-            <Text style={{ color: '#FCA5A5', fontSize: fontSize.xl, fontWeight: '800' }}>
+          <View style={[styles.statColBox, { backgroundColor: totalBermasalah > 0 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(255,255,255,0.06)' }]}>
+            <Text style={{ color: totalBermasalah > 0 ? '#F87171' : '#94A3B8', fontSize: fontSize.lg, fontWeight: '900' }}>
               {totalBermasalah}
             </Text>
-            <Text style={{ color: colors.primaryLight, fontSize: fontSize.xs }}>Bermasalah</Text>
+            <Text style={{ color: totalBermasalah > 0 ? '#FECACA' : '#94A3B8', fontSize: 10.5, fontWeight: '600' }}>Bermasalah</Text>
           </View>
         </View>
 
@@ -205,11 +211,11 @@ export default function PeralatanScreen({ route }: any) {
           onPress={() => navigation.navigate('QrScan')}
           style={({ pressed }) => [
             styles.scanHeaderBtn,
-            { backgroundColor: colors.gold || '#F59E0B' },
+            { backgroundColor: '#F59E0B' },
             pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
           ]}
         >
-          <Feather name="camera" size={16} color="#000000" strokeWidth={2.2} />
+          <Feather name="camera" size={16} color="#0A2342" strokeWidth={2.2} />
           <Text style={styles.scanHeaderBtnText}>Pindai QR Aset / Peralatan</Text>
         </Pressable>
       </Card>
@@ -697,32 +703,48 @@ const styles = StyleSheet.create({
   content: { padding: 16, gap: 12, paddingBottom: 110 },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   iconBox: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  statRow: { flexDirection: 'row', padding: 12, alignItems: 'center', justifyContent: 'space-around' },
+  statRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   statCol: { alignItems: 'center', gap: 2 },
+  statColBox: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderRadius: 12,
+    gap: 2,
+  },
   scanHeaderBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 16,
-    borderRadius: 10,
-    marginTop: 6,
+    borderRadius: 12,
+    marginTop: 4,
   },
   scanHeaderBtnText: {
-    color: '#000000',
+    color: '#0A2342',
     fontSize: 13,
-    fontWeight: '800',
+    fontWeight: '900',
+    letterSpacing: 0.2,
   },
-  chip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1 },
-  eqPhoto: { width: '100%', height: 180, borderRadius: 8, marginBottom: 4 },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 13,
+    paddingVertical: 8,
+    borderWidth: 1,
+  },
+  eqPhoto: { width: '100%', height: 180, borderRadius: 12, marginBottom: 4 },
   qrBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
     borderWidth: 1,
   },
   qrToggleBtn: {
@@ -730,13 +752,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    paddingVertical: 8,
+    paddingVertical: 9,
     paddingHorizontal: 12,
     borderWidth: 1,
   },
-  infoGrid: { flexDirection: 'row', padding: 10, gap: 12, marginVertical: 4 },
-  infoCol: { flex: 1 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalCard: { borderTopLeftRadius: 16, borderTopRightRadius: 16, padding: 20 },
-  statusBtn: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, borderWidth: 1 },
+  infoGrid: { flexDirection: 'row', padding: 10, gap: 8, marginVertical: 4 },
+  infoCol: {
+    flex: 1,
+    padding: 6,
+    borderRadius: 8,
+  },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+  modalCard: { borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20 },
+  statusBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, borderWidth: 1 },
 });

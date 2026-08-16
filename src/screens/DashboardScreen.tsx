@@ -60,7 +60,7 @@ function QuickActionGrid({ items }: { items: QuickAction[] }) {
       case 'primary':
       default:
         return {
-          bg: isDark ? 'rgba(245, 158, 11, 0.15)' : colors.accentLight || '#EFF6FF',
+          bg: isDark ? 'rgba(245, 158, 11, 0.15)' : '#F1F5F9',
           fg: isDark ? colors.gold : colors.accent || colors.primary,
         };
     }
@@ -171,7 +171,7 @@ function CommandHeroHeader({ currentUser, role, sppgName, sppgScopeCount, onNoti
           {currentUser.fotoProfil ? (
             <Image source={{ uri: currentUser.fotoProfil }} style={[styles.cleanHeaderAvatar, { borderColor: isDark ? colors.gold : colors.primary }]} />
           ) : (
-            <View style={[styles.cleanHeaderAvatarPlaceholder, { backgroundColor: colors.primaryLight, borderColor: colors.border }]}>
+            <View style={[styles.cleanHeaderAvatarPlaceholder, { backgroundColor: isDark ? '#1E3250' : '#F1F5F9', borderColor: colors.border }]}>
               <Feather name="shield" size={20} color={isDark ? colors.gold : colors.primary} />
             </View>
           )}
@@ -227,7 +227,7 @@ function ProductionStageBar({ progress, target }: { progress: number; target: nu
     <Card style={{ gap: 12, borderRadius: 20, borderWidth: 1, borderColor: colors.border, padding: 16 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <View style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : (colors.accentLight || '#EFF6FF'), alignItems: 'center', justifyContent: 'center' }}>
+          <View style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
             <Feather name="activity" size={15} color={isDark ? colors.gold : (colors.accent || colors.primary)} />
           </View>
           <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: isDark ? colors.gold : colors.primary, letterSpacing: 0.4 }}>

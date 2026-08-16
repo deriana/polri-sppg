@@ -131,25 +131,31 @@ export default function AssetQrDetailScreen({ route }: AssetQrDetailScreenProps)
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       {/* Header Card */}
-      <Card style={{ backgroundColor: colors.surface, borderColor: isDark ? colors.border : '#BFDBFE', borderWidth: 1.5, gap: spacing.xs, borderRadius: radius.xl }}>
+      <Card style={{ backgroundColor: isDark ? '#0F1D33' : '#0A2342', borderColor: isDark ? '#1E3250' : '#1E293B', borderWidth: 1, gap: spacing.xs, borderRadius: radius.xl }}>
         <View style={styles.rowBetween}>
           <View style={{ flex: 1, gap: 2 }}>
-            <Text style={{ fontSize: fontSize.lg, fontWeight: '900', color: colors.text }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#F59E0B' }} />
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: '#FBBF24', letterSpacing: 0.5 }}>
+                PASPOR ASET BER-QR
+              </Text>
+            </View>
+            <Text style={{ fontSize: fontSize.lg, fontWeight: '900', color: '#FFFFFF' }}>
               Detail Aset Peralatan
             </Text>
-            <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>
-              Informasi lengkap peralatan SPPG berdasarkan QR Code
+            <Text style={{ fontSize: fontSize.xs, color: '#94A3B8' }}>
+              Informasi lengkap peralatan SPPG berdasarkan QR Code terverifikasi
             </Text>
           </View>
-          <View style={[styles.iconBox, { backgroundColor: isDark ? 'rgba(56, 189, 248, 0.15)' : colors.primaryLight }]}>
-            <Feather name="clipboard" size={22} color={colors.primary} strokeWidth={iconStrokeWidth} />
+          <View style={[styles.iconBox, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
+            <Feather name="clipboard" size={22} color="#FBBF24" strokeWidth={iconStrokeWidth} />
           </View>
         </View>
       </Card>
 
       {/* QR Code Display & Share as PNG */}
       <Card style={{ alignItems: 'center', gap: spacing.md }}>
-        <View style={[styles.qrBox, { borderRadius: radius.md, borderColor: colors.border }]}>
+        <View style={[styles.qrBox, { borderRadius: radius.lg, borderColor: colors.border }]}>
           <QRCode
             value={eq.qrCodeId}
             size={180}
@@ -161,9 +167,9 @@ export default function AssetQrDetailScreen({ route }: AssetQrDetailScreenProps)
           />
         </View>
 
-        <View style={[styles.codeBadge, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}>
-          <Feather name="maximize" size={13} color={colors.primary} strokeWidth={iconStrokeWidth} />
-          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.primary }}>
+        <View style={[styles.codeBadge, { backgroundColor: isDark ? 'rgba(245,158,11,0.12)' : '#FEF3C7', borderColor: isDark ? '#F59E0B' : '#FDE68A' }]}>
+          <Feather name="maximize" size={13} color={isDark ? '#FBBF24' : '#B45309'} strokeWidth={iconStrokeWidth} />
+          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: isDark ? '#FBBF24' : '#B45309' }}>
             {eq.qrCodeId}
           </Text>
         </View>

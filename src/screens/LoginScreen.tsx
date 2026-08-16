@@ -66,9 +66,9 @@ export default function LoginScreen() {
   const selectedAccount = ACCOUNTS.find((a) => a.nik === nikOrId);
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: isDark ? '#061325' : '#F4F7FB' }]} edges={['top', 'bottom', 'left', 'right']}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: isDark ? '#07101E' : '#F8FAFC' }]} edges={['top', 'bottom', 'left', 'right']}>
       <KeyboardAvoidingView
-        style={[styles.container, { backgroundColor: isDark ? '#061325' : '#F4F7FB' }]}
+        style={[styles.container, { backgroundColor: isDark ? '#07101E' : '#F8FAFC' }]}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
@@ -80,25 +80,25 @@ export default function LoginScreen() {
           {/* 1. HERO INSTITUTIONAL BRAND HEADER */}
           <View style={styles.brandHeroBlock}>
             <View style={styles.logoRow}>
-              <View style={[styles.emblemContainer, { backgroundColor: isDark ? colors.surface : '#EFF6FF', borderColor: '#BFDBFE' }]}>
+              <View style={[styles.emblemContainer, { backgroundColor: isDark ? '#0F1D33' : '#FFFFFF', borderColor: isDark ? '#1E3250' : '#CBD5E1' }]}>
                 <Image source={BRAND_ASSETS.polriEmblem} style={styles.logoPolri} resizeMode="contain" />
               </View>
               <View style={styles.brandDivider} />
-              <View style={[styles.emblemContainer, { backgroundColor: isDark ? colors.surface : '#FFFBEB', borderColor: '#FDE68A' }]}>
+              <View style={[styles.emblemContainer, { backgroundColor: isDark ? '#0F1D33' : '#FFFFFF', borderColor: isDark ? 'rgba(245,158,11,0.5)' : '#FDE68A' }]}>
                 <Image source={BRAND_ASSETS.bgnLogo} style={styles.logoBgn} resizeMode="contain" />
               </View>
             </View>
 
             <View style={styles.brandTextGroup}>
               <View style={styles.appNameRow}>
-                <Text style={[styles.brandTitle, { color: isDark ? '#FFFFFF' : '#071E49' }]}>
+                <Text style={[styles.brandTitle, { color: isDark ? '#FFFFFF' : '#0A2342' }]}>
                   SIGAP SPPG
                 </Text>
                 <View style={styles.presisiBadge}>
                   <Text style={styles.presisiBadgeText}>PRESISI</Text>
                 </View>
               </View>
-              <Text style={[styles.brandSubtitle, { color: isDark ? '#FBBF24' : '#D97706' }]}>
+              <Text style={[styles.brandSubtitle, { color: isDark ? '#FBBF24' : '#B45309' }]}>
                 SATUAN PELAYANAN PANGAN BERGIZI POLRI – BGN
               </Text>
               <Text style={[styles.tagline, { color: isDark ? '#94A3B8' : '#64748B' }]}>
@@ -124,7 +124,7 @@ export default function LoginScreen() {
                 </Text>
               </View>
               <Pressable onPress={() => setShowRoleModal(true)} hitSlop={6}>
-                <Text style={{ fontSize: 11, fontWeight: '800', color: '#1D4ED8' }}>
+                <Text style={{ fontSize: 11, fontWeight: '800', color: isDark ? '#FBBF24' : '#0A2342' }}>
                   Lihat Semua ({ACCOUNTS.length})
                 </Text>
               </Pressable>
@@ -140,8 +140,8 @@ export default function LoginScreen() {
                     style={({ pressed }) => [
                       styles.quickRoleChip,
                       {
-                        backgroundColor: isCurrent ? '#071E49' : (isDark ? '#0F2942' : '#FFFFFF'),
-                        borderColor: isCurrent ? '#F59E0B' : (isDark ? '#1E3A8A' : '#E2E8F0'),
+                        backgroundColor: isCurrent ? '#0A2342' : (isDark ? '#0F1D33' : '#FFFFFF'),
+                        borderColor: isCurrent ? '#F59E0B' : (isDark ? '#1E3250' : '#E2E8F0'),
                         borderWidth: isCurrent ? 1.5 : 1,
                       },
                       pressed && { opacity: 0.8 },
@@ -173,10 +173,10 @@ export default function LoginScreen() {
           </View>
 
           {/* 3. FORM LOGIN CARD */}
-          <View style={[styles.formCard, { backgroundColor: isDark ? '#0B2240' : '#FFFFFF', borderColor: isDark ? '#1E3A8A' : '#E2E8F0' }]}>
+          <View style={[styles.formCard, { backgroundColor: isDark ? '#0F1D33' : '#FFFFFF', borderColor: isDark ? '#1E3250' : '#E2E8F0' }]}>
             <View style={styles.formHeaderRow}>
               <View style={{ flex: 1 }}>
-                <Text style={[styles.formTitle, { color: isDark ? '#FFFFFF' : '#071E49' }]}>
+                <Text style={[styles.formTitle, { color: isDark ? '#FFFFFF' : '#0A2342' }]}>
                   Autentikasi Personel
                 </Text>
                 <Text style={{ fontSize: 11.5, color: isDark ? '#94A3B8' : '#64748B', marginTop: 2 }}>
@@ -185,10 +185,10 @@ export default function LoginScreen() {
               </View>
               <Pressable
                 onPress={() => setShowRoleModal(true)}
-                style={[styles.roleSelectChip, { backgroundColor: isDark ? '#1E3A8A' : '#EFF6FF', borderColor: '#BFDBFE' }]}
+                style={[styles.roleSelectChip, { backgroundColor: isDark ? '#1E3250' : '#F1F5F9', borderColor: isDark ? '#2E4870' : '#CBD5E1' }]}
               >
-                <Feather name="users" size={13} color="#1D4ED8" />
-                <Text style={{ fontSize: 10.5, fontWeight: '800', color: '#1D4ED8' }}>
+                <Feather name="users" size={13} color={isDark ? '#FBBF24' : '#0A2342'} />
+                <Text style={{ fontSize: 10.5, fontWeight: '800', color: isDark ? '#FFFFFF' : '#0A2342' }}>
                   Ganti Role
                 </Text>
               </Pressable>
@@ -241,8 +241,8 @@ export default function LoginScreen() {
                 style={({ pressed }) => [
                   styles.biometricBtn,
                   {
-                    backgroundColor: isDark ? colors.surface : '#F8FAFC',
-                    borderColor: isDark ? '#1E3A8A' : '#CBD5E1',
+                    backgroundColor: isDark ? '#07101E' : '#F8FAFC',
+                    borderColor: isDark ? '#1E3250' : '#CBD5E1',
                   },
                   pressed && { opacity: 0.8 },
                 ]}
@@ -271,14 +271,14 @@ export default function LoginScreen() {
       <Modal visible={showRoleModal} animationType="slide" transparent onRequestClose={() => setShowRoleModal(false)}>
         <View style={styles.modalOverlay}>
           <Pressable style={styles.modalBackdrop} onPress={() => setShowRoleModal(false)} />
-          <View style={[styles.roleModalContent, { backgroundColor: isDark ? '#0B2240' : '#FFFFFF', borderColor: isDark ? '#1E3A8A' : '#CBD5E1' }]}>
+          <View style={[styles.roleModalContent, { backgroundColor: isDark ? '#0F1D33' : '#FFFFFF', borderColor: isDark ? '#1E3250' : '#CBD5E1' }]}>
             <View style={styles.modalHeaderRow}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: '#EFF6FF', alignItems: 'center', justifyContent: 'center' }}>
-                  <Feather name="users" size={17} color="#1D4ED8" />
+                <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: isDark ? '#1E3250' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
+                  <Feather name="users" size={17} color={isDark ? '#FBBF24' : '#0A2342'} />
                 </View>
                 <View>
-                  <Text style={{ fontSize: 14, fontWeight: '900', color: isDark ? '#FFFFFF' : '#071E49' }}>
+                  <Text style={{ fontSize: 14, fontWeight: '900', color: isDark ? '#FFFFFF' : '#0A2342' }}>
                     Pilih Peran Personel (Quick Switch)
                   </Text>
                   <Text style={{ fontSize: 11, color: isDark ? '#94A3B8' : '#64748B' }}>
@@ -301,26 +301,26 @@ export default function LoginScreen() {
                     style={({ pressed }) => [
                       styles.roleItemRow,
                       {
-                        backgroundColor: isCurrent ? (isDark ? 'rgba(11,34,64,0.8)' : '#EFF6FF') : (isDark ? '#061325' : '#F8FAFC'),
-                        borderColor: isCurrent ? '#1D4ED8' : (isDark ? '#1E3A8A' : '#E2E8F0'),
+                        backgroundColor: isCurrent ? (isDark ? 'rgba(251,191,36,0.12)' : '#FEF3C7') : (isDark ? '#07101E' : '#F8FAFC'),
+                        borderColor: isCurrent ? (isDark ? '#F59E0B' : '#D97706') : (isDark ? '#1E3250' : '#E2E8F0'),
                         borderWidth: isCurrent ? 1.5 : 1,
                       },
                       pressed && { opacity: 0.8 },
                     ]}
                   >
-                    <View style={[styles.roleIconWrap, { backgroundColor: isCurrent ? '#071E49' : (isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0') }]}>
+                    <View style={[styles.roleIconWrap, { backgroundColor: isCurrent ? '#0A2342' : (isDark ? 'rgba(255,255,255,0.06)' : '#E2E8F0') }]}>
                       <Feather name="user-check" size={16} color={isCurrent ? '#FBBF24' : (isDark ? '#FFFFFF' : '#0F172A')} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ fontSize: 12.5, fontWeight: '800', color: isDark ? '#FFFFFF' : '#071E49' }}>
+                      <Text style={{ fontSize: 12.5, fontWeight: '800', color: isDark ? '#FFFFFF' : '#0A2342' }}>
                         {ROLE_LABEL[a.role]}
                       </Text>
                       <Text style={{ fontSize: 11, color: isDark ? '#94A3B8' : '#64748B' }}>{a.name}</Text>
-                      <Text style={{ fontSize: 10, color: '#1D4ED8', fontWeight: '700', marginTop: 1 }}>
+                      <Text style={{ fontSize: 10, color: isDark ? '#FBBF24' : '#0A2342', fontWeight: '700', marginTop: 1 }}>
                         NIK: {a.nik} • Sandi: {a.password}
                       </Text>
                     </View>
-                    <Feather name={isCurrent ? 'check-circle' : 'chevron-right'} size={18} color={isCurrent ? '#1D4ED8' : '#94A3B8'} />
+                    <Feather name={isCurrent ? 'check-circle' : 'chevron-right'} size={18} color={isCurrent ? (isDark ? '#FBBF24' : '#D97706') : '#94A3B8'} />
                   </Pressable>
                 );
               })}
@@ -332,12 +332,12 @@ export default function LoginScreen() {
       {/* OTP VERIFICATION MODAL */}
       <Modal visible={showOtpModal} animationType="fade" transparent onRequestClose={() => setShowOtpModal(false)}>
         <View style={styles.modalOverlay}>
-          <View style={[styles.otpModalCard, { backgroundColor: isDark ? '#0B2240' : '#FFFFFF', borderColor: isDark ? '#1E3A8A' : '#CBD5E1' }]}>
+          <View style={[styles.otpModalCard, { backgroundColor: isDark ? '#0F1D33' : '#FFFFFF', borderColor: isDark ? '#1E3250' : '#CBD5E1' }]}>
             <View style={{ alignItems: 'center', gap: 6 }}>
-              <View style={{ width: 54, height: 54, borderRadius: 27, backgroundColor: '#EFF6FF', alignItems: 'center', justifyContent: 'center' }}>
-                <Feather name="shield" size={26} color="#1D4ED8" strokeWidth={iconStrokeWidth} />
+              <View style={{ width: 54, height: 54, borderRadius: 27, backgroundColor: isDark ? 'rgba(251,191,36,0.15)' : '#FEF3C7', alignItems: 'center', justifyContent: 'center' }}>
+                <Feather name="shield" size={26} color={isDark ? '#FBBF24' : '#D97706'} strokeWidth={iconStrokeWidth} />
               </View>
-              <Text style={{ fontSize: 16, fontWeight: '900', color: isDark ? '#FFFFFF' : '#071E49', textAlign: 'center' }}>
+              <Text style={{ fontSize: 16, fontWeight: '900', color: isDark ? '#FFFFFF' : '#0A2342', textAlign: 'center' }}>
                 Verifikasi Kode OTP Presisi
               </Text>
               <Text style={{ fontSize: 11.5, color: isDark ? '#94A3B8' : '#64748B', textAlign: 'center', lineHeight: 16 }}>
