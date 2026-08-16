@@ -88,6 +88,20 @@ export default function GudangScreen({ navigation }: any) {
     });
   }, [bahanInScope, statusFilter, kategoriFilter, searchQuery, mitraList]);
 
+  // Pagination per 5 item
+  const ITEMS_PER_PAGE = 5;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, kategoriFilter, activeTab]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredBahan.length / ITEMS_PER_PAGE));
+  const paginatedBahan = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredBahan.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredBahan, currentPage]);
+
   const isWilayah = !!role && ROLE_PERMISSIONS[role].isViewOnly;
   const canRequest = !!role && ROLE_PERMISSIONS[role].canManageGudang;
 
@@ -336,7 +350,7 @@ export default function GudangScreen({ navigation }: any) {
           <SectionTitle
             action={
               <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, fontWeight: '600' }}>
-                {filteredBahan.length} Bahan
+                Halaman {currentPage} dari {totalPages} ({filteredBahan.length} Bahan)
               </Text>
             }
           >
@@ -351,7 +365,7 @@ export default function GudangScreen({ navigation }: any) {
             />
           ) : (
             <View style={{ gap: spacing.sm }}>
-              {filteredBahan.map((b) => {
+              {paginatedBahan.map((b) => {
                 const isLow = b.stok <= b.ambangMinimum;
                 const sppgName = isWilayah ? sppgInScope.find((s) => s.id === b.sppgId)?.nama : null;
                 const mitra = b.mitraId ? mitraList.find((m) => m.id === b.mitraId) : undefined;
@@ -479,6 +493,82 @@ export default function GudangScreen({ navigation }: any) {
                   </Card>
                 );
               })}
+
+              {/* Pagination Controls (5 per page) */}
+              {totalPages > 1 && (
+                <View
+                  style={[
+                    styles.paginationRow,
+                    {
+                      backgroundColor: isDark ? colors.surface : '#FFFFFF',
+                      borderColor: colors.border,
+                      borderRadius: radius.md,
+                    },
+                  ]}
+                >
+                  <Pressable
+                    disabled={currentPage === 1}
+                    onPress={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    style={[
+                      styles.pageNavBtn,
+                      {
+                        borderColor: colors.border,
+                        backgroundColor: colors.surface,
+                        opacity: currentPage === 1 ? 0.35 : 1,
+                      },
+                    ]}
+                  >
+                    <Feather name="chevron-left" size={14} color={colors.text} />
+                    <Text style={{ fontSize: 11, fontWeight: '700', color: colors.text }}>Prev</Text>
+                  </Pressable>
+
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                      const isCurrent = pageNum === currentPage;
+                      return (
+                        <Pressable
+                          key={pageNum}
+                          onPress={() => setCurrentPage(pageNum)}
+                          style={[
+                            styles.pageNumberBtn,
+                            {
+                              backgroundColor: isCurrent ? (isDark ? colors.gold : colors.primary) : colors.surface,
+                              borderColor: isCurrent ? (isDark ? colors.gold : colors.primary) : colors.border,
+                              borderRadius: radius.sm,
+                            },
+                          ]}
+                        >
+                          <Text
+                            style={{
+                              fontSize: 11,
+                              fontWeight: '800',
+                              color: isCurrent ? (isDark ? '#07101E' : '#FFF') : colors.text,
+                            }}
+                          >
+                            {pageNum}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+
+                  <Pressable
+                    disabled={currentPage === totalPages}
+                    onPress={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    style={[
+                      styles.pageNavBtn,
+                      {
+                        borderColor: colors.border,
+                        backgroundColor: colors.surface,
+                        opacity: currentPage === totalPages ? 0.35 : 1,
+                      },
+                    ]}
+                  >
+                    <Text style={{ fontSize: 11, fontWeight: '700', color: colors.text }}>Next</Text>
+                    <Feather name="chevron-right" size={14} color={colors.text} />
+                  </Pressable>
+                </View>
+              )}
             </View>
           )}
         </View>
@@ -793,6 +883,31 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingHorizontal: 9,
     paddingVertical: 4,
+    borderWidth: 1,
+  },
+  paginationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 10,
+    borderWidth: 1,
+    marginTop: 4,
+  },
+  pageNavBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderRadius: 6,
+  },
+  pageNumberBtn: {
+    minWidth: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
     borderWidth: 1,
   },
 });
