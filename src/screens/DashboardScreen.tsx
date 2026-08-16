@@ -2034,7 +2034,12 @@ export default function DashboardScreen({ navigation }: any) {
                       padding: 12,
                       gap: 8,
                       borderLeftWidth: 3.5,
-                      borderLeftColor: warn.tingkat === 'warning' ? colors.warning : colors.primary,
+                      borderLeftColor:
+                        warn.tingkat === 'critical'
+                          ? colors.danger
+                          : warn.tingkat === 'warning'
+                          ? colors.warning
+                          : colors.primary,
                       borderWidth: 1,
                       borderColor: colors.border,
                     }}
@@ -2042,8 +2047,18 @@ export default function DashboardScreen({ navigation }: any) {
                     {/* Header row with category pill and timestamp chip */}
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                       <Pill
-                        label={warn.kategori.replace('_', ' ').toUpperCase()}
-                        tone={warn.tingkat === 'warning' ? 'warning' : 'primary'}
+                        label={
+                          warn.tingkat === 'critical'
+                            ? `ANOMALY: ${warn.kategori.replace('_', ' ').toUpperCase()}`
+                            : warn.kategori.replace('_', ' ').toUpperCase()
+                        }
+                        tone={
+                          warn.tingkat === 'critical'
+                            ? 'danger'
+                            : warn.tingkat === 'warning'
+                            ? 'warning'
+                            : 'primary'
+                        }
                       />
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.pill }}>
                         <Feather name="clock" size={10.5} color={colors.textMuted} />

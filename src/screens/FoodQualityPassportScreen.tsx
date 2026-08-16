@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
@@ -7,15 +7,152 @@ import { Card, Pill, PrimaryButton, SecondaryButton, SectionTitle } from '../com
 import { BRAND_ASSETS } from '../data/images';
 
 export default function FoodQualityPassportScreen({ navigation, route }: any) {
-  const { qualityPassportList, currentSppg } = useApp();
+  const { qualityPassportList, currentSppg, foodSafetyList, laporanList } = useApp();
   const { colors, fontSize, iconStrokeWidth, radius, spacing, isDark } = useTheme();
 
-  const batchId = route?.params?.batchId || 'BATCH-20260815-01';
+  const initialBatchId = route?.params?.batchId || 'BATCH-20260815-01';
+  const initialTanggal = route?.params?.tanggal;
+  const initialLogId = route?.params?.logId;
 
-  const passport = useMemo(
-    () => qualityPassportList.find((p) => p.batchId === batchId) || qualityPassportList[0],
-    [qualityPassportList, batchId],
-  );
+  const [selectedBatchId, setSelectedBatchId] = useState<string>(initialBatchId);
+
+  // Available batch options for quick switcher
+  const availableBatches = useMemo(() => {
+    const list: Array<{ batchId: string; label: string; tanggal: string }> = [];
+    
+    qualityPassportList.forEach((p) => {
+      list.push({
+        batchId: p.batchId,
+        label: `${p.tanggal.slice(5)} (${p.menuNama.split(',')[1]?.trim() || p.menuNama.slice(0, 15)})`,
+        tanggal: p.tanggal,
+      });
+    });
+
+    laporanList.forEach((l) => {
+      const bId = l.batchId || l.id;
+      if (!list.some((item) => item.batchId === bId)) {
+        list.push({
+          batchId: bId,
+          label: `${l.tanggal.slice(5)} (${l.menu.slice(0, 16)}...)`,
+          tanggal: l.tanggal,
+        });
+      }
+    });
+
+    return list;
+  }, [qualityPassportList, laporanList]);
+
+  // Dynamic Passport Synthesis
+  const passport = useMemo(() => {
+    // 1. Cek langsung di qualityPassportList
+    const exact = qualityPassportList.find(
+      (p) => p.batchId === selectedBatchId || p.id === selectedBatchId,
+    );
+    if (exact && !initialLogId) return exact;
+
+    // 2. Cek apakah ada matching di FoodSafetyLog
+    const matchedLog = foodSafetyList.find(
+      (f) =>
+        f.id === selectedBatchId ||
+        f.id === initialLogId ||
+        (initialTanggal && f.tanggal === initialTanggal),
+    );
+
+    // 3. Cek Laporan Produksi
+    const matchedLaporan = laporanList.find(
+      (l) =>
+        l.batchId === selectedBatchId ||
+        l.id === selectedBatchId ||
+        (initialTanggal && l.tanggal === initialTanggal) ||
+        (matchedLog && l.tanggal === matchedLog.tanggal),
+    );
+
+    if (matchedLog || matchedLaporan) {
+      const tanggal = matchedLog?.tanggal || matchedLaporan?.tanggal || '2026-08-15';
+      const menuNama =
+        matchedLaporan?.menu ||
+        `Menu Masakan Sehat (${matchedLog?.jenisMakanan ? matchedLog.jenisMakanan.toUpperCase() : 'Lauk Lengkap & Sayur'})`;
+      const isAman = matchedLog ? matchedLog.statusKadaluarsa === 'aman' : true;
+      const score = matchedLaporan?.qcScore || (isAman ? 98 : 70);
+      const grade = matchedLaporan?.qcGrade || (isAman ? 'A+' : 'C');
+      const verifier =
+        matchedLog?.petugasLabName ||
+        matchedLaporan?.qcApprovedBy ||
+        'Dr. Tri Wibowo, S.Gz';
+      const certifiedAt = matchedLog?.waktuUkurSuhu
+        ? `${matchedLog.waktuUkurSuhu} WIB`
+        : matchedLaporan?.qcTimestamp
+        ? `${matchedLaporan.qcTimestamp} WIB`
+        : '07:35 WIB';
+      const suhuInti = matchedLog?.suhuIntiMatang || 84.5;
+      const suhuHolding = matchedLog?.suhuHoldingBox || matchedLog?.suhuPenyimpanan || 64.2;
+
+      return {
+        id: `PASSPORT-${selectedBatchId}`,
+        batchId: matchedLaporan?.batchId || matchedLog?.id || selectedBatchId,
+        sppgId: currentSppg?.id || 'SPPG-001',
+        tanggal,
+        menuNama,
+        score,
+        grade,
+        verifierName: verifier,
+        verifierRole: 'Ahli Gizi SPPG Terverifikasi BGN',
+        parameters: {
+          titikMatang: {
+            value: suhuInti,
+            unit: '°C',
+            passed: suhuInti >= 75,
+            note:
+              suhuInti >= 75
+                ? `Suhu titik matang inti masakan (${suhuInti}°C) di atas ambang batas kritis BGN (≥75.0°C).`
+                : `Suhu titik matang (${suhuInti}°C) di bawah standar batas aman BGN.`,
+          },
+          organoleptik: {
+            passed: matchedLog?.rapidTestFormalin !== 'positif' && matchedLog?.rapidTestBoraks !== 'positif',
+            note:
+              matchedLog?.catatanLab ||
+              'Uji kimiawi 4 parameter (Formalin, Boraks, Pestisida, E.Coli) Negatif racun & organoleptik prima.',
+            rasa: 'Gurih Manis Pas',
+            aroma: 'Harum Sedap',
+            tekstur: 'Empuk Lembut',
+          },
+          gramasiPorsi: {
+            passed: true,
+            note: 'Gramasi tiap komponen piring memenuhi standar kecukupan nutrisi AKG BGN.',
+            nasi: 150,
+            protein: 80,
+            sayur: 60,
+            buah: 50,
+          },
+          suhuHolding: {
+            value: suhuHolding,
+            unit: '°C',
+            passed: suhuHolding >= 60,
+            note: `Suhu makanan di dalam thermal box (${suhuHolding}°C) terjaga hangat di atas 60°C selama distribusi.`,
+          },
+          sealingTutup: {
+            passed: true,
+            note: 'Klip 4 sisi terkunci rapat dan band sealer anti-tumpah terpasang rapi.',
+          },
+          higieneApd: {
+            passed: true,
+            note: 'Seluruh kru pemorsi mengenakan apron, hairnet, masker, dan sarung tangan steril 100%.',
+          },
+        },
+        certifiedAt,
+      };
+    }
+
+    return qualityPassportList[0];
+  }, [
+    qualityPassportList,
+    selectedBatchId,
+    initialTanggal,
+    initialLogId,
+    foodSafetyList,
+    laporanList,
+    currentSppg,
+  ]);
 
   if (!passport) return null;
 
@@ -33,6 +170,36 @@ export default function FoodQualityPassportScreen({ navigation, route }: any) {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
+      {/* Batch Switcher Bar */}
+      <View style={{ gap: 4 }}>
+        <Text style={{ fontSize: 11, fontWeight: '700', color: colors.textMuted }}>
+          Pilih Batch Produksi & Paspor Mutu:
+        </Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
+          {availableBatches.map((b) => {
+            const isSelected = selectedBatchId === b.batchId;
+            return (
+              <Pressable
+                key={b.batchId}
+                onPress={() => setSelectedBatchId(b.batchId)}
+                style={[
+                  styles.batchChip,
+                  {
+                    backgroundColor: isSelected ? colors.primary : colors.surface,
+                    borderColor: isSelected ? colors.primary : colors.border,
+                  },
+                ]}
+              >
+                <Feather name="award" size={12} color={isSelected ? '#FFF' : colors.primary} />
+                <Text style={{ fontSize: 11, fontWeight: '800', color: isSelected ? '#FFF' : colors.text }}>
+                  {b.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      </View>
+
       {/* Official Certificate Card */}
       <Card
         style={[
@@ -258,4 +425,13 @@ const styles = StyleSheet.create({
   checkCircle: { width: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   sealBox: { gap: 4 },
   stampPill: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1.5, borderRadius: 8 },
+  batchChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
 });

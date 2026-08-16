@@ -343,7 +343,15 @@ export interface KitchenReadinessScore {
 export interface AiKitchenEarlyWarning {
   id: string;
   tingkat: 'critical' | 'warning' | 'info';
-  kategori: 'waktu_masak' | 'suhu_holding' | 'stok_fefo' | 'distribusi' | 'anggaran';
+  kategori:
+    | 'anomali_konsumsi'
+    | 'anomali_pembelian'
+    | 'disparitas_harga'
+    | 'waktu_masak'
+    | 'suhu_holding'
+    | 'stok_fefo'
+    | 'distribusi'
+    | 'anggaran';
   pesan: string;
   rekomendasiAksi: string;
   actionRoute?: string;
