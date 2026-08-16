@@ -40,6 +40,11 @@ export default function FoodSafetyFormScreen({ navigation }: any) {
   // Tab State: Formulir Uji vs Riwayat Sertifikat Uji Lab
   const [activeTab, setActiveTab] = useState<'form' | 'riwayat'>('form');
 
+  // Riwayat Filters State
+  const [filterStatus, setFilterStatus] = useState<'semua' | 'aman' | 'peringatan'>('semua');
+  const [filterKategori, setFilterKategori] = useState<'semua' | 'nasi' | 'lauk' | 'sayur'>('semua');
+  const [searchQuery, setSearchQuery] = useState('');
+
   // Riwayat log uji lab khusus SPPG ini
   const scopedLogs = useMemo(() => {
     if (!currentSppg) return [];
@@ -47,6 +52,48 @@ export default function FoodSafetyFormScreen({ navigation }: any) {
       .filter((f) => f.sppgId === currentSppg.id)
       .sort((a, b) => (a.tanggal < b.tanggal ? 1 : -1));
   }, [foodSafetyList, currentSppg]);
+
+  const filteredLogs = useMemo(() => {
+    return scopedLogs.filter((log) => {
+      const hasChemicalHazard =
+        log.rapidTestFormalin === 'positif' ||
+        log.rapidTestBoraks === 'positif' ||
+        log.rapidTestPestisida === 'positif' ||
+        log.ujiBakteriEcoli === 'positif';
+      const isThermalWarning =
+        (log.suhuIntiMatang !== undefined && log.suhuIntiMatang < 75) ||
+        (log.suhuHoldingBox !== undefined && log.suhuHoldingBox < 60);
+      const isSafe =
+        !hasChemicalHazard &&
+        !isThermalWarning &&
+        log.statusKadaluarsa === 'aman' &&
+        log.organoleptikStatus !== 'tidak_layak';
+
+      // Status filter
+      if (filterStatus === 'aman' && !isSafe) return false;
+      if (filterStatus === 'peringatan' && isSafe) return false;
+
+      // Category filter
+      if (filterKategori !== 'semua') {
+        const lower = log.jenisMakanan.toLowerCase();
+        if (filterKategori === 'nasi' && !lower.includes('nasi') && !lower.includes('beras') && !lower.includes('karbo')) return false;
+        if (filterKategori === 'lauk' && !lower.includes('ayam') && !lower.includes('daging') && !lower.includes('ikan') && !lower.includes('telur') && !lower.includes('rendang') && !lower.includes('katsu') && !lower.includes('lauk') && !lower.includes('tahu') && !lower.includes('tempe')) return false;
+        if (filterKategori === 'sayur' && !lower.includes('sop') && !lower.includes('sayur') && !lower.includes('kangkung') && !lower.includes('buncis') && !lower.includes('bayam') && !lower.includes('lodeh') && !lower.includes('capcay') && !lower.includes('salad') && !lower.includes('kimlo')) return false;
+      }
+
+      // Search query
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchName = log.jenisMakanan.toLowerCase().includes(q);
+        const matchDate = log.tanggal.includes(q);
+        const matchNotes = (log.catatanLab || '').toLowerCase().includes(q);
+        const matchPetugas = (log.petugasLabName || '').toLowerCase().includes(q);
+        if (!matchName && !matchDate && !matchNotes && !matchPetugas) return false;
+      }
+
+      return true;
+    });
+  }, [scopedLogs, filterStatus, filterKategori, searchQuery]);
 
   // Ambil menu aktif hari ini dari laporan produksi / rencana menu
   const todayStr = todayDate();
@@ -763,12 +810,126 @@ export default function FoodSafetyFormScreen({ navigation }: any) {
             </View>
           </View>
 
+          {/* Search & Filter Controls Card */}
+          <Card style={{ gap: 10, padding: 12 }}>
+            <Input
+              label="Cari Log Uji Lab Pangan"
+              icon="search"
+              placeholder="Cari masakan, tanggal (YYYY-MM-DD), catatan..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+
+            {/* Filter Status Row */}
+            <View style={{ gap: 4 }}>
+              <Text style={{ fontSize: 10.5, fontWeight: '700', color: colors.textMuted }}>Filter Status Hasil Uji:</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
+                {[
+                  { key: 'semua', label: `Semua (${scopedLogs.length})` },
+                  {
+                    key: 'aman',
+                    label: `Lolos Standar (${scopedLogs.filter((l) => l.statusKadaluarsa === 'aman' && l.rapidTestFormalin !== 'positif' && l.rapidTestBoraks !== 'positif' && l.rapidTestPestisida !== 'positif' && l.ujiBakteriEcoli !== 'positif').length})`,
+                  },
+                  {
+                    key: 'peringatan',
+                    label: `Peringatan / Bahaya (${scopedLogs.filter((l) => l.statusKadaluarsa !== 'aman' || l.rapidTestFormalin === 'positif' || l.rapidTestBoraks === 'positif' || l.rapidTestPestisida === 'positif' || l.ujiBakteriEcoli === 'positif').length})`,
+                  },
+                ].map((item) => {
+                  const isSelected = filterStatus === item.key;
+                  return (
+                    <Pressable
+                      key={item.key}
+                      onPress={() => setFilterStatus(item.key as any)}
+                      style={[
+                        styles.chipBtn,
+                        {
+                          backgroundColor: isSelected ? colors.primary : colors.surface,
+                          borderColor: isSelected ? colors.primary : colors.border,
+                          paddingVertical: 5,
+                          paddingHorizontal: 10,
+                        },
+                      ]}
+                    >
+                      <Text style={{ fontSize: 11, fontWeight: '800', color: isSelected ? '#FFF' : colors.text }}>
+                        {item.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
+
+            {/* Filter Kategori Makanan Row */}
+            <View style={{ gap: 4 }}>
+              <Text style={{ fontSize: 10.5, fontWeight: '700', color: colors.textMuted }}>Filter Jenis Komponen:</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
+                {[
+                  { key: 'semua', label: 'Semua Komponen' },
+                  { key: 'nasi', label: 'Nasi / Karbo' },
+                  { key: 'lauk', label: 'Lauk / Protein' },
+                  { key: 'sayur', label: 'Sayuran & Sup' },
+                ].map((item) => {
+                  const isSelected = filterKategori === item.key;
+                  return (
+                    <Pressable
+                      key={item.key}
+                      onPress={() => setFilterKategori(item.key as any)}
+                      style={[
+                        styles.chipBtn,
+                        {
+                          backgroundColor: isSelected ? (isDark ? colors.gold : colors.accent) : colors.surface,
+                          borderColor: isSelected ? (isDark ? colors.gold : colors.accent) : colors.border,
+                          paddingVertical: 5,
+                          paddingHorizontal: 10,
+                        },
+                      ]}
+                    >
+                      <Text style={{ fontSize: 11, fontWeight: '800', color: isSelected ? (isDark ? '#07101E' : '#FFF') : colors.text }}>
+                        {item.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
+
+            {/* Active Filter Reset Button */}
+            {(searchQuery.trim().length > 0 || filterStatus !== 'semua' || filterKategori !== 'semua') && (
+              <Pressable
+                onPress={() => {
+                  setSearchQuery('');
+                  setFilterStatus('semua');
+                  setFilterKategori('semua');
+                }}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', paddingTop: 2 }}
+              >
+                <Feather name="rotate-ccw" size={11} color={colors.primary} />
+                <Text style={{ fontSize: 10.5, color: colors.primary, fontWeight: '700' }}>
+                  Reset Semua Filter ({filteredLogs.length} hasil ditemukan)
+                </Text>
+              </Pressable>
+            )}
+          </Card>
+
           {/* List of Lab Logs */}
-          <SectionTitle>Daftar Sertifikasi Uji Laboratorium SPPG</SectionTitle>
-          {scopedLogs.length === 0 ? (
-            <EmptyState icon="clipboard" title="Belum Ada Hasil Uji" body="Belum ada riwayat pengujian laboratorium pangan yang tersimpan." />
+          <SectionTitle
+            action={
+              <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: '600' }}>
+                {filteredLogs.length} dari {scopedLogs.length} Sampel
+              </Text>
+            }
+          >
+            Daftar Sertifikasi Uji Laboratorium SPPG
+          </SectionTitle>
+
+          {filteredLogs.length === 0 ? (
+            <EmptyState
+              icon="clipboard"
+              title="Tidak Ada Log yang Cocok"
+              body="Tidak ditemukan data pengujian laboratorium yang sesuai dengan kombinasi filter atau pencarian di atas."
+            />
           ) : (
-            scopedLogs.map((log) => {
+            filteredLogs.map((log) => {
               const hasChemicalHazard =
                 log.rapidTestFormalin === 'positif' ||
                 log.rapidTestBoraks === 'positif' ||
