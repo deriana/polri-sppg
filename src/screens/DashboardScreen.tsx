@@ -1964,173 +1964,87 @@ export default function DashboardScreen({ navigation }: any) {
             ))}
           </View>
 
-          {/* PERINGATAN STOK GUDANG MENIPIS / KRITIS */}
-          {lowStockMaterials.length > 0 && (
-            <Card
-              style={{
-                backgroundColor: isDark ? 'rgba(239,68,68,0.08)' : '#FEF2F2',
-                borderWidth: 0,
-                borderRadius: radius.xl,
-                gap: 12,
-                marginTop: spacing.xs,
-              }}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, minWidth: 160 }}>
-                  <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: isDark ? 'rgba(239,68,68,0.2)' : '#FEE2E2', alignItems: 'center', justifyContent: 'center' }}>
-                    <Feather name="package" size={16} color={colors.danger} />
-                  </View>
-                  <View>
-                    <Text style={{ fontSize: 11, fontWeight: '900', color: colors.danger, letterSpacing: 0.5 }}>
-                      PERINGATAN STOK GUDANG MENIPIS
-                    </Text>
-                    <Text style={{ fontSize: 10, color: colors.textMuted }}>
-                      {lowStockMaterials.length} bahan pangan berada di bawah batas minimum
-                    </Text>
-                  </View>
-                </View>
-                <Pill label={`${lowStockMaterials.length} Bahan Kritis`} tone="danger" />
-              </View>
-
-              <View style={{ gap: 8 }}>
-                {lowStockMaterials.map((item) => {
-                  const ratio = Math.min(100, Math.round((item.stok / item.ambangMinimum) * 100));
-                  return (
-                    <Pressable
-                      key={item.id}
-                      onPress={() => navigation.navigate('Gudang')}
-                      style={({ pressed }) => [
-                        {
-                          backgroundColor: colors.surface,
-                          borderRadius: radius.md,
-                          padding: 10,
-                          gap: 6,
-                          borderLeftWidth: 3.5,
-                          borderLeftColor: colors.danger,
-                        },
-                        pressed && { opacity: 0.8 },
-                      ]}
-                    >
-                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <View style={{ flex: 1, gap: 2 }}>
-                          <Text style={{ fontSize: 12, fontWeight: '800', color: colors.text }} numberOfLines={1}>
-                            {item.nama}
-                          </Text>
-                          <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
-                            Lokasi: {item.lokasiRak || 'Gudang Utama'} • Exp: {item.tanggalKadaluarsa || '—'}
-                          </Text>
-                        </View>
-                        <View style={{ alignItems: 'flex-end', gap: 2 }}>
-                          <Text style={{ fontSize: 13, fontWeight: '900', color: colors.danger }}>
-                            {item.stok} {item.satuan}
-                          </Text>
-                          <Text style={{ fontSize: 9.5, color: colors.textMuted }}>
-                            Min: {item.ambangMinimum} {item.satuan}
-                          </Text>
-                        </View>
+          {/* COMPACT PERINGATAN LOGISTIK & ASET (Ringkas & Langsung ke Detail Tanpa Overload) */}
+          {(lowStockMaterials.length > 0 || problematicEquipment.length > 0) && (
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: spacing.xs }}>
+              {lowStockMaterials.length > 0 && (
+                <Pressable
+                  onPress={() => navigation.navigate('Gudang')}
+                  style={({ pressed }) => [
+                    {
+                      flex: 1,
+                      minWidth: 150,
+                      backgroundColor: isDark ? 'rgba(239,68,68,0.12)' : '#FEF2F2',
+                      borderColor: isDark ? 'rgba(239,68,68,0.3)' : '#FCA5A5',
+                      borderWidth: 1,
+                      borderRadius: radius.lg,
+                      padding: 12,
+                      gap: 4,
+                      justifyContent: 'space-between',
+                    },
+                    pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+                  ]}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: isDark ? 'rgba(239,68,68,0.25)' : '#FEE2E2', alignItems: 'center', justifyContent: 'center' }}>
+                        <Feather name="package" size={13} color={colors.danger} />
                       </View>
-
-                      {/* Stock Level Bar */}
-                      <View style={{ height: 4.5, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#F1F5F9', borderRadius: 3, overflow: 'hidden' }}>
-                        <View style={{ height: '100%', width: `${ratio}%`, backgroundColor: colors.danger, borderRadius: 3 }} />
-                      </View>
-                    </Pressable>
-                  );
-                })}
-              </View>
-
-              <PrimaryButton
-                label="Buka Gudang & Ajukan Permintaan Pasokan"
-                icon="package"
-                onPress={() => navigation.navigate('Gudang')}
-              />
-            </Card>
-          )}
-
-          {/* PERINGATAN PERALATAN DAPUR BERMASALAH / PERBAIKAN */}
-          {problematicEquipment.length > 0 && (
-            <Card
-              style={{
-                backgroundColor: isDark ? 'rgba(217,119,6,0.08)' : '#FFFBEB',
-                borderWidth: 0,
-                borderRadius: radius.xl,
-                gap: 12,
-                marginTop: spacing.xs,
-              }}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, minWidth: 160 }}>
-                  <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: isDark ? 'rgba(217,119,6,0.2)' : '#FEF3C7', alignItems: 'center', justifyContent: 'center' }}>
-                    <Feather name="tool" size={16} color={colors.warning} />
-                  </View>
-                  <View>
-                    <Text style={{ fontSize: 11, fontWeight: '900', color: colors.warning, letterSpacing: 0.5 }}>
-                      PERALATAN PERLU PENANGANAN
-                    </Text>
-                    <Text style={{ fontSize: 10, color: colors.textMuted }}>
-                      {problematicEquipment.length} aset teridentifikasi kendala / perbaikan
-                    </Text>
-                  </View>
-                </View>
-                <Pill label={`${problematicEquipment.length} Unit`} tone="warning" />
-              </View>
-
-              <View style={{ gap: 8 }}>
-                {problematicEquipment.slice(0, 4).map((eq) => (
-                  <Pressable
-                    key={eq.id}
-                    onPress={() => navigation.navigate('AssetQrDetail', { equipmentId: eq.id })}
-                    style={({ pressed }) => [
-                      {
-                        backgroundColor: colors.surface,
-                        borderRadius: radius.md,
-                        padding: 10,
-                        gap: 6,
-                        borderLeftWidth: 3.5,
-                        borderLeftColor: eq.status === 'rusak' ? colors.danger : colors.warning,
-                      },
-                      pressed && { opacity: 0.8 },
-                    ]}
-                  >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <View style={{ flex: 1, gap: 2 }}>
-                        <Text style={{ fontSize: 12, fontWeight: '800', color: colors.text }} numberOfLines={1}>
-                          {eq.nama}
-                        </Text>
-                        <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
-                          Kode: {eq.kodeUnit} • Lokasi: {eq.lokasi}
-                        </Text>
-                      </View>
-                      <Pill
-                        label={
-                          eq.status === 'rusak'
-                            ? 'Rusak'
-                            : eq.status === 'perlu_perbaikan'
-                            ? 'Perbaikan'
-                            : eq.jumlahBermasalah > 0
-                            ? `${eq.jumlahBermasalah} Bermasalah`
-                            : 'Maintenance'
-                        }
-                        tone={eq.status === 'rusak' ? 'danger' : 'warning'}
-                      />
-                    </View>
-
-                    {eq.catatanKondisi && (
-                      <Text style={{ fontSize: 10.5, color: colors.textMuted, fontStyle: 'italic' }} numberOfLines={2}>
-                        "{eq.catatanKondisi}"
+                      <Text style={{ fontSize: 11, fontWeight: '900', color: colors.danger, letterSpacing: 0.4 }}>
+                        STOK KRITIS
                       </Text>
-                    )}
-                  </Pressable>
-                ))}
-              </View>
+                    </View>
+                    <Feather name="chevron-right" size={14} color={colors.danger} />
+                  </View>
 
-              <PrimaryButton
-                label="Buka Manajemen Peralatan & Aset"
-                icon="tool"
-                variant="secondary"
-                onPress={() => navigation.navigate('Peralatan')}
-              />
-            </Card>
+                  <Text style={{ fontSize: 16, fontWeight: '900', color: colors.danger, marginTop: 2 }}>
+                    {lowStockMaterials.length} Bahan
+                  </Text>
+                  <Text style={{ fontSize: 10.5, color: colors.textMuted }} numberOfLines={1}>
+                    {lowStockMaterials.map((b) => b.nama.split(' ')[0]).join(', ')} menipis
+                  </Text>
+                </Pressable>
+              )}
+
+              {problematicEquipment.length > 0 && (
+                <Pressable
+                  onPress={() => navigation.navigate('Peralatan', { initialStatusFilter: 'bermasalah' })}
+                  style={({ pressed }) => [
+                    {
+                      flex: 1,
+                      minWidth: 150,
+                      backgroundColor: isDark ? 'rgba(217,119,6,0.12)' : '#FFFBEB',
+                      borderColor: isDark ? 'rgba(217,119,6,0.3)' : '#FCD34D',
+                      borderWidth: 1,
+                      borderRadius: radius.lg,
+                      padding: 12,
+                      gap: 4,
+                      justifyContent: 'space-between',
+                    },
+                    pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+                  ]}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: isDark ? 'rgba(217,119,6,0.25)' : '#FEF3C7', alignItems: 'center', justifyContent: 'center' }}>
+                        <Feather name="tool" size={13} color={colors.warning} />
+                      </View>
+                      <Text style={{ fontSize: 11, fontWeight: '900', color: colors.warning, letterSpacing: 0.4 }}>
+                        ALAT KENDALA
+                      </Text>
+                    </View>
+                    <Feather name="chevron-right" size={14} color={colors.warning} />
+                  </View>
+
+                  <Text style={{ fontSize: 16, fontWeight: '900', color: colors.warning, marginTop: 2 }}>
+                    {problematicEquipment.length} Unit
+                  </Text>
+                  <Text style={{ fontSize: 10.5, color: colors.textMuted }} numberOfLines={1}>
+                    {problematicEquipment.map((e) => e.nama.split(' ')[0]).join(', ')} butuh servis
+                  </Text>
+                </Pressable>
+              )}
+            </View>
           )}
         </>
       )}
