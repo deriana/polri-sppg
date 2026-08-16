@@ -35,10 +35,10 @@ export default function PeralatanScreen({ route }: any) {
 
   // Status counts for filter chips
   const countBermasalah = peralatanInScope.filter(
-    (p) => p.status === 'rusak' || p.status === 'perlu_perbaikan' || p.status === 'maintenance' || p.jumlahBermasalah > 0,
+    (p) => p.status === 'rusak' || p.status === 'perlu_perbaikan' || (p.status !== 'maintenance' && p.jumlahBermasalah > 0),
   ).length;
   const countReady = peralatanInScope.filter((p) => p.status === 'ready' && p.jumlahBermasalah === 0).length;
-  const countMaintenance = peralatanInScope.filter((p) => p.status === 'maintenance' || p.status === 'perlu_perbaikan').length;
+  const countMaintenance = peralatanInScope.filter((p) => p.status === 'maintenance').length;
   const countRusak = peralatanInScope.filter((p) => p.status === 'rusak').length;
 
   // Interactive Checklist per Role in Peralatan Hub
@@ -83,13 +83,17 @@ export default function PeralatanScreen({ route }: any) {
     if (!matchKat) return false;
 
     if (activeStatusFilter === 'bermasalah') {
-      return eq.status === 'rusak' || eq.status === 'perlu_perbaikan' || eq.status === 'maintenance' || eq.jumlahBermasalah > 0;
+      return (
+        eq.status === 'rusak' ||
+        eq.status === 'perlu_perbaikan' ||
+        (eq.status !== 'maintenance' && eq.jumlahBermasalah > 0)
+      );
     }
     if (activeStatusFilter === 'ready') {
       return eq.status === 'ready' && eq.jumlahBermasalah === 0;
     }
     if (activeStatusFilter === 'maintenance') {
-      return eq.status === 'maintenance' || eq.status === 'perlu_perbaikan';
+      return eq.status === 'maintenance';
     }
     if (activeStatusFilter === 'rusak') {
       return eq.status === 'rusak';
