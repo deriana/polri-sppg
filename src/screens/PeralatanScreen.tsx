@@ -121,24 +121,24 @@ export default function PeralatanScreen({ route }: any) {
 
   const getEquipmentBadge = (eq: Peralatan) => {
     if (eq.status === 'rusak') {
-      return { label: 'RUSAK TOTAL', tone: 'danger' as const };
+      return { label: 'Rusak Total', tone: 'danger' as const };
     }
     if (eq.status === 'perlu_perbaikan') {
-      return { label: 'PERLU PERBAIKAN', tone: 'warning' as const };
+      return { label: 'Perlu Servis', tone: 'warning' as const };
     }
     if (eq.status === 'maintenance') {
-      return { label: 'DALAM MAINTENANCE', tone: 'warning' as const };
+      return { label: 'Maintenance', tone: 'warning' as const };
     }
     if (eq.jumlahBermasalah > 0) {
       return {
-        label: `${eq.jumlahBermasalah} BERMASALAH (${eq.jumlahReady}/${eq.jumlahTotal} READY)`,
+        label: `${eq.jumlahBermasalah} Unit Bermasalah`,
         tone: 'warning' as const,
       };
     }
     if (eq.status === 'digunakan') {
-      return { label: 'SEDANG DIGUNAKAN', tone: 'primary' as const };
+      return { label: 'Sedang Digunakan', tone: 'primary' as const };
     }
-    return { label: 'SIAP PAKAI (READY)', tone: 'success' as const };
+    return { label: 'Siap Pakai', tone: 'success' as const };
   };
 
   const statusTone = (st: PeralatanStatus) => {
@@ -480,27 +480,34 @@ export default function PeralatanScreen({ route }: any) {
             {eq.fotoPeralatan && (
               <Image source={{ uri: eq.fotoPeralatan }} style={styles.eqPhoto} resizeMode="cover" />
             )}
-            <View style={styles.rowBetween}>
-              <View style={{ flex: 1, gap: 2 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text, flex: 1 }}>{eq.nama}</Text>
-                  <Feather name="chevron-right" size={16} color={colors.textMuted} />
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                  <Text style={{ fontSize: fontSize.xs, color: colors.primary, fontWeight: '700' }}>Unit: {eq.kodeUnit}</Text>
-                  <Pressable
-                    onPress={(e) => {
-                      e.stopPropagation?.();
-                      setQrModalEq(eq);
-                    }}
-                    style={[styles.qrBadge, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}
-                  >
-                    <Feather name="maximize" size={10} color={colors.primary} />
-                    <Text style={{ fontSize: 10, color: colors.primary, fontWeight: '800' }}>{eq.qrCodeId}</Text>
-                  </Pressable>
-                </View>
-              </View>
+            {/* Top Bar: Status Pill & QR Badge */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
               <Pill label={getEquipmentBadge(eq).label} tone={getEquipmentBadge(eq).tone} />
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation?.();
+                  setQrModalEq(eq);
+                }}
+                style={[styles.qrBadge, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}
+              >
+                <Feather name="maximize" size={10} color={colors.primary} />
+                <Text style={{ fontSize: 10, color: colors.primary, fontWeight: '800' }}>{eq.qrCodeId}</Text>
+              </Pressable>
+            </View>
+
+            {/* Title & Unit Row */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 2 }}>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text }}>
+                  {eq.nama}
+                </Text>
+                <Text style={{ fontSize: fontSize.xs, color: colors.primary, fontWeight: '700' }}>
+                  Kode Unit: {eq.kodeUnit}
+                </Text>
+              </View>
+              <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
+                <Feather name="chevron-right" size={15} color={colors.textMuted} />
+              </View>
             </View>
 
             <View style={[styles.infoGrid, { backgroundColor: colors.background, borderRadius: radius.md }]}>
