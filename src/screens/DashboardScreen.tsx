@@ -22,6 +22,7 @@ import { useScopedData, usePendingSyncCount } from '../hooks';
 import { AlertLog, AlertTingkat } from '../types';
 import { ROLE_LABEL, ROLE_PERMISSIONS, roleScopeLabel, scopePolresInPolda } from '../utils/scope';
 import { syncOfflineQueue } from '../utils/offlineQueue';
+import { KITCHEN_DAILY_PERFORMANCES } from '../mock/kitchenPerformance';
 
 function todayDate(): string {
   return new Date().toISOString().slice(0, 10);
@@ -321,6 +322,10 @@ export default function DashboardScreen({ navigation }: any) {
   const [syncing, setSyncing] = React.useState(false);
   const [showReadinessModal, setShowReadinessModal] = useState(false);
   const today = todayDate();
+
+  const kitchenPerformance = useMemo(() => {
+    return KITCHEN_DAILY_PERFORMANCES[currentSppg?.id || 'SPPG-001'] || KITCHEN_DAILY_PERFORMANCES['SPPG-001'];
+  }, [currentSppg?.id]);
 
   const handleSync = async () => {
     setSyncing(true);
@@ -2108,6 +2113,74 @@ export default function DashboardScreen({ navigation }: any) {
                 ))}
             </Card>
           )}
+
+          {/* WIDGET RAPOR MUTU KINERJA OPERASIONAL DAPUR (KITCHEN DAILY PERFORMANCE SCORE) */}
+          <Card
+            style={{
+              backgroundColor: isDark ? colors.surface : '#FFFFFF',
+              borderWidth: 0,
+              borderRadius: radius.xl,
+              gap: 12,
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, minWidth: 160 }}>
+                <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: isDark ? 'rgba(234,179,8,0.2)' : '#FEF9C3', alignItems: 'center', justifyContent: 'center' }}>
+                  <Feather name="award" size={16} color={isDark ? colors.gold : '#CA8A04'} />
+                </View>
+                <View>
+                  <Text style={{ fontSize: 11, fontWeight: '900', color: colors.text, letterSpacing: 0.5 }}>
+                    RAPOR MUTU OPERASIONAL DAPUR
+                  </Text>
+                  <Text style={{ fontSize: 10, color: colors.textMuted }}>
+                    Evaluasi Internal Harian • Update {kitchenPerformance.lastUpdated}
+                  </Text>
+                </View>
+              </View>
+              <Pill label={`Grade ${kitchenPerformance.grade} (${kitchenPerformance.overallScore}/100)`} tone="success" />
+            </View>
+
+            {/* 6 Performance Pillars Bars */}
+            <View style={{ gap: 8 }}>
+              {kitchenPerformance.pillars.map((pillar) => (
+                <View key={pillar.key} style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC', padding: 10, borderRadius: radius.md, gap: 4 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Feather name={pillar.icon as any} size={12} color={colors.primary} />
+                      <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }}>
+                        {pillar.label}
+                      </Text>
+                    </View>
+                    <Text style={{ fontSize: 11.5, fontWeight: '900', color: colors.primary }}>
+                      {pillar.score}%
+                    </Text>
+                  </View>
+
+                  {/* Progress track */}
+                  <View style={{ height: 5, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0', borderRadius: 3, overflow: 'hidden' }}>
+                    <View style={{ height: '100%', width: `${pillar.score}%`, backgroundColor: colors.primary, borderRadius: 3 }} />
+                  </View>
+
+                  <Text style={{ fontSize: 10, color: colors.textMuted, marginTop: 1 }}>
+                    {pillar.status}
+                  </Text>
+                </View>
+              ))}
+            </View>
+
+            {/* Daily Continuous Improvement Recommendation Box */}
+            <View style={{ backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#EFF6FF', padding: 10, borderRadius: radius.md, gap: 4 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Feather name="info" size={13} color={colors.primary} />
+                <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.primary }}>
+                  Catatan Rekomendasi Evaluasi Hari Ini:
+                </Text>
+              </View>
+              <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
+                {kitchenPerformance.ringkasanEvaluasi}
+              </Text>
+            </View>
+          </Card>
         </>
       )}
 

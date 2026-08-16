@@ -755,3 +755,23 @@ export interface SystemActivityLog {
   metadata?: Record<string, any>;
 }
 
+export interface KitchenPerformancePillar {
+  key: string;
+  label: string;
+  score: number; // 0 - 100
+  status: string; // e.g. "1.500 Porsi Tuntas Jam 06:15"
+  tone: 'success' | 'warning' | 'danger' | 'info';
+  icon: string; // Feather icon name
+}
+
+export interface KitchenDailyPerformance {
+  sppgId: string;
+  tanggal: string;
+  overallScore: number; // e.g. 96.2
+  grade: 'A+' | 'A' | 'B' | 'C';
+  statusLabel: string; // e.g. "Kinerja Prima (Optimal)"
+  ringkasanEvaluasi: string;
+  pillars: KitchenPerformancePillar[];
+  lastUpdated: string;
+}
+
