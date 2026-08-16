@@ -1880,7 +1880,111 @@ export default function DashboardScreen({ navigation }: any) {
       {/* ========================================================================= */}
       {dashboardTab === 'operasional' && (
         <>
-          {/* COMPACT PERINGATAN LOGISTIK & ASET DI PALING ATAS (Prioritas Utama) */}
+          {/* 1. RAPOR MUTU OPERASIONAL DAPUR DI PALING ATAS (Bento Grid Bebas Overlay) */}
+          <Card style={{ gap: spacing.sm }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, minWidth: 160 }}>
+                <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: isDark ? 'rgba(234,179,8,0.2)' : '#FEF9C3', alignItems: 'center', justifyContent: 'center' }}>
+                  <Feather name="award" size={16} color={isDark ? colors.gold : '#CA8A04'} />
+                </View>
+                <View>
+                  <Text style={{ fontSize: 11, fontWeight: '900', color: colors.text, letterSpacing: 0.5 }}>
+                    RAPOR MUTU OPERASIONAL DAPUR
+                  </Text>
+                  <Text style={{ fontSize: 10, color: colors.textMuted }}>
+                    Evaluasi Harian • Score: {kitchenPerformance.overallScore}/100
+                  </Text>
+                </View>
+              </View>
+              <Pill label={`Grade ${kitchenPerformance.grade} (${kitchenPerformance.overallScore})`} tone="success" />
+            </View>
+
+            {/* 6 Performance Pillars in 2-Column Bento Grid (Spacious Stacked Layout) */}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 2 }}>
+              {kitchenPerformance.pillars.map((pillar) => {
+                const isPillarSuccess = pillar.score >= 95;
+                const isPillarWarning = pillar.score < 90;
+                return (
+                  <View
+                    key={pillar.key}
+                    style={{
+                      width: '48.2%',
+                      flexGrow: 1,
+                      backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC',
+                      borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#E2E8F0',
+                      borderWidth: 1,
+                      borderRadius: radius.md,
+                      padding: 10,
+                      gap: 6,
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    {/* Top Row: Mini Icon Left, Bold Score Right */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <View
+                        style={{
+                          width: 24,
+                          height: 24,
+                          borderRadius: 12,
+                          backgroundColor: isDark ? 'rgba(59,130,246,0.15)' : '#EFF6FF',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Feather name={pillar.icon as any} size={12} color={colors.primary} />
+                      </View>
+                      <Text
+                        style={{
+                          fontSize: 13.5,
+                          fontWeight: '900',
+                          color: isPillarSuccess ? colors.success : isPillarWarning ? colors.warning : colors.primary,
+                        }}
+                      >
+                        {pillar.score}%
+                      </Text>
+                    </View>
+
+                    {/* Middle: Full-width Label (Zero Squishing/Overlay) */}
+                    <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text, lineHeight: 14 }} numberOfLines={2}>
+                      {pillar.label}
+                    </Text>
+
+                    {/* Mini Progress Track */}
+                    <View style={{ height: 4, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0', borderRadius: 2, overflow: 'hidden' }}>
+                      <View
+                        style={{
+                          height: '100%',
+                          width: `${pillar.score}%`,
+                          backgroundColor: isPillarSuccess ? colors.success : isPillarWarning ? colors.warning : colors.primary,
+                          borderRadius: 2,
+                        }}
+                      />
+                    </View>
+
+                    {/* Status note */}
+                    <Text style={{ fontSize: 9.5, color: colors.textMuted, lineHeight: 13 }} numberOfLines={1}>
+                      {pillar.status}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+
+            {/* Compact Continuous Improvement Recommendation */}
+            <View style={{ backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#EFF6FF', padding: 8, borderRadius: radius.md, gap: 3, marginTop: 2 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                <Feather name="info" size={12} color={colors.primary} />
+                <Text style={{ fontSize: 10, fontWeight: '800', color: colors.primary }}>
+                  Rekomendasi Evaluasi Hari Ini:
+                </Text>
+              </View>
+              <Text style={{ fontSize: 10.5, color: colors.textMuted, lineHeight: 14 }}>
+                {kitchenPerformance.ringkasanEvaluasi}
+              </Text>
+            </View>
+          </Card>
+
+          {/* COMPACT PERINGATAN LOGISTIK & ASET (Prioritas Utama) */}
           {(lowStockMaterials.length > 0 || problematicEquipment.length > 0) && (
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
               {lowStockMaterials.length > 0 && (
@@ -2150,91 +2254,6 @@ export default function DashboardScreen({ navigation }: any) {
               </Pressable>
             ))}
           </View>
-
-          {/* RAPOR MUTU OPERASIONAL DAPUR (GRID 2-KOLOM COMPACT BENTO) */}
-          <Card style={{ gap: spacing.sm }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, minWidth: 160 }}>
-                <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: isDark ? 'rgba(234,179,8,0.2)' : '#FEF9C3', alignItems: 'center', justifyContent: 'center' }}>
-                  <Feather name="award" size={16} color={isDark ? colors.gold : '#CA8A04'} />
-                </View>
-                <View>
-                  <Text style={{ fontSize: 11, fontWeight: '900', color: colors.text, letterSpacing: 0.5 }}>
-                    RAPOR MUTU OPERASIONAL DAPUR
-                  </Text>
-                  <Text style={{ fontSize: 10, color: colors.textMuted }}>
-                    Evaluasi Harian • Score: {kitchenPerformance.overallScore}/100
-                  </Text>
-                </View>
-              </View>
-              <Pill label={`Grade ${kitchenPerformance.grade} (${kitchenPerformance.overallScore})`} tone="success" />
-            </View>
-
-            {/* 6 Performance Pillars in 2-Column Bento Grid */}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 2 }}>
-              {kitchenPerformance.pillars.map((pillar) => {
-                const isPillarSuccess = pillar.score >= 95;
-                const isPillarWarning = pillar.score < 90;
-                return (
-                  <View
-                    key={pillar.key}
-                    style={{
-                      width: '48.5%',
-                      flexGrow: 1,
-                      backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC',
-                      borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#E2E8F0',
-                      borderWidth: 1,
-                      borderRadius: radius.md,
-                      padding: 10,
-                      gap: 4,
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, flex: 1 }}>
-                        <Feather name={pillar.icon as any} size={13} color={colors.primary} />
-                        <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }} numberOfLines={1}>
-                          {pillar.label}
-                        </Text>
-                      </View>
-                      <Text style={{ fontSize: 13, fontWeight: '900', color: isPillarSuccess ? colors.success : isPillarWarning ? colors.warning : colors.primary }}>
-                        {pillar.score}%
-                      </Text>
-                    </View>
-
-                    {/* Mini Track */}
-                    <View style={{ height: 4, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0', borderRadius: 2, overflow: 'hidden', marginVertical: 2 }}>
-                      <View
-                        style={{
-                          height: '100%',
-                          width: `${pillar.score}%`,
-                          backgroundColor: isPillarSuccess ? colors.success : isPillarWarning ? colors.warning : colors.primary,
-                          borderRadius: 2,
-                        }}
-                      />
-                    </View>
-
-                    <Text style={{ fontSize: 9.5, color: colors.textMuted }} numberOfLines={1}>
-                      {pillar.status}
-                    </Text>
-                  </View>
-                );
-              })}
-            </View>
-
-            {/* Compact Continuous Improvement Evaluation Recommendation */}
-            <View style={{ backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#EFF6FF', padding: 8, borderRadius: radius.md, gap: 3, marginTop: 2 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-                <Feather name="info" size={12} color={colors.primary} />
-                <Text style={{ fontSize: 10, fontWeight: '800', color: colors.primary }}>
-                  Rekomendasi Evaluasi Hari Ini:
-                </Text>
-              </View>
-              <Text style={{ fontSize: 10.5, color: colors.textMuted, lineHeight: 14 }}>
-                {kitchenPerformance.ringkasanEvaluasi}
-              </Text>
-            </View>
-          </Card>
         </>
       )}
 
