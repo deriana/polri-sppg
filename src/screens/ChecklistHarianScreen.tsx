@@ -150,14 +150,16 @@ export default function ChecklistHarianScreen() {
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       {/* 1. Header Hero Card */}
       <Card variant="accent" style={{ gap: spacing.xs }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
             <Feather name="check-square" size={18} color={isDark ? colors.gold : colors.primary} />
-            <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
-              {isKepala ? 'CHECKLIST OPERASIONAL SPPG (SEMUA DIVISI)' : `CHECKLIST HARIAN (${ROLE_LABEL[role]?.toUpperCase() || 'STAF'})`}
+            <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5, flex: 1 }} numberOfLines={1}>
+              {isKepala ? 'CHECKLIST OPERASIONAL SPPG' : 'CHECKLIST HARIAN SAYA'}
             </Text>
           </View>
-          <Pill label={`${completedCount}/${displayItems.length} Selesai`} tone={allAnswered ? 'success' : 'warning'} />
+          <View style={{ flexShrink: 0 }}>
+            <Pill label={`${completedCount}/${displayItems.length} Selesai`} tone={allAnswered ? 'success' : 'warning'} />
+          </View>
         </View>
         <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, marginTop: 2 }}>
           {isKepala

@@ -2097,15 +2097,22 @@ export default function DashboardScreen({ navigation }: any) {
           <Card style={{ gap: spacing.sm, borderRadius: 20, borderWidth: 1, borderColor: colors.border, padding: 16 }}>
             <Pressable
               onPress={() => setIsWorkflowExpanded(!isWorkflowExpanded)}
-              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}
             >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
-                <Feather name={isKepala ? 'layers' : 'check-circle'} size={16} color={colors.primary} />
-                <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.4 }}>
-                  {isKepala ? 'ALUR OPERASIONAL SPPG HARI INI' : `TUGAS SAYA HARI INI (${ROLE_LABEL[role]?.toUpperCase() || 'STAF'})`}
-                </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+                <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Feather name={isKepala ? 'layers' : 'check-circle'} size={14} color={colors.primary} />
+                </View>
+                <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
+                  <Text style={{ fontSize: 12, fontWeight: '900', color: colors.primary, letterSpacing: 0.3 }} numberOfLines={1}>
+                    {isKepala ? 'ALUR OPERASIONAL SPPG' : 'TUGAS SAYA HARI INI'}
+                  </Text>
+                  <Text style={{ fontSize: 10.5, color: colors.textMuted, fontWeight: '700' }} numberOfLines={1}>
+                    {ROLE_LABEL[role] || 'Staf Tim'}
+                  </Text>
+                </View>
               </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                 <Pill
                   label={`${roleProgressPct}% (${completedRoleSteps}/${activeTaskList.length})`}
                   tone={roleProgressPct >= 100 ? 'success' : roleProgressPct > 50 ? 'primary' : 'warning'}
