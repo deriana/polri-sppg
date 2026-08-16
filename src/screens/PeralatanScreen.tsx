@@ -119,6 +119,28 @@ export default function PeralatanScreen({ route }: any) {
     navigation.navigate('AssetQrDetail', { peralatan: eq, sppgNama: sppg?.nama });
   };
 
+  const getEquipmentBadge = (eq: Peralatan) => {
+    if (eq.status === 'rusak') {
+      return { label: 'RUSAK TOTAL', tone: 'danger' as const };
+    }
+    if (eq.status === 'perlu_perbaikan') {
+      return { label: 'PERLU PERBAIKAN', tone: 'warning' as const };
+    }
+    if (eq.status === 'maintenance') {
+      return { label: 'DALAM MAINTENANCE', tone: 'warning' as const };
+    }
+    if (eq.jumlahBermasalah > 0) {
+      return {
+        label: `${eq.jumlahBermasalah} BERMASALAH (${eq.jumlahReady}/${eq.jumlahTotal} READY)`,
+        tone: 'warning' as const,
+      };
+    }
+    if (eq.status === 'digunakan') {
+      return { label: 'SEDANG DIGUNAKAN', tone: 'primary' as const };
+    }
+    return { label: 'SIAP PAKAI (READY)', tone: 'success' as const };
+  };
+
   const statusTone = (st: PeralatanStatus) => {
     switch (st) {
       case 'ready':
@@ -478,7 +500,7 @@ export default function PeralatanScreen({ route }: any) {
                   </Pressable>
                 </View>
               </View>
-              <Pill label={eq.status.replace('_', ' ').toUpperCase()} tone={statusTone(eq.status)} />
+              <Pill label={getEquipmentBadge(eq).label} tone={getEquipmentBadge(eq).tone} />
             </View>
 
             <View style={[styles.infoGrid, { backgroundColor: colors.background, borderRadius: radius.md }]}>
@@ -494,6 +516,14 @@ export default function PeralatanScreen({ route }: any) {
                   {eq.jumlahReady.toLocaleString('id-ID')} unit
                 </Text>
               </View>
+              {eq.jumlahBermasalah > 0 && (
+                <View style={styles.infoCol}>
+                  <Text style={{ fontSize: fontSize.xs, color: colors.warning, fontWeight: '700' }}>Kendala/Servis</Text>
+                  <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.warning }}>
+                    {eq.jumlahBermasalah.toLocaleString('id-ID')} unit
+                  </Text>
+                </View>
+              )}
             </View>
 
             <View style={{ gap: 2 }}>
