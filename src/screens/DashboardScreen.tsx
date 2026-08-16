@@ -1912,15 +1912,21 @@ export default function DashboardScreen({ navigation }: any) {
             {/* 6 Performance Pillars in 3-Column Micro Bento Grid */}
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
               {kitchenPerformance.pillars.map((pillar) => {
-                const isPillarSuccess = pillar.score >= 95;
-                const isPillarWarning = pillar.score < 90;
-                const scoreColor = isPillarSuccess ? colors.success : isPillarWarning ? colors.warning : colors.primary;
+                const isPillarSuccess = pillar.score >= 90;
+                const isPillarWarning = pillar.score >= 75 && pillar.score < 90;
+                const scoreColor = isPillarSuccess ? colors.success : isPillarWarning ? colors.warning : colors.danger;
                 const shortLabels: Record<string, string> = {
-                  masak: 'Masak & Rasa',
+                  operasional_masak: 'Proses Masak',
+                  keamanan_uji_lab: 'Uji Lab QC',
+                  standar_gizi_alergi: 'Gizi AKG',
+                  ketepatan_distribusi: 'Distribusi',
+                  sanitasi_checklist: 'Kebersihan',
+                  presensi_staf: 'Staf Tim',
+                  masak: 'Proses Masak',
                   organoleptik: 'Uji Lab QC',
                   gizi: 'Gizi AKG',
                   distribusi: 'Distribusi',
-                  sanitasi: 'Sanitasi',
+                  sanitasi: 'Kebersihan',
                   kehadiran: 'Staf Tim',
                 };
 
@@ -2671,10 +2677,10 @@ export default function DashboardScreen({ navigation }: any) {
 
               <View style={{ gap: 8 }}>
                 {kitchenPerformance.pillars.map((pillar) => {
-                  const isPillarSuccess = pillar.score >= 95;
-                  const isPillarWarning = pillar.score < 90;
-                  const scoreTone = isPillarSuccess ? 'success' : isPillarWarning ? 'warning' : 'primary';
-                  const scoreColor = isPillarSuccess ? colors.success : isPillarWarning ? colors.warning : colors.primary;
+                  const isPillarSuccess = pillar.score >= 90;
+                  const isPillarWarning = pillar.score >= 75 && pillar.score < 90;
+                  const scoreTone = isPillarSuccess ? 'success' : isPillarWarning ? 'warning' : 'danger';
+                  const scoreColor = isPillarSuccess ? colors.success : isPillarWarning ? colors.warning : colors.danger;
                   const isSelected = selectedPillarKey === pillar.key;
 
                   return (

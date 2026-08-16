@@ -46,8 +46,8 @@ export const KITCHEN_DAILY_PERFORMANCES: Record<string, KitchenDailyPerformance>
       {
         key: 'sanitasi_checklist',
         label: 'Kebersihan & Sanitasi Dapur',
-        score: 94,
-        status: 'Checklist Dapur 24/24 Titik Terpenuhi',
+        score: 96,
+        status: 'Checklist Dapur 24/24 Titik Terpenuhi (Steril)',
         tone: 'success',
         icon: 'check-circle',
       },
