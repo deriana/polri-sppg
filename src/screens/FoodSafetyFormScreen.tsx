@@ -50,48 +50,64 @@ export default function FoodSafetyFormScreen({ navigation }: any) {
 
   // Ambil menu aktif hari ini dari laporan produksi / rencana menu
   const todayStr = todayDate();
+  const [selectedTanggal, setSelectedTanggal] = useState(todayStr);
+
   const activeLaporanHariIni = useMemo(() => {
-    return (
-      laporanList.find((l) => l.sppgId === currentSppg?.id && l.tanggal === todayStr) ||
-      laporanList[laporanList.length - 1]
-    );
-  }, [laporanList, currentSppg, todayStr]);
+    // 1. Coba cari di laporan produksi hari ini / tanggal terpilih
+    const lap = laporanList.find((l) => l.sppgId === currentSppg?.id && l.tanggal === selectedTanggal);
+    if (lap?.menu) return { menu: lap.menu, batchId: lap.id, source: 'laporan' };
+
+    // 2. Coba cari di rencana menu harian (menuHarianPlanList)
+    const plan = menuHarianPlanList.find((m) => m.sppgId === currentSppg?.id && m.tanggal === selectedTanggal);
+    if (plan?.menu) return { menu: plan.menu, batchId: `BATCH-${currentSppg?.id || 'SPPG'}-${selectedTanggal.replace(/-/g, '')}-01`, source: 'plan' };
+
+    // 3. Fallback ke rencana terdekat
+    const fallbackPlan = menuHarianPlanList.find((m) => m.sppgId === currentSppg?.id);
+    if (fallbackPlan?.menu) return { menu: fallbackPlan.menu, batchId: `BATCH-${currentSppg?.id || 'SPPG'}-${selectedTanggal.replace(/-/g, '')}-01`, source: 'plan_fallback' };
+
+    // 4. Fallback ke laporan terakhir
+    const lastLap = laporanList[laporanList.length - 1];
+    return {
+      menu: lastLap?.menu || 'Nasi Merah Organik, Ayam Ungkep Kalasan, Sup Kimlo Sayur Jamur, Buah Naga Merah, Susu UHT',
+      batchId: lastLap?.id || `BATCH-${currentSppg?.id || 'SPPG'}-${selectedTanggal.replace(/-/g, '')}-01`,
+      source: 'default',
+    };
+  }, [laporanList, menuHarianPlanList, currentSppg, selectedTanggal]);
 
   // Pecah komponen makanan secara dinamis dari menu yang dimasak hari ini
   const dynamicFoodComponents = useMemo(() => {
-    if (!activeLaporanHariIni?.menu) {
-      return [
-        { label: 'Nasi Pulen (Karbohidrat)', value: 'nasi', baseCategory: 'nasi' },
-        { label: 'Ayam Kecap Gurih (Protein Hewani)', value: 'lauk goreng', baseCategory: 'lauk goreng' },
-        { label: 'Sayur Sop Segar (Sayuran)', value: 'sayur berkuah', baseCategory: 'sayur berkuah' },
-        { label: 'Buah Semangka (Buah)', value: 'buah', baseCategory: 'buah' },
-      ];
-    }
-
-    const parts = activeLaporanHariIni.menu
-      .split(/[+,]/)
+    const rawMenu = activeLaporanHariIni?.menu || '';
+    const parts = rawMenu
+      .split(/[,+•\n]/)
       .map((p) => p.trim())
-      .filter(Boolean);
+      .filter((p) => p.length > 0);
 
     if (parts.length === 0) {
       return [
-        { label: 'Nasi Pulen (Karbohidrat)', value: 'nasi', baseCategory: 'nasi' },
-        { label: 'Lauk Protein Hewani', value: 'lauk goreng', baseCategory: 'lauk goreng' },
-        { label: 'Sayur Sop Segar', value: 'sayur berkuah', baseCategory: 'sayur berkuah' },
-        { label: 'Buah Segar', value: 'buah', baseCategory: 'buah' },
+        { label: 'Nasi Merah Organik', value: 'Nasi Merah Organik', baseCategory: 'nasi' },
+        { label: 'Ayam Ungkep Kalasan', value: 'Ayam Ungkep Kalasan', baseCategory: 'lauk goreng' },
+        { label: 'Sup Kimlo Sayur Jamur', value: 'Sup Kimlo Sayur Jamur', baseCategory: 'sayur berkuah' },
+        { label: 'Buah Naga Merah', value: 'Buah Naga Merah', baseCategory: 'buah' },
       ];
     }
 
     return parts.map((part) => {
       const lower = part.toLowerCase();
       let baseCategory = 'lauk berkuah';
-      if (lower.includes('nasi') || lower.includes('beras') || lower.includes('roti')) baseCategory = 'nasi';
-      else if (lower.includes('sop') || lower.includes('sayur') || lower.includes('buncis') || lower.includes('kangkung') || lower.includes('bayam') || lower.includes('capcay')) baseCategory = 'sayur berkuah';
-      else if (lower.includes('goreng') || lower.includes('bakar') || lower.includes('ayam') || lower.includes('ikan') || lower.includes('rendang') || lower.includes('daging') || lower.includes('telur')) baseCategory = 'lauk goreng';
-      else if (lower.includes('buah') || lower.includes('semangka') || lower.includes('jeruk') || lower.includes('pisang')) baseCategory = 'buah';
+      if (lower.includes('nasi') || lower.includes('beras') || lower.includes('roti') || lower.includes('karbo')) {
+        baseCategory = 'nasi';
+      } else if (lower.includes('sop') || lower.includes('sayur') || lower.includes('kangkung') || lower.includes('buncis') || lower.includes('bayam') || lower.includes('lodeh') || lower.includes('capcay') || lower.includes('salad') || lower.includes('kimlo')) {
+        baseCategory = 'sayur berkuah';
+      } else if (lower.includes('ayam') || lower.includes('daging') || lower.includes('ikan') || lower.includes('telur') || lower.includes('rendang') || lower.includes('katsu') || lower.includes('empal') || lower.includes('goreng') || lower.includes('bakar') || lower.includes('semur') || lower.includes('tahu') || lower.includes('tempe')) {
+        baseCategory = 'lauk goreng';
+      } else if (lower.includes('buah') || lower.includes('semangka') || lower.includes('jeruk') || lower.includes('pisang') || lower.includes('melon') || lower.includes('apel') || lower.includes('pepaya') || lower.includes('naga')) {
+        baseCategory = 'buah';
+      } else if (lower.includes('susu') || lower.includes('uht') || lower.includes('minuman')) {
+        baseCategory = 'susu';
+      }
 
       return {
-        label: `${part} (${baseCategory.toUpperCase()})`,
+        label: `${part}`,
         value: part,
         baseCategory,
       };
@@ -99,7 +115,7 @@ export default function FoodSafetyFormScreen({ navigation }: any) {
   }, [activeLaporanHariIni]);
 
   // 1. Identitas Sampel
-  const [jenisMakanan, setJenisMakanan] = useState(dynamicFoodComponents[0]?.value || 'nasi');
+  const [jenisMakanan, setJenisMakanan] = useState(dynamicFoodComponents[0]?.value || 'Nasi Merah Organik');
   const [batchId, setBatchId] = useState(
     activeLaporanHariIni?.batchId || `BATCH-${currentSppg?.id || 'SPPG'}-${todayStr.replace(/-/g, '')}-01`,
   );
@@ -290,16 +306,51 @@ export default function FoodSafetyFormScreen({ navigation }: any) {
           {/* 2. Identitas Sampel Masakan Berdasarkan Menu Hari Ini */}
           <SectionTitle>1. Identitas Sampel Masakan Hari Ini</SectionTitle>
           <Card style={{ gap: spacing.sm }}>
+        {/* Date / Plan Selector Bar */}
+        <View style={{ gap: 4 }}>
+          <Text style={{ fontSize: 11, fontWeight: '700', color: colors.textMuted }}>
+            Pilih Tanggal Jadwal Masak / Batch:
+          </Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingBottom: 2 }}>
+            {['2026-08-14', '2026-08-15', '2026-08-16', '2026-08-17', '2026-08-18'].map((tgl) => {
+              const isSelected = selectedTanggal === tgl;
+              const isToday = tgl === todayStr;
+              return (
+                <Pressable
+                  key={tgl}
+                  onPress={() => {
+                    setSelectedTanggal(tgl);
+                  }}
+                  style={[
+                    styles.chipBtn,
+                    {
+                      backgroundColor: isSelected ? colors.primary : colors.surface,
+                      borderColor: isSelected ? colors.primary : colors.border,
+                      paddingVertical: 5,
+                      paddingHorizontal: 9,
+                    },
+                  ]}
+                >
+                  <Feather name="calendar" size={11} color={isSelected ? '#FFF' : colors.textMuted} />
+                  <Text style={{ fontSize: 10.5, fontWeight: '800', color: isSelected ? '#FFF' : colors.text }}>
+                    {tgl} {isToday ? '(Hari Ini)' : ''}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </View>
+
         {/* Info Menu Hari Ini */}
         <View style={{ gap: 4, padding: 10, backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#EFF6FF', borderRadius: radius.md, borderWidth: 1, borderColor: colors.primary }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <Feather name="coffee" size={13} color={colors.primary} />
             <Text style={{ fontSize: 11, fontWeight: '900', color: colors.primary }}>
-              MENU SAJIAN DAPUR HARI INI:
+              MENU SAJIAN DAPUR ({selectedTanggal === todayStr ? 'HARI INI' : selectedTanggal}):
             </Text>
           </View>
           <Text style={{ fontSize: 12, fontWeight: '800', color: colors.text }}>
-            {activeLaporanHariIni?.menu || 'Nasi Pulen + Ayam Kecap Gurih + Sayur Sop Segar + Semangka'}
+            {activeLaporanHariIni?.menu || 'Nasi Merah Organik, Ayam Ungkep Kalasan, Sup Kimlo Sayur Jamur, Buah Naga Merah'}
           </Text>
         </View>
 
@@ -696,11 +747,15 @@ export default function FoodSafetyFormScreen({ navigation }: any) {
           <View style={[styles.statGrid, { backgroundColor: isDark ? colors.surface : '#FFFFFF', borderColor: colors.border, borderRadius: radius.lg }]}>
             <View style={styles.statCol}>
               <Text style={{ fontSize: 10, color: colors.textMuted }}>Total Pengujian</Text>
-              <Text style={{ fontSize: 16, fontWeight: '900', color: colors.primary }}>{scopedLogs.length} Kali</Text>
+              <Text style={{ fontSize: 16, fontWeight: '900', color: colors.primary }}>{scopedLogs.length} Sampel</Text>
             </View>
             <View style={styles.statCol}>
               <Text style={{ fontSize: 10, color: colors.textMuted }}>Status Keamanan</Text>
-              <Text style={{ fontSize: 13, fontWeight: '900', color: colors.success }}>100% Bebas Racun</Text>
+              <Text style={{ fontSize: 13, fontWeight: '900', color: colors.success }}>
+                {scopedLogs.length > 0
+                  ? `${Math.round((scopedLogs.filter((l) => l.statusKadaluarsa === 'aman' && l.rapidTestFormalin !== 'positif' && l.rapidTestBoraks !== 'positif' && l.rapidTestPestisida !== 'positif' && l.ujiBakteriEcoli !== 'positif').length / scopedLogs.length) * 100)}% Lolos Standar`
+                  : '100% Bebas Racun'}
+              </Text>
             </View>
             <View style={styles.statCol}>
               <Text style={{ fontSize: 10, color: colors.textMuted }}>Loker Retensi</Text>
@@ -714,9 +769,29 @@ export default function FoodSafetyFormScreen({ navigation }: any) {
             <EmptyState icon="clipboard" title="Belum Ada Hasil Uji" body="Belum ada riwayat pengujian laboratorium pangan yang tersimpan." />
           ) : (
             scopedLogs.map((log) => {
-              const isSafe = log.statusKadaluarsa === 'aman';
+              const hasChemicalHazard =
+                log.rapidTestFormalin === 'positif' ||
+                log.rapidTestBoraks === 'positif' ||
+                log.rapidTestPestisida === 'positif' ||
+                log.ujiBakteriEcoli === 'positif';
+              const isThermalWarning =
+                (log.suhuIntiMatang !== undefined && log.suhuIntiMatang < 75) ||
+                (log.suhuHoldingBox !== undefined && log.suhuHoldingBox < 60);
+              const isSafe =
+                !hasChemicalHazard &&
+                !isThermalWarning &&
+                log.statusKadaluarsa === 'aman' &&
+                log.organoleptikStatus !== 'tidak_layak';
+
               return (
-                <Card key={log.id} style={{ gap: spacing.sm }}>
+                <Card
+                  key={log.id}
+                  style={{
+                    gap: spacing.sm,
+                    borderColor: isSafe ? colors.border : colors.danger,
+                    borderWidth: isSafe ? 1 : 1.5,
+                  }}
+                >
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                       <Feather name="shield" size={14} color={isSafe ? colors.success : colors.danger} />
@@ -725,7 +800,15 @@ export default function FoodSafetyFormScreen({ navigation }: any) {
                       </Text>
                     </View>
                     <Pill
-                      label={isSafe ? 'LOLOS STANDAR BGN' : 'PERINGATAN'}
+                      label={
+                        isSafe
+                          ? 'LOLOS STANDAR BGN'
+                          : hasChemicalHazard
+                          ? 'BAHAYA KIMIA / PESTISIDA'
+                          : isThermalWarning
+                          ? 'PERINGATAN SUHU'
+                          : 'PERLU REVISI'
+                      }
                       tone={isSafe ? 'success' : 'danger'}
                       icon={isSafe ? 'check-circle' : 'alert-triangle'}
                     />
@@ -747,25 +830,25 @@ export default function FoodSafetyFormScreen({ navigation }: any) {
                     <View style={styles.chemPill}>
                       <Text style={styles.chemLabel}>Formalin:</Text>
                       <Text style={[styles.chemValue, { color: log.rapidTestFormalin === 'positif' ? colors.danger : colors.success }]}>
-                        {log.rapidTestFormalin === 'positif' ? 'POSITIF' : 'NEGATIF'}
+                        {log.rapidTestFormalin === 'positif' ? 'POSITIF (BAHAYA)' : 'NEGATIF'}
                       </Text>
                     </View>
                     <View style={styles.chemPill}>
                       <Text style={styles.chemLabel}>Boraks:</Text>
                       <Text style={[styles.chemValue, { color: log.rapidTestBoraks === 'positif' ? colors.danger : colors.success }]}>
-                        {log.rapidTestBoraks === 'positif' ? 'POSITIF' : 'NEGATIF'}
+                        {log.rapidTestBoraks === 'positif' ? 'POSITIF (BAHAYA)' : 'NEGATIF'}
                       </Text>
                     </View>
                     <View style={styles.chemPill}>
                       <Text style={styles.chemLabel}>Pestisida:</Text>
                       <Text style={[styles.chemValue, { color: log.rapidTestPestisida === 'positif' ? colors.danger : colors.success }]}>
-                        {log.rapidTestPestisida === 'positif' ? 'POSITIF' : 'NEGATIF'}
+                        {log.rapidTestPestisida === 'positif' ? 'POSITIF (BAHAYA)' : 'NEGATIF'}
                       </Text>
                     </View>
                     <View style={styles.chemPill}>
                       <Text style={styles.chemLabel}>E. Coli:</Text>
                       <Text style={[styles.chemValue, { color: log.ujiBakteriEcoli === 'positif' ? colors.danger : colors.success }]}>
-                        {log.ujiBakteriEcoli === 'positif' ? 'POSITIF' : 'NEGATIF'}
+                        {log.ujiBakteriEcoli === 'positif' ? 'POSITIF (BAHAYA)' : 'NEGATIF'}
                       </Text>
                     </View>
                   </View>
