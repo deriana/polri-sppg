@@ -1749,6 +1749,36 @@ export default function DashboardScreen({ navigation }: any) {
 
       <SyncStatusBadge pendingCount={pendingCount} onSyncPress={handleSync} syncing={syncing} />
 
+      {/* BROADCAST KOMANDO MABES / BGN (Muncul di Semua Tab sebagai Alert Darurat) */}
+      {broadcastInScope.length > 0 && !isBroadcastHidden && (
+        <Card style={{ backgroundColor: isDark ? 'rgba(217,119,6,0.15)' : '#FFFBEB', borderColor: colors.warning, gap: 8, borderWidth: 1.5 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
+              <Feather name="radio" size={16} color={colors.warning} />
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.warning }}>
+                ARAHAN KOMANDO PUSAT (MABES/BGN)
+              </Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Pill label={broadcastInScope[0].tingkat.toUpperCase()} tone="warning" />
+              <Pressable
+                onPress={() => setIsBroadcastHidden(true)}
+                hitSlop={8}
+                style={{ padding: 4, borderRadius: 12, backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)' }}
+              >
+                <Feather name="x" size={14} color={colors.textMuted} />
+              </Pressable>
+            </View>
+          </View>
+          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
+            {broadcastInScope[0].judul}
+          </Text>
+          <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
+            {broadcastInScope[0].isi}
+          </Text>
+        </Card>
+      )}
+
       {/* 2. Segmented Navigation Tabs (Menghindari Informasi Berjejal Menumpuk) */}
       <View
         style={[
@@ -2120,6 +2150,91 @@ export default function DashboardScreen({ navigation }: any) {
               </Pressable>
             ))}
           </View>
+
+          {/* RAPOR MUTU OPERASIONAL DAPUR (GRID 2-KOLOM COMPACT BENTO) */}
+          <Card style={{ gap: spacing.sm }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, minWidth: 160 }}>
+                <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: isDark ? 'rgba(234,179,8,0.2)' : '#FEF9C3', alignItems: 'center', justifyContent: 'center' }}>
+                  <Feather name="award" size={16} color={isDark ? colors.gold : '#CA8A04'} />
+                </View>
+                <View>
+                  <Text style={{ fontSize: 11, fontWeight: '900', color: colors.text, letterSpacing: 0.5 }}>
+                    RAPOR MUTU OPERASIONAL DAPUR
+                  </Text>
+                  <Text style={{ fontSize: 10, color: colors.textMuted }}>
+                    Evaluasi Harian • Score: {kitchenPerformance.overallScore}/100
+                  </Text>
+                </View>
+              </View>
+              <Pill label={`Grade ${kitchenPerformance.grade} (${kitchenPerformance.overallScore})`} tone="success" />
+            </View>
+
+            {/* 6 Performance Pillars in 2-Column Bento Grid */}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 2 }}>
+              {kitchenPerformance.pillars.map((pillar) => {
+                const isPillarSuccess = pillar.score >= 95;
+                const isPillarWarning = pillar.score < 90;
+                return (
+                  <View
+                    key={pillar.key}
+                    style={{
+                      width: '48.5%',
+                      flexGrow: 1,
+                      backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC',
+                      borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#E2E8F0',
+                      borderWidth: 1,
+                      borderRadius: radius.md,
+                      padding: 10,
+                      gap: 4,
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, flex: 1 }}>
+                        <Feather name={pillar.icon as any} size={13} color={colors.primary} />
+                        <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }} numberOfLines={1}>
+                          {pillar.label}
+                        </Text>
+                      </View>
+                      <Text style={{ fontSize: 13, fontWeight: '900', color: isPillarSuccess ? colors.success : isPillarWarning ? colors.warning : colors.primary }}>
+                        {pillar.score}%
+                      </Text>
+                    </View>
+
+                    {/* Mini Track */}
+                    <View style={{ height: 4, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0', borderRadius: 2, overflow: 'hidden', marginVertical: 2 }}>
+                      <View
+                        style={{
+                          height: '100%',
+                          width: `${pillar.score}%`,
+                          backgroundColor: isPillarSuccess ? colors.success : isPillarWarning ? colors.warning : colors.primary,
+                          borderRadius: 2,
+                        }}
+                      />
+                    </View>
+
+                    <Text style={{ fontSize: 9.5, color: colors.textMuted }} numberOfLines={1}>
+                      {pillar.status}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+
+            {/* Compact Continuous Improvement Evaluation Recommendation */}
+            <View style={{ backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#EFF6FF', padding: 8, borderRadius: radius.md, gap: 3, marginTop: 2 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                <Feather name="info" size={12} color={colors.primary} />
+                <Text style={{ fontSize: 10, fontWeight: '800', color: colors.primary }}>
+                  Rekomendasi Evaluasi Hari Ini:
+                </Text>
+              </View>
+              <Text style={{ fontSize: 10.5, color: colors.textMuted, lineHeight: 14 }}>
+                {kitchenPerformance.ringkasanEvaluasi}
+              </Text>
+            </View>
+          </Card>
         </>
       )}
 
@@ -2288,74 +2403,6 @@ export default function DashboardScreen({ navigation }: any) {
                 ))}
             </Card>
           )}
-
-          {/* WIDGET RAPOR MUTU KINERJA OPERASIONAL DAPUR (KITCHEN DAILY PERFORMANCE SCORE) */}
-          <Card
-            style={{
-              backgroundColor: isDark ? colors.surface : '#FFFFFF',
-              borderWidth: 0,
-              borderRadius: radius.xl,
-              gap: 12,
-            }}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, minWidth: 160 }}>
-                <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: isDark ? 'rgba(234,179,8,0.2)' : '#FEF9C3', alignItems: 'center', justifyContent: 'center' }}>
-                  <Feather name="award" size={16} color={isDark ? colors.gold : '#CA8A04'} />
-                </View>
-                <View>
-                  <Text style={{ fontSize: 11, fontWeight: '900', color: colors.text, letterSpacing: 0.5 }}>
-                    RAPOR MUTU OPERASIONAL DAPUR
-                  </Text>
-                  <Text style={{ fontSize: 10, color: colors.textMuted }}>
-                    Evaluasi Internal Harian • Update {kitchenPerformance.lastUpdated}
-                  </Text>
-                </View>
-              </View>
-              <Pill label={`Grade ${kitchenPerformance.grade} (${kitchenPerformance.overallScore}/100)`} tone="success" />
-            </View>
-
-            {/* 6 Performance Pillars Bars */}
-            <View style={{ gap: 8 }}>
-              {kitchenPerformance.pillars.map((pillar) => (
-                <View key={pillar.key} style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC', padding: 10, borderRadius: radius.md, gap: 4 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <Feather name={pillar.icon as any} size={12} color={colors.primary} />
-                      <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }}>
-                        {pillar.label}
-                      </Text>
-                    </View>
-                    <Text style={{ fontSize: 11.5, fontWeight: '900', color: colors.primary }}>
-                      {pillar.score}%
-                    </Text>
-                  </View>
-
-                  {/* Progress track */}
-                  <View style={{ height: 5, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0', borderRadius: 3, overflow: 'hidden' }}>
-                    <View style={{ height: '100%', width: `${pillar.score}%`, backgroundColor: colors.primary, borderRadius: 3 }} />
-                  </View>
-
-                  <Text style={{ fontSize: 10, color: colors.textMuted, marginTop: 1 }}>
-                    {pillar.status}
-                  </Text>
-                </View>
-              ))}
-            </View>
-
-            {/* Daily Continuous Improvement Recommendation Box */}
-            <View style={{ backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#EFF6FF', padding: 10, borderRadius: radius.md, gap: 4 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Feather name="info" size={13} color={colors.primary} />
-                <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.primary }}>
-                  Catatan Rekomendasi Evaluasi Hari Ini:
-                </Text>
-              </View>
-              <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
-                {kitchenPerformance.ringkasanEvaluasi}
-              </Text>
-            </View>
-          </Card>
         </>
       )}
 
@@ -2364,36 +2411,6 @@ export default function DashboardScreen({ navigation }: any) {
       {/* ========================================================================= */}
       {dashboardTab === 'pemantauan' && (
         <>
-          {/* BROADCAST KOMANDO MABES / BGN */}
-          {broadcastInScope.length > 0 && !isBroadcastHidden && (
-            <Card style={{ backgroundColor: isDark ? 'rgba(217,119,6,0.15)' : '#FFFBEB', borderColor: colors.warning, gap: 8, borderWidth: 1.5 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
-                  <Feather name="radio" size={16} color={colors.warning} />
-                  <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.warning }}>
-                    ARAHAN KOMANDO PUSAT (MABES/BGN)
-                  </Text>
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Pill label={broadcastInScope[0].tingkat.toUpperCase()} tone="warning" />
-                  <Pressable
-                    onPress={() => setIsBroadcastHidden(true)}
-                    hitSlop={8}
-                    style={{ padding: 4, borderRadius: 12, backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)' }}
-                  >
-                    <Feather name="x" size={14} color={colors.textMuted} />
-                  </Pressable>
-                </View>
-              </View>
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>
-                {broadcastInScope[0].judul}
-              </Text>
-              <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
-                {broadcastInScope[0].isi}
-              </Text>
-            </Card>
-          )}
-
           {/* Active Emergency Alert List */}
           <AlertPreviewList
             alerts={activeAlerts}
