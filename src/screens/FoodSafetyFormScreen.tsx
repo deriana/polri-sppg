@@ -307,7 +307,7 @@ export default function FoodSafetyFormScreen({ navigation }: any) {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
           <Feather name="user-check" size={13} color={colors.primary} />
           <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.text }}>
-            Petugas Verifikator: {currentUser.nama} (Ahli Gizi SPPG)
+            Petugas Verifikator: {currentUser.nama} ({role === 'KEPALA_SPPG' ? 'Kepala SPPG' : ROLE_LABEL[role] || 'Ahli Gizi SPPG'})
           </Text>
         </View>
       </Card>

@@ -49,6 +49,8 @@ export default function MoreMenuScreen({ navigation }: any) {
 
   if (role === 'KEPALA_SPPG') {
     operasionalItems.push({ key: 'StatistikEksekutif', icon: 'bar-chart-2', label: 'Laporan Statistik & Rekap Berkala', desc: 'Executive Summary mingguan/bulanan: kehadiran staf, distribusi porsi, insiden, kepatuhan gizi, & efisiensi anggaran' });
+    operasionalItems.push({ key: 'FoodSafetyForm', icon: 'shield', label: 'Uji Lab & Rapid Test Pangan', desc: 'Sertifikasi uji kimiawi (formalin, boraks, pestisida), titik suhu masak, & sampel arsip 2x24 jam' });
+    operasionalItems.push({ key: 'FoodQualityPassport', icon: 'award', label: 'Paspor Mutu Porsi (Quality Passport)', desc: 'Tinjau paspor kelayakan gizi, organoleptik, & sertifikasi digital tiap batch' });
     operasionalItems.push({ key: 'KandunganGiziHarian', icon: 'activity', label: 'Evaluasi Kandungan Gizi (AKG BGN)', desc: 'Input kandungan energi pokok, makronutrien, & sertifikasi gizi harian' });
     operasionalItems.push({ key: 'PengadaanBahan', icon: 'shopping-cart', label: 'Pengadaan & Logistik Bahan', desc: 'Satu pintu: beli bahan (nota), ajuin ke pusat, & scan QR terima barang' });
     operasionalItems.push({ key: 'PengadaanPeralatan', icon: 'tool', label: 'Pengadaan Peralatan & Aset Dapur', desc: 'Beli mandiri (potong anggaran unit) atau ajukan ke BGN Pusat' });
@@ -62,6 +64,8 @@ export default function MoreMenuScreen({ navigation }: any) {
     operasionalItems.push({ key: 'IncidentList', icon: 'alert-octagon', label: 'Manajemen Insiden Lapangan', desc: 'Pelaporan & investigasi kendala/insiden operasional' });
     operasionalItems.push({ key: 'AduanMasyarakat', icon: 'message-square', label: 'Aduan Masyarakat', desc: 'Laporan pengaduan publik & respon SPPG' });
     operasionalItems.push({ key: 'Notifikasi', icon: 'bell', label: 'Notifikasi & Alarm', desc: 'Pengingat tugas & riwayat alert' });
+
+    phase2Items.push({ key: 'BatchTraceability', icon: 'archive', label: 'Lacak Rantai Pangan (Traceability)', desc: 'Pelacakan asal-usul bahan baku hingga porsi meja siswa' });
 
     phase2Items.push({ key: 'Distribusi', icon: 'truck', label: 'Distribusi Armada GPS', desc: 'Pelacakan GPS live armada pengiriman MBG' });
     phase2Items.push({ key: 'RiwayatDistribusi', icon: 'clipboard', label: 'Log Pengiriman Sekolah', desc: 'Riwayat semua pengiriman ke sekolah' });
