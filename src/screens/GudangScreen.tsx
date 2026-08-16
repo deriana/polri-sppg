@@ -134,22 +134,152 @@ export default function GudangScreen({ navigation }: any) {
 
       {/* 2. FEFO Priority Warning Banner */}
       {expiringSoonList.length > 0 && (
-        <Card style={{ gap: 8 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <View style={[styles.miniIconWrap, { backgroundColor: colors.warningBg }]}>
-              <Feather name="clock" size={15} color={colors.warning} />
+        <Card
+          style={{
+            gap: 12,
+            backgroundColor: isDark ? 'rgba(217, 119, 6, 0.08)' : '#FFFBEB',
+            borderColor: isDark ? 'rgba(245, 158, 11, 0.3)' : '#FDE68A',
+            borderWidth: 1.5,
+            borderRadius: radius.xl,
+            padding: 14,
+          }}
+        >
+          {/* Header */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, minWidth: 200 }}>
+              <View style={[styles.miniIconWrap, { backgroundColor: isDark ? 'rgba(245, 158, 11, 0.2)' : '#FEF3C7' }]}>
+                <Feather name="alert-triangle" size={15} color={isDark ? colors.gold : '#D97706'} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 11.5, fontWeight: '900', color: isDark ? colors.gold : '#B45309', letterSpacing: 0.4 }}>
+                  REKOMENDASI FEFO (FIRST-EXPIRED, FIRST-OUT)
+                </Text>
+                <Text style={{ fontSize: 10.5, color: isDark ? '#D1D5DB' : '#92400E', marginTop: 1 }}>
+                  Wajib diolah terlebih dahulu untuk menu hari ini / besok
+                </Text>
+              </View>
             </View>
-            <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.warning, flex: 1 }}>
-              REKOMENDASI FEFO (FIRST-EXPIRED, FIRST-OUT)
-            </Text>
-            <Pill label={`${expiringSoonList.length} Prioritas`} tone="warning" />
+            <Pill label={`${expiringSoonList.length} Bahan Prioritas`} tone="warning" />
           </View>
-          <Text style={{ fontSize: 11.5, color: colors.text, fontWeight: '700' }}>
-            Bahan berikut wajib diprioritaskan untuk dimasak hari ini sebelum kadaluarsa:
-          </Text>
-          <Text style={{ fontSize: 11, color: colors.textMuted }}>
-            {expiringSoonList.map((b) => `${b.nama} (${b.stok} ${b.satuan} — Exp: ${b.tanggalKadaluarsa})`).join(' • ')}
-          </Text>
+
+          {/* List of Expiring Items in Structured Cards */}
+          <View style={{ gap: 8 }}>
+            {expiringSoonList.map((b) => {
+              const sisaHari = b.tanggalKadaluarsa ? daysUntil(b.tanggalKadaluarsa) : 0;
+              const isUrgent = sisaHari <= 1;
+
+              return (
+                <View
+                  key={b.id}
+                  style={[
+                    styles.fefoItemCard,
+                    {
+                      backgroundColor: colors.surface,
+                      borderColor: isUrgent ? (isDark ? 'rgba(239, 68, 68, 0.4)' : '#FCA5A5') : colors.border,
+                      borderWidth: 1,
+                      borderRadius: radius.lg,
+                    },
+                  ]}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    {b.fotoBahan ? (
+                      <Image source={{ uri: b.fotoBahan }} style={{ width: 44, height: 44, borderRadius: radius.md }} />
+                    ) : (
+                      <View
+                        style={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: radius.md,
+                          backgroundColor: isUrgent ? colors.dangerBg : colors.warningBg,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Feather
+                          name={isUrgent ? 'alert-circle' : 'clock'}
+                          size={20}
+                          color={isUrgent ? colors.danger : colors.warning}
+                        />
+                      </View>
+                    )}
+
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text style={{ fontSize: 13, fontWeight: '800', color: colors.text }} numberOfLines={1}>
+                        {b.nama}
+                      </Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                        <Text style={{ fontSize: 11, color: colors.textMuted }}>
+                          Stok: <Text style={{ fontWeight: '800', color: colors.text }}>{b.stok.toLocaleString('id-ID')} {b.satuan}</Text>
+                        </Text>
+                        {b.lokasiRak && (
+                          <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
+                            • {b.lokasiRak}
+                          </Text>
+                        )}
+                      </View>
+                    </View>
+
+                    {/* Expiry Pill */}
+                    <View style={{ alignItems: 'flex-end', gap: 2 }}>
+                      <Pill
+                        label={sisaHari <= 0 ? 'Exp Hari Ini!' : sisaHari === 1 ? 'Exp Besok' : `Sisa ${sisaHari} Hari`}
+                        tone={isUrgent ? 'danger' : 'warning'}
+                      />
+                      <Text style={{ fontSize: 10, color: colors.textMuted }}>
+                        {b.tanggalKadaluarsa}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Quick Action Bar for This Item */}
+                  <View style={[styles.fefoItemFooter, { borderTopColor: colors.border }]}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, flex: 1 }}>
+                      <Feather name="info" size={11} color={isUrgent ? colors.danger : colors.warning} />
+                      <Text style={{ fontSize: 10.5, color: isUrgent ? colors.danger : colors.warning, fontWeight: '700' }} numberOfLines={1}>
+                        {isUrgent ? 'Mendesak: olah pada jadwal masak terdekat!' : 'Gunakan sebelum membuka kemasan baru'}
+                      </Text>
+                    </View>
+                    {canRequest && (
+                      <Pressable
+                        onPress={() => navigation.navigate('MutasiStokForm', { initialBahanId: b.id, jenis: 'keluar' })}
+                        style={[
+                          styles.fefoUseBtn,
+                          {
+                            backgroundColor: isDark ? 'rgba(37, 99, 235, 0.15)' : colors.primaryLight,
+                            borderColor: colors.primary,
+                            borderRadius: radius.pill,
+                          },
+                        ]}
+                      >
+                        <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.primary }}>
+                          Catat Pemakaian
+                        </Text>
+                        <Feather name="arrow-right" size={11} color={colors.primary} />
+                      </Pressable>
+                    )}
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+
+          {/* Quick Filter Toggle Button */}
+          <Pressable
+            onPress={() => setStatusFilter('fefo')}
+            style={[
+              styles.fefoFilterToggle,
+              {
+                backgroundColor: colors.surface,
+                borderColor: isDark ? 'rgba(245, 158, 11, 0.4)' : '#FDE68A',
+                borderRadius: radius.md,
+              },
+            ]}
+          >
+            <Feather name="filter" size={12} color={isDark ? colors.gold : '#B45309'} />
+            <Text style={{ fontSize: 11, fontWeight: '800', color: isDark ? colors.gold : '#B45309' }}>
+              Filter Hanya Tampilkan Bahan FEFO di Tabel Bawah ({expiringSoonList.length})
+            </Text>
+          </Pressable>
         </Card>
       )}
 
@@ -526,6 +656,35 @@ const styles = StyleSheet.create({
   mitraBtn: {
     paddingHorizontal: 10,
     paddingVertical: 6,
+    borderWidth: 1,
+  },
+  fefoItemCard: {
+    padding: 10,
+    gap: 8,
+  },
+  fefoItemFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderTopWidth: 0.5,
+    paddingTop: 6,
+    gap: 6,
+  },
+  fefoUseBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderWidth: 1,
+  },
+  fefoFilterToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
     borderWidth: 1,
   },
 });

@@ -5,17 +5,20 @@ import { useTheme } from '../context/ThemeContext';
 import { Card, DropdownPicker, EmptyState, Input, PrimaryButton, SectionTitle, Stepper } from '../components/ui';
 import { ROLE_PERMISSIONS } from '../utils/scope';
 
-export default function MutasiStokFormScreen({ navigation }: any) {
+export default function MutasiStokFormScreen({ navigation, route }: any) {
   const { role, currentSppg, bahanBakuList, catatMutasiStok } = useApp();
   const { colors, spacing, fontSize, radius } = useTheme();
+
+  const preselectedBahanId = route?.params?.initialBahanId || route?.params?.bahanId;
+  const preselectedJenis = route?.params?.jenis as ('masuk' | 'keluar') | undefined;
 
   const bahanOptions = useMemo(
     () => bahanBakuList.filter((b) => b.sppgId === currentSppg?.id).map((b) => ({ label: `${b.nama} (${b.satuan})`, value: b.id })),
     [bahanBakuList, currentSppg],
   );
 
-  const [bahanId, setBahanId] = useState(bahanOptions[0]?.value ?? '');
-  const [jenis, setJenis] = useState<'masuk' | 'keluar'>('masuk');
+  const [bahanId, setBahanId] = useState(preselectedBahanId || bahanOptions[0]?.value || '');
+  const [jenis, setJenis] = useState<'masuk' | 'keluar'>(preselectedJenis || 'masuk');
   const [jumlah, setJumlah] = useState(10);
   const [keterangan, setKeterangan] = useState('');
 
