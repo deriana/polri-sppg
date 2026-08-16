@@ -739,7 +739,7 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
         onClose={() => setIsBuyModalVisible(false)}
         title="Input Pembelian Bahan & Nota Baru"
       >
-        <ScrollView style={{ maxHeight: 520 }} contentContainerStyle={{ gap: spacing.md, paddingBottom: 24 }}>
+        <ScrollView style={{ maxHeight: 560 }} contentContainerStyle={{ gap: spacing.md, paddingBottom: 80 }} showsVerticalScrollIndicator={true} keyboardShouldPersistTaps="handled">
           <Input
             label="Peruntukan Belanja / Judul Transaksi *"
             icon="file-text"

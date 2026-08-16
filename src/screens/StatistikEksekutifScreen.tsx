@@ -397,11 +397,11 @@ export default function StatistikEksekutifScreen({ navigation }: any) {
           disabled={isExporting}
           style={({ pressed }) => [
             styles.exportHeaderBtn,
-            { backgroundColor: colors.gold || '#F59E0B' },
+            { backgroundColor: isDark ? (colors.accent || colors.primary) : colors.primary },
             pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
           ]}
         >
-          <Feather name={isExporting ? 'loader' : 'printer'} size={15} color="#000000" strokeWidth={2.2} />
+          <Feather name={isExporting ? 'loader' : 'printer'} size={15} color="#FFFFFF" strokeWidth={2.2} />
           <Text style={styles.exportHeaderBtnText}>
             {isExporting ? 'Menyiapkan Dokumen PDF...' : 'Cetak / Bagikan Laporan PDF'}
           </Text>
@@ -914,7 +914,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   exportHeaderBtnText: {
-    color: '#000000',
+    color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '800',
   },

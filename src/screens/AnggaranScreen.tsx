@@ -430,7 +430,7 @@ export default function AnggaranScreen({ navigation }: any) {
 
       {/* Modal Input Procurement / Belanja Baru */}
       <Modal visible={showModal} onClose={() => setShowModal(false)} title="Input Pembelian & Pengadaan Bahan">
-        <ScrollView contentContainerStyle={{ gap: spacing.md, paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={{ gap: spacing.md, paddingBottom: 80 }} showsVerticalScrollIndicator={true} keyboardShouldPersistTaps="handled">
           {error && (
             <View style={{ backgroundColor: colors.background, borderWidth: 1, borderColor: colors.danger, padding: 10, borderRadius: radius.md, marginBottom: 8 }}>
               <Text style={{ color: colors.danger, fontSize: fontSize.xs, fontWeight: '600' }}>{error}</Text>
