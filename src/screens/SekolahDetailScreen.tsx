@@ -80,13 +80,12 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
             styles.tabBtn,
             {
               backgroundColor: activeTab === 'ringkasan' ? colors.primary : colors.surface,
-              borderColor: activeTab === 'ringkasan' ? colors.primary : colors.border,
             },
           ]}
         >
           <Feather name="info" size={14} color={activeTab === 'ringkasan' ? '#FFF' : colors.text} />
           <Text style={{ fontSize: 12, fontWeight: '800', color: activeTab === 'ringkasan' ? '#FFF' : colors.text }}>
-            Ringkasan Sekolah
+            Profil Sekolah
           </Text>
         </Pressable>
 
@@ -96,13 +95,12 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
             styles.tabBtn,
             {
               backgroundColor: activeTab === 'beneficiary' ? colors.primary : colors.surface,
-              borderColor: activeTab === 'beneficiary' ? colors.primary : colors.border,
             },
           ]}
         >
-          <Feather name="users" size={14} color={activeTab === 'beneficiary' ? '#FFF' : colors.text} />
+          <Feather name="bar-chart-2" size={14} color={activeTab === 'beneficiary' ? '#FFF' : colors.text} />
           <Text style={{ fontSize: 12, fontWeight: '800', color: activeTab === 'beneficiary' ? '#FFF' : colors.text }}>
-            Siswa & Alergi ({daftarAlergi.length})
+            Summary MBG & Presensi Hari Ini
           </Text>
         </Pressable>
       </View>
@@ -179,32 +177,31 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
           <Card
             style={{
               backgroundColor: isDark ? colors.surface : '#FFFFFF',
-              borderColor: colors.primary,
-              borderWidth: 1.5,
+              borderWidth: 0,
               gap: 12,
             }}
           >
             <View style={styles.rowBetween}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Feather name="users" size={16} color={colors.primary} />
+                <Feather name="bar-chart-2" size={16} color={colors.primary} />
                 <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
-                  REKAPITULASI PRESENSI & MAKAN SISWA HARI INI
+                  SUMMARY LAYANAN & REKAP PRESENSI HARI INI
                 </Text>
               </View>
-              <Pill tone="success" label="Presensi 97.5%" />
+              <Pill tone="success" label="Presensi 97.5% Hadir" />
             </View>
 
             {/* 4 Stat Box Grid */}
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', borderColor: colors.border }]}>
+              <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC' }]}>
                 <Text style={styles.statBoxLabel}>Terdaftar</Text>
                 <Text style={[styles.statBoxVal, { color: colors.text }]}>
                   {summary?.totalSiswaTerdaftar ?? sekolah.jumlahSiswa}
                 </Text>
-                <Text style={styles.statBoxSub}>Siswa</Text>
+                <Text style={styles.statBoxSub}>Siswa Sekolah</Text>
               </View>
 
-              <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#EFF6FF', borderColor: colors.primary }]}>
+              <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#EFF6FF' }]}>
                 <Text style={styles.statBoxLabel}>Disiapkan</Text>
                 <Text style={[styles.statBoxVal, { color: colors.primary }]}>
                   {summary?.porsiDisiapkan ?? sekolah.jumlahSiswa}
@@ -212,7 +209,7 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
                 <Text style={styles.statBoxSub}>Porsi MBG</Text>
               </View>
 
-              <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(16,185,129,0.1)' : '#ECFDF5', borderColor: colors.success }]}>
+              <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(16,185,129,0.1)' : '#ECFDF5' }]}>
                 <Text style={styles.statBoxLabel}>Menerima</Text>
                 <Text style={[styles.statBoxVal, { color: colors.success }]}>
                   {summary?.siswaHadirMenerima ?? sekolah.jumlahSiswa - 6}
@@ -220,7 +217,7 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
                 <Text style={styles.statBoxSub}>Siswa Hadir</Text>
               </View>
 
-              <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(239,68,68,0.1)' : '#FEF2F2', borderColor: colors.danger }]}>
+              <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(239,68,68,0.1)' : '#FEF2F2' }]}>
                 <Text style={styles.statBoxLabel}>Tidak Hadir</Text>
                 <Text style={[styles.statBoxVal, { color: colors.danger }]}>
                   {summary?.siswaTidakHadir ?? 6}
@@ -248,7 +245,7 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
           </Card>
 
           {/* Section: Allergy & Nutrition Profiling */}
-          <Card style={{ gap: 10 }}>
+          <Card style={{ gap: 10, borderWidth: 0, backgroundColor: isDark ? colors.surface : '#FFFFFF' }}>
             <View style={styles.rowBetween}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                 <Feather name="alert-circle" size={16} color={colors.warning} />
@@ -280,8 +277,7 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
                     style={[
                       styles.allergyChip,
                       {
-                        backgroundColor: active ? colors.primary : colors.surface,
-                        borderColor: active ? colors.primary : colors.border,
+                        backgroundColor: active ? colors.primary : isDark ? colors.surface : '#F1F5F9',
                       },
                     ]}
                   >
@@ -303,8 +299,7 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
                   style={[
                     styles.allergyCard,
                     {
-                      backgroundColor: colors.background,
-                      borderColor: colors.border,
+                      backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC',
                       borderRadius: radius.md,
                     },
                   ]}
@@ -354,7 +349,7 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
           </Card>
 
           {/* Privacy & Governance Notice */}
-          <Card style={{ backgroundColor: isDark ? colors.surface : '#F8FAFC', gap: 6 }}>
+          <Card style={{ backgroundColor: isDark ? colors.surface : '#F8FAFC', borderWidth: 0, gap: 6 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Feather name="lock" size={14} color={colors.primary} />
               <Text style={{ fontSize: 11, fontWeight: '900', color: colors.primary }}>
@@ -386,14 +381,14 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 10,
     borderRadius: 10,
-    borderWidth: 1,
+    borderWidth: 0,
   },
   statBox: {
     flex: 1,
     minWidth: '47%',
-    padding: 10,
+    padding: 12,
     borderRadius: 10,
-    borderWidth: 1,
+    borderWidth: 0,
     alignItems: 'center',
     gap: 2,
   },
@@ -414,11 +409,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
-    borderWidth: 1,
+    borderWidth: 0,
   },
   allergyCard: {
-    padding: 10,
-    borderWidth: 1,
+    padding: 12,
+    borderWidth: 0,
     gap: 6,
   },
 });
