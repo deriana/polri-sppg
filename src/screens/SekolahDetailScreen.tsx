@@ -181,11 +181,11 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
               gap: 12,
             }}
           >
-            <View style={styles.rowBetween}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, minWidth: 150 }}>
                 <Feather name="bar-chart-2" size={16} color={colors.primary} />
                 <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
-                  SUMMARY LAYANAN & REKAP PRESENSI HARI INI
+                  SUMMARY LAYANAN HARI INI
                 </Text>
               </View>
               <Pill tone="success" label="Presensi 97.5% Hadir" />
@@ -246,14 +246,14 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
 
           {/* Section: Allergy & Nutrition Profiling */}
           <Card style={{ gap: 10, borderWidth: 0, backgroundColor: isDark ? colors.surface : '#FFFFFF' }}>
-            <View style={styles.rowBetween}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, minWidth: 150 }}>
                 <Feather name="alert-circle" size={16} color={colors.warning} />
                 <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.text }}>
-                  MANAJEMEN ALERGI & MENU SUBSTITUSI ({daftarAlergi.length})
+                  MANAJEMEN ALERGI SISWA
                 </Text>
               </View>
-              <Pill tone="primary" label={`${daftarAlergi.length} Khusus`} />
+              <Pill tone="primary" label={`${daftarAlergi.length} Siswa Khusus`} />
             </View>
 
             <Text style={{ fontSize: 11, color: colors.textMuted }}>
@@ -304,8 +304,8 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
                     },
                   ]}
                 >
-                  <View style={styles.rowBetween}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, minWidth: 120 }}>
                       <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
                         <Feather name="user" size={12} color={colors.primary} />
                       </View>
@@ -313,7 +313,7 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
                         {item.namaInisial}
                       </Text>
                     </View>
-                    <View style={{ flexDirection: 'row', gap: 4 }}>
+                    <View style={{ flexDirection: 'row', gap: 4, flexWrap: 'wrap' }}>
                       <Pill tone="neutral" label={item.kelas} />
                       <Pill tone="danger" label={item.labelAlergi} />
                     </View>
