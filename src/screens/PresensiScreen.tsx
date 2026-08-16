@@ -44,6 +44,7 @@ export default function PresensiScreen({ navigation }: any) {
   }, []);
 
   // Filter state for Kepala SPPG
+  const [mainTab, setMainTab] = useState<'personal' | 'team'>('personal');
   const [activeTab, setActiveTab] = useState<'semua' | 'hadir' | 'belum'>('semua');
   const [searchQuery, setSearchQuery] = useState('');
   // Kepala SPPG: ketuk kartu staf untuk buka rincian presensi lengkap staf itu.
@@ -189,10 +190,43 @@ export default function PresensiScreen({ navigation }: any) {
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
-      {/* ========================================================================= */}
-      {/* 1. TAMPILAN KHUSUS PEGAWAI / STAF OPERASIONAL (LOG STATUS KEHADIRAN PRIBADI) */}
-      {/* ========================================================================= */}
-      {!isKepala ? (
+      {/* Top Segmented Tab Switcher for ALL ROLES */}
+      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 2 }}>
+        <Pressable
+          onPress={() => setMainTab('personal')}
+          style={[
+            styles.mainTabBtn,
+            {
+              backgroundColor: mainTab === 'personal' ? colors.primary : colors.surface,
+              borderColor: mainTab === 'personal' ? colors.primary : colors.border,
+            },
+          ]}
+        >
+          <Feather name="camera" size={14} color={mainTab === 'personal' ? '#FFF' : colors.text} />
+          <Text style={{ fontSize: 12, fontWeight: '800', color: mainTab === 'personal' ? '#FFF' : colors.text }}>
+            Presensi Saya
+          </Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => setMainTab('team')}
+          style={[
+            styles.mainTabBtn,
+            {
+              backgroundColor: mainTab === 'team' ? colors.primary : colors.surface,
+              borderColor: mainTab === 'team' ? colors.primary : colors.border,
+            },
+          ]}
+        >
+          <Feather name="users" size={14} color={mainTab === 'team' ? '#FFF' : colors.text} />
+          <Text style={{ fontSize: 12, fontWeight: '800', color: mainTab === 'team' ? '#FFF' : colors.text }}>
+            Daftar & Rekap Staf ({usersInScope.length})
+          </Text>
+        </Pressable>
+      </View>
+
+      {/* 1. TAMPILAN PRESENSI PRIBADI */}
+      {mainTab === 'personal' && (
         <>
           {/* Header Profile & Unit */}
           <Card style={{ backgroundColor: colors.primary, gap: spacing.xs }}>
@@ -372,14 +406,14 @@ export default function PresensiScreen({ navigation }: any) {
             </View>
           </Card>
         </>
-      ) : (
-        /* ========================================================================= */
-        /* 2. TAMPILAN KHUSUS KEPALA SPPG (MONITORING KEHADIRAN SELURUH STAF TIM)    */
-        /* ========================================================================= */
+      )}
+
+      {/* 2. TAMPILAN MONITORING REKAPITULASI & DAFTAR SELURUH STAF TIM DAPUR */}
+      {mainTab === 'team' && (
         <>
-          <SectionTitle>Monitoring Kehadiran Staf SPPG</SectionTitle>
+          <SectionTitle>Daftar & Rekapitulasi Presensi Staf Dapur</SectionTitle>
           <Text style={{ color: colors.textMuted, fontSize: fontSize.xs, marginTop: -8 }}>
-            Pusat Rekapitulasi Presensi & Geofence Staf Dapur — {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            Daftar Lengkap Staf SPPG, Pembagian Divisi Kerja, dan Rekap Absensi Real-Time — {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </Text>
 
           {/* Executive Attendance Statistics KPI Card */}
@@ -754,6 +788,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
+    borderWidth: 1,
+  },
+  mainTabBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 10,
     borderWidth: 1,
   },
 });
