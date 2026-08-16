@@ -10,11 +10,16 @@ import { useScopedData } from '../hooks';
 import { Peralatan, PeralatanKategori, PeralatanStatus } from '../types';
 import { KATEGORI_PERALATAN_OPTIONS as KATEGORI_OPTIONS } from '../mock/peralatan';
 
-export default function PeralatanScreen() {
+export default function PeralatanScreen({ route }: any) {
   const { peralatanInScope } = useScopedData();
   const { updatePeralatanStatus, role, sppgList } = useApp();
-  const { colors, fontSize, iconStrokeWidth, radius, spacing } = useTheme();
+  const { colors, fontSize, iconStrokeWidth, radius, spacing, isDark } = useTheme();
   const navigation = useNavigation<any>();
+
+  type StatusFilterType = 'semua' | 'bermasalah' | 'ready' | 'maintenance' | 'rusak';
+  const [activeStatusFilter, setActiveStatusFilter] = useState<StatusFilterType>(() => {
+    return route?.params?.initialStatusFilter || 'semua';
+  });
 
   const [activeKategori, setActiveKategori] = useState<PeralatanKategori | 'semua'>(() => {
     if (role === 'PEMORSI_PACKING') return 'ompreng_tray';
@@ -27,6 +32,14 @@ export default function PeralatanScreen() {
   const [editStatus, setEditStatus] = useState<PeralatanStatus>('ready');
   const [catatanText, setCatatanText] = useState('');
   const [qrModalEq, setQrModalEq] = useState<Peralatan | null>(null);
+
+  // Status counts for filter chips
+  const countBermasalah = peralatanInScope.filter(
+    (p) => p.status === 'rusak' || p.status === 'perlu_perbaikan' || (p.status !== 'maintenance' && p.jumlahBermasalah > 0),
+  ).length;
+  const countReady = peralatanInScope.filter((p) => p.status === 'ready' && p.jumlahBermasalah === 0).length;
+  const countMaintenance = peralatanInScope.filter((p) => p.status === 'maintenance').length;
+  const countRusak = peralatanInScope.filter((p) => p.status === 'rusak').length;
 
   // Interactive Checklist per Role in Peralatan Hub
   const [packingTodos, setPackingTodos] = useState<{ id: string; text: string; done: boolean }[]>([
@@ -65,9 +78,28 @@ export default function PeralatanScreen() {
     return false;
   };
 
-  const filtered = peralatanInScope.filter(
-    (eq) => activeKategori === 'semua' || eq.kategori === activeKategori,
-  );
+  const filtered = peralatanInScope.filter((eq) => {
+    const matchKat = activeKategori === 'semua' || eq.kategori === activeKategori;
+    if (!matchKat) return false;
+
+    if (activeStatusFilter === 'bermasalah') {
+      return (
+        eq.status === 'rusak' ||
+        eq.status === 'perlu_perbaikan' ||
+        (eq.status !== 'maintenance' && eq.jumlahBermasalah > 0)
+      );
+    }
+    if (activeStatusFilter === 'ready') {
+      return eq.status === 'ready' && eq.jumlahBermasalah === 0;
+    }
+    if (activeStatusFilter === 'maintenance') {
+      return eq.status === 'maintenance';
+    }
+    if (activeStatusFilter === 'rusak') {
+      return eq.status === 'rusak';
+    }
+    return true;
+  });
 
   const totalReady = peralatanInScope.reduce((acc, curr) => acc + curr.jumlahReady, 0);
   const totalBermasalah = peralatanInScope.reduce((acc, curr) => acc + curr.jumlahBermasalah, 0);
@@ -89,6 +121,28 @@ export default function PeralatanScreen() {
   const openAssetDetail = (eq: Peralatan) => {
     const sppg = sppgList.find((s) => s.id === eq.sppgId);
     navigation.navigate('AssetQrDetail', { peralatan: eq, sppgNama: sppg?.nama });
+  };
+
+  const getEquipmentBadge = (eq: Peralatan) => {
+    if (eq.status === 'rusak') {
+      return { label: 'Rusak Total', tone: 'danger' as const };
+    }
+    if (eq.status === 'perlu_perbaikan') {
+      return { label: 'Perlu Servis', tone: 'warning' as const };
+    }
+    if (eq.status === 'maintenance') {
+      return { label: 'Maintenance', tone: 'warning' as const };
+    }
+    if (eq.jumlahBermasalah > 0) {
+      return {
+        label: `${eq.jumlahBermasalah} Unit Bermasalah`,
+        tone: 'warning' as const,
+      };
+    }
+    if (eq.status === 'digunakan') {
+      return { label: 'Sedang Digunakan', tone: 'primary' as const };
+    }
+    return { label: 'Siap Pakai', tone: 'success' as const };
   };
 
   const statusTone = (st: PeralatanStatus) => {
@@ -286,31 +340,138 @@ export default function PeralatanScreen() {
         </Card>
       )}
 
-      {/* Category Pills */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.xs, marginVertical: spacing.xs }}>
-        {KATEGORI_OPTIONS.map((kat) => {
-          const isActive = activeKategori === kat.id;
-          return (
-            <Pressable
-              key={kat.id}
-              onPress={() => setActiveKategori(kat.id)}
-              style={[
-                styles.chip,
-                {
-                  backgroundColor: isActive ? colors.primary : colors.surface,
-                  borderColor: isActive ? colors.primary : colors.border,
-                  borderRadius: radius.pill,
-                },
-              ]}
+      {/* 1. Status Filter Pills */}
+      <View style={{ marginTop: spacing.xs, gap: 6 }}>
+        <Text style={{ fontSize: 11, fontWeight: '800', color: colors.textMuted, letterSpacing: 0.4 }}>
+          FILTER KONDISI ASET
+        </Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.xs }}>
+          <Pressable
+            onPress={() => setActiveStatusFilter('semua')}
+            style={[
+              styles.chip,
+              {
+                backgroundColor: activeStatusFilter === 'semua' ? colors.primary : colors.surface,
+                borderColor: activeStatusFilter === 'semua' ? colors.primary : colors.border,
+                borderRadius: radius.pill,
+              },
+            ]}
+          >
+            <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: activeStatusFilter === 'semua' ? colors.textInverse : colors.text }}>
+              Semua ({peralatanInScope.length})
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => setActiveStatusFilter('bermasalah')}
+            style={[
+              styles.chip,
+              {
+                backgroundColor:
+                  activeStatusFilter === 'bermasalah'
+                    ? (isDark ? 'rgba(239,68,68,0.3)' : colors.danger)
+                    : (isDark ? 'rgba(239,68,68,0.1)' : '#FEF2F2'),
+                borderColor: colors.danger,
+                borderRadius: radius.pill,
+              },
+            ]}
+          >
+            <Feather
+              name="alert-triangle"
+              size={13}
+              color={activeStatusFilter === 'bermasalah' ? (isDark ? '#FCA5A5' : '#FFFFFF') : colors.danger}
+            />
+            <Text
+              style={{
+                fontSize: fontSize.xs,
+                fontWeight: '800',
+                color: activeStatusFilter === 'bermasalah' ? (isDark ? '#FCA5A5' : '#FFFFFF') : colors.danger,
+              }}
             >
-              <Feather name={kat.icon as any} size={14} color={isActive ? colors.textInverse : colors.textMuted} strokeWidth={iconStrokeWidth} />
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: isActive ? colors.textInverse : colors.text }}>
-                {kat.label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+              Bermasalah ({countBermasalah})
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => setActiveStatusFilter('ready')}
+            style={[
+              styles.chip,
+              {
+                backgroundColor: activeStatusFilter === 'ready' ? colors.success : colors.surface,
+                borderColor: activeStatusFilter === 'ready' ? colors.success : colors.border,
+                borderRadius: radius.pill,
+              },
+            ]}
+          >
+            <Feather
+              name="check-circle"
+              size={13}
+              color={activeStatusFilter === 'ready' ? '#FFFFFF' : colors.success}
+            />
+            <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: activeStatusFilter === 'ready' ? '#FFFFFF' : colors.text }}>
+              Siap Pakai ({countReady})
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => setActiveStatusFilter('maintenance')}
+            style={[
+              styles.chip,
+              {
+                backgroundColor: activeStatusFilter === 'maintenance' ? (isDark ? 'rgba(217,119,6,0.3)' : colors.warning) : colors.surface,
+                borderColor: activeStatusFilter === 'maintenance' ? colors.warning : colors.border,
+                borderRadius: radius.pill,
+              },
+            ]}
+          >
+            <Feather
+              name="tool"
+              size={13}
+              color={activeStatusFilter === 'maintenance' ? (isDark ? '#FDE68A' : '#FFFFFF') : colors.warning}
+            />
+            <Text
+              style={{
+                fontSize: fontSize.xs,
+                fontWeight: '800',
+                color: activeStatusFilter === 'maintenance' ? (isDark ? '#FDE68A' : '#FFFFFF') : colors.text,
+              }}
+            >
+              Maintenance ({countMaintenance})
+            </Text>
+          </Pressable>
+        </ScrollView>
+      </View>
+
+      {/* 2. Category Pills */}
+      <View style={{ marginTop: spacing.xs, gap: 6 }}>
+        <Text style={{ fontSize: 11, fontWeight: '800', color: colors.textMuted, letterSpacing: 0.4 }}>
+          KATEGORI PERALATAN
+        </Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.xs }}>
+          {KATEGORI_OPTIONS.map((kat) => {
+            const isActive = activeKategori === kat.id;
+            return (
+              <Pressable
+                key={kat.id}
+                onPress={() => setActiveKategori(kat.id)}
+                style={[
+                  styles.chip,
+                  {
+                    backgroundColor: isActive ? colors.primary : colors.surface,
+                    borderColor: isActive ? colors.primary : colors.border,
+                    borderRadius: radius.pill,
+                  },
+                ]}
+              >
+                <Feather name={kat.icon as any} size={14} color={isActive ? '#FFFFFF' : colors.textMuted} strokeWidth={iconStrokeWidth} />
+                <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: isActive ? '#FFFFFF' : colors.text }}>
+                  {kat.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      </View>
 
       {/* Equipment List */}
       <SectionTitle>Daftar Peralatan ({filtered.length})</SectionTitle>
@@ -323,27 +484,34 @@ export default function PeralatanScreen() {
             {eq.fotoPeralatan && (
               <Image source={{ uri: eq.fotoPeralatan }} style={styles.eqPhoto} resizeMode="cover" />
             )}
-            <View style={styles.rowBetween}>
+            {/* Top Bar: Status Pill & QR Badge */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
+              <Pill label={getEquipmentBadge(eq).label} tone={getEquipmentBadge(eq).tone} />
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation?.();
+                  setQrModalEq(eq);
+                }}
+                style={[styles.qrBadge, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}
+              >
+                <Feather name="maximize" size={10} color={colors.primary} />
+                <Text style={{ fontSize: 10, color: colors.primary, fontWeight: '800' }}>{eq.qrCodeId}</Text>
+              </Pressable>
+            </View>
+
+            {/* Title & Unit Row */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 2 }}>
               <View style={{ flex: 1, gap: 2 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text, flex: 1 }}>{eq.nama}</Text>
-                  <Feather name="chevron-right" size={16} color={colors.textMuted} />
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                  <Text style={{ fontSize: fontSize.xs, color: colors.primary, fontWeight: '700' }}>Unit: {eq.kodeUnit}</Text>
-                  <Pressable
-                    onPress={(e) => {
-                      e.stopPropagation?.();
-                      setQrModalEq(eq);
-                    }}
-                    style={[styles.qrBadge, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}
-                  >
-                    <Feather name="maximize" size={10} color={colors.primary} />
-                    <Text style={{ fontSize: 10, color: colors.primary, fontWeight: '800' }}>{eq.qrCodeId}</Text>
-                  </Pressable>
-                </View>
+                <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.text }}>
+                  {eq.nama}
+                </Text>
+                <Text style={{ fontSize: fontSize.xs, color: colors.primary, fontWeight: '700' }}>
+                  Kode Unit: {eq.kodeUnit}
+                </Text>
               </View>
-              <Pill label={eq.status.replace('_', ' ').toUpperCase()} tone={statusTone(eq.status)} />
+              <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
+                <Feather name="chevron-right" size={15} color={colors.textMuted} />
+              </View>
             </View>
 
             <View style={[styles.infoGrid, { backgroundColor: colors.background, borderRadius: radius.md }]}>
@@ -359,6 +527,14 @@ export default function PeralatanScreen() {
                   {eq.jumlahReady.toLocaleString('id-ID')} unit
                 </Text>
               </View>
+              {eq.jumlahBermasalah > 0 && (
+                <View style={styles.infoCol}>
+                  <Text style={{ fontSize: fontSize.xs, color: colors.warning, fontWeight: '700' }}>Kendala/Servis</Text>
+                  <Text style={{ fontSize: fontSize.sm, fontWeight: '800', color: colors.warning }}>
+                    {eq.jumlahBermasalah.toLocaleString('id-ID')} unit
+                  </Text>
+                </View>
+              )}
             </View>
 
             <View style={{ gap: 2 }}>

@@ -349,7 +349,7 @@ export const peralatanList: Peralatan[] = [
     kategori: 'penyimpanan',
     jumlahTotal: 2,
     jumlahReady: 1,
-    jumlahBermasalah: 1,
+    jumlahBermasalah: 0,
     status: 'maintenance',
     lokasi: 'Cold Storage Protein',
     fotoPeralatan: SPPG_ASSET_MAP.alat_freezer,

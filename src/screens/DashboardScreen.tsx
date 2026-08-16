@@ -22,6 +22,7 @@ import { useScopedData, usePendingSyncCount } from '../hooks';
 import { AlertLog, AlertTingkat } from '../types';
 import { ROLE_LABEL, ROLE_PERMISSIONS, roleScopeLabel, scopePolresInPolda } from '../utils/scope';
 import { syncOfflineQueue } from '../utils/offlineQueue';
+import { KITCHEN_DAILY_PERFORMANCES } from '../mock/kitchenPerformance';
 
 function todayDate(): string {
   return new Date().toISOString().slice(0, 10);
@@ -316,11 +317,107 @@ export default function DashboardScreen({ navigation }: any) {
     usersInScope,
     sppgInScope,
     broadcastInScope,
+    peralatanInScope,
   } = useScopedData();
   const [pendingCount, setPendingCount] = usePendingSyncCount();
   const [syncing, setSyncing] = React.useState(false);
   const [showReadinessModal, setShowReadinessModal] = useState(false);
   const today = todayDate();
+
+  const kitchenPerformance = useMemo(() => {
+    return KITCHEN_DAILY_PERFORMANCES[currentSppg?.id || 'SPPG-001'] || KITCHEN_DAILY_PERFORMANCES['SPPG-001'];
+  }, [currentSppg?.id]);
+
+  // 1. Role-based visibility for warehouse stock alerts:
+  // Hanya Petugas Logistik/Gudang, Kepala SPPG, Chef Utama, Ahli Gizi, dan Supervisor
+  const canSeeGudangAlert = useMemo(() => {
+    if (!role) return false;
+    return (
+      role === 'PETUGAS_LOGISTIK' ||
+      role === 'KEPALA_SPPG' ||
+      role === 'CHEF_UTAMA' ||
+      role === 'AHLI_GIZI' ||
+      role === 'SUPERVISOR_POLRES' ||
+      role === 'SUPERVISOR_POLDA'
+    );
+  }, [role]);
+
+  // Bahan baku gudang yang menipis (khusus role terkait rantai pasok pangan)
+  const lowStockMaterials = useMemo(() => {
+    if (!canSeeGudangAlert) return [];
+    const activeSppgId = currentSppg?.id || 'SPPG-001';
+    return bahanBakuList.filter((b) => b.sppgId === activeSppgId && b.stok <= b.ambangMinimum);
+  }, [bahanBakuList, currentSppg?.id, canSeeGudangAlert]);
+
+  // 2. Peralatan yang bermasalah (disaring sesuai tupoksi/divisi masing-masing role)
+  const problematicEquipment = useMemo(() => {
+    if (!role) return [];
+
+    const broken = peralatanInScope.filter(
+      (p) =>
+        p.status === 'rusak' ||
+        p.status === 'perlu_perbaikan' ||
+        p.status === 'maintenance' ||
+        p.jumlahBermasalah > 0,
+    );
+
+    // Pimpinan & Petugas Logistik mengawasi seluruh unit aset
+    if (
+      role === 'KEPALA_SPPG' ||
+      role === 'PETUGAS_LOGISTIK' ||
+      role === 'SUPERVISOR_POLRES' ||
+      role === 'SUPERVISOR_POLDA'
+    ) {
+      return broken;
+    }
+
+    // Driver hanya melihat alert armada kendaraan
+    if (role === 'DRIVER') {
+      return broken.filter((p) => p.kategori === 'kendaraan');
+    }
+
+    // Pemorsi & Packing hanya melihat alert wadah ompreng, sealing, & thermal container
+    if (role === 'PEMORSI_PACKING') {
+      return broken.filter(
+        (p) =>
+          p.kategori === 'ompreng_tray' ||
+          p.kategori === 'kontainer_suhu' ||
+          p.kategori === 'sealing_packaging',
+      );
+    }
+
+    // Chef Utama hanya melihat alert kompor, alat masak, chiller/penyimpanan, & alat ukur QC
+    if (role === 'CHEF_UTAMA') {
+      return broken.filter(
+        (p) =>
+          p.kategori === 'alat_masak' ||
+          p.kategori === 'penyimpanan' ||
+          p.kategori === 'ukur_qc',
+      );
+    }
+
+    // Petugas Sanitasi hanya melihat alert mesin cuci/dishwasher, sterilisasi, & APD
+    if (role === 'PETUGAS_SANITASI') {
+      return broken.filter(
+        (p) =>
+          p.kategori === 'sterilisasi' ||
+          p.kategori === 'kebersihan_apd' ||
+          p.kategori === 'ompreng_tray',
+      );
+    }
+
+    // Ahli Gizi hanya melihat alat ukur QC & penyimpanan suhu
+    if (role === 'AHLI_GIZI') {
+      return broken.filter(
+        (p) =>
+          p.kategori === 'ukur_qc' ||
+          p.kategori === 'penyimpanan' ||
+          p.kategori === 'kontainer_suhu',
+      );
+    }
+
+    return [];
+  }, [peralatanInScope, role]);
 
   const handleSync = async () => {
     setSyncing(true);
@@ -1831,6 +1928,89 @@ export default function DashboardScreen({ navigation }: any) {
       {/* ========================================================================= */}
       {dashboardTab === 'operasional' && (
         <>
+          {/* COMPACT PERINGATAN LOGISTIK & ASET DI PALING ATAS (Prioritas Utama) */}
+          {(lowStockMaterials.length > 0 || problematicEquipment.length > 0) && (
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+              {lowStockMaterials.length > 0 && (
+                <Pressable
+                  onPress={() => navigation.navigate('Gudang')}
+                  style={({ pressed }) => [
+                    {
+                      flex: 1,
+                      minWidth: 150,
+                      backgroundColor: isDark ? 'rgba(239,68,68,0.12)' : '#FEF2F2',
+                      borderColor: isDark ? 'rgba(239,68,68,0.3)' : '#FCA5A5',
+                      borderWidth: 1,
+                      borderRadius: radius.lg,
+                      padding: 12,
+                      gap: 4,
+                      justifyContent: 'space-between',
+                    },
+                    pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+                  ]}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: isDark ? 'rgba(239,68,68,0.25)' : '#FEE2E2', alignItems: 'center', justifyContent: 'center' }}>
+                        <Feather name="package" size={13} color={colors.danger} />
+                      </View>
+                      <Text style={{ fontSize: 11, fontWeight: '900', color: colors.danger, letterSpacing: 0.4 }}>
+                        STOK KRITIS
+                      </Text>
+                    </View>
+                    <Feather name="chevron-right" size={14} color={colors.danger} />
+                  </View>
+
+                  <Text style={{ fontSize: 16, fontWeight: '900', color: colors.danger, marginTop: 2 }}>
+                    {lowStockMaterials.length} Bahan
+                  </Text>
+                  <Text style={{ fontSize: 10.5, color: colors.textMuted }} numberOfLines={1}>
+                    {lowStockMaterials.map((b) => b.nama.split(' ')[0]).join(', ')} menipis
+                  </Text>
+                </Pressable>
+              )}
+
+              {problematicEquipment.length > 0 && (
+                <Pressable
+                  onPress={() => navigation.navigate('Peralatan', { initialStatusFilter: 'bermasalah' })}
+                  style={({ pressed }) => [
+                    {
+                      flex: 1,
+                      minWidth: 150,
+                      backgroundColor: isDark ? 'rgba(217,119,6,0.12)' : '#FFFBEB',
+                      borderColor: isDark ? 'rgba(217,119,6,0.3)' : '#FCD34D',
+                      borderWidth: 1,
+                      borderRadius: radius.lg,
+                      padding: 12,
+                      gap: 4,
+                      justifyContent: 'space-between',
+                    },
+                    pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+                  ]}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: isDark ? 'rgba(217,119,6,0.25)' : '#FEF3C7', alignItems: 'center', justifyContent: 'center' }}>
+                        <Feather name="tool" size={13} color={colors.warning} />
+                      </View>
+                      <Text style={{ fontSize: 11, fontWeight: '900', color: colors.warning, letterSpacing: 0.4 }}>
+                        ALAT KENDALA
+                      </Text>
+                    </View>
+                    <Feather name="chevron-right" size={14} color={colors.warning} />
+                  </View>
+
+                  <Text style={{ fontSize: 16, fontWeight: '900', color: colors.warning, marginTop: 2 }}>
+                    {problematicEquipment.length} Unit
+                  </Text>
+                  <Text style={{ fontSize: 10.5, color: colors.textMuted }} numberOfLines={1}>
+                    {problematicEquipment.map((e) => e.nama.split(' ')[0]).join(', ')} butuh servis
+                  </Text>
+                </Pressable>
+              )}
+            </View>
+          )}
+
           {/* Role-Specific Tasks / Daily Operational Hub */}
           <Card style={{ gap: spacing.sm, borderRadius: 20, borderWidth: 1, borderColor: colors.border, padding: 16 }}>
             <Pressable
@@ -2188,6 +2368,74 @@ export default function DashboardScreen({ navigation }: any) {
                 ))}
             </Card>
           )}
+
+          {/* WIDGET RAPOR MUTU KINERJA OPERASIONAL DAPUR (KITCHEN DAILY PERFORMANCE SCORE) */}
+          <Card
+            style={{
+              backgroundColor: isDark ? colors.surface : '#FFFFFF',
+              borderWidth: 0,
+              borderRadius: radius.xl,
+              gap: 12,
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, minWidth: 160 }}>
+                <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: isDark ? 'rgba(234,179,8,0.2)' : '#FEF9C3', alignItems: 'center', justifyContent: 'center' }}>
+                  <Feather name="award" size={16} color={isDark ? colors.gold : '#CA8A04'} />
+                </View>
+                <View>
+                  <Text style={{ fontSize: 11, fontWeight: '900', color: colors.text, letterSpacing: 0.5 }}>
+                    RAPOR MUTU OPERASIONAL DAPUR
+                  </Text>
+                  <Text style={{ fontSize: 10, color: colors.textMuted }}>
+                    Evaluasi Internal Harian • Update {kitchenPerformance.lastUpdated}
+                  </Text>
+                </View>
+              </View>
+              <Pill label={`Grade ${kitchenPerformance.grade} (${kitchenPerformance.overallScore}/100)`} tone="success" />
+            </View>
+
+            {/* 6 Performance Pillars Bars */}
+            <View style={{ gap: 8 }}>
+              {kitchenPerformance.pillars.map((pillar) => (
+                <View key={pillar.key} style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC', padding: 10, borderRadius: radius.md, gap: 4 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Feather name={pillar.icon as any} size={12} color={colors.primary} />
+                      <Text style={{ fontSize: 11, fontWeight: '800', color: colors.text }}>
+                        {pillar.label}
+                      </Text>
+                    </View>
+                    <Text style={{ fontSize: 11.5, fontWeight: '900', color: colors.primary }}>
+                      {pillar.score}%
+                    </Text>
+                  </View>
+
+                  {/* Progress track */}
+                  <View style={{ height: 5, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0', borderRadius: 3, overflow: 'hidden' }}>
+                    <View style={{ height: '100%', width: `${pillar.score}%`, backgroundColor: colors.primary, borderRadius: 3 }} />
+                  </View>
+
+                  <Text style={{ fontSize: 10, color: colors.textMuted, marginTop: 1 }}>
+                    {pillar.status}
+                  </Text>
+                </View>
+              ))}
+            </View>
+
+            {/* Daily Continuous Improvement Recommendation Box */}
+            <View style={{ backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#EFF6FF', padding: 10, borderRadius: radius.md, gap: 4 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Feather name="info" size={13} color={colors.primary} />
+                <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.primary }}>
+                  Catatan Rekomendasi Evaluasi Hari Ini:
+                </Text>
+              </View>
+              <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
+                {kitchenPerformance.ringkasanEvaluasi}
+              </Text>
+            </View>
+          </Card>
         </>
       )}
 

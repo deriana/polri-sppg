@@ -30,6 +30,28 @@ const KATEGORI_LABEL: Record<string, string> = {
   k3_darurat: 'K3 & Darurat',
 };
 
+const getEquipmentBadge = (eq: Peralatan) => {
+  if (eq.status === 'rusak') {
+    return { label: 'RUSAK TOTAL', tone: 'danger' as const };
+  }
+  if (eq.status === 'perlu_perbaikan') {
+    return { label: 'PERLU PERBAIKAN', tone: 'warning' as const };
+  }
+  if (eq.status === 'maintenance') {
+    return { label: 'DALAM MAINTENANCE', tone: 'warning' as const };
+  }
+  if (eq.jumlahBermasalah > 0) {
+    return {
+      label: `⚠️ ${eq.jumlahBermasalah} BERMASALAH (${eq.jumlahReady}/${eq.jumlahTotal} READY)`,
+      tone: 'warning' as const,
+    };
+  }
+  if (eq.status === 'digunakan') {
+    return { label: 'SEDANG DIGUNAKAN', tone: 'primary' as const };
+  }
+  return { label: 'SIAP PAKAI (READY)', tone: 'success' as const };
+};
+
 const statusTone = (st: PeralatanStatus): 'success' | 'primary' | 'warning' | 'danger' | 'neutral' => {
   switch (st) {
     case 'ready':
@@ -167,7 +189,7 @@ export default function AssetQrDetailScreen({ route }: AssetQrDetailScreenProps)
       <Card style={{ gap: spacing.sm }}>
         <View style={styles.rowBetween}>
           <Text style={{ fontSize: fontSize.md, fontWeight: '800', color: colors.text, flex: 1 }}>{eq.nama}</Text>
-          <Pill label={eq.status.replace('_', ' ').toUpperCase()} tone={statusTone(eq.status)} />
+          <Pill label={getEquipmentBadge(eq).label} tone={getEquipmentBadge(eq).tone} />
         </View>
 
         <View style={[styles.detailGrid, { backgroundColor: colors.background, borderRadius: radius.md }]}>
