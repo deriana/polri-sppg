@@ -3,10 +3,11 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { Card, EmptyState, Pill, PrimaryButton, SectionTitle } from '../components/ui';
+import { Card, EmptyState, Input, Pill, PrimaryButton, SectionTitle } from '../components/ui';
 import { useScopedData } from '../hooks';
 import { scopeBahanBaku, ROLE_PERMISSIONS } from '../utils/scope';
 import { BahanKategori } from '../types';
+import { KATEGORI_BAHAN_LIST as KATEGORI_LIST } from '../mock/bahanBaku';
 
 const KATEGORI_LABEL: Record<BahanKategori, string> = {
   bahan_pokok: 'Bahan Pokok',
@@ -16,8 +17,6 @@ const KATEGORI_LABEL: Record<BahanKategori, string> = {
   kemasan: 'Kemasan & Box',
   lainnya: 'Lainnya',
 };
-
-import { KATEGORI_BAHAN_LIST as KATEGORI_LIST } from '../mock/bahanBaku';
 
 // Ambang peringatan kadaluarsa FEFO (3 hari)
 const EXPIRY_WARNING_DAYS = 3;
@@ -33,51 +32,61 @@ export default function GudangScreen({ navigation }: any) {
   const { sppgInScope } = useScopedData();
   const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark } = useTheme();
 
-  // Terpisah: Filter Status / FEFO vs Filter Kategori
-  const [statusFilter, setStatusFilter] = useState<'semua' | 'fefo' | 'kritis' | 'aman'>('semua');
+  // Tab Slicing: 'stok' (Daftar Stok) | 'fefo' (Prioritas FEFO) | 'mutasi' (Mutasi & IoT)
+  const [activeTab, setActiveTab] = useState<'stok' | 'fefo' | 'mutasi'>('stok');
+
+  // Search & Filter state for Stok tab
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'semua' | 'kritis' | 'aman'>('semua');
   const [kategoriFilter, setKategoriFilter] = useState<BahanKategori | 'semua'>('semua');
+  const [expandedBahanId, setExpandedBahanId] = useState<string | null>(null);
 
   const bahanInScope = useMemo(() => scopeBahanBaku(sppgInScope, bahanBakuList), [sppgInScope, bahanBakuList]);
 
-  // FEFO Sorting: bahan yang ada tanggalKadaluarsa diurutkan dari yang paling dekat expired
-  const fefoSorted = useMemo(() => {
-    return [...bahanInScope].sort((a, b) => {
-      if (!a.tanggalKadaluarsa) return 1;
-      if (!b.tanggalKadaluarsa) return -1;
-      return a.tanggalKadaluarsa.localeCompare(b.tanggalKadaluarsa);
-    });
-  }, [bahanInScope]);
-
+  // FEFO List: bahan mendekati expired diurutkan paling mendesak
   const expiringSoonList = useMemo(() => {
-    return bahanInScope.filter((b) => {
-      if (!b.tanggalKadaluarsa) return false;
-      const days = daysUntil(b.tanggalKadaluarsa);
-      return days <= EXPIRY_WARNING_DAYS;
-    });
+    return bahanInScope
+      .filter((b) => {
+        if (!b.tanggalKadaluarsa) return false;
+        const days = daysUntil(b.tanggalKadaluarsa);
+        return days <= EXPIRY_WARNING_DAYS;
+      })
+      .sort((a, b) => {
+        const da = daysUntil(a.tanggalKadaluarsa!);
+        const db = daysUntil(b.tanggalKadaluarsa!);
+        return da - db;
+      });
   }, [bahanInScope]);
 
   const criticalStockList = useMemo(() => {
     return bahanInScope.filter((b) => b.stok <= b.ambangMinimum);
   }, [bahanInScope]);
 
-  // Filter kombinasi: Status (FEFO/Kritis/Aman) DAN Kategori Bahan
-  const filtered = useMemo(() => {
-    return fefoSorted.filter((b) => {
-      const sisaHari = b.tanggalKadaluarsa ? daysUntil(b.tanggalKadaluarsa) : null;
-      const isFefo = sisaHari !== null && sisaHari <= EXPIRY_WARNING_DAYS;
+  // Filtered List for Stok tab
+  const filteredBahan = useMemo(() => {
+    return bahanInScope.filter((b) => {
       const isCritical = b.stok <= b.ambangMinimum;
 
-      // Check Status Filter
-      if (statusFilter === 'fefo' && !isFefo) return false;
+      // Status Filter
       if (statusFilter === 'kritis' && !isCritical) return false;
       if (statusFilter === 'aman' && isCritical) return false;
 
-      // Check Kategori Filter
+      // Kategori Filter
       if (kategoriFilter !== 'semua' && b.kategori !== kategoriFilter) return false;
+
+      // Search Query
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchName = b.nama.toLowerCase().includes(q);
+        const matchRak = (b.lokasiRak || '').toLowerCase().includes(q);
+        const mitra = b.mitraId ? mitraList.find((m) => m.id === b.mitraId) : undefined;
+        const matchMitra = mitra ? mitra.nama.toLowerCase().includes(q) : false;
+        if (!matchName && !matchRak && !matchMitra) return false;
+      }
 
       return true;
     });
-  }, [fefoSorted, statusFilter, kategoriFilter]);
+  }, [bahanInScope, statusFilter, kategoriFilter, searchQuery, mitraList]);
 
   const isWilayah = !!role && ROLE_PERMISSIONS[role].isViewOnly;
   const canRequest = !!role && ROLE_PERMISSIONS[role].canManageGudang;
@@ -88,16 +97,9 @@ export default function GudangScreen({ navigation }: any) {
       mutasiStokList
         .filter((m) => sppgIdsInScope.has(m.sppgId))
         .sort((a, b) => (a.tanggal < b.tanggal ? 1 : -1))
-        .slice(0, 6),
+        .slice(0, 8),
     [mutasiStokList, sppgIdsInScope],
   );
-
-  const statusFilterOptions = [
-    { key: 'semua', label: `Semua (${bahanInScope.length})` },
-    { key: 'fefo', label: `FEFO / Dekat Expired (${expiringSoonList.length})`, isWarning: true },
-    { key: 'kritis', label: `Stok Kritis (${criticalStockList.length})`, isDanger: true },
-    { key: 'aman', label: 'Stok Aman' },
-  ];
 
   // Live Telemetry Simulation for Gudang
   const [telemetry, setTelemetry] = useState({
@@ -119,548 +121,663 @@ export default function GudangScreen({ navigation }: any) {
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
-      {/* 1. Header Row */}
+      {/* 1. Header Ringkas */}
       <View style={styles.headerRow}>
         <View style={{ flex: 1 }}>
-          <SectionTitle style={{ marginBottom: 0 }}>Gudang & Stok Bahan Baku</SectionTitle>
+          <SectionTitle style={{ marginBottom: 0 }}>Gudang & Stok Bahan</SectionTitle>
           <Text style={{ fontSize: 11, color: colors.textMuted, marginTop: 2 }}>
-            Manajemen logistik dapur, masa kedaluwarsa (FEFO), & relasi pemasok
+            Kontrol stok dapur SPPG, rotasi FEFO, & mutasi logistik
           </Text>
         </View>
         {canRequest && (
-          <PrimaryButton label="+ Ajukan Bahan" icon="plus" fullWidth={false} onPress={() => navigation.navigate('PengadaanBahan', { initialTab: 'ajuin' })} />
+          <PrimaryButton
+            label="+ Ajukan Bahan"
+            icon="plus"
+            fullWidth={false}
+            onPress={() => navigation.navigate('PengadaanBahan', { initialTab: 'ajuin' })}
+          />
         )}
       </View>
 
-      {/* 2. FEFO Priority Warning Banner */}
-      {expiringSoonList.length > 0 && (
-        <Card
-          style={{
-            gap: 12,
-            backgroundColor: isDark ? 'rgba(217, 119, 6, 0.08)' : '#FFFBEB',
-            borderColor: isDark ? 'rgba(245, 158, 11, 0.3)' : '#FDE68A',
-            borderWidth: 1.5,
-            borderRadius: radius.xl,
-            padding: 14,
-          }}
+      {/* 2. Top Segmented Navigation (Slicing Tabs) */}
+      <View style={[styles.tabBar, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.lg }]}>
+        <Pressable
+          onPress={() => setActiveTab('stok')}
+          style={[
+            styles.tabItem,
+            activeTab === 'stok' && {
+              backgroundColor: isDark ? colors.gold : colors.primary,
+              borderRadius: radius.md,
+            },
+          ]}
         >
-          {/* Header */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, minWidth: 200 }}>
+          <Feather
+            name="package"
+            size={13}
+            color={activeTab === 'stok' ? (isDark ? '#07101E' : '#FFF') : colors.textMuted}
+          />
+          <Text
+            style={[
+              styles.tabLabel,
+              { color: activeTab === 'stok' ? (isDark ? '#07101E' : '#FFF') : colors.textMuted },
+            ]}
+          >
+            Stok Bahan ({bahanInScope.length})
+          </Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => setActiveTab('fefo')}
+          style={[
+            styles.tabItem,
+            activeTab === 'fefo' && {
+              backgroundColor: isDark ? colors.gold : colors.primary,
+              borderRadius: radius.md,
+            },
+          ]}
+        >
+          <Feather
+            name="alert-triangle"
+            size={13}
+            color={activeTab === 'fefo' ? (isDark ? '#07101E' : '#FFF') : expiringSoonList.length > 0 ? colors.warning : colors.textMuted}
+          />
+          <Text
+            style={[
+              styles.tabLabel,
+              {
+                color:
+                  activeTab === 'fefo'
+                    ? (isDark ? '#07101E' : '#FFF')
+                    : expiringSoonList.length > 0
+                    ? colors.warning
+                    : colors.textMuted,
+              },
+            ]}
+          >
+            FEFO Exp ({expiringSoonList.length})
+          </Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => setActiveTab('mutasi')}
+          style={[
+            styles.tabItem,
+            activeTab === 'mutasi' && {
+              backgroundColor: isDark ? colors.gold : colors.primary,
+              borderRadius: radius.md,
+            },
+          ]}
+        >
+          <Feather
+            name="activity"
+            size={13}
+            color={activeTab === 'mutasi' ? (isDark ? '#07101E' : '#FFF') : colors.textMuted}
+          />
+          <Text
+            style={[
+              styles.tabLabel,
+              { color: activeTab === 'mutasi' ? (isDark ? '#07101E' : '#FFF') : colors.textMuted },
+            ]}
+          >
+            Mutasi & IoT
+          </Text>
+        </Pressable>
+      </View>
+
+      {/* ========================================================================= */}
+      {/* TAB 1: DAFTAR STOK BAHAN */}
+      {/* ========================================================================= */}
+      {activeTab === 'stok' && (
+        <View style={{ gap: spacing.md }}>
+          {/* Quick Metrics Bar */}
+          <View style={[styles.statGrid, { backgroundColor: isDark ? colors.surface : '#FFFFFF', borderColor: colors.border, borderRadius: radius.lg }]}>
+            <View style={styles.statCol}>
+              <Text style={{ fontSize: 10, color: colors.textMuted }}>Total Stok</Text>
+              <Text style={{ fontSize: 15, fontWeight: '900', color: colors.primary }}>{bahanInScope.length} Bahan</Text>
+            </View>
+            <View style={styles.statCol}>
+              <Text style={{ fontSize: 10, color: colors.textMuted }}>Stok Kritis</Text>
+              <Text style={{ fontSize: 15, fontWeight: '900', color: criticalStockList.length > 0 ? colors.danger : colors.success }}>
+                {criticalStockList.length} Bahan
+              </Text>
+            </View>
+            <Pressable onPress={() => setActiveTab('fefo')} style={styles.statCol}>
+              <Text style={{ fontSize: 10, color: colors.textMuted }}>Dekat Expired</Text>
+              <Text style={{ fontSize: 15, fontWeight: '900', color: expiringSoonList.length > 0 ? colors.warning : colors.textMuted }}>
+                {expiringSoonList.length} Item ➔
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* Filter & Search Box */}
+          <Card style={{ gap: 8, padding: 10 }}>
+            <Input
+              label="Cari Bahan Baku"
+              icon="search"
+              placeholder="Cari nama bahan, lokasi rak, atau pemasok..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+
+            {/* Kategori Filter Chips */}
+            <View style={{ gap: 4 }}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
+                {KATEGORI_LIST.map((k) => {
+                  const isSelected = kategoriFilter === k;
+                  return (
+                    <Pressable
+                      key={k}
+                      onPress={() => setKategoriFilter(k)}
+                      style={[
+                        styles.chip,
+                        {
+                          borderColor: isSelected ? (isDark ? colors.gold : colors.primary) : colors.border,
+                          backgroundColor: isSelected ? (isDark ? colors.gold : colors.primary) : colors.surface,
+                          borderRadius: radius.pill,
+                          paddingVertical: 5,
+                          paddingHorizontal: 10,
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={{
+                          color: isSelected ? (isDark ? '#07101E' : '#FFFFFF') : colors.textMuted,
+                          fontWeight: isSelected ? '800' : '600',
+                          fontSize: 11,
+                        }}
+                      >
+                        {k === 'semua' ? 'Semua Kategori' : KATEGORI_LABEL[k]}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
+
+            {/* Status Filter Chips */}
+            <View style={{ flexDirection: 'row', gap: 6 }}>
+              {[
+                { key: 'semua', label: 'Semua Status' },
+                { key: 'aman', label: 'Stok Aman' },
+                { key: 'kritis', label: `Stok Kritis (${criticalStockList.length})` },
+              ].map((opt) => {
+                const isSelected = statusFilter === opt.key;
+                return (
+                  <Pressable
+                    key={opt.key}
+                    onPress={() => setStatusFilter(opt.key as any)}
+                    style={[
+                      styles.chip,
+                      {
+                        borderColor: isSelected ? (isDark ? colors.gold : colors.accent) : colors.border,
+                        backgroundColor: isSelected ? (isDark ? colors.gold : colors.accent) : colors.surface,
+                        borderRadius: radius.pill,
+                        paddingVertical: 4,
+                        paddingHorizontal: 9,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={{
+                        color: isSelected ? (isDark ? '#07101E' : '#FFFFFF') : colors.textMuted,
+                        fontWeight: isSelected ? '800' : '600',
+                        fontSize: 10.5,
+                      }}
+                    >
+                      {opt.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </Card>
+
+          {/* List Section */}
+          <SectionTitle
+            action={
+              <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, fontWeight: '600' }}>
+                {filteredBahan.length} Bahan
+              </Text>
+            }
+          >
+            Daftar Ketersediaan Stok
+          </SectionTitle>
+
+          {filteredBahan.length === 0 ? (
+            <EmptyState
+              icon="package"
+              title="Tidak Ada Bahan yang Cocok"
+              body="Coba ubah kata kunci pencarian atau kombinasi filter kategori di atas."
+            />
+          ) : (
+            <View style={{ gap: spacing.sm }}>
+              {filteredBahan.map((b) => {
+                const isLow = b.stok <= b.ambangMinimum;
+                const sppgName = isWilayah ? sppgInScope.find((s) => s.id === b.sppgId)?.nama : null;
+                const mitra = b.mitraId ? mitraList.find((m) => m.id === b.mitraId) : undefined;
+                const sisaHari = b.tanggalKadaluarsa ? daysUntil(b.tanggalKadaluarsa) : null;
+                const isUrgentFefo = sisaHari !== null && sisaHari <= 2;
+                const isExpiringSoon = sisaHari !== null && sisaHari <= EXPIRY_WARNING_DAYS;
+                const isExpanded = expandedBahanId === b.id;
+
+                return (
+                  <Card
+                    key={b.id}
+                    style={{
+                      gap: 8,
+                      borderColor: isUrgentFefo ? colors.danger : isExpiringSoon ? colors.warning : colors.border,
+                      borderWidth: isUrgentFefo || isLow ? 1.5 : 1,
+                    }}
+                  >
+                    {/* Header Row: Foto/Icon + Nama Bahan + Kategori & Stok */}
+                    <View style={styles.stockItemHeader}>
+                      {b.fotoBahan ? (
+                        <Image source={{ uri: b.fotoBahan }} style={[styles.bahanImage, { borderRadius: radius.md }]} />
+                      ) : (
+                        <View style={[styles.stockIconWrap, { backgroundColor: isLow ? colors.dangerBg : colors.primaryLight }]}>
+                          <Feather name="package" size={20} color={isLow ? colors.danger : colors.primary} strokeWidth={iconStrokeWidth} />
+                        </View>
+                      )}
+
+                      <View style={{ flex: 1, gap: 2 }}>
+                        <Text style={{ color: colors.text, fontWeight: '700', fontSize: fontSize.sm }}>
+                          {b.nama}
+                        </Text>
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4, alignItems: 'center' }}>
+                          <Pill label={KATEGORI_LABEL[b.kategori]} tone="neutral" />
+                          {b.lokasiRak && <Pill label={b.lokasiRak} tone="info" icon="map-pin" />}
+                        </View>
+                        {sppgName && <Text style={{ color: colors.textMuted, fontSize: 10.5 }}>Unit: {sppgName}</Text>}
+                      </View>
+
+                      <View style={{ alignItems: 'flex-end', gap: 2 }}>
+                        <Text style={{ color: isLow ? colors.danger : colors.text, fontWeight: '900', fontSize: 16 }}>
+                          {b.stok.toLocaleString('id-ID')} <Text style={{ fontSize: 11, fontWeight: '600' }}>{b.satuan}</Text>
+                        </Text>
+                        <Pill
+                          label={isLow ? 'Stok Kritis' : 'Stok Aman'}
+                          tone={isLow ? 'danger' : 'success'}
+                        />
+                      </View>
+                    </View>
+
+                    {/* Ambang Minimum & Exp Date Row */}
+                    <View style={[styles.stockMetaBar, { backgroundColor: colors.background, borderRadius: radius.sm }]}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                        <Feather name="shield" size={11} color={colors.textMuted} />
+                        <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
+                          Min: <Text style={{ fontWeight: '700', color: colors.text }}>{b.ambangMinimum} {b.satuan}</Text>
+                        </Text>
+                      </View>
+
+                      {b.tanggalKadaluarsa ? (
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                          <Feather name="calendar" size={11} color={isExpiringSoon ? colors.warning : colors.textMuted} />
+                          <Text style={{ fontSize: 10.5, color: isExpiringSoon ? (isUrgentFefo ? colors.danger : colors.warning) : colors.textMuted, fontWeight: isExpiringSoon ? '800' : '500' }}>
+                            Exp: {b.tanggalKadaluarsa} ({sisaHari !== null ? (sisaHari <= 0 ? 'Hari Ini!' : `${sisaHari} hr`) : ''})
+                          </Text>
+                        </View>
+                      ) : (
+                        <Text style={{ fontSize: 10.5, color: colors.textMuted }}>Non-perishable</Text>
+                      )}
+                    </View>
+
+                    {/* Collapsible Supplier Info Panel */}
+                    {isExpanded && (
+                      <View style={[styles.supplierPanel, { backgroundColor: colors.background, borderColor: colors.border, borderRadius: radius.md }]}>
+                        <View style={[styles.supplierIconBox, { backgroundColor: colors.primaryLight }]}>
+                          <Feather name="truck" size={14} color={colors.primary} />
+                        </View>
+                        <View style={{ flex: 1, gap: 1 }}>
+                          <Text style={{ fontSize: 9.5, color: colors.textMuted, fontWeight: '700' }}>PEMASOK RESMI</Text>
+                          <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.text }} numberOfLines={1}>
+                            {mitra ? mitra.nama : 'Swakelola / Disediakan SPPG'}
+                          </Text>
+                          {mitra && (
+                            <Text style={{ fontSize: 10, color: colors.textMuted }}>
+                              {mitra.jenisProduk} • {mitra.wilayahLayanan}
+                            </Text>
+                          )}
+                        </View>
+                        {mitra && (
+                          <Pressable
+                            onPress={() => navigation.navigate('MitraList', { mitraId: mitra.id })}
+                            style={[styles.mitraBtn, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.sm }]}
+                          >
+                            <Text style={{ color: colors.primary, fontWeight: '700', fontSize: 10.5 }}>
+                              Detail ➔
+                            </Text>
+                          </Pressable>
+                        )}
+                      </View>
+                    )}
+
+                    {/* Action Bar */}
+                    <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', justifyContent: 'space-between', marginTop: 2 }}>
+                      <Pressable
+                        onPress={() => setExpandedBahanId(isExpanded ? null : b.id)}
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 4 }}
+                      >
+                        <Feather name={isExpanded ? 'chevron-up' : 'info'} size={12} color={colors.primary} />
+                        <Text style={{ fontSize: 11, fontWeight: '700', color: colors.primary }}>
+                          {isExpanded ? 'Tutup Info Pemasok' : 'Info Pemasok'}
+                        </Text>
+                      </Pressable>
+
+                      {canRequest && (
+                        <Pressable
+                          onPress={() => navigation.navigate('MutasiStokForm', { initialBahanId: b.id, jenis: 'keluar' })}
+                          style={[styles.fefoUseBtn, { backgroundColor: colors.primaryLight, borderColor: colors.primary, borderRadius: radius.pill }]}
+                        >
+                          <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.primary }}>
+                            Catat Pemakaian
+                          </Text>
+                          <Feather name="arrow-right" size={11} color={colors.primary} />
+                        </Pressable>
+                      )}
+                    </View>
+                  </Card>
+                );
+              })}
+            </View>
+          )}
+        </View>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 2: PRIORITAS FEFO (FIRST-EXPIRED, FIRST-OUT) */}
+      {/* ========================================================================= */}
+      {activeTab === 'fefo' && (
+        <View style={{ gap: spacing.md }}>
+          <Card
+            style={{
+              gap: 8,
+              backgroundColor: isDark ? 'rgba(217, 119, 6, 0.08)' : '#FFFBEB',
+              borderColor: isDark ? 'rgba(245, 158, 11, 0.3)' : '#FDE68A',
+              borderWidth: 1.5,
+              borderRadius: radius.lg,
+              padding: 12,
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <View style={[styles.miniIconWrap, { backgroundColor: isDark ? 'rgba(245, 158, 11, 0.2)' : '#FEF3C7' }]}>
                 <Feather name="alert-triangle" size={15} color={isDark ? colors.gold : '#D97706'} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 11.5, fontWeight: '900', color: isDark ? colors.gold : '#B45309', letterSpacing: 0.4 }}>
-                  REKOMENDASI FEFO (FIRST-EXPIRED, FIRST-OUT)
+                <Text style={{ fontSize: 12, fontWeight: '900', color: isDark ? colors.gold : '#B45309' }}>
+                  SISTEM ROTASI FEFO (FIRST-EXPIRED, FIRST-OUT)
                 </Text>
-                <Text style={{ fontSize: 10.5, color: isDark ? '#D1D5DB' : '#92400E', marginTop: 1 }}>
-                  Wajib diolah terlebih dahulu untuk menu hari ini / besok
+                <Text style={{ fontSize: 11, color: isDark ? '#D1D5DB' : '#92400E', marginTop: 1 }}>
+                  Bahan dengan tanggal kedaluwarsa terdekat wajib dimasak lebih dulu sebelum membuka stok kemasan baru.
                 </Text>
               </View>
             </View>
-            <Pill label={`${expiringSoonList.length} Bahan Prioritas`} tone="warning" />
-          </View>
+          </Card>
 
-          {/* List of Expiring Items in Structured Cards */}
-          <View style={{ gap: 8 }}>
-            {expiringSoonList.map((b) => {
-              const sisaHari = b.tanggalKadaluarsa ? daysUntil(b.tanggalKadaluarsa) : 0;
-              const isUrgent = sisaHari <= 1;
-
-              return (
-                <View
-                  key={b.id}
-                  style={[
-                    styles.fefoItemCard,
-                    {
-                      backgroundColor: colors.surface,
-                      borderColor: isUrgent ? (isDark ? 'rgba(239, 68, 68, 0.4)' : '#FCA5A5') : colors.border,
-                      borderWidth: 1,
-                      borderRadius: radius.lg,
-                    },
-                  ]}
-                >
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                    {b.fotoBahan ? (
-                      <Image source={{ uri: b.fotoBahan }} style={{ width: 44, height: 44, borderRadius: radius.md }} />
-                    ) : (
-                      <View
-                        style={{
-                          width: 44,
-                          height: 44,
-                          borderRadius: radius.md,
-                          backgroundColor: isUrgent ? colors.dangerBg : colors.warningBg,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <Feather
-                          name={isUrgent ? 'alert-circle' : 'clock'}
-                          size={20}
-                          color={isUrgent ? colors.danger : colors.warning}
-                        />
-                      </View>
-                    )}
-
-                    <View style={{ flex: 1, gap: 2 }}>
-                      <Text style={{ fontSize: 13, fontWeight: '800', color: colors.text }} numberOfLines={1}>
-                        {b.nama}
-                      </Text>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                        <Text style={{ fontSize: 11, color: colors.textMuted }}>
-                          Stok: <Text style={{ fontWeight: '800', color: colors.text }}>{b.stok.toLocaleString('id-ID')} {b.satuan}</Text>
-                        </Text>
-                        {b.lokasiRak && (
-                          <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
-                            • {b.lokasiRak}
-                          </Text>
-                        )}
-                      </View>
-                    </View>
-
-                    {/* Expiry Pill */}
-                    <View style={{ alignItems: 'flex-end', gap: 2 }}>
-                      <Pill
-                        label={sisaHari <= 0 ? 'Exp Hari Ini!' : sisaHari === 1 ? 'Exp Besok' : `Sisa ${sisaHari} Hari`}
-                        tone={isUrgent ? 'danger' : 'warning'}
-                      />
-                      <Text style={{ fontSize: 10, color: colors.textMuted }}>
-                        {b.tanggalKadaluarsa}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Quick Action Bar for This Item */}
-                  <View style={[styles.fefoItemFooter, { borderTopColor: colors.border }]}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, flex: 1 }}>
-                      <Feather name="info" size={11} color={isUrgent ? colors.danger : colors.warning} />
-                      <Text style={{ fontSize: 10.5, color: isUrgent ? colors.danger : colors.warning, fontWeight: '700' }} numberOfLines={1}>
-                        {isUrgent ? 'Mendesak: olah pada jadwal masak terdekat!' : 'Gunakan sebelum membuka kemasan baru'}
-                      </Text>
-                    </View>
-                    {canRequest && (
-                      <Pressable
-                        onPress={() => navigation.navigate('MutasiStokForm', { initialBahanId: b.id, jenis: 'keluar' })}
-                        style={[
-                          styles.fefoUseBtn,
-                          {
-                            backgroundColor: isDark ? 'rgba(37, 99, 235, 0.15)' : colors.primaryLight,
-                            borderColor: colors.primary,
-                            borderRadius: radius.pill,
-                          },
-                        ]}
-                      >
-                        <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.primary }}>
-                          Catat Pemakaian
-                        </Text>
-                        <Feather name="arrow-right" size={11} color={colors.primary} />
-                      </Pressable>
-                    )}
-                  </View>
-                </View>
-              );
-            })}
-          </View>
-
-          {/* Quick Filter Toggle Button */}
-          <Pressable
-            onPress={() => setStatusFilter('fefo')}
-            style={[
-              styles.fefoFilterToggle,
-              {
-                backgroundColor: colors.surface,
-                borderColor: isDark ? 'rgba(245, 158, 11, 0.4)' : '#FDE68A',
-                borderRadius: radius.md,
-              },
-            ]}
+          <SectionTitle
+            action={
+              <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, fontWeight: '600' }}>
+                {expiringSoonList.length} Bahan Prioritas
+              </Text>
+            }
           >
-            <Feather name="filter" size={12} color={isDark ? colors.gold : '#B45309'} />
-            <Text style={{ fontSize: 11, fontWeight: '800', color: isDark ? colors.gold : '#B45309' }}>
-              Filter Hanya Tampilkan Bahan FEFO di Tabel Bawah ({expiringSoonList.length})
-            </Text>
-          </Pressable>
-        </Card>
-      )}
+            Daftar Bahan Mendekati Kedaluwarsa
+          </SectionTitle>
 
-      {/* Quick IoT Cold Storage & Freezer Telemetry Card */}
-      <Card onPress={() => navigation.navigate('GudangKondisi')} style={{ gap: 12 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <View style={[styles.miniIconWrap, { backgroundColor: colors.successBg }]}>
-              <Feather name="cpu" size={16} color={colors.success} />
-            </View>
-            <Text style={{ fontSize: 13, fontWeight: '900', color: colors.text }}>
-              KONTROL IoT PENDINGIN & FREEZER
-            </Text>
-          </View>
-          <Pill label="Buka Panel IoT >" tone="success" icon="sliders" />
-        </View>
-
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          <View style={[styles.telemetryBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
-            <Text style={{ fontSize: 9.5, color: colors.textMuted, fontWeight: '800' }}>CHILLER DAGING</Text>
-            <Text style={{ fontSize: 16, fontWeight: '900', color: colors.success, marginTop: 2 }}>
-              {telemetry.chillerDaging > 0 ? `+${telemetry.chillerDaging.toFixed(1)}` : telemetry.chillerDaging.toFixed(1)}°C
-            </Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 }}>
-              <Feather name="lock" size={10} color={colors.success} />
-              <Text style={{ fontSize: 9.5, color: colors.success, fontWeight: '700' }}>Terkunci</Text>
-            </View>
-          </View>
-          <View style={[styles.telemetryBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
-            <Text style={{ fontSize: 9.5, color: colors.textMuted, fontWeight: '800' }}>DEEP FREEZER</Text>
-            <Text style={{ fontSize: 16, fontWeight: '900', color: colors.info, marginTop: 2 }}>
-              {telemetry.deepFreezer.toFixed(1)}°C
-            </Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 }}>
-              <Feather name="lock" size={10} color={colors.success} />
-              <Text style={{ fontSize: 9.5, color: colors.success, fontWeight: '700' }}>Terkunci</Text>
-            </View>
-          </View>
-          <View style={[styles.telemetryBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
-            <Text style={{ fontSize: 9.5, color: colors.textMuted, fontWeight: '800' }}>CHILLER SAYUR</Text>
-            <Text style={{ fontSize: 16, fontWeight: '900', color: colors.success, marginTop: 2 }}>
-              {telemetry.chillerSayur > 0 ? `+${telemetry.chillerSayur.toFixed(1)}` : telemetry.chillerSayur.toFixed(1)}°C
-            </Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 }}>
-              <Feather name="lock" size={10} color={colors.success} />
-              <Text style={{ fontSize: 9.5, color: colors.success, fontWeight: '700' }}>Terkunci</Text>
-            </View>
-          </View>
-        </View>
-      </Card>
-
-      {/* 3. FILTER GROUP 1: Status & Prioritas Stok */}
-      <View style={{ gap: 6 }}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
-          {statusFilterOptions.map((opt) => {
-            const isSelected = statusFilter === opt.key;
-            return (
-              <Pressable
-                key={opt.key}
-                onPress={() => setStatusFilter(opt.key as any)}
-                style={[
-                  styles.chip,
-                  {
-                    borderColor: isSelected ? (isDark ? colors.gold : colors.primary) : colors.border,
-                    borderRadius: radius.pill,
-                    backgroundColor: isSelected ? (isDark ? colors.gold : colors.primary) : colors.surface,
-                  },
-                ]}
-              >
-                <Text
-                  style={{
-                    color: isSelected ? (isDark ? '#07101E' : '#FFFFFF') : colors.text,
-                    fontWeight: isSelected ? '800' : '600',
-                    fontSize: fontSize.xs,
-                  }}
-                >
-                  {opt.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-      </View>
-
-      {/* 4. FILTER GROUP 2: Kategori Bahan Baku */}
-      <View style={{ gap: 6 }}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
-          {KATEGORI_LIST.map((k) => {
-            const isSelected = kategoriFilter === k;
-            return (
-              <Pressable
-                key={k}
-                onPress={() => setKategoriFilter(k)}
-                style={[
-                  styles.chip,
-                  {
-                    borderColor: isSelected ? (isDark ? colors.gold : colors.accent) : colors.border,
-                    borderRadius: radius.pill,
-                    backgroundColor: isSelected ? (isDark ? colors.gold : colors.accent) : colors.surface,
-                  },
-                ]}
-              >
-                <Text
-                  style={{
-                    color: isSelected ? (isDark ? '#07101E' : '#FFFFFF') : colors.text,
-                    fontWeight: isSelected ? '800' : '600',
-                    fontSize: fontSize.xs,
-                  }}
-                >
-                  {k === 'semua' ? 'Semua Kategori' : KATEGORI_LABEL[k]}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-      </View>
-
-      {/* 5. Daftar Kartu Bahan Baku */}
-      <SectionTitle
-        action={
-          <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, fontWeight: '600' }}>
-            {filtered.length} Bahan Ditemukan
-          </Text>
-        }
-      >
-        Daftar Ketersediaan Stok
-      </SectionTitle>
-
-      {filtered.length === 0 ? (
-        <EmptyState
-          icon="package"
-          title="Tidak Ada Bahan yang Cocok"
-          body="Coba ubah kombinasi filter status atau kategori bahan di atas."
-        />
-      ) : (
-        <View style={{ gap: spacing.sm }}>
-          {filtered.map((b) => {
-            const isLow = b.stok < b.ambangMinimum;
-            const sppgName = isWilayah ? sppgInScope.find((s) => s.id === b.sppgId)?.nama : null;
-            const mitra = b.mitraId ? mitraList.find((m) => m.id === b.mitraId) : undefined;
-            const sisaHari = b.tanggalKadaluarsa ? daysUntil(b.tanggalKadaluarsa) : null;
-            const isUrgentFefo = sisaHari !== null && sisaHari <= 2;
-            const isExpiringSoon = sisaHari !== null && sisaHari <= EXPIRY_WARNING_DAYS;
-
-            return (
-              <Card
-                key={b.id}
-                style={{
-                  gap: 10,
-                  borderColor: isUrgentFefo ? colors.danger : isExpiringSoon ? colors.warning : colors.border,
-                  borderWidth: 1,
-                }}
-              >
-                {/* Header Row: Foto/Icon + Nama Bahan + Kategori & Rak */}
-                <View style={styles.stockItemHeader}>
-                  {b.fotoBahan ? (
-                    <Image source={{ uri: b.fotoBahan }} style={[styles.bahanImage, { borderRadius: radius.md }]} />
-                  ) : (
-                    <View style={[styles.stockIconWrap, { backgroundColor: isLow ? colors.dangerBg : colors.primaryLight }]}>
-                      <Feather name="package" size={20} color={isLow ? colors.danger : colors.primary} strokeWidth={iconStrokeWidth} />
-                    </View>
-                  )}
-
-                  <View style={{ flex: 1, gap: 4 }}>
-                    <Text style={{ color: colors.text, fontWeight: '800', fontSize: fontSize.md }}>
-                      {b.nama}
-                    </Text>
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
-                      <Pill label={KATEGORI_LABEL[b.kategori]} tone="neutral" />
-                      {b.lokasiRak && <Pill label={b.lokasiRak} tone="info" icon="map-pin" />}
-                    </View>
-                    {sppgName && <Text style={{ color: colors.textMuted, fontSize: 11 }}>Unit: {sppgName}</Text>}
-                  </View>
-
-                  <View style={{ alignItems: 'flex-end', gap: 4 }}>
-                    <Text style={{ color: isLow ? colors.danger : colors.text, fontWeight: '900', fontSize: 18 }}>
-                      {b.stok.toLocaleString('id-ID')} <Text style={{ fontSize: 12, fontWeight: '600' }}>{b.satuan}</Text>
-                    </Text>
-                    <Pill
-                      label={isLow ? 'Stok Kritis' : 'Stok Aman'}
-                      tone={isLow ? 'danger' : 'success'}
-                    />
-                  </View>
-                </View>
-
-                {/* Ambang Minimum & Exp Date Bar */}
-                <View style={[styles.stockMetaBar, { backgroundColor: colors.background, borderRadius: radius.sm }]}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                    <Feather name="shield" size={12} color={colors.textMuted} />
-                    <Text style={{ fontSize: 11, color: colors.textMuted }}>
-                      Ambang Batas: <Text style={{ fontWeight: '700', color: colors.text }}>{b.ambangMinimum} {b.satuan}</Text>
-                    </Text>
-                  </View>
-
-                  {b.tanggalKadaluarsa && (
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                      <Feather name="calendar" size={12} color={isExpiringSoon ? colors.warning : colors.textMuted} />
-                      <Text style={{ fontSize: 11, color: isExpiringSoon ? (isUrgentFefo ? colors.danger : colors.warning) : colors.textMuted, fontWeight: isExpiringSoon ? '800' : '500' }}>
-                        Exp: {b.tanggalKadaluarsa} ({sisaHari !== null ? (sisaHari <= 0 ? 'Hari Ini!' : `${sisaHari} hari lagi`) : ''})
-                      </Text>
-                    </View>
-                  )}
-                </View>
-
-                {/* FEFO Urgent Warning Badge */}
-                {isUrgentFefo && (
-                  <View style={[styles.fefoTag, { backgroundColor: colors.dangerBg, borderRadius: radius.sm }]}>
-                    <Feather name="alert-triangle" size={13} color={colors.danger} />
-                    <Text style={{ fontSize: 11, color: colors.danger, fontWeight: '800', flex: 1 }}>
-                      PRIORITAS FEFO: Wajib diolah lebih dulu dalam {sisaHari} hari
-                    </Text>
-                  </View>
-                )}
-
-                {/* Supplier Dedicated Panel */}
-                <View style={[styles.supplierPanel, { backgroundColor: colors.background, borderColor: colors.border, borderRadius: radius.md }]}>
-                  <View style={[styles.supplierIconBox, { backgroundColor: colors.primaryLight }]}>
-                    <Feather name="truck" size={16} color={colors.primary} />
-                  </View>
-
-                  <View style={{ flex: 1, gap: 2 }}>
-                    <Text style={{ fontSize: 10, color: colors.textMuted, fontWeight: '700' }}>PEMASOK RESMI</Text>
-                    <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }} numberOfLines={1}>
-                      {mitra ? mitra.nama : 'Swakelola / Disediakan SPPG'}
-                    </Text>
-                    {mitra && (
-                      <Text style={{ fontSize: 10.5, color: colors.textMuted }}>
-                        Kategori: {mitra.jenisProduk} • {mitra.wilayahLayanan}
-                      </Text>
-                    )}
-                  </View>
-
-                  {mitra ? (
-                    <Pressable
-                      onPress={() => navigation.navigate('MitraList', { mitraId: mitra.id })}
-                      hitSlop={6}
-                      style={[styles.mitraBtn, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.sm }]}
-                    >
-                      <Text style={{ color: colors.primary, fontWeight: '800', fontSize: 11 }}>
-                        Detail Pemasok ➔
-                      </Text>
-                    </Pressable>
-                  ) : (
-                    <Pill label="Swakelola" tone="neutral" />
-                  )}
-                </View>
-              </Card>
-            );
-          })
-        }
-        </View>
-      )}
-
-      {/* 6. Riwayat Mutasi Stok Terbaru */}
-      {riwayatMutasi.length > 0 && (
-        <View style={{ gap: spacing.xs, marginTop: spacing.sm }}>
-          <SectionTitle style={{ marginBottom: 0 }}>Riwayat Keluar / Masuk Bahan</SectionTitle>
-          {riwayatMutasi.map((m) => {
-            const bahan = bahanBakuList.find((b) => b.id === m.bahanId);
-            const isMasuk = m.jenis === 'masuk';
-            return (
-              <Card key={m.id} style={styles.row}>
-                <View style={[styles.iconWrap, { backgroundColor: isMasuk ? colors.successBg : colors.warningBg }]}>
-                  <Feather
-                    name={isMasuk ? 'arrow-down-circle' : 'arrow-up-circle'}
-                    size={18}
-                    color={isMasuk ? colors.success : colors.warning}
-                    strokeWidth={iconStrokeWidth}
-                  />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: colors.text, fontWeight: '800', fontSize: fontSize.sm }}>
-                    {bahan ? bahan.nama : m.bahanId} · {isMasuk ? '+' : '-'}{m.jumlah} {bahan?.satuan ?? ''}
-                  </Text>
-                  <Text style={{ color: colors.textMuted, fontSize: 11 }}>{m.keterangan}</Text>
-                </View>
-                <Text style={{ color: colors.textMuted, fontSize: 11 }}>{m.tanggal}</Text>
-              </Card>
-            );
-          })}
-        </View>
-      )}
-
-      {/* 7. Action Shortcuts Panel */}
-      <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
-        <SectionTitle style={{ marginBottom: 0 }}>Aksi Cepat Logistik & Pengadaan</SectionTitle>
-
-        {canRequest && (
-          <>
-            <PrimaryButton
-              label="Pusat Pengadaan & Logistik Bahan (Satu Pintu)"
-              icon="layers"
-              onPress={() => navigation.navigate('PengadaanBahan')}
+          {expiringSoonList.length === 0 ? (
+            <EmptyState
+              icon="check-circle"
+              title="Semua Stok Aman"
+              body="Tidak ada bahan baku yang mendekati masa kedaluwarsa (≤ 3 hari). Rotasi FEFO berjalan optimal."
             />
+          ) : (
+            <View style={{ gap: 8 }}>
+              {expiringSoonList.map((b) => {
+                const sisaHari = b.tanggalKadaluarsa ? daysUntil(b.tanggalKadaluarsa) : 0;
+                const isUrgent = sisaHari <= 1;
+
+                return (
+                  <Card
+                    key={b.id}
+                    style={{
+                      gap: 8,
+                      borderColor: isUrgent ? (isDark ? 'rgba(239, 68, 68, 0.5)' : '#FCA5A5') : colors.warning,
+                      borderWidth: 1.5,
+                      borderRadius: radius.md,
+                      padding: 12,
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                      {b.fotoBahan ? (
+                        <Image source={{ uri: b.fotoBahan }} style={{ width: 44, height: 44, borderRadius: radius.md }} />
+                      ) : (
+                        <View
+                          style={{
+                            width: 44,
+                            height: 44,
+                            borderRadius: radius.md,
+                            backgroundColor: isUrgent ? colors.dangerBg : colors.warningBg,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <Feather name={isUrgent ? 'alert-circle' : 'clock'} size={20} color={isUrgent ? colors.danger : colors.warning} />
+                        </View>
+                      )}
+
+                      <View style={{ flex: 1, gap: 2 }}>
+                        <Text style={{ fontSize: 13, fontWeight: '700', color: colors.text }} numberOfLines={1}>
+                          {b.nama}
+                        </Text>
+                        <Text style={{ fontSize: 11, color: colors.textMuted }}>
+                          Stok Tersedia: <Text style={{ fontWeight: '800', color: colors.text }}>{b.stok.toLocaleString('id-ID')} {b.satuan}</Text>
+                          {b.lokasiRak ? ` • ${b.lokasiRak}` : ''}
+                        </Text>
+                      </View>
+
+                      <View style={{ alignItems: 'flex-end', gap: 2 }}>
+                        <Pill
+                          label={sisaHari <= 0 ? 'Exp Hari Ini!' : sisaHari === 1 ? 'Exp Besok' : `Sisa ${sisaHari} Hari`}
+                          tone={isUrgent ? 'danger' : 'warning'}
+                        />
+                        <Text style={{ fontSize: 10, color: colors.textMuted }}>
+                          {b.tanggalKadaluarsa}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View style={[styles.fefoItemFooter, { borderTopColor: colors.border }]}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, flex: 1 }}>
+                        <Feather name="info" size={11} color={isUrgent ? colors.danger : colors.warning} />
+                        <Text style={{ fontSize: 10.5, color: isUrgent ? colors.danger : colors.warning, fontWeight: '700' }} numberOfLines={1}>
+                          {isUrgent ? 'Mendesak: olah pada masakan hari ini!' : 'Prioritaskan pemakaian hari ini/besok'}
+                        </Text>
+                      </View>
+                      {canRequest && (
+                        <Pressable
+                          onPress={() => navigation.navigate('MutasiStokForm', { initialBahanId: b.id, jenis: 'keluar' })}
+                          style={[
+                            styles.fefoUseBtn,
+                            {
+                              backgroundColor: colors.primaryLight,
+                              borderColor: colors.primary,
+                              borderRadius: radius.pill,
+                            },
+                          ]}
+                        >
+                          <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.primary }}>
+                            Catat Pemakaian
+                          </Text>
+                          <Feather name="arrow-right" size={11} color={colors.primary} />
+                        </Pressable>
+                      )}
+                    </View>
+                  </Card>
+                );
+              })}
+            </View>
+          )}
+        </View>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 3: MUTASI STOK & TELEMETRI IoT */}
+      {/* ========================================================================= */}
+      {activeTab === 'mutasi' && (
+        <View style={{ gap: spacing.md }}>
+          {/* IoT Cold Storage & Freezer Telemetry Card */}
+          <Card onPress={() => navigation.navigate('GudangKondisi')} style={{ gap: 10 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <View style={[styles.miniIconWrap, { backgroundColor: colors.successBg }]}>
+                  <Feather name="cpu" size={15} color={colors.success} />
+                </View>
+                <Text style={{ fontSize: 12.5, fontWeight: '800', color: colors.text }}>
+                  KONTROL IoT SUHU COLD STORAGE
+                </Text>
+              </View>
+              <Pill label="Panel Detail >" tone="success" />
+            </View>
+
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <View style={[styles.telemetryBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                <Text style={{ fontSize: 9, color: colors.textMuted, fontWeight: '700' }}>CHILLER DAGING</Text>
+                <Text style={{ fontSize: 15, fontWeight: '900', color: colors.success, marginTop: 2 }}>
+                  {telemetry.chillerDaging > 0 ? `+${telemetry.chillerDaging.toFixed(1)}` : telemetry.chillerDaging.toFixed(1)}°C
+                </Text>
+              </View>
+              <View style={[styles.telemetryBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                <Text style={{ fontSize: 9, color: colors.textMuted, fontWeight: '700' }}>DEEP FREEZER</Text>
+                <Text style={{ fontSize: 15, fontWeight: '900', color: colors.info, marginTop: 2 }}>
+                  {telemetry.deepFreezer.toFixed(1)}°C
+                </Text>
+              </View>
+              <View style={[styles.telemetryBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                <Text style={{ fontSize: 9, color: colors.textMuted, fontWeight: '700' }}>CHILLER SAYUR</Text>
+                <Text style={{ fontSize: 15, fontWeight: '900', color: colors.success, marginTop: 2 }}>
+                  {telemetry.chillerSayur > 0 ? `+${telemetry.chillerSayur.toFixed(1)}` : telemetry.chillerSayur.toFixed(1)}°C
+                </Text>
+              </View>
+            </View>
+          </Card>
+
+          {/* Riwayat Mutasi Stok Keluar-Masuk */}
+          <SectionTitle>Riwayat Mutasi Stok Keluar / Masuk</SectionTitle>
+          {riwayatMutasi.length === 0 ? (
+            <EmptyState icon="clipboard" title="Belum Ada Mutasi" body="Belum ada catatan mutasi stok keluar maupun masuk." />
+          ) : (
+            <View style={{ gap: 6 }}>
+              {riwayatMutasi.map((m) => {
+                const bahan = bahanBakuList.find((b) => b.id === m.bahanId);
+                const isMasuk = m.jenis === 'masuk';
+                return (
+                  <Card key={m.id} style={styles.row}>
+                    <View style={[styles.iconWrap, { backgroundColor: isMasuk ? colors.successBg : colors.warningBg }]}>
+                      <Feather
+                        name={isMasuk ? 'arrow-down-circle' : 'arrow-up-circle'}
+                        size={17}
+                        color={isMasuk ? colors.success : colors.warning}
+                        strokeWidth={iconStrokeWidth}
+                      />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: colors.text, fontWeight: '700', fontSize: fontSize.sm }}>
+                        {bahan ? bahan.nama : m.bahanId} · {isMasuk ? '+' : '-'}{m.jumlah} {bahan?.satuan ?? ''}
+                      </Text>
+                      <Text style={{ color: colors.textMuted, fontSize: 11 }}>{m.keterangan}</Text>
+                    </View>
+                    <Text style={{ color: colors.textMuted, fontSize: 11 }}>{m.tanggal}</Text>
+                  </Card>
+                );
+              })}
+            </View>
+          )}
+
+          {/* Aksi Cepat Logistik */}
+          <SectionTitle>Aksi Cepat Logistik</SectionTitle>
+          <View style={{ gap: 8 }}>
             <PrimaryButton
-              label="+ Belanja Bahan Pokok Mandiri (Input Nota)"
-              icon="shopping-cart"
+              label="+ Catat Mutasi Stok Keluar / Masuk"
+              icon="repeat"
               variant="secondary"
-              onPress={() => navigation.navigate('PengadaanBahan', { initialTab: 'beli' })}
+              onPress={() => navigation.navigate('MutasiStokForm')}
             />
-          </>
-        )}
 
-        <PrimaryButton
-          label="Pindai QR Penerimaan Barang / Surat Jalan"
-          icon="camera"
-          variant="secondary"
-          onPress={() => navigation.navigate('PengadaanBahan', { initialTab: 'terima' })}
-        />
+            {canRequest && (
+              <PrimaryButton
+                label="+ Belanja Mandiri (Input Nota Pembelian)"
+                icon="shopping-cart"
+                variant="secondary"
+                onPress={() => navigation.navigate('PengadaanBahan', { initialTab: 'beli' })}
+              />
+            )}
 
-        <PrimaryButton
-          label="Catat Mutasi Stok Keluar / Masuk Manual"
-          icon="repeat"
-          variant="outline"
-          onPress={() => navigation.navigate('MutasiStokForm')}
-        />
+            <PrimaryButton
+              label="Pindai QR Terima Pasokan (Scan DO)"
+              icon="camera"
+              variant="secondary"
+              onPress={() => navigation.navigate('PengadaanBahan', { initialTab: 'terima' })}
+            />
 
-        <Card onPress={() => navigation.navigate('MitraList')} style={styles.row}>
-          <View style={[styles.iconWrap, { backgroundColor: colors.primaryLight }]}>
-            <Feather name="users" size={18} color={colors.primary} strokeWidth={iconStrokeWidth} />
+            <Card onPress={() => navigation.navigate('MitraList')} style={styles.row}>
+              <View style={[styles.iconWrap, { backgroundColor: colors.primaryLight }]}>
+                <Feather name="users" size={17} color={colors.primary} strokeWidth={iconStrokeWidth} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: colors.text, fontWeight: '700', fontSize: fontSize.sm }}>Lihat Seluruh Mitra Pemasok</Text>
+                <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Daftar supplier bahan & status kontrak</Text>
+              </View>
+              <Feather name="chevron-right" size={16} color={colors.textMuted} />
+            </Card>
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: colors.text, fontWeight: '800', fontSize: fontSize.sm }}>Lihat Seluruh Mitra Pemasok</Text>
-            <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Daftar supplier bahan baku & status kontrak aktif</Text>
-          </View>
-          <Feather name="chevron-right" size={18} color={colors.textMuted} strokeWidth={iconStrokeWidth} />
-        </Card>
-      </View>
+        </View>
+      )}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 14, paddingBottom: 120 }, // Fix bottom button overlay
+  content: { padding: 16, gap: 12, paddingBottom: 120 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 },
+  tabBar: { flexDirection: 'row', padding: 4, borderWidth: 1, gap: 4 },
+  tabItem: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, paddingVertical: 8 },
+  tabLabel: { fontSize: 11, fontWeight: '800' },
+  statGrid: { flexDirection: 'row', borderWidth: 1, paddingVertical: 10, paddingHorizontal: 12 },
+  statCol: { flex: 1, alignItems: 'center', gap: 2 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  iconWrap: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
-  miniIconWrap: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  telemetryBox: { flex: 1, padding: 10, borderRadius: 14, borderWidth: 1, alignItems: 'center' },
-  filterGroupLabel: { fontSize: 10.5, fontWeight: '800', letterSpacing: 0.5 },
-  chipRow: { gap: 8, paddingBottom: 4 },
-  chip: { borderWidth: 1, paddingHorizontal: 14, paddingVertical: 8 },
+  iconWrap: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  miniIconWrap: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
+  telemetryBox: { flex: 1, padding: 8, borderRadius: 10, borderWidth: 1, alignItems: 'center' },
+  chip: { borderWidth: 1 },
   stockItemHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  bahanImage: { width: 54, height: 54, resizeMode: 'cover' },
-  stockIconWrap: { width: 50, height: 50, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  bahanImage: { width: 48, height: 48, resizeMode: 'cover' },
+  stockIconWrap: { width: 46, height: 46, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   stockMetaBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  fefoTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    padding: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
   },
   supplierPanel: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    padding: 10,
+    gap: 8,
+    padding: 8,
     borderWidth: 1,
   },
   supplierIconBox: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
   mitraBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderWidth: 1,
-  },
-  fefoItemCard: {
-    padding: 10,
-    gap: 8,
   },
   fefoItemFooter: {
     flexDirection: 'row',
@@ -674,19 +791,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 10,
+    paddingHorizontal: 9,
     paddingVertical: 4,
     borderWidth: 1,
   },
-  fefoFilterToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderWidth: 1,
-  },
 });
-
-

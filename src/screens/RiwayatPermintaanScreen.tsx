@@ -71,7 +71,7 @@ export default function RiwayatPermintaanScreen({ navigation }: any) {
                 },
               ]}
             >
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: isActive ? colors.textInverse : colors.text }}>
+              <Text style={{ fontSize: fontSize.xs, fontWeight: isActive ? '800' : '600', color: isActive ? colors.textInverse : colors.textMuted }}>
                 {st === 'semua' ? 'Semua Status' : STATUS_LABEL[st]}
               </Text>
             </Pressable>
@@ -97,23 +97,23 @@ export default function RiwayatPermintaanScreen({ navigation }: any) {
 
               <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginTop: 2 }}>
                 {bahan?.fotoBahan ? (
-                  <Image source={{ uri: bahan.fotoBahan }} style={{ width: 52, height: 52, borderRadius: radius.sm }} />
+                  <Image source={{ uri: bahan.fotoBahan }} style={{ width: 50, height: 50, borderRadius: radius.sm }} />
                 ) : (
-                  <View style={{ width: 52, height: 52, borderRadius: radius.sm, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
-                    <Feather name="package" size={24} color={colors.primary} />
+                  <View style={{ width: 50, height: 50, borderRadius: radius.sm, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
+                    <Feather name="package" size={22} color={colors.primary} />
                   </View>
                 )}
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: colors.text, fontWeight: '800', fontSize: fontSize.sm }}>
+                  <Text style={{ color: colors.text, fontWeight: '700', fontSize: fontSize.sm }}>
                     {bahan ? bahan.nama : p.bahanId}
                   </Text>
-                  <Text style={{ color: colors.primary, fontWeight: '700', fontSize: fontSize.xs }}>
-                    Jumlah Pengajuan: {p.jumlah} {bahan?.satuan ?? 'unit'}
+                  <Text style={{ color: colors.textMuted, fontSize: fontSize.xs, marginTop: 1 }}>
+                    Jumlah Pengajuan: <Text style={{ color: colors.primary, fontWeight: '700' }}>{p.jumlah} {bahan?.satuan ?? 'unit'}</Text>
                   </Text>
                   {mitra ? (
-                    <Text style={{ color: colors.textMuted, fontSize: 10 }}>Pemasok: {mitra.nama}</Text>
+                    <Text style={{ color: colors.textMuted, fontSize: 11, marginTop: 1 }}>Pemasok: {mitra.nama}</Text>
                   ) : (
-                    <Text style={{ color: colors.textMuted, fontSize: 10 }}>Tujuan: BGN Pusat (belum ada mitra tetap)</Text>
+                    <Text style={{ color: colors.textMuted, fontSize: 11, marginTop: 1 }}>Tujuan: BGN Pusat (swakelola)</Text>
                   )}
                 </View>
               </View>
@@ -146,21 +146,25 @@ export default function RiwayatPermintaanScreen({ navigation }: any) {
                 </View>
               )}
 
-              <PrimaryButton
-                label="Lacak Pengiriman Truk (Peta Live)"
-                icon="truck"
-                variant="outline"
-                onPress={() => navigation.navigate('PermintaanBahanDetail', { permintaanId: p.id })}
-              />
-
-              {canAdvance && nextStatus && (
+              <View style={{ flexDirection: canAdvance && nextStatus ? 'row' : 'column', gap: 8, marginTop: 4 }}>
                 <PrimaryButton
-                  label={`Lanjutkan Status ➔ ${STATUS_LABEL[nextStatus]}`}
+                  label="Lacak Pengiriman Truk"
+                  icon="truck"
                   variant="secondary"
-                  onPress={() => updatePermintaanStatus(p.id, nextStatus)}
-                  style={{ marginTop: 4 }}
+                  onPress={() => navigation.navigate('PermintaanBahanDetail', { permintaanId: p.id })}
+                  style={{ flex: 1 }}
                 />
-              )}
+
+                {canAdvance && nextStatus && (
+                  <PrimaryButton
+                    label={`Lanjut: ${STATUS_LABEL[nextStatus]}`}
+                    icon="arrow-right"
+                    variant="primary"
+                    onPress={() => updatePermintaanStatus(p.id, nextStatus)}
+                    style={{ flex: 1 }}
+                  />
+                )}
+              </View>
             </Card>
           );
         })
