@@ -59,8 +59,8 @@ export default function DistribusiScreen({ navigation }: any) {
           gap: 12,
           padding: 16,
           borderRadius: 20,
-          borderWidth: isSelected ? 1.5 : 1,
-          borderColor: isSelected ? (isDark ? colors.gold : (colors.accent || colors.primary)) : colors.border,
+          borderWidth: 1,
+          borderColor: colors.border,
           backgroundColor: colors.surface,
           ...shadow.card,
         }}

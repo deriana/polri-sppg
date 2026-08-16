@@ -2128,14 +2128,10 @@ export function SchoolCarouselCard({
       style={({ pressed }) => [
         styles.carouselCard,
         {
-          backgroundColor: isSelected
-            ? isDark
-              ? 'rgba(11, 34, 64, 0.95)'
-              : '#EFF6FF'
-            : colors.surface,
-          borderColor: isSelected ? colors.primary : colors.border,
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
           borderRadius: radius.xl,
-          borderWidth: isSelected ? 2 : 1,
+          borderWidth: 1,
         },
         pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
       ]}
