@@ -176,15 +176,25 @@ export interface User {
 export type PublicReportStatus = 'dikirim' | 'diproses' | 'ditindaklanjuti' | 'selesai';
 export type PublicReportKategori = 'kualitas_makanan' | 'keterlambatan' | 'kebersihan' | 'kemasan' | 'layanan' | 'lainnya';
 
+export type AiFeedbackCluster =
+  | 'taste_issue'
+  | 'quality_issue'
+  | 'distribution_issue'
+  | 'portion_issue'
+  | 'menu_preference';
+
 export interface PublicReport {
   id: string;
   sppgId: string;
   sekolahId?: string | null;
   namaPelapor: string;
   noHpPelapor: string;
+  peranPelapor?: 'guru' | 'wali_murid' | 'siswa' | 'komite_sekolah' | 'masyarakat';
   kategori: PublicReportKategori;
   judul: string;
   deskripsi: string;
+  ratingBintang?: number;
+  aiCluster?: AiFeedbackCluster;
   fotoBukti?: string | null;
   tanggal: string;
   timestamp: string;

@@ -29,11 +29,24 @@ const STATUS_LABEL: Record<PublicReportStatus, string> = {
   selesai: 'Selesai',
 };
 
+const AI_CLUSTER_META: Record<
+  string,
+  { label: string; icon: keyof typeof Feather.glyphMap; tone: 'warning' | 'danger' | 'info' | 'primary' | 'success'; pct: number }
+> = {
+  all: { label: 'Semua Klaster', icon: 'layers', tone: 'primary', pct: 100 },
+  menu_preference: { label: 'Menu Preference', icon: 'award', tone: 'success', pct: 69 },
+  quality_issue: { label: 'Quality Issue', icon: 'shield', tone: 'danger', pct: 11 },
+  portion_issue: { label: 'Portion Issue', icon: 'package', tone: 'primary', pct: 8 },
+  taste_issue: { label: 'Taste Issue', icon: 'coffee', tone: 'warning', pct: 7 },
+  distribution_issue: { label: 'Distribution Issue', icon: 'truck', tone: 'info', pct: 5 },
+};
+
 export default function AduanMasyarakatScreen() {
   const { publicReportList, sppgList, submitPublicReport, updatePublicReportStatus, currentSppg } = useApp();
-  const { colors, fontSize, iconStrokeWidth, radius, spacing } = useTheme();
+  const { colors, fontSize, iconStrokeWidth, radius, spacing, isDark } = useTheme();
 
   const [activeTab, setActiveTab] = useState<string>('semua');
+  const [selectedCluster, setSelectedCluster] = useState<string>('all');
   const [selectedReport, setSelectedReport] = useState<PublicReport | null>(null);
 
   // Response State
@@ -42,8 +55,9 @@ export default function AduanMasyarakatScreen() {
   const [newStatus, setNewStatus] = useState<PublicReportStatus>('ditindaklanjuti');
 
   const filteredReports = publicReportList.filter((r) => {
-    if (activeTab === 'semua') return true;
-    return r.status === activeTab;
+    const matchTab = activeTab === 'semua' || r.status === activeTab;
+    const matchCluster = selectedCluster === 'all' || r.aiCluster === selectedCluster;
+    return matchTab && matchCluster;
   });
 
   const handleSaveResponse = (id: string) => {
@@ -60,10 +74,10 @@ export default function AduanMasyarakatScreen() {
           <View style={styles.rowBetween}>
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: fontSize.lg, fontWeight: '800', color: colors.textInverse }}>
-                Modul Aduan Masyarakat
+                MBG Citizen Feedback & Aduan
               </Text>
               <Text style={{ fontSize: fontSize.xs, color: colors.primaryLight, marginTop: 2 }}>
-                Layanan pengaduan publik & transparansi program Makan Bergizi Gratis
+                Layanan feedback publik & AI Topic Clustering program Makan Bergizi Gratis
               </Text>
             </View>
             <View style={[styles.iconBox, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
@@ -72,9 +86,90 @@ export default function AduanMasyarakatScreen() {
           </View>
 
           <View style={[styles.demoBadge, { backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: radius.sm }]}>
-            <Feather name="check-circle" size={12} color="#FDE047" strokeWidth={2} />
+            <Feather name="cpu" size={12} color="#FDE047" strokeWidth={2} />
             <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.textInverse }}>
-              Portal Pengaduan Publik Real-Time Connected
+              AI NLP Sentiment & Clustering Engine Active
+            </Text>
+          </View>
+        </Card>
+
+        {/* AI TOPIC CLUSTERING & EXECUTIVE SUMMARY FOR LEADERSHIP */}
+        <Card
+          style={{
+            backgroundColor: isDark ? colors.surface : '#F8FAFC',
+            borderColor: colors.border,
+            borderWidth: 1.5,
+            gap: 10,
+          }}
+        >
+          <View style={styles.rowBetween}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: isDark ? 'rgba(59,130,246,0.25)' : '#DBEAFE', alignItems: 'center', justifyContent: 'center' }}>
+                <Feather name="cpu" size={14} color={colors.primary} />
+              </View>
+              <Text style={{ fontSize: 11, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
+                AI FEEDBACK CLUSTERING & INSIGHTS
+              </Text>
+            </View>
+            <Pill tone="success" label="Kepuasan 4.7 / 5.0" />
+          </View>
+
+          {/* Quick Metrics Bar */}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', backgroundColor: colors.background, padding: 10, borderRadius: radius.md }}>
+            <View style={{ alignItems: 'center', flex: 1 }}>
+              <Text style={{ fontSize: 10, color: colors.textMuted }}>Total Masukan</Text>
+              <Text style={{ fontSize: 14, fontWeight: '900', color: colors.text }}>1.240 Ulasan</Text>
+            </View>
+            <View style={{ alignItems: 'center', flex: 1 }}>
+              <Text style={{ fontSize: 10, color: colors.textMuted }}>Sentimen Positif</Text>
+              <Text style={{ fontSize: 14, fontWeight: '900', color: colors.success }}>94.2% Puas</Text>
+            </View>
+            <View style={{ alignItems: 'center', flex: 1 }}>
+              <Text style={{ fontSize: 10, color: colors.textMuted }}>Tindak Lanjut</Text>
+              <Text style={{ fontSize: 14, fontWeight: '900', color: colors.primary }}>100% Respons</Text>
+            </View>
+          </View>
+
+          {/* AI Cluster Filters */}
+          <View style={{ gap: 4 }}>
+            <Text style={{ fontSize: 10.5, fontWeight: '700', color: colors.textMuted }}>
+              Filter Berdasarkan Klaster AI:
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
+              {Object.entries(AI_CLUSTER_META).map(([key, meta]) => {
+                const isSelected = selectedCluster === key;
+                return (
+                  <Pressable
+                    key={key}
+                    onPress={() => setSelectedCluster(key)}
+                    style={[
+                      styles.clusterChip,
+                      {
+                        backgroundColor: isSelected ? colors.primary : colors.surface,
+                        borderColor: isSelected ? colors.primary : colors.border,
+                      },
+                    ]}
+                  >
+                    <Feather name={meta.icon} size={11} color={isSelected ? '#FFF' : colors.primary} />
+                    <Text style={{ fontSize: 11, fontWeight: '800', color: isSelected ? '#FFF' : colors.text }}>
+                      {meta.label} ({meta.pct}%)
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </View>
+
+          {/* Executive Summary Box */}
+          <View style={{ backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#EFF6FF', padding: 10, borderRadius: radius.md, borderWidth: 1, borderColor: colors.primary }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+              <Feather name="file-text" size={13} color={colors.primary} />
+              <Text style={{ fontSize: 11, fontWeight: '900', color: colors.primary }}>
+                Executive Summary AI untuk Pimpinan:
+              </Text>
+            </View>
+            <Text style={{ fontSize: 11, color: colors.text, lineHeight: 16 }}>
+              Pimpinan SPPG tidak perlu membaca ribuan komentar satu per satu. AI menyimpulkan: Kepuasan program minggu ini sangat tinggi (4.7/5). Menu favorit tertinggi adalah Olahan Ikan Gurame & Ayam Kecap. Poin evaluasi prioritas: penyesuaian gramasi porsi untuk siswa kelas atas (SD 4-6) dan takaran bumbu sop sayur.
             </Text>
           </View>
         </Card>
@@ -83,7 +178,7 @@ export default function AduanMasyarakatScreen() {
         <View style={styles.rowBetween}>
           <View>
             <Text style={{ fontSize: fontSize.md, fontWeight: '800', color: colors.text }}>
-              Daftar Aduan Masuk ({filteredReports.length})
+              Daftar Masukan Warga ({filteredReports.length})
             </Text>
             <Text style={{ fontSize: 11, color: colors.textMuted, marginTop: 1 }}>
               Klik kartu aduan untuk melihat rincian & menindaklanjuti
@@ -95,7 +190,7 @@ export default function AduanMasyarakatScreen() {
         {/* Tabs Filter */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.xs }}>
           {[
-            { id: 'semua', label: 'Semua' },
+            { id: 'semua', label: 'Semua Status' },
             { id: 'dikirim', label: 'Dikirim' },
             { id: 'diproses', label: 'Diproses' },
             { id: 'ditindaklanjuti', label: 'Ditindaklanjuti' },
@@ -127,14 +222,24 @@ export default function AduanMasyarakatScreen() {
         {filteredReports.map((report) => {
           const sppg = sppgList.find((s) => s.id === report.sppgId);
           const isResponding = respondingId === report.id;
+          const clusterMeta = report.aiCluster ? AI_CLUSTER_META[report.aiCluster] : null;
 
           return (
             <Card key={report.id} style={{ gap: spacing.sm }} onPress={() => setSelectedReport(report)}>
               <View style={styles.rowBetween}>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, fontWeight: '600' }}>
-                    {report.id} · {report.timestamp}
-                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, fontWeight: '600' }}>
+                      {report.id} · {report.timestamp}
+                    </Text>
+                    {report.ratingBintang && (
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                        {Array.from({ length: report.ratingBintang }).map((_, i) => (
+                          <Feather key={i} name="star" size={11} color="#EAB308" />
+                        ))}
+                      </View>
+                    )}
+                  </View>
                   <Text style={{ fontSize: fontSize.md, fontWeight: '800', color: colors.text, marginTop: 2 }}>
                     {report.judul}
                   </Text>
@@ -145,6 +250,12 @@ export default function AduanMasyarakatScreen() {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                 <Pill tone="neutral" label={`SPPG: ${sppg?.nama ?? report.sppgId}`} />
                 <Pill tone="primary" label={KATEGORI_LABEL[report.kategori]} />
+                {clusterMeta && (
+                  <Pill tone={clusterMeta.tone} label={`AI: ${clusterMeta.label}`} icon={clusterMeta.icon} />
+                )}
+                {report.peranPelapor && (
+                  <Pill tone="info" label={report.peranPelapor.replace('_', ' ').toUpperCase()} />
+                )}
               </View>
 
               <Text style={{ fontSize: fontSize.sm, color: colors.text, lineHeight: 20 }} numberOfLines={3}>{report.deskripsi}</Text>
@@ -323,6 +434,15 @@ const styles = StyleSheet.create({
   statusChip: { flex: 1, paddingVertical: 6, alignItems: 'center', borderWidth: 1 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 16 },
   modalContent: { maxHeight: '90%', borderRadius: 16, gap: 12, padding: 20 },
+  clusterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
   chip: { paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1 },
   uploadBox: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 14, borderWidth: 1, borderStyle: 'dashed' },
 });
