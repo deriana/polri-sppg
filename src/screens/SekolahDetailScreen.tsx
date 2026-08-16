@@ -37,6 +37,15 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
   const summary = sekolah.beneficiarySummary;
   const daftarAlergi = summary?.daftarAlergi || [];
 
+  const totalTerdaftar = summary?.totalSiswaTerdaftar ?? sekolah.jumlahSiswa;
+  const porsiDisiapkan = summary?.porsiDisiapkan ?? sekolah.jumlahSiswa;
+  const hadirMenerima = summary?.siswaHadirMenerima ?? sekolah.jumlahSiswa;
+  const tidakHadir = summary?.siswaTidakHadir ?? 0;
+  const persentaseHadir = totalTerdaftar > 0 ? ((hadirMenerima / totalTerdaftar) * 100).toFixed(1) : '100.0';
+  const persentaseNum = parseFloat(persentaseHadir);
+  const pillTone = tidakHadir === 0 ? 'success' : persentaseNum >= 95 ? 'success' : persentaseNum >= 90 ? 'warning' : 'danger';
+  const pillLabel = tidakHadir === 0 ? '100% Hadir (Penuh)' : `${persentaseHadir}% (${hadirMenerima}/${totalTerdaftar} Siswa)`;
+
   const filteredAlergi = daftarAlergi.filter((item) => {
     if (selectedAllergyFilter === 'all') return true;
     return item.jenisAlergi === selectedAllergyFilter;
@@ -188,7 +197,7 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
                   SUMMARY LAYANAN HARI INI
                 </Text>
               </View>
-              <Pill tone="success" label="Presensi 97.5% Hadir" />
+              <Pill tone={pillTone} label={pillLabel} />
             </View>
 
             {/* 4 Stat Box Grid */}
@@ -196,7 +205,7 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
               <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC' }]}>
                 <Text style={styles.statBoxLabel}>Terdaftar</Text>
                 <Text style={[styles.statBoxVal, { color: colors.text }]}>
-                  {summary?.totalSiswaTerdaftar ?? sekolah.jumlahSiswa}
+                  {totalTerdaftar}
                 </Text>
                 <Text style={styles.statBoxSub}>Siswa Sekolah</Text>
               </View>
@@ -204,7 +213,7 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
               <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#EFF6FF' }]}>
                 <Text style={styles.statBoxLabel}>Disiapkan</Text>
                 <Text style={[styles.statBoxVal, { color: colors.primary }]}>
-                  {summary?.porsiDisiapkan ?? sekolah.jumlahSiswa}
+                  {porsiDisiapkan}
                 </Text>
                 <Text style={styles.statBoxSub}>Porsi MBG</Text>
               </View>
@@ -212,18 +221,24 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
               <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(16,185,129,0.1)' : '#ECFDF5' }]}>
                 <Text style={styles.statBoxLabel}>Menerima</Text>
                 <Text style={[styles.statBoxVal, { color: colors.success }]}>
-                  {summary?.siswaHadirMenerima ?? sekolah.jumlahSiswa - 6}
+                  {hadirMenerima}
                 </Text>
-                <Text style={styles.statBoxSub}>Siswa Hadir</Text>
+                <Text style={styles.statBoxSub}>
+                  {tidakHadir === 0 ? '100% Hadir Penuh' : `${persentaseHadir}% Hadir`}
+                </Text>
               </View>
 
               <View style={[styles.statBox, { backgroundColor: isDark ? 'rgba(239,68,68,0.1)' : '#FEF2F2' }]}>
                 <Text style={styles.statBoxLabel}>Tidak Hadir</Text>
-                <Text style={[styles.statBoxVal, { color: colors.danger }]}>
-                  {summary?.siswaTidakHadir ?? 6}
+                <Text style={[styles.statBoxVal, { color: tidakHadir === 0 ? colors.textMuted : colors.danger }]}>
+                  {tidakHadir}
                 </Text>
                 <Text style={styles.statBoxSub}>
-                  {summary?.alasanTidakHadir ? `${summary.alasanTidakHadir.sakit} Sakit, ${summary.alasanTidakHadir.izin} Izin` : 'Sakit / Izin'}
+                  {tidakHadir === 0
+                    ? '0 Sakit / Izin'
+                    : summary?.alasanTidakHadir
+                    ? `${summary.alasanTidakHadir.sakit} Sakit, ${summary.alasanTidakHadir.izin} Izin`
+                    : `${tidakHadir} Siswa`}
                 </Text>
               </View>
             </View>
