@@ -37,7 +37,7 @@ function inCurrentMonth(tanggal: string): boolean {
 export default function LaporanProduksiListScreen({ navigation }: any) {
   const { role, currentUser, verifyLaporan, masterMenuList, costPerMeal } = useApp();
   const { laporanInScope } = useScopedData();
-  const { colors, spacing, fontSize, iconStrokeWidth, radius } = useTheme();
+  const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark, shadow } = useTheme();
   const [filter, setFilter] = useState<Filter>('minggu');
 
   const sorted = useMemo(() => [...laporanInScope].sort((a, b) => (a.tanggal < b.tanggal ? 1 : -1)), [laporanInScope]);
@@ -56,14 +56,18 @@ export default function LaporanProduksiListScreen({ navigation }: any) {
           <SectionTitle style={{ marginBottom: 0 }}>Laporan Produksi</SectionTitle>
           <PrimaryButton label="Baru" icon="plus" fullWidth={false} onPress={() => navigation.navigate('LaporanForm', {})} />
         </View>
-        <View style={[styles.segment, { borderColor: colors.border, borderRadius: radius.md }]}>
+        <View style={[styles.segment, { borderColor: colors.border, borderRadius: radius.md, backgroundColor: colors.surface }]}>
           {(['hari', 'minggu', 'bulan', 'semua'] as Filter[]).map((f) => (
             <Pressable
               key={f}
               onPress={() => setFilter(f)}
-              style={[styles.segmentItem, { borderRadius: radius.sm }, filter === f && { backgroundColor: colors.primary }]}
+              style={[
+                styles.segmentItem,
+                { borderRadius: radius.sm },
+                filter === f && { backgroundColor: isDark ? colors.gold : colors.accent },
+              ]}
             >
-              <Text style={{ color: filter === f ? colors.textInverse : colors.text, fontWeight: '700', fontSize: fontSize.xs }}>
+              <Text style={{ color: filter === f ? (isDark ? '#07101E' : '#FFFFFF') : colors.text, fontWeight: '800', fontSize: fontSize.xs }}>
                 {f === 'hari' ? 'Hari Ini' : f === 'minggu' ? 'Minggu Ini' : f === 'bulan' ? 'Bulan Ini' : 'Semua'}
               </Text>
             </Pressable>
@@ -102,17 +106,15 @@ export default function LaporanProduksiListScreen({ navigation }: any) {
             return (
               <Card
                 key={l.id}
-                style={{ gap: spacing.sm, borderWidth: 1.2, borderColor: l.status === 'diverifikasi' ? colors.success : colors.border }}
+                style={{ gap: spacing.sm, borderWidth: 1, borderColor: l.status === 'diverifikasi' ? colors.success : colors.border }}
                 onPress={() => navigation.navigate('LaporanForm', { laporanId: l.id })}
               >
                 <View style={styles.rowTop}>
                   <View style={{ gap: 2 }}>
                     <Text style={{ color: colors.text, fontWeight: '900', fontSize: fontSize.sm }}>{l.tanggal}</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <View style={[styles.batchBadge, { backgroundColor: colors.primaryLight }]}>
-                        <Feather name="hash" size={11} color={colors.primary} />
-                        <Text style={{ color: colors.primary, fontSize: 10.5, fontWeight: '800' }}>{batchLabel}</Text>
-                      </View>
+                    <View style={[styles.batchBadge, { backgroundColor: colors.primaryLight }]}>
+                      <Feather name="hash" size={11} color={colors.primary} />
+                      <Text style={{ color: colors.primary, fontSize: 10.5, fontWeight: '800' }}>{batchLabel}</Text>
                     </View>
                   </View>
                   <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>

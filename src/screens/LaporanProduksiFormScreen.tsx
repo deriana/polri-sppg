@@ -254,7 +254,7 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       {/* 1. Header & Batch Identifier Bar */}
-      <View style={[styles.batchCard, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.lg }]}>
+      <Card style={styles.batchCard}>
         <View style={{ flex: 1, gap: 2 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <Feather name="hash" size={14} color={colors.primary} />
@@ -268,14 +268,13 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
           </Text>
         </View>
         <Pill label={qcStatus} tone={qcTone} />
-      </View>
+      </Card>
 
       {/* 2. PROMINENT QUALITY CONTROL (QC) INSPECTION GATE (PALING AWAL & MENCELOK) */}
       <Card
         style={{
-          backgroundColor: qcStatus === 'READY' ? colors.successBg : qcStatus === 'HOLD' ? colors.warningBg : qcStatus === 'REJECTED' ? colors.dangerBg : colors.surface,
           borderColor: qcToneColor,
-          borderWidth: 2,
+          borderWidth: 1.5,
           gap: spacing.sm,
         }}
       >
@@ -349,7 +348,7 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
       </Card>
 
       {readOnly && existing && (
-        <View style={[styles.warnBanner, { backgroundColor: colors.infoBg, borderRadius: radius.md }]}>
+        <View style={[styles.warnBanner, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: radius.md }]}>
           <Feather name="lock" size={16} color={colors.info} strokeWidth={iconStrokeWidth} />
           <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>
             {existing.status === 'diverifikasi'
@@ -602,7 +601,7 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
         </View>
 
         {!sudahDiporsi ? (
-          <View style={[styles.infoBanner, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
+          <View style={[styles.infoBanner, { backgroundColor: colors.background, borderColor: colors.border, borderWidth: 1, borderRadius: radius.md }]}>
             <Feather name="info" size={16} color={colors.primary} />
             <Text style={{ fontSize: 11, color: colors.text, flex: 1, lineHeight: 16 }}>
               Koki saat ini memasak bahan baku volume besar di kuali. Jumlah porsi riil akan dihitung dan diinput setelah tim pemorsi selesai menakar dan mengisi ompreng (Tahap 4).
@@ -753,7 +752,7 @@ export default function LaporanProduksiFormScreen({ navigation, route }: any) {
             </Text>
           )}
           {saved && (
-            <View style={[styles.successBanner, { backgroundColor: colors.successBg }]}>
+            <View style={[styles.successBanner, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}>
               <Feather name="check-circle" size={16} color={colors.success} />
               <Text style={{ color: colors.success, fontSize: fontSize.xs, fontWeight: '700' }}>Tersimpan — akan terkirim otomatis</Text>
             </View>
@@ -887,8 +886,6 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: { padding: 16, gap: 16, paddingBottom: 120 },
   batchCard: {
-    padding: 14,
-    borderWidth: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

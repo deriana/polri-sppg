@@ -15,7 +15,7 @@ function todayDate(): string {
 
 export default function LaporanPackingScreen() {
   const { role, currentUser, currentSppg, laporanPackingList, submitLaporanPacking, sekolahList } = useApp();
-  const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark } = useTheme();
+  const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark, shadow } = useTheme();
 
   const today = todayDate();
   const existingToday = laporanPackingList.find((l) => l.tanggal === today && l.sppgId === currentSppg?.id);
@@ -121,24 +121,24 @@ export default function LaporanPackingScreen() {
 
       {/* 2. KPI Summary 3 Boxes */}
       <View style={styles.kpiGrid}>
-        <View style={[styles.kpiBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Text style={{ fontSize: 20, fontWeight: '900', color: colors.primary }}>{totalOmpreng}</Text>
-          <Text style={{ fontSize: 10, color: colors.textMuted, fontWeight: '700' }}>Ompreng Dipacking</Text>
+        <View style={[styles.kpiBox, { backgroundColor: colors.surface, borderColor: colors.border, ...shadow.card, borderRadius: radius.lg }]}>
+          <Text style={{ fontSize: 22, fontWeight: '900', color: isDark ? colors.gold : colors.primary }}>{totalOmpreng}</Text>
+          <Text style={{ fontSize: 10.5, color: colors.textMuted, fontWeight: '700' }}>Ompreng Dipacking</Text>
         </View>
 
-        <View style={[styles.kpiBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Text style={{ fontSize: 20, fontWeight: '900', color: colors.text }}>{totalBox} Box</Text>
-          <Text style={{ fontSize: 10, color: colors.textMuted, fontWeight: '700' }}>Thermal Container</Text>
+        <View style={[styles.kpiBox, { backgroundColor: colors.surface, borderColor: colors.border, ...shadow.card, borderRadius: radius.lg }]}>
+          <Text style={{ fontSize: 22, fontWeight: '900', color: colors.text }}>{totalBox} Box</Text>
+          <Text style={{ fontSize: 10.5, color: colors.textMuted, fontWeight: '700' }}>Thermal Container</Text>
         </View>
 
-        <View style={[styles.kpiBox, { backgroundColor: isDark ? 'rgba(13,148,136,0.15)' : '#F0FDF4', borderColor: colors.success }]}>
-          <Text style={{ fontSize: 20, fontWeight: '900', color: colors.success }}>{suhuHolding}°C</Text>
-          <Text style={{ fontSize: 10, color: colors.success, fontWeight: '800' }}>Suhu Holding (≥60°C)</Text>
+        <View style={[styles.kpiBox, { backgroundColor: colors.surface, borderColor: colors.success, ...shadow.card, borderRadius: radius.lg }]}>
+          <Text style={{ fontSize: 22, fontWeight: '900', color: colors.success }}>{suhuHolding}°C</Text>
+          <Text style={{ fontSize: 10.5, color: colors.success, fontWeight: '800' }}>Suhu Holding (≥60°C)</Text>
         </View>
       </View>
 
       {/* 3. Form Input Data Packing */}
-      <Card style={{ gap: spacing.md }}>
+      <Card style={{ gap: spacing.md, borderRadius: radius.xl, ...shadow.card }}>
         <SectionTitle style={{ marginBottom: 0 }}>Input Data & Kondisi Packing</SectionTitle>
 
         <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -180,8 +180,10 @@ export default function LaporanPackingScreen() {
                 styles.selectOption,
                 {
                   flex: 1,
-                  backgroundColor: statusSealing === 'rapat_sempurna' ? (isDark ? 'rgba(13,148,136,0.2)' : '#F0FDF4') : colors.surface,
+                  backgroundColor: statusSealing === 'rapat_sempurna' ? (isDark ? 'rgba(16,185,129,0.15)' : '#ECFDF5') : colors.surface,
                   borderColor: statusSealing === 'rapat_sempurna' ? colors.success : colors.border,
+                  borderWidth: statusSealing === 'rapat_sempurna' ? 1.5 : 1,
+                  borderRadius: radius.md,
                 },
               ]}
             >
@@ -197,8 +199,10 @@ export default function LaporanPackingScreen() {
                 styles.selectOption,
                 {
                   flex: 1,
-                  backgroundColor: statusSealing === 'ada_retur' ? (isDark ? 'rgba(225,29,72,0.15)' : '#FFF1F2') : colors.surface,
+                  backgroundColor: statusSealing === 'ada_retur' ? (isDark ? 'rgba(239,68,68,0.15)' : '#FFE4E6') : colors.surface,
                   borderColor: statusSealing === 'ada_retur' ? colors.danger : colors.border,
+                  borderWidth: statusSealing === 'ada_retur' ? 1.5 : 1,
+                  borderRadius: radius.md,
                 },
               ]}
             >
@@ -311,6 +315,6 @@ const styles = StyleSheet.create({
   photoThumbWrapper: { position: 'relative' },
   photoThumb: { width: 75, height: 75, borderRadius: 8 },
   photoDeleteBtn: { position: 'absolute', top: -4, right: -4, width: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  addPhotoBtn: { width: 75, height: 75, borderRadius: 8, borderWidth: 1.5, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center' },
+  addPhotoBtn: { width: 75, height: 75, borderRadius: 8, borderWidth: 1, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center' },
   historyCard: { padding: 10, borderRadius: 8, borderWidth: 1, gap: 3 },
 });

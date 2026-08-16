@@ -368,7 +368,7 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 12, paddingBottom: 40 },
+  content: { padding: 16, gap: 12, paddingBottom: 110 },
   grid: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
   gridCol: { flex: 1 },
   reportRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6, borderBottomWidth: 0.5 },

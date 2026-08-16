@@ -97,7 +97,7 @@ export default function StaffFormScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
+  content: { padding: 16, gap: 12, paddingBottom: 110 },
   errorBanner: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10, borderRadius: 10 },
   fotoRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   fotoThumb: { width: 64, height: 64 },

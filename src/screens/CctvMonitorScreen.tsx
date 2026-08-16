@@ -45,7 +45,7 @@ export default function CctvMonitorScreen() {
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
-      <View style={[styles.disclaimer, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
+      <View style={[styles.disclaimer, { backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border }]}>
         <Feather name="video" size={16} color={colors.primary} strokeWidth={iconStrokeWidth} />
         <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>
           Pengawasan CCTV AI Real-Time — 12 Channel Kamera terbagi dalam 6 Wilayah Operasional Dapur SPPG. Klik kamera untuk putar stream.
@@ -144,7 +144,7 @@ export default function CctvMonitorScreen() {
       {/* CCTV Video Player Modal (Normal & Fullscreen) */}
       <Modal visible={!!activeFeed} animationType="fade" transparent={!isFullscreen}>
         <View style={isFullscreen ? styles.fullscreenOverlay : styles.modalOverlay}>
-          <Card style={isFullscreen ? styles.fullscreenCard : [styles.modalCard, { backgroundColor: colors.surface }]}>
+          <Card style={isFullscreen ? styles.fullscreenCard : styles.modalCard}>
             {!isFullscreen && (
               <View style={styles.rowBetween}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
@@ -300,7 +300,7 @@ export default function CctvMonitorScreen() {
       {/* Modal Detail Screenshot & Tinjauan Anomali */}
       <Modal visible={!!selectedEvent} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <Card style={[styles.modalCard, { backgroundColor: colors.surface, maxHeight: '90%' }]}>
+          <Card style={[styles.modalCard, { maxHeight: '90%' }]}>
             <View style={styles.rowBetween}>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: fontSize.md, fontWeight: '800', color: colors.text }}>Detail Deteksi Anomali CCTV</Text>
@@ -403,7 +403,7 @@ function CctvEventRow({ event, onPress }: { event: CctvEvent; onPress: () => voi
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
+  content: { padding: 16, gap: 12, paddingBottom: 110 },
   disclaimer: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 10 },
   cameraGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   cameraBox: { width: '48%', gap: 4 },

@@ -52,7 +52,7 @@ interface AssetQrDetailScreenProps {
 
 export default function AssetQrDetailScreen({ route }: AssetQrDetailScreenProps) {
   const { peralatan: eq, sppgNama } = route.params;
-  const { colors, fontSize, radius, spacing, iconStrokeWidth } = useTheme();
+  const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark } = useTheme();
   const qrSvgRef = useRef<any>(null);
   const [isSharing, setIsSharing] = useState(false);
 
@@ -109,18 +109,18 @@ export default function AssetQrDetailScreen({ route }: AssetQrDetailScreenProps)
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       {/* Header Card */}
-      <Card style={{ backgroundColor: colors.primary, gap: spacing.xs }}>
+      <Card style={{ backgroundColor: colors.surface, borderColor: isDark ? colors.border : '#BFDBFE', borderWidth: 1.5, gap: spacing.xs, borderRadius: radius.xl }}>
         <View style={styles.rowBetween}>
           <View style={{ flex: 1, gap: 2 }}>
-            <Text style={{ fontSize: fontSize.lg, fontWeight: '800', color: colors.textInverse }}>
+            <Text style={{ fontSize: fontSize.lg, fontWeight: '900', color: colors.text }}>
               Detail Aset Peralatan
             </Text>
-            <Text style={{ fontSize: fontSize.xs, color: colors.primaryLight }}>
+            <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>
               Informasi lengkap peralatan SPPG berdasarkan QR Code
             </Text>
           </View>
-          <View style={[styles.iconBox, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-            <Feather name="clipboard" size={24} color={colors.textInverse} strokeWidth={iconStrokeWidth} />
+          <View style={[styles.iconBox, { backgroundColor: isDark ? 'rgba(56, 189, 248, 0.15)' : colors.primaryLight }]}>
+            <Feather name="clipboard" size={22} color={colors.primary} strokeWidth={iconStrokeWidth} />
           </View>
         </View>
       </Card>
@@ -280,7 +280,7 @@ export default function AssetQrDetailScreen({ route }: AssetQrDetailScreenProps)
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 12 },
+  content: { padding: 16, gap: 12, paddingBottom: 110 },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   iconBox: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   eqPhoto: { width: '100%', height: 200, borderRadius: 8 },

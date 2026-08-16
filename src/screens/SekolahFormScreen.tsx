@@ -163,7 +163,7 @@ export default function SekolahFormScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 14, paddingBottom: 90 },
+  content: { padding: 16, gap: 14, paddingBottom: 110 },
   candidateBox: { padding: 12, borderWidth: 1 },
 });
 

@@ -171,7 +171,7 @@ export default function CheckInScreen({ navigation, route }: any) {
                 </Text>
               </View>
 
-              <View style={{ borderTopWidth: 1, borderTopColor: isGeofenceValid ? 'rgba(34,197,94,0.2)' : 'rgba(234,179,8,0.2)', paddingTop: 6 }}>
+              <View style={{ borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 6 }}>
                 <Pill
                   tone={isGeofenceValid ? 'success' : 'warning'}
                   label={isGeofenceValid ? 'RADIUS GEOFENCE 100M VALID' : 'DILUAR RADIUS 100M (PERINGATAN)'}
@@ -210,7 +210,7 @@ export default function CheckInScreen({ navigation, route }: any) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
+  content: { padding: 16, gap: 12, paddingBottom: 110 },
   photo: { width: '100%', height: 200 },
   photoPlaceholder: { width: '100%', height: 200, alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
   locBox: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12 },

@@ -125,7 +125,7 @@ export default function PeralatanScreen() {
           </View>
         </View>
 
-        <View style={[styles.statRow, { backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: radius.md, marginTop: spacing.xs }]}>
+        <View style={[styles.statRow, { marginTop: spacing.xs }]}>
           <View style={styles.statCol}>
             <Text style={{ color: colors.textInverse, fontSize: fontSize.xl, fontWeight: '800' }}>
               {peralatanInScope.length}
@@ -518,7 +518,7 @@ export default function PeralatanScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 12 },
+  content: { padding: 16, gap: 12, paddingBottom: 110 },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   iconBox: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   statRow: { flexDirection: 'row', padding: 12, alignItems: 'center', justifyContent: 'space-around' },

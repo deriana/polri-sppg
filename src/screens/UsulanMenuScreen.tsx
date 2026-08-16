@@ -80,13 +80,13 @@ export default function UsulanMenuScreen({ navigation }: any) {
               style={[
                 styles.chip,
                 {
-                  backgroundColor: isActive ? colors.primary : colors.surface,
-                  borderColor: isActive ? colors.primary : colors.border,
+                  backgroundColor: isActive ? (colors.accent || colors.primary) : colors.surface,
+                  borderColor: isActive ? (colors.accent || colors.primary) : colors.border,
                   borderRadius: radius.pill,
                 },
               ]}
             >
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: isActive ? colors.textInverse : colors.text }}>
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: isActive ? '#FFFFFF' : colors.text }}>
                 {st === 'semua' ? 'Semua Status' : STATUS_LABEL[st]}
               </Text>
             </Pressable>
@@ -389,7 +389,7 @@ export default function UsulanMenuScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 14, paddingBottom: 100 },
+  content: { padding: 16, gap: 14, paddingBottom: 110 },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   chip: { borderWidth: 1, paddingHorizontal: 12, paddingVertical: 7 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', padding: 16 },

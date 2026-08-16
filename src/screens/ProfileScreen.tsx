@@ -18,7 +18,7 @@ function todayDate(): string {
 export default function ProfileScreen({ navigation }: any) {
   const { currentUser, currentSppg, role, updateCurrentUser } = useApp();
   const { presensiInScope } = useScopedData();
-  const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark } = useTheme();
+  const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark, shadow } = useTheme();
 
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const foto = currentUser?.fotoProfil ?? null;
@@ -86,47 +86,49 @@ export default function ProfileScreen({ navigation }: any) {
         style={[
           styles.hero,
           {
-            backgroundColor: isDark ? colors.surface : colors.primary,
-            borderColor: isDark ? colors.border : colors.primaryDark,
+            backgroundColor: colors.surface,
+            borderColor: isDark ? colors.border : '#BFDBFE',
+            borderWidth: 1.5,
             borderRadius: radius.xl,
+            ...shadow.card,
           },
         ]}
       >
         <View style={styles.heroTopRow}>
-          <Pill label={currentUser.statusAktif ? 'AKUN AKTIF' : 'NONAKTIF'} tone={currentUser.statusAktif ? 'success' : 'neutral'} />
-          <Text style={{ color: isDark ? colors.textMuted : 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '700' }}>
-            {currentUser.id}
+          <Pill label={currentUser.statusAktif ? 'AKUN AKTIF' : 'NONAKTIF'} tone={currentUser.statusAktif ? 'emerald' : 'neutral'} />
+          <Text style={{ color: colors.textMuted, fontSize: 10.5, fontWeight: '800' }}>
+            ID: {currentUser.id}
           </Text>
         </View>
 
         <View style={{ alignItems: 'center', gap: 6 }}>
           <View style={styles.avatarWrap}>
             {foto ? (
-              <Image source={{ uri: foto }} style={[styles.avatarImg, { borderColor: colors.gold }]} />
+              <Image source={{ uri: foto }} style={[styles.avatarImg, { borderColor: colors.primary }]} />
             ) : (
-              <View style={[styles.avatarImg, styles.avatarEmpty, { borderColor: colors.gold, backgroundColor: isDark ? colors.background : colors.primaryDark }]}>
-                <Feather name="user" size={34} color={colors.gold} strokeWidth={iconStrokeWidth} />
+              <View style={[styles.avatarImg, styles.avatarEmpty, { borderColor: colors.primary, backgroundColor: isDark ? 'rgba(56, 189, 248, 0.15)' : colors.primaryLight }]}>
+                <Feather name="user" size={34} color={colors.primary} strokeWidth={iconStrokeWidth} />
               </View>
             )}
-            <Pressable onPress={() => setShowPhotoModal(true)} style={[styles.avatarEditBtn, { backgroundColor: colors.gold }]} hitSlop={6}>
-              <Feather name="camera" size={13} color={isDark ? colors.background : colors.primary} />
+            <Pressable onPress={() => setShowPhotoModal(true)} style={[styles.avatarEditBtn, { backgroundColor: colors.primary }]} hitSlop={6}>
+              <Feather name="camera" size={13} color="#FFFFFF" />
             </Pressable>
           </View>
 
-          <Text style={[styles.heroName, { fontSize: fontSize.lg }]}>{currentUser.nama}</Text>
-          <Text style={{ color: colors.gold, fontWeight: '800', fontSize: fontSize.xs }}>
+          <Text style={[styles.heroName, { fontSize: fontSize.lg, color: colors.text, fontWeight: '900' }]}>{currentUser.nama}</Text>
+          <Text style={{ color: colors.primary, fontWeight: '800', fontSize: fontSize.xs }}>
             {roleScopeLabel(currentUser)}
           </Text>
-          <Text style={{ color: isDark ? colors.textMuted : 'rgba(255,255,255,0.82)', fontSize: 11 }}>
+          <Text style={{ color: colors.textMuted, fontSize: 11.5 }}>
             {currentSppg?.nama ?? 'Unit SPPG'}
             {currentUser.jobdesk ? ` • ${JOBDESK_LABEL[currentUser.jobdesk]}` : ''}
           </Text>
 
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginTop: 4 }}>
-            <Pill label={`Shift ${currentUser.shift ?? 'Pagi'}`} tone="warning" icon="clock" />
+            <Pill label={`Shift ${currentUser.shift ?? 'Pagi'}`} tone="amber" icon="clock" />
             <Pill
               label={currentUser.kategoriPegawai === 'relawan_lokal' ? 'Relawan Lokal' : 'Pegawai Inti BGN'}
-              tone="info"
+              tone="royal"
               icon="award"
             />
           </View>
@@ -140,10 +142,10 @@ export default function ProfileScreen({ navigation }: any) {
           { icon: 'clock' as const, value: `${stats.tepatWaktu}%`, label: 'Tepat Waktu' },
           { icon: 'check-circle' as const, value: String(stats.streak), label: 'Total Presensi' },
         ].map((s) => (
-          <View key={s.label} style={[styles.statBox, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.md }]}>
-            <Feather name={s.icon} size={15} color={isDark ? colors.gold : colors.primary} strokeWidth={iconStrokeWidth} />
-            <Text style={{ fontSize: 18, fontWeight: '900', color: colors.text }}>{s.value}</Text>
-            <Text style={{ fontSize: 9.5, fontWeight: '700', color: colors.textMuted, textAlign: 'center' }}>{s.label}</Text>
+          <View key={s.label} style={[styles.statBox, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.lg, ...shadow.card }]}>
+            <Feather name={s.icon} size={16} color={isDark ? colors.gold : colors.primary} strokeWidth={iconStrokeWidth} />
+            <Text style={{ fontSize: 20, fontWeight: '900', color: colors.text }}>{s.value}</Text>
+            <Text style={{ fontSize: 10, fontWeight: '700', color: colors.textMuted, textAlign: 'center' }}>{s.label}</Text>
           </View>
         ))}
       </View>

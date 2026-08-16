@@ -125,19 +125,21 @@ export default function KandunganGiziHarianScreen({ navigation }: any) {
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       {/* 1. Header Hero Banner */}
-      <View style={[styles.heroBanner, { backgroundColor: colors.primaryLight, borderRadius: radius.lg }]}>
+      <Card style={{ gap: spacing.sm, borderRadius: radius.xl, borderColor: colors.border }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Feather name="activity" size={20} color={colors.primary} />
-          <Text style={{ fontSize: fontSize.sm, fontWeight: '900', color: colors.primary }}>
+          <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: isDark ? 'rgba(16,185,129,0.15)' : colors.emeraldLight, alignItems: 'center', justifyContent: 'center' }}>
+            <Feather name="activity" size={16} color={isDark ? colors.emerald : colors.emerald} />
+          </View>
+          <Text style={{ fontSize: fontSize.sm, fontWeight: '900', color: isDark ? colors.gold : colors.primary }}>
             EVALUASI KANDUNGAN GIZI & STANDAR AKG
           </Text>
         </View>
-        <Text style={{ fontSize: fontSize.xs, color: colors.text }}>
+        <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>
           Input dan validasi kandungan energi pokok makanan (kalori, makronutrien, mikronutrien) yang disajikan ke penerima manfaat hari ini.
         </Text>
-        <View style={styles.ahliGiziBadge}>
-          <Feather name="award" size={13} color={colors.primary} />
-          <Text style={{ fontSize: 11, fontWeight: '700', color: colors.primary }}>
+        <View style={[styles.ahliGiziBadge, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : colors.primaryLight, borderRadius: radius.sm }]}>
+          <Feather name="award" size={13} color={isDark ? colors.gold : colors.primary} />
+          <Text style={{ fontSize: 11, fontWeight: '700', color: isDark ? colors.gold : colors.primary }}>
             Petugas Ahli Gizi: {currentUser?.nama ?? 'Dr. Tri Wibowo, S.Gz, M.Sc'}
           </Text>
         </View>
@@ -196,16 +198,16 @@ export default function KandunganGiziHarianScreen({ navigation }: any) {
         </View>
 
         {/* Tab Segment Controls */}
-        <View style={[styles.segmentContainer, { backgroundColor: colors.surface, borderRadius: radius.md }]}>
+        <View style={[styles.segmentContainer, { backgroundColor: colors.background, borderRadius: radius.md }]}>
           <Pressable
             onPress={() => setActiveTab('input')}
             style={[
               styles.segmentBtn,
-              { backgroundColor: activeTab === 'input' ? colors.primary : 'transparent', borderRadius: radius.sm },
+              { backgroundColor: activeTab === 'input' ? (isDark ? colors.gold : colors.accent) : 'transparent', borderRadius: radius.sm },
             ]}
           >
-            <Feather name="edit-3" size={14} color={activeTab === 'input' ? '#FFF' : colors.text} />
-            <Text style={{ fontSize: 11, fontWeight: '800', color: activeTab === 'input' ? '#FFF' : colors.text }}>
+            <Feather name="edit-3" size={14} color={activeTab === 'input' ? (isDark ? '#07101E' : '#FFF') : colors.text} />
+            <Text style={{ fontSize: 11.5, fontWeight: '800', color: activeTab === 'input' ? (isDark ? '#07101E' : '#FFF') : colors.text }}>
               Input Kandungan Gizi
             </Text>
           </Pressable>
@@ -214,16 +216,16 @@ export default function KandunganGiziHarianScreen({ navigation }: any) {
             onPress={() => setActiveTab('riwayat')}
             style={[
               styles.segmentBtn,
-              { backgroundColor: activeTab === 'riwayat' ? colors.primary : 'transparent', borderRadius: radius.sm },
+              { backgroundColor: activeTab === 'riwayat' ? (isDark ? colors.gold : colors.accent) : 'transparent', borderRadius: radius.sm },
             ]}
           >
-            <Feather name="clipboard" size={14} color={activeTab === 'riwayat' ? '#FFF' : colors.text} />
-            <Text style={{ fontSize: 11, fontWeight: '800', color: activeTab === 'riwayat' ? '#FFF' : colors.text }}>
+            <Feather name="clipboard" size={14} color={activeTab === 'riwayat' ? (isDark ? '#07101E' : '#FFF') : colors.text} />
+            <Text style={{ fontSize: 11.5, fontWeight: '800', color: activeTab === 'riwayat' ? (isDark ? '#07101E' : '#FFF') : colors.text }}>
               Riwayat Sertifikasi ({kandunganGiziList.length})
             </Text>
           </Pressable>
         </View>
-      </View>
+      </Card>
 
       {/* ========================================================================= */}
       {/* TAB 1: FORM INPUT KANDUNGAN GIZI MAKANAN HARI INI                         */}
@@ -249,6 +251,7 @@ export default function KandunganGiziHarianScreen({ navigation }: any) {
                       {
                         backgroundColor: isSelected ? colors.primaryLight : colors.surface,
                         borderColor: isSelected ? colors.primary : colors.border,
+                        borderWidth: isSelected ? 1.5 : 1,
                         borderRadius: radius.md,
                       },
                     ]}
@@ -520,7 +523,7 @@ export default function KandunganGiziHarianScreen({ navigation }: any) {
             contentContainerStyle={{ gap: spacing.md, paddingBottom: 28, paddingTop: 4 }}
           >
             {/* 1. Hero Kalori Banner */}
-            <View style={[styles.detailHero, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
+            <View style={[styles.detailHero, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.md }]}>
               <Text style={{ fontSize: 11, fontWeight: '700', color: colors.primary }}>TOTAL NILAI ENERGI SAJIAN</Text>
               <Text style={{ fontSize: 30, fontWeight: '900', color: colors.primary }}>
                 {selectedDetail.kalori} kkal
@@ -599,7 +602,7 @@ export default function KandunganGiziHarianScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: { padding: 16, gap: 14, paddingBottom: 110 },
-  heroBanner: { padding: 14, gap: 10 },
+  heroBanner: { padding: 14, gap: 10, borderWidth: 1 },
   ahliGiziBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -618,7 +621,6 @@ const styles = StyleSheet.create({
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   presetCard: {
     padding: 8,
-    borderWidth: 1.5,
     gap: 6,
     alignItems: 'center',
   },
@@ -638,7 +640,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   macroCol: { alignItems: 'center', flex: 1 },
-  detailHero: { padding: 16, alignItems: 'center', gap: 6, marginBottom: 2 },
+  detailHero: { padding: 16, alignItems: 'center', gap: 6, marginBottom: 2, borderWidth: 1 },
   infoCard: { padding: 12, borderWidth: 1, gap: 4, marginBottom: 2 },
   nutriRow: {
     flexDirection: 'row',

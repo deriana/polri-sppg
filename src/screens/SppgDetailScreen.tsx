@@ -118,7 +118,7 @@ export default function SppgDetailScreen({ route }: any) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
+  content: { padding: 16, gap: 12, paddingBottom: 110 },
   headerCard: { padding: 14, borderRadius: 16, borderWidth: 1, gap: 4 },
   headerRow: { flexDirection: 'row', gap: 8, marginTop: 4 },
   rowCard: { flexDirection: 'row', alignItems: 'center', gap: 8 },

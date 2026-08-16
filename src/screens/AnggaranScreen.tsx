@@ -20,13 +20,13 @@ const KATEGORI_LABEL: Record<AnggaranKategori, string> = {
   lainnya: 'Lainnya',
 };
 
-const KATEGORI_TONE: Record<AnggaranKategori, 'success' | 'info' | 'warning' | 'primary' | 'neutral' | 'danger'> = {
+const KATEGORI_TONE: Record<AnggaranKategori, any> = {
   alokasi_pusat: 'success',
-  bahan_baku: 'primary',
-  operasional_armada: 'warning',
-  gaji_insentif: 'info',
-  peralatan_dapur: 'neutral',
-  kebersihan_apd: 'neutral',
+  bahan_baku: 'royal',
+  operasional_armada: 'amber',
+  gaji_insentif: 'violet',
+  peralatan_dapur: 'cyan',
+  kebersihan_apd: 'emerald',
   lainnya: 'neutral',
 };
 
@@ -235,7 +235,7 @@ export default function AnggaranScreen({ navigation }: any) {
       <Card style={{ gap: spacing.sm, borderRadius: radius.xl }}>
         <View style={styles.rowBetween}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: isDark ? 'rgba(16,185,129,0.2)' : '#ECFDF5', alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: colors.successBg, alignItems: 'center', justifyContent: 'center' }}>
               <Feather name="pie-chart" size={16} color={colors.success} />
             </View>
             <View>
@@ -250,7 +250,7 @@ export default function AnggaranScreen({ navigation }: any) {
           <Pill label={`Hemat +${costPerMeal.hematEfisiensiPct}%`} tone="success" />
         </View>
 
-        <View style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : colors.background, borderRadius: radius.lg, padding: 12, gap: 8 }}>
+        <View style={{ backgroundColor: colors.background, borderRadius: radius.lg, padding: 12, gap: 8 }}>
           <View style={styles.rowBetween}>
             <View>
               <Text style={{ fontSize: 10.5, color: colors.textMuted, fontWeight: '700' }}>TOTAL BIAYA RIIL / PORSI</Text>
@@ -432,7 +432,7 @@ export default function AnggaranScreen({ navigation }: any) {
       <Modal visible={showModal} onClose={() => setShowModal(false)} title="Input Pembelian & Pengadaan Bahan">
         <ScrollView contentContainerStyle={{ gap: spacing.md, paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
           {error && (
-            <View style={{ backgroundColor: colors.dangerBg, padding: 10, borderRadius: radius.md, marginBottom: 8 }}>
+            <View style={{ backgroundColor: colors.background, borderWidth: 1, borderColor: colors.danger, padding: 10, borderRadius: radius.md, marginBottom: 8 }}>
               <Text style={{ color: colors.danger, fontSize: fontSize.xs, fontWeight: '600' }}>{error}</Text>
             </View>
           )}
@@ -618,7 +618,6 @@ export default function AnggaranScreen({ navigation }: any) {
               variant="accent"
               style={{
                 gap: 6,
-                backgroundColor: isDark ? colors.surface : '#FFFFFF',
                 borderLeftColor: selectedLogDetail.jenis === 'penerimaan' ? colors.success : colors.primary,
               }}
             >
@@ -928,28 +927,6 @@ const styles = StyleSheet.create({
     padding: 10,
     alignItems: 'center',
     borderTopWidth: 1,
-  },
-  digitalInvoiceBox: {
-    padding: 14,
-    borderWidth: 1,
-    gap: 10,
-  },
-  docIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  verifiedStamp: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    gap: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderWidth: 1,
-    borderRadius: 4,
   },
 });
 

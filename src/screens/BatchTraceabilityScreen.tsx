@@ -104,15 +104,14 @@ export default function BatchTraceabilityScreen({ navigation, route }: any) {
       {/* Hero Overview Card */}
       <Card
         style={{
-          backgroundColor: colors.surface,
           gap: spacing.sm,
           borderRadius: radius.xl,
-          borderWidth: 1.5,
+          borderWidth: 1,
           borderColor: isDark ? colors.border : '#F59E0B',
         }}
       >
         <View style={styles.rowBetween}>
-          <View style={[styles.badgePill, { backgroundColor: isDark ? 'rgba(245,158,11,0.2)' : '#FEF3C7' }]}>
+          <View style={[styles.badgePill, { backgroundColor: colors.warningBg }]}>
             <Feather name="shield" size={13} color="#D97706" strokeWidth={2.2} />
             <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#FBBF24' : '#B45309', letterSpacing: 0.8 }}>
               FOOD SUPPLY CHAIN TRACEABILITY
@@ -133,7 +132,7 @@ export default function BatchTraceabilityScreen({ navigation, route }: any) {
           </Text>
         </View>
 
-        <View style={[styles.summaryGrid, { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : colors.background, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border }]}>
+        <View style={[styles.summaryGrid, { backgroundColor: colors.background, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border }]}>
           <View style={styles.gridCol}>
             <Text style={{ fontSize: 10, color: colors.textMuted }}>Rantai Pasok</Text>
             <Text style={{ fontSize: 12, fontWeight: '900', color: colors.text }}>6 Tahap Lengkap</Text>
@@ -155,8 +154,8 @@ export default function BatchTraceabilityScreen({ navigation, route }: any) {
         style={({ pressed }) => [
           styles.passportBanner,
           {
-            backgroundColor: isDark ? 'rgba(13,148,136,0.15)' : '#ECFDF5',
-            borderColor: colors.success,
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
             borderRadius: radius.lg,
           },
           pressed && { opacity: 0.8 },
@@ -261,7 +260,7 @@ export default function BatchTraceabilityScreen({ navigation, route }: any) {
         onRequestClose={() => setSelectedStepModal(null)}
       >
         <View style={styles.modalOverlay}>
-          <Card style={[styles.modalCard, { backgroundColor: colors.surface, borderRadius: radius.xl, maxHeight: '90%' }]}>
+          <Card style={[styles.modalCard, { borderRadius: radius.xl, maxHeight: '90%' }]}>
             {selectedStepModal && modalDocs && (
               <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingBottom: 20 }}>
                 {/* Modal Header */}
@@ -387,7 +386,7 @@ export default function BatchTraceabilityScreen({ navigation, route }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: { padding: 16, gap: 12, paddingBottom: 64 },
+  content: { padding: 16, gap: 12, paddingBottom: 110 },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   badgePill: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99 },
   summaryGrid: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10, paddingHorizontal: 8, marginTop: 4 },

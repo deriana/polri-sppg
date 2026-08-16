@@ -21,7 +21,7 @@ const todayDateStr = () => new Date().toISOString().slice(0, 10);
 export default function DistribusiScreen({ navigation }: any) {
   const { sekolahList, distribusiList } = useApp();
   const { sppgInScope } = useScopedData();
-  const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark } = useTheme();
+  const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark, shadow } = useTheme();
 
   const inScope = useMemo(() => scopeDistribusi(sppgInScope, distribusiList), [sppgInScope, distribusiList]);
   const todayInScope = useMemo(() => inScope.filter((r) => r.tanggal === todayDateStr()), [inScope]);
@@ -56,9 +56,13 @@ export default function DistribusiScreen({ navigation }: any) {
       <Card
         key={rute.id}
         style={{
-          gap: spacing.sm,
-          borderWidth: isSelected ? 2 : 1,
-          borderColor: isSelected ? colors.primary : colors.border,
+          gap: 12,
+          padding: 16,
+          borderRadius: 20,
+          borderWidth: isSelected ? 1.5 : 1,
+          borderColor: isSelected ? (isDark ? colors.gold : (colors.accent || colors.primary)) : colors.border,
+          backgroundColor: colors.surface,
+          ...shadow.card,
         }}
         onPress={() => {
           setSelectedRuteId(rute.id);
@@ -66,32 +70,32 @@ export default function DistribusiScreen({ navigation }: any) {
         }}
       >
         <View style={styles.rowTop}>
-          <Text style={{ color: colors.text, fontWeight: '800', fontSize: fontSize.sm, flex: 1 }} numberOfLines={1}>
+          <Text style={{ color: colors.text, fontWeight: '800', fontSize: 14, flex: 1 }} numberOfLines={1}>
             {sekolahNama}
           </Text>
           <Pill label={STATUS_LABEL[rute.status]} tone={isKendala ? 'danger' : rute.status === 'tiba' ? 'success' : 'info'} />
         </View>
 
-        <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
           {sekolahItem?.fotoSekolah ? (
-            <Image source={{ uri: sekolahItem.fotoSekolah }} style={{ width: 50, height: 50, borderRadius: radius.sm }} />
+            <Image source={{ uri: sekolahItem.fotoSekolah }} style={{ width: 54, height: 54, borderRadius: 14 }} />
           ) : (
-            <View style={{ width: 50, height: 50, borderRadius: radius.sm, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
-              <Feather name="truck" size={24} color={colors.primary} />
+            <View style={{ width: 54, height: 54, borderRadius: 14, backgroundColor: isDark ? 'rgba(34, 211, 238, 0.15)' : (colors.cyanLight || '#ECFEFF'), alignItems: 'center', justifyContent: 'center' }}>
+              <Feather name="truck" size={24} color={isDark ? '#22D3EE' : (colors.cyan || '#0891B2')} />
             </View>
           )}
           <View style={{ flex: 1, gap: 2 }}>
-            <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>
+            <Text style={{ color: colors.textMuted, fontSize: 11.5 }}>
               Target: {sekolahItem?.jumlahSiswa ?? 350} siswa ({sekolahItem?.jumlahSiswa ?? 350} porsi)
             </Text>
-            <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>
-              Estimasi Tiba: {rute.estimasiTiba || '11:00 WIB'}
+            <Text style={{ color: colors.textMuted, fontSize: 11.5 }}>
+              Estimasi Tiba: <Text style={{ fontWeight: '700', color: colors.text }}>{rute.estimasiTiba || '11:00 WIB'}</Text>
             </Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 }}>
-              <Text style={{ color: colors.primary, fontSize: 10.5, fontWeight: '800' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 3 }}>
+              <Text style={{ color: isDark ? colors.gold : (colors.accent || colors.primary), fontSize: 11, fontWeight: '800' }}>
                 Buka Log Tracking Detail
               </Text>
-              <Feather name="chevron-right" size={12} color={colors.primary} />
+              <Feather name="chevron-right" size={13} color={isDark ? colors.gold : (colors.accent || colors.primary)} />
             </View>
           </View>
         </View>
@@ -202,9 +206,9 @@ export default function DistribusiScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 14, paddingBottom: 40 },
+  content: { padding: 16, gap: 14, paddingBottom: 110 },
   mapContainer: {
-    borderWidth: 1.2,
+    borderWidth: 1,
   },
   rowTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   sppgHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, padding: 8 },

@@ -44,68 +44,80 @@ interface QuickAction {
 }
 
 function QuickActionGrid({ items }: { items: QuickAction[] }) {
-  const { colors, spacing, radius, fontSize, shadow, iconStrokeWidth, isDark } = useTheme();
+  const { colors, isDark, radius, shadow } = useTheme();
+
+  const getToneDetails = (tone?: string) => {
+    switch (tone) {
+      case 'danger':
+        return { bg: isDark ? 'rgba(239, 68, 68, 0.15)' : '#FFE4E6', fg: colors.danger };
+      case 'warning':
+        return { bg: isDark ? 'rgba(245, 158, 11, 0.15)' : '#FEF3C7', fg: colors.warning };
+      case 'success':
+        return { bg: isDark ? 'rgba(16, 185, 129, 0.15)' : '#ECFDF5', fg: colors.success };
+      case 'info':
+        return { bg: isDark ? 'rgba(56, 189, 248, 0.15)' : '#E0F2FE', fg: colors.info };
+      case 'primary':
+      default:
+        return {
+          bg: isDark ? 'rgba(245, 158, 11, 0.15)' : colors.accentLight || '#EFF6FF',
+          fg: isDark ? colors.gold : colors.accent || colors.primary,
+        };
+    }
+  };
+
   return (
     <View style={styles.grid}>
-      {items.map((item) => (
-        <Pressable
-          key={item.key}
-          onPress={item.onPress}
-          style={({ pressed }) => [
-            styles.gridCard,
-            {
-              backgroundColor: colors.surface,
-              borderColor: item.tone === 'danger' ? colors.danger : item.tone === 'warning' ? colors.warning : colors.border,
-              borderRadius: radius.lg,
-              ...shadow.card,
-            },
-            pressed && { opacity: 0.85, transform: [{ scale: 0.975 }] },
-          ]}
-        >
-          <View style={styles.gridCardTopRow}>
-            <View
-              style={[
-                styles.gridIconWrap,
-                {
-                  backgroundColor:
-                    item.tone === 'danger'
-                      ? colors.dangerBg
-                      : item.tone === 'warning'
-                      ? colors.warningBg
-                      : colors.primaryLight,
-                },
-              ]}
-            >
-              <Feather
-                name={item.icon}
-                size={20}
-                color={
-                  item.tone === 'danger'
-                    ? colors.danger
-                    : item.tone === 'warning'
-                    ? colors.warning
-                    : isDark
-                    ? colors.gold
-                    : colors.primary
-                }
-                strokeWidth={iconStrokeWidth}
-              />
+      {items.map((item) => {
+        const t = getToneDetails(item.tone);
+        return (
+          <Pressable
+            key={item.key}
+            onPress={item.onPress}
+            style={({ pressed }) => [
+              styles.gridCard,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+                ...shadow.card,
+              },
+              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+            ]}
+          >
+            <View style={styles.gridCardTopRow}>
+              <View
+                style={[
+                  styles.gridIconWrap,
+                  {
+                    backgroundColor: t.bg,
+                    borderRadius: radius.md,
+                  },
+                ]}
+              >
+                <Feather
+                  name={item.icon}
+                  size={19}
+                  color={t.fg}
+                  strokeWidth={2}
+                />
+              </View>
+              {item.badge && (
+                <Pill
+                  label={item.badge}
+                  tone={(item.tone as any) ?? 'primary'}
+                />
+              )}
             </View>
-            {item.badge && (
-              <Pill
-                label={item.badge}
-                tone={item.tone ?? 'neutral'}
-              />
-            )}
-          </View>
-          <Text style={[styles.gridTitle, { color: colors.text, fontSize: fontSize.sm }]} numberOfLines={1}>
-            {item.title}
-          </Text>
-          <Text style={[styles.gridSubtitle, { color: colors.textMuted }]} numberOfLines={2}>
-            {item.subtitle}
-          </Text>
-        </Pressable>
-      ))}
+            <View style={{ gap: 2, marginTop: 4 }}>
+              <Text style={[styles.gridTitle, { color: colors.text, fontSize: 13.5, fontWeight: '800' }]} numberOfLines={1}>
+                {item.title}
+              </Text>
+              <Text style={[styles.gridSubtitle, { color: colors.textMuted }]} numberOfLines={2}>
+                {item.subtitle}
+              </Text>
+            </View>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -149,71 +161,57 @@ function AlertPreviewList({ alerts, onSeeAll, onOpen }: { alerts: AlertLog[]; on
 }
 
 function CommandHeroHeader({ currentUser, role, sppgName, sppgScopeCount, onNotifPress, onProfilePress, activeAlertCount }: any) {
-  const { colors, fontSize, radius, spacing, isDark } = useTheme();
+  const { colors, isDark } = useTheme();
 
   return (
-    <View
-      style={[
-        styles.commandHero,
-        {
-          backgroundColor: isDark ? colors.surface : colors.primary,
-          borderRadius: radius.xl,
-          borderColor: isDark ? colors.border : colors.primaryDark,
-        },
-      ]}
-    >
-      <View style={styles.commandHeroTopRow}>
-        <View style={styles.commandHeroBadge}>
-          <View style={[styles.commandHeroPulseDot, { backgroundColor: colors.gold }]} />
-          <Text style={[styles.commandHeroBadgeText, { color: colors.gold }]}>PUSAT KOMANDO OPERASIONAL</Text>
-        </View>
-        <Pressable
-          hitSlop={8}
-          onPress={onNotifPress}
-          style={({ pressed }) => [
-            styles.notifBtn,
-            { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.15)' },
-            pressed && { opacity: 0.7 },
-          ]}
-        >
-          <Feather name="bell" size={18} color="#FFFFFF" strokeWidth={2} />
-          {activeAlertCount > 0 && (
-            <View style={[styles.notifBadgeDot, { backgroundColor: colors.danger }]} />
+    <View style={[styles.cleanHeaderBar, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+      <View style={styles.cleanHeaderLeft}>
+        <Pressable onPress={onProfilePress} style={styles.cleanHeaderAvatarWrap}>
+          {currentUser.fotoProfil ? (
+            <Image source={{ uri: currentUser.fotoProfil }} style={[styles.cleanHeaderAvatar, { borderColor: isDark ? colors.gold : colors.primary }]} />
+          ) : (
+            <View style={[styles.cleanHeaderAvatarPlaceholder, { backgroundColor: colors.primaryLight, borderColor: colors.border }]}>
+              <Feather name="shield" size={20} color={isDark ? colors.gold : colors.primary} />
+            </View>
           )}
+          <View style={[styles.cleanHeaderOnlineDot, { backgroundColor: colors.success, borderColor: colors.surface }]} />
         </Pressable>
-      </View>
-
-      {/* Kartu identitas — ketuk untuk membuka Profil Saya */}
-      <Pressable
-        onPress={onProfilePress}
-        style={({ pressed }) => [styles.commandHeroMainRow, pressed && { opacity: 0.75 }]}
-      >
-        {currentUser.fotoProfil ? (
-          <Image source={{ uri: currentUser.fotoProfil }} style={styles.heroAvatar} />
-        ) : (
-          <View style={[styles.heroAvatarPlaceholder, { backgroundColor: colors.gold }]}>
-            <Feather name="user" size={22} color={colors.primary} />
-          </View>
-        )}
-        <View style={{ flex: 1, gap: 2 }}>
-          <Text style={[styles.heroGreeting, { color: '#FFFFFF', fontSize: fontSize.lg }]}>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.cleanHeaderGreeting, { color: colors.text }]} numberOfLines={1}>
             {currentUser.nama}
           </Text>
-          <Text style={{ color: isDark ? colors.textMuted : 'rgba(255,255,255,0.85)', fontSize: fontSize.xs, fontWeight: '600' }}>
-            {ROLE_LABEL[role as keyof typeof ROLE_LABEL] ?? role} • {sppgName}
-          </Text>
-          <Text style={{ color: colors.gold, fontSize: 10.5, fontWeight: '800', marginTop: 1 }}>
-            Ketuk untuk buka Profil Saya
-          </Text>
+          <Pressable
+            onPress={onProfilePress}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 1 }}
+          >
+            <Text style={[styles.cleanHeaderSub, { color: colors.textMuted }]} numberOfLines={1}>
+              {ROLE_LABEL[role as keyof typeof ROLE_LABEL] ?? role} • {sppgName}
+            </Text>
+            <Feather name="chevron-right" size={12} color={colors.textMuted} />
+          </Pressable>
         </View>
-        <Feather name="chevron-right" size={18} color={isDark ? colors.textMuted : 'rgba(255,255,255,0.75)'} />
+      </View>
+
+      <Pressable
+        style={[styles.cleanHeaderNotifBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
+        onPress={onNotifPress}
+        hitSlop={8}
+      >
+        <Feather name="bell" size={20} color={colors.text} />
+        {activeAlertCount > 0 && (
+          <View style={[styles.cleanHeaderNotifBadge, { backgroundColor: colors.danger }]}>
+            <Text style={styles.cleanHeaderNotifBadgeText}>
+              {activeAlertCount > 9 ? '9+' : activeAlertCount}
+            </Text>
+          </View>
+        )}
       </Pressable>
     </View>
   );
 }
 
 function ProductionStageBar({ progress, target }: { progress: number; target: number }) {
-  const { colors, fontSize, radius } = useTheme();
+  const { colors, isDark, fontSize, radius } = useTheme();
   const pct = Math.min(100, Math.round((progress / target) * 100));
 
   const stages = [
@@ -225,11 +223,13 @@ function ProductionStageBar({ progress, target }: { progress: number; target: nu
   ];
 
   return (
-    <Card variant="accent" style={{ gap: 12 }}>
+    <Card style={{ gap: 12, borderRadius: 20, borderWidth: 1, borderColor: colors.border, padding: 16 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Feather name="activity" size={16} color={colors.primary} />
-          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.primary, letterSpacing: 0.4 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : (colors.accentLight || '#EFF6FF'), alignItems: 'center', justifyContent: 'center' }}>
+            <Feather name="activity" size={15} color={isDark ? colors.gold : (colors.accent || colors.primary)} />
+          </View>
+          <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: isDark ? colors.gold : colors.primary, letterSpacing: 0.4 }}>
             PROGRESS DOKUMENTASI PRODUKSI
           </Text>
         </View>
@@ -249,8 +249,8 @@ function ProductionStageBar({ progress, target }: { progress: number; target: nu
       </Text>
 
       {/* Progress Track */}
-      <View style={{ height: 8, backgroundColor: colors.background, borderRadius: radius.pill, overflow: 'hidden' }}>
-        <View style={{ height: '100%', width: `${pct}%`, backgroundColor: colors.gold || colors.primary, borderRadius: radius.pill }} />
+      <View style={{ height: 8, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : colors.background, borderRadius: radius.pill, overflow: 'hidden' }}>
+        <View style={{ height: '100%', width: `${pct}%`, backgroundColor: pct >= 100 ? colors.success : (isDark ? colors.gold : colors.accent || colors.primary), borderRadius: radius.pill }} />
       </View>
 
       {/* Stages Row */}
@@ -259,9 +259,9 @@ function ProductionStageBar({ progress, target }: { progress: number; target: nu
           <View key={i} style={{ alignItems: 'center', gap: 4 }}>
             <View
               style={{
-                width: 18,
-                height: 18,
-                borderRadius: 9,
+                width: 20,
+                height: 20,
+                borderRadius: 10,
                 backgroundColor: stg.done ? colors.success : colors.background,
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -270,9 +270,9 @@ function ProductionStageBar({ progress, target }: { progress: number; target: nu
               }}
             >
               {stg.done ? (
-                <Feather name="check" size={11} color="#FFFFFF" strokeWidth={3} />
+                <Feather name="check" size={12} color="#FFFFFF" strokeWidth={3} />
               ) : (
-                <Text style={{ fontSize: 9, color: colors.textMuted, fontWeight: '700' }}>{i + 1}</Text>
+                <Text style={{ fontSize: 9.5, color: colors.textMuted, fontWeight: '700' }}>{i + 1}</Text>
               )}
             </View>
             <Text style={{ fontSize: 10, fontWeight: '700', color: stg.done ? colors.text : colors.textMuted }}>
@@ -306,7 +306,7 @@ export default function DashboardScreen({ navigation }: any) {
     permintaanBahanList,
     incidentList,
   } = useApp();
-  const { colors, spacing, fontSize, radius, iconStrokeWidth, isDark } = useTheme();
+  const { colors, spacing, fontSize, radius, iconStrokeWidth, isDark, shadow } = useTheme();
   const {
     laporanInScope,
     presensiInScope,
@@ -383,11 +383,39 @@ export default function DashboardScreen({ navigation }: any) {
 
         <SyncStatusBadge pendingCount={pendingCount} onSyncPress={handleSync} syncing={syncing} />
 
-        <SectionTitle>Ringkasan Status SPPG Wilayah</SectionTitle>
+        <View style={styles.guruSectionHeaderRow}>
+          <Text style={[styles.guruSectionTitle, { color: colors.text }]}>
+            Ringkasan Status SPPG Wilayah
+          </Text>
+        </View>
+
         <View style={styles.statRowThree}>
-          <KpiCard label="Normal" value={counts.normal} tone={colors.success} icon="check-circle" />
-          <KpiCard label="Perhatian" value={counts.perhatian} tone={colors.warning} icon="alert-circle" />
-          <KpiCard label="Darurat" value={counts.emergency} tone={colors.danger} icon="alert-triangle" />
+          <View style={[styles.supervisorKpiTile, { backgroundColor: colors.successBg, borderColor: colors.success }]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Feather name="check-circle" size={18} color={colors.success} />
+              <View style={[styles.simpleStatusDot, { backgroundColor: colors.success }]} />
+            </View>
+            <Text style={[styles.supervisorKpiVal, { color: colors.success }]}>{counts.normal}</Text>
+            <Text style={[styles.supervisorKpiLabel, { color: colors.success }]}>Normal</Text>
+          </View>
+
+          <View style={[styles.supervisorKpiTile, { backgroundColor: colors.warningBg, borderColor: colors.warning }]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Feather name="alert-circle" size={18} color={colors.warning} />
+              <View style={[styles.simpleStatusDot, { backgroundColor: colors.warning }]} />
+            </View>
+            <Text style={[styles.supervisorKpiVal, { color: colors.warning }]}>{counts.perhatian}</Text>
+            <Text style={[styles.supervisorKpiLabel, { color: colors.warning }]}>Perhatian</Text>
+          </View>
+
+          <View style={[styles.supervisorKpiTile, { backgroundColor: colors.dangerBg, borderColor: colors.danger }]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Feather name="alert-triangle" size={18} color={colors.danger} />
+              <View style={[styles.simpleStatusDot, { backgroundColor: colors.danger }]} />
+            </View>
+            <Text style={[styles.supervisorKpiVal, { color: colors.danger }]}>{counts.emergency}</Text>
+            <Text style={[styles.supervisorKpiLabel, { color: colors.danger }]}>Darurat</Text>
+          </View>
         </View>
 
         <AlertPreviewList
@@ -1652,14 +1680,64 @@ export default function DashboardScreen({ navigation }: any) {
 
       <SyncStatusBadge pendingCount={pendingCount} onSyncPress={handleSync} syncing={syncing} />
 
-      {/* 2. Segmented Navigation Tabs (Menghindari Informasi Berjejal Menumpuk) */}
+      {/* HERO STATUS CARD & 4 METRIC TILES (Guru Style) */}
+      <View style={[styles.guruHeroCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={styles.guruHeroTopRow}>
+          <View style={[styles.guruHeroIconBox, { backgroundColor: colors.successBg }]}>
+            <Feather name="activity" size={20} color={colors.success} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.guruHeroTitle, { color: colors.text }]}>
+              Dapur Operasional Aktif
+            </Text>
+            <Text style={[styles.guruHeroSub, { color: colors.textMuted }]}>
+              Target {targetKapasitas.toLocaleString('id-ID')} Porsi • Rantai Mutu BGN & Presisi Polri
+            </Text>
+          </View>
+          <View style={[styles.guruHeroStatusBadge, { backgroundColor: colors.successBg, borderColor: colors.success }]}>
+            <Text style={[styles.guruHeroStatusBadgeText, { color: colors.success }]}>Normal</Text>
+          </View>
+        </View>
+
+        {/* 4 Metric Tiles */}
+        <View style={styles.guruMetricGrid}>
+          <View style={[styles.guruMetricTile, { backgroundColor: colors.successBg }]}>
+            <Feather name="box" size={15} color={colors.success} />
+            <Text style={[styles.guruMetricVal, { color: colors.success }]}>
+              {progressProduksiRealtime.toLocaleString('id-ID')}/{targetKapasitas.toLocaleString('id-ID')}
+            </Text>
+            <Text style={[styles.guruMetricLabel, { color: colors.success }]}>Porsi Target</Text>
+          </View>
+
+          <View style={[styles.guruMetricTile, { backgroundColor: colors.primaryLight }]}>
+            <Feather name="thermometer" size={15} color={colors.primary} />
+            <Text style={[styles.guruMetricVal, { color: colors.primary }]}>62°C</Text>
+            <Text style={[styles.guruMetricLabel, { color: colors.primary }]}>Suhu Rata-rata</Text>
+          </View>
+
+          <View style={[styles.guruMetricTile, { backgroundColor: colors.warningBg }]}>
+            <Feather name="shield" size={15} color={colors.warning} />
+            <Text style={[styles.guruMetricVal, { color: colors.warning }]}>100% Utuh</Text>
+            <Text style={[styles.guruMetricLabel, { color: colors.warning }]}>Segel Higienis</Text>
+          </View>
+
+          <View style={[styles.guruMetricTile, { backgroundColor: colors.violetLight }]}>
+            <Feather name="check-circle" size={15} color={colors.violet} />
+            <Text style={[styles.guruMetricVal, { color: colors.violet }]}>{roleProgressPct}%</Text>
+            <Text style={[styles.guruMetricLabel, { color: colors.violet }]}>Kepatuhan SOP</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* 2. Segmented Navigation Tabs */}
       <View
         style={[
           styles.dashTabRow,
           {
             backgroundColor: colors.surface,
             borderColor: colors.border,
-            borderRadius: radius.xl,
+            borderRadius: 14,
+            ...shadow.sm,
           },
         ]}
       >
@@ -1668,21 +1746,21 @@ export default function DashboardScreen({ navigation }: any) {
           style={[
             styles.dashTabBtn,
             dashboardTab === 'operasional' && {
-              backgroundColor: colors.primary,
-              borderRadius: radius.lg,
+              backgroundColor: isDark ? colors.gold : colors.primary,
+              borderRadius: 10,
             },
           ]}
         >
           <Feather
             name="activity"
             size={13}
-            color={dashboardTab === 'operasional' ? '#FFF' : colors.textMuted}
+            color={dashboardTab === 'operasional' ? (isDark ? colors.textInverse : '#FFFFFF') : colors.textMuted}
           />
           <Text
             style={{
               fontSize: 11.5,
               fontWeight: '800',
-              color: dashboardTab === 'operasional' ? '#FFF' : colors.text,
+              color: dashboardTab === 'operasional' ? (isDark ? colors.textInverse : '#FFFFFF') : colors.text,
             }}
           >
             Operasional
@@ -1694,21 +1772,21 @@ export default function DashboardScreen({ navigation }: any) {
           style={[
             styles.dashTabBtn,
             dashboardTab === 'analisis' && {
-              backgroundColor: colors.primary,
-              borderRadius: radius.lg,
+              backgroundColor: isDark ? colors.gold : colors.primary,
+              borderRadius: 10,
             },
           ]}
         >
           <Feather
             name="cpu"
             size={13}
-            color={dashboardTab === 'analisis' ? '#FFF' : colors.textMuted}
+            color={dashboardTab === 'analisis' ? (isDark ? colors.textInverse : '#FFFFFF') : colors.textMuted}
           />
           <Text
             style={{
               fontSize: 11.5,
               fontWeight: '800',
-              color: dashboardTab === 'analisis' ? '#FFF' : colors.text,
+              color: dashboardTab === 'analisis' ? (isDark ? colors.textInverse : '#FFFFFF') : colors.text,
             }}
           >
             Kinerja & AI
@@ -1723,21 +1801,21 @@ export default function DashboardScreen({ navigation }: any) {
           style={[
             styles.dashTabBtn,
             dashboardTab === 'pemantauan' && {
-              backgroundColor: colors.primary,
-              borderRadius: radius.lg,
+              backgroundColor: isDark ? colors.gold : colors.primary,
+              borderRadius: 10,
             },
           ]}
         >
           <Feather
             name="bell"
             size={13}
-            color={dashboardTab === 'pemantauan' ? '#FFF' : colors.textMuted}
+            color={dashboardTab === 'pemantauan' ? (isDark ? colors.textInverse : '#FFFFFF') : colors.textMuted}
           />
           <Text
             style={{
               fontSize: 11.5,
               fontWeight: '800',
-              color: dashboardTab === 'pemantauan' ? '#FFF' : colors.text,
+              color: dashboardTab === 'pemantauan' ? (isDark ? colors.textInverse : '#FFFFFF') : colors.text,
             }}
           >
             Alert & Wilayah
@@ -1754,7 +1832,7 @@ export default function DashboardScreen({ navigation }: any) {
       {dashboardTab === 'operasional' && (
         <>
           {/* Role-Specific Tasks / Daily Operational Hub */}
-          <Card variant="accent" style={{ gap: spacing.sm }}>
+          <Card style={{ gap: spacing.sm, borderRadius: 20, borderWidth: 1, borderColor: colors.border, padding: 16 }}>
             <Pressable
               onPress={() => setIsWorkflowExpanded(!isWorkflowExpanded)}
               style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
@@ -1871,22 +1949,25 @@ export default function DashboardScreen({ navigation }: any) {
           </Card>
 
           {/* Quick Menu */}
-          <SectionTitle style={{ marginTop: spacing.xs }}>Menu Pintasan Cepat</SectionTitle>
+          <View style={styles.guruSectionHeaderRow}>
+            <Text style={[styles.guruSectionTitle, { color: colors.text }]}>
+              Menu Pintasan Cepat
+            </Text>
+          </View>
           <QuickActionGrid items={quickActions} />
 
           {/* Status Kinerja Operasional */}
-          <SectionTitle
-            action={
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.success }} />
-                <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: '700' }}>
-                  Monitoring Real-Time
-                </Text>
-              </View>
-            }
-          >
-            Status Kinerja Operasional
-          </SectionTitle>
+          <View style={styles.guruSectionHeaderRow}>
+            <Text style={[styles.guruSectionTitle, { color: colors.text }]}>
+              Status Kinerja Operasional
+            </Text>
+            <View style={{ marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.success }} />
+              <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: '700' }}>
+                Real-Time
+              </Text>
+            </View>
+          </View>
 
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
             {statusCards.map((c) => (
@@ -1908,9 +1989,7 @@ export default function DashboardScreen({ navigation }: any) {
                     style={[
                       styles.simpleStatusIconWrap,
                       {
-                        backgroundColor: c.ok
-                          ? (isDark ? 'rgba(13,148,136,0.15)' : '#F0FDF4')
-                          : (isDark ? 'rgba(217,119,6,0.15)' : '#FFFBEB'),
+                        backgroundColor: c.ok ? colors.successBg : colors.warningBg,
                       },
                     ]}
                   >
@@ -2004,15 +2083,16 @@ export default function DashboardScreen({ navigation }: any) {
           {aiEarlyWarnings.filter((w) => w.targetRole.includes(role)).length > 0 && (
             <Card
               style={{
-                backgroundColor: isDark ? 'rgba(59,130,246,0.08)' : '#F0F9FF',
-                borderWidth: 0,
+                backgroundColor: colors.surface,
+                borderWidth: 1,
+                borderColor: colors.border,
                 borderRadius: radius.xl,
                 gap: 10,
               }}
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: isDark ? 'rgba(59,130,246,0.25)' : '#DBEAFE', alignItems: 'center', justifyContent: 'center' }}>
+                  <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
                     <Feather name="cpu" size={14} color={colors.primary} />
                   </View>
                   <Text style={{ fontSize: 11, fontWeight: '900', color: colors.primary, letterSpacing: 0.5 }}>
@@ -2033,6 +2113,8 @@ export default function DashboardScreen({ navigation }: any) {
                       borderRadius: radius.lg,
                       padding: 12,
                       gap: 8,
+                      borderWidth: 1,
+                      borderColor: colors.border,
                       borderLeftWidth: 3.5,
                       borderLeftColor:
                         warn.tingkat === 'critical'
@@ -2040,8 +2122,6 @@ export default function DashboardScreen({ navigation }: any) {
                           : warn.tingkat === 'warning'
                           ? colors.warning
                           : colors.primary,
-                      borderWidth: 1,
-                      borderColor: colors.border,
                     }}
                   >
                     {/* Header row with category pill and timestamp chip */}
@@ -2060,7 +2140,7 @@ export default function DashboardScreen({ navigation }: any) {
                             : 'primary'
                         }
                       />
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.pill }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: colors.problemBg, paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.pill }}>
                         <Feather name="clock" size={10.5} color={colors.textMuted} />
                         <Text style={{ fontSize: 10.5, fontWeight: '700', color: colors.textMuted }}>
                           {warn.timestamp}
@@ -2074,7 +2154,7 @@ export default function DashboardScreen({ navigation }: any) {
                     </Text>
 
                     {/* Recommendation box */}
-                    <View style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : colors.background, padding: 8, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border }}>
+                    <View style={{ backgroundColor: colors.background, padding: 8, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border }}>
                       <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
                         <Text style={{ fontWeight: '800', color: colors.text }}>Rekomendasi AI:</Text> {warn.rekomendasiAksi}
                       </Text>
@@ -2091,7 +2171,7 @@ export default function DashboardScreen({ navigation }: any) {
                             justifyContent: 'space-between',
                             paddingVertical: 6,
                             paddingHorizontal: 10,
-                            backgroundColor: isDark ? 'rgba(59,130,246,0.15)' : '#EFF6FF',
+                            backgroundColor: colors.primaryLight,
                             borderRadius: radius.md,
                             marginTop: 2,
                           },
@@ -2118,7 +2198,7 @@ export default function DashboardScreen({ navigation }: any) {
         <>
           {/* BROADCAST KOMANDO MABES / BGN */}
           {broadcastInScope.length > 0 && !isBroadcastHidden && (
-            <Card style={{ backgroundColor: isDark ? 'rgba(217,119,6,0.15)' : '#FFFBEB', borderColor: colors.warning, gap: 8, borderWidth: 1.5 }}>
+            <Card style={{ backgroundColor: colors.surface, borderColor: colors.warning, gap: 8, borderWidth: 1 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 }}>
                   <Feather name="radio" size={16} color={colors.warning} />
@@ -2215,8 +2295,8 @@ export default function DashboardScreen({ navigation }: any) {
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingBottom: 16 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: isDark ? 'rgba(245,158,11,0.2)' : '#FEF3C7', alignItems: 'center', justifyContent: 'center' }}>
-                    <Feather name="shield" size={16} color="#D97706" />
+                  <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: colors.warningBg, alignItems: 'center', justifyContent: 'center' }}>
+                    <Feather name="shield" size={16} color={colors.warning} />
                   </View>
                   <View>
                     <Text style={{ fontSize: fontSize.md, fontWeight: '900', color: colors.text }}>
@@ -2233,7 +2313,7 @@ export default function DashboardScreen({ navigation }: any) {
               </View>
 
               {/* Score Hero */}
-              <View style={{ backgroundColor: isDark ? 'rgba(16,185,129,0.15)' : '#ECFDF5', borderRadius: radius.lg, padding: 14, alignItems: 'center', gap: 2 }}>
+              <View style={{ backgroundColor: colors.successBg, borderRadius: radius.lg, padding: 14, alignItems: 'center', gap: 2 }}>
                 <Text style={{ fontSize: 11, fontWeight: '800', color: colors.success }}>
                   TOTAL KITCHEN READINESS SCORE
                 </Text>
@@ -2348,7 +2428,168 @@ export default function DashboardScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 16, paddingBottom: 90 },
+  content: { paddingHorizontal: 16, paddingTop: 16, gap: 16, paddingBottom: 110 },
+  cleanHeaderBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+    marginHorizontal: -16,
+    marginTop: -16,
+    marginBottom: 4,
+  },
+  cleanHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  cleanHeaderAvatarWrap: {
+    position: 'relative',
+  },
+  cleanHeaderAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+  },
+  cleanHeaderAvatarPlaceholder: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#EFF6FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+  },
+  cleanHeaderOnlineDot: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#059669',
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+  },
+  cleanHeaderGreeting: {
+    fontSize: 16,
+    fontWeight: '900',
+    letterSpacing: -0.3,
+  },
+  cleanHeaderSub: {
+    fontSize: 11.5,
+    fontWeight: '600',
+  },
+  cleanHeaderNotifBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#F8FAFC',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    position: 'relative',
+    marginLeft: 8,
+  },
+  cleanHeaderNotifBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    backgroundColor: '#DC2626',
+    borderRadius: 9,
+    minWidth: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  cleanHeaderNotifBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '900',
+  },
+  guruHeroCard: {
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    gap: 14,
+  },
+  guruHeroTopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  guruHeroIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#ECFDF5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  guruHeroTitle: {
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  guruHeroSub: {
+    fontSize: 11.5,
+    marginTop: 2,
+    lineHeight: 16,
+  },
+  guruHeroStatusBadge: {
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  guruHeroStatusBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#059669',
+  },
+  guruMetricGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  guruMetricTile: {
+    width: '48.5%',
+    borderRadius: 14,
+    padding: 10,
+    gap: 3,
+  },
+  guruMetricVal: {
+    fontSize: 13.5,
+    fontWeight: '900',
+    marginTop: 2,
+  },
+  guruMetricLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  guruSectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    marginBottom: 4,
+  },
+  guruSectionTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: -0.2,
+  },
   dashTabRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -2374,78 +2615,34 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
   },
-  commandHero: {
-    padding: 16,
-    borderWidth: 1,
-    gap: 12,
-  },
-  commandHeroTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  commandHeroBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  commandHeroPulseDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  commandHeroBadgeText: {
-    fontSize: 10,
-    fontWeight: '900',
-    letterSpacing: 0.6,
-  },
-  notifBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  notifBadgeDot: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  commandHeroMainRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  heroAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-  },
-  heroAvatarPlaceholder: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  heroGreeting: {
-    fontWeight: '900',
-  },
   statRowThree: {
     flexDirection: 'row',
     gap: 8,
   },
+  supervisorKpiTile: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    gap: 4,
+  },
+  supervisorKpiVal: {
+    fontSize: 20,
+    fontWeight: '900',
+    marginTop: 2,
+  },
+  supervisorKpiLabel: {
+    fontSize: 10.5,
+    fontWeight: '700',
+  },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between' },
   gridCard: {
     width: '48.5%',
-    padding: 12,
+    padding: 16,
     borderWidth: 1,
-    gap: 6,
-    minHeight: 110,
+    borderRadius: 18,
+    gap: 8,
+    minHeight: 120,
     justifyContent: 'flex-start',
   },
   gridCardTopRow: {
@@ -2455,9 +2652,9 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   gridIconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -2471,14 +2668,15 @@ const styles = StyleSheet.create({
   workflowRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
+    padding: 14,
     borderWidth: 1,
+    borderRadius: 14,
     gap: 12,
   },
   workflowIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -2498,7 +2696,8 @@ const styles = StyleSheet.create({
   simpleStatusCard: {
     width: '48.5%',
     padding: 14,
-    borderWidth: 1.2,
+    borderWidth: 1,
+    borderRadius: 16,
     justifyContent: 'space-between',
   },
   simpleStatusTopRow: {
@@ -2507,9 +2706,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   simpleStatusIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     alignItems: 'center',
     justifyContent: 'center',
   },

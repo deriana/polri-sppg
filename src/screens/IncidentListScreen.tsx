@@ -77,7 +77,7 @@ export default function IncidentListScreen({ navigation }: any) {
         </View>
 
         {/* Filter Pills */}
-        <View style={[styles.segment, { borderColor: colors.border, borderRadius: radius.md }]}>
+        <View style={[styles.segment, { borderColor: colors.border, borderRadius: radius.md, backgroundColor: colors.surface }]}>
           {(['SEMUA', 'OPEN', 'INVESTIGASI', 'RESOLVED'] as FilterStatus[]).map((f) => (
             <Pressable
               key={f}
@@ -85,13 +85,13 @@ export default function IncidentListScreen({ navigation }: any) {
               style={[
                 styles.segmentItem,
                 { borderRadius: radius.sm },
-                activeFilter === f && { backgroundColor: colors.primary },
+                activeFilter === f && { backgroundColor: isDark ? colors.gold : colors.accent },
               ]}
             >
               <Text
                 style={{
-                  color: activeFilter === f ? colors.textInverse : colors.text,
-                  fontWeight: '700',
+                  color: activeFilter === f ? (isDark ? '#07101E' : '#FFFFFF') : colors.text,
+                  fontWeight: '800',
                   fontSize: fontSize.xs,
                 }}
               >

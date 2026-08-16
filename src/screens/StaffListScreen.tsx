@@ -15,7 +15,7 @@ function todayDate(): string {
 
 export default function StaffListScreen({ navigation }: any) {
   const { role, removeStaff, presensiList } = useApp();
-  const { colors, spacing, fontSize, iconStrokeWidth, radius } = useTheme();
+  const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark, shadow } = useTheme();
   const { usersInScope } = useScopedData();
   const today = todayDate();
 
@@ -54,20 +54,20 @@ export default function StaffListScreen({ navigation }: any) {
           const jobdeskIcon = u.jobdesk ? JOBDESK_ICON[u.jobdesk] : 'user';
 
           return (
-            <Card key={u.id} style={styles.row} onPress={() => setSelectedStaff(u)}>
+            <Card key={u.id} style={[styles.row, { ...shadow.card, borderRadius: radius.lg }]} onPress={() => setSelectedStaff(u)}>
               {u.fotoProfil ? (
-                <Image source={{ uri: u.fotoProfil }} style={styles.avatarImg} />
+                <Image source={{ uri: u.fotoProfil }} style={[styles.avatarImg, { borderRadius: radius.md }]} />
               ) : (
-                <View style={[styles.avatar, { backgroundColor: colors.primaryLight }]}>
-                  <Feather name={jobdeskIcon} size={20} color={colors.primary} strokeWidth={iconStrokeWidth} />
+                <View style={[styles.avatar, { backgroundColor: colors.accentLight || colors.primaryLight, borderRadius: radius.md }]}>
+                  <Feather name={jobdeskIcon} size={20} color={colors.accent || colors.primary} strokeWidth={iconStrokeWidth} />
                 </View>
               )}
               <View style={{ flex: 1, gap: 2 }}>
-                <Text style={[styles.name, { color: colors.text, fontSize: fontSize.sm }]}>{u.nama}</Text>
+                <Text style={[styles.name, { color: colors.text, fontSize: fontSize.sm, fontWeight: '800' }]}>{u.nama}</Text>
                 <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>NIK {u.nik} • {u.noHp}</Text>
                 <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Shift {u.shift ?? 'Pagi'}</Text>
                 <View style={styles.badgeRow}>
-                  {u.jobdesk && <Pill label={JOBDESK_LABEL[u.jobdesk]} tone="primary" icon={jobdeskIcon} />}
+                  {u.jobdesk && <Pill label={JOBDESK_LABEL[u.jobdesk]} tone="royal" icon={jobdeskIcon} />}
                   <Pill label={hadirHariIni ? 'Hadir' : 'Belum Absen'} tone={hadirHariIni ? 'success' : 'neutral'} />
                 </View>
               </View>
@@ -157,7 +157,7 @@ export default function StaffListScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
+  content: { padding: 16, gap: 12, paddingBottom: 110 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   avatar: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },

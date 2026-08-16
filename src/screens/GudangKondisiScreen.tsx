@@ -266,7 +266,7 @@ export default function GudangKondisiScreen({ navigation }: any) {
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       {/* 1. Header Banner */}
-      <View style={[styles.disclaimer, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
+      <View style={[styles.disclaimer, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.md }]}>
         <Feather name="cpu" size={18} color={colors.primary} strokeWidth={iconStrokeWidth} />
         <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1, fontWeight: '600' }}>
           Smart Storage IoT Controller — pantau & atur suhu ruang pendingin, kendalikan solenoid pintu kulkas freezer, dan pantau stok FEFO real-time.
@@ -323,7 +323,7 @@ export default function GudangKondisiScreen({ navigation }: any) {
       </ScrollView>
 
       {/* Main Interactive IoT Unit Control Card */}
-      <Card style={{ gap: spacing.md, borderColor: colors.primary, borderWidth: 1.5 }}>
+      <Card style={{ gap: spacing.md, borderColor: colors.primary }}>
         {/* Card Top Title & Status */}
         <View style={styles.rowBetween}>
           <View style={{ flex: 1, gap: 2 }}>
@@ -995,7 +995,7 @@ export default function GudangKondisiScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: { padding: 16, gap: 14, paddingBottom: 110 },
-  disclaimer: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 10 },
+  disclaimer: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 10, borderWidth: 1 },
   rowTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   unitTab: {
@@ -1042,7 +1042,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 12,
-    borderWidth: 1.5,
+    borderWidth: 1,
     gap: 10,
   },
   doorIconWrap: {
@@ -1098,7 +1098,7 @@ const styles = StyleSheet.create({
     gap: 8,
     padding: 10,
   },
-  kpiCard: { flex: 1, gap: 4, padding: 12, borderWidth: 1.5 },
+  kpiCard: { flex: 1, gap: 4, padding: 12, borderWidth: 1 },
   kpiTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   listItemRow: {
     flexDirection: 'row',

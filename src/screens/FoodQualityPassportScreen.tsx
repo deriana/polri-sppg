@@ -229,7 +229,7 @@ export default function FoodQualityPassportScreen({ navigation, route }: any) {
         </View>
 
         {/* Big Score Badge */}
-        <View style={[styles.scoreHero, { backgroundColor: isDark ? 'rgba(16,185,129,0.15)' : '#ECFDF5', borderRadius: radius.lg }]}>
+        <View style={[styles.scoreHero, { backgroundColor: colors.background, borderColor: colors.border, borderRadius: radius.lg }]}>
           <View style={{ alignItems: 'center' }}>
             <Text style={{ fontSize: 11, fontWeight: '800', color: colors.success }}>
               FOOD QUALITY SCORE INDEX
@@ -247,19 +247,19 @@ export default function FoodQualityPassportScreen({ navigation, route }: any) {
         {/* Menu & Batch Info */}
         <View style={[styles.infoBox, { backgroundColor: colors.background, borderRadius: radius.md }]}>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Kode Batch:</Text>
+            <Text style={[styles.infoLabel, { color: colors.textMuted }]}>Kode Batch:</Text>
             <Text style={styles.infoValue}>{passport.batchId}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Sajian Menu:</Text>
+            <Text style={[styles.infoLabel, { color: colors.textMuted }]}>Sajian Menu:</Text>
             <Text style={styles.infoValue}>{passport.menuNama}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Unit Dapur:</Text>
+            <Text style={[styles.infoLabel, { color: colors.textMuted }]}>Unit Dapur:</Text>
             <Text style={styles.infoValue}>{currentSppg?.nama ?? passport.sppgId}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Waktu Sertifikasi:</Text>
+            <Text style={[styles.infoLabel, { color: colors.textMuted }]}>Waktu Sertifikasi:</Text>
             <Text style={styles.infoValue}>{passport.tanggal}, {passport.certifiedAt}</Text>
           </View>
         </View>
@@ -409,16 +409,16 @@ export default function FoodQualityPassportScreen({ navigation, route }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: { padding: 16, gap: 14, paddingBottom: 64 },
-  certificateCard: { padding: 18, borderWidth: 1.5, gap: 14 },
+  content: { padding: 16, gap: 14, paddingBottom: 110 },
+  certificateCard: { padding: 18, borderWidth: 1, gap: 14 },
   certHeader: { alignItems: 'center', textAlign: 'center' },
   emblemRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 8 },
   emblemSmall: { width: 36, height: 36 },
-  scoreHero: { padding: 16, alignItems: 'center', justifyContent: 'center' },
+  scoreHero: { padding: 16, alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
   gradeBadge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 99 },
   infoBox: { padding: 12, gap: 6 },
   infoRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 },
-  infoLabel: { fontSize: 11, color: '#64748B', flexShrink: 0 },
+  infoLabel: { fontSize: 11, flexShrink: 0 },
   infoValue: { fontSize: 11, fontWeight: '700', flex: 1, textAlign: 'right' },
   paramCard: { padding: 10 },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

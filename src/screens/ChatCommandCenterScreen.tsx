@@ -58,7 +58,7 @@ export default function ChatCommandCenterScreen() {
           <FlatList
             data={thread}
             keyExtractor={(m) => m.id}
-            contentContainerStyle={{ padding: 16, gap: 8 }}
+            contentContainerStyle={{ padding: 16, gap: 8, paddingBottom: 24 }}
             renderItem={({ item }) => <ChatBubble message={item} />}
           />
         )}
@@ -113,5 +113,5 @@ const styles = StyleSheet.create({
   disclaimer: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 10 },
   bubbleRow: { flexDirection: 'row' },
   bubble: { maxWidth: '80%', padding: 10 },
-  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderTopWidth: 1 },
+  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, paddingBottom: 24, borderTopWidth: 1 },
 });

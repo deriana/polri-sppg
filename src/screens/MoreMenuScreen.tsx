@@ -150,6 +150,60 @@ export default function MoreMenuScreen({ navigation }: any) {
     phase2Items.push({ key: 'ChatCommandCenter', icon: 'message-circle', label: 'Chat SPPG', desc: 'Komunikasi tim' });
   }
 
+  const getMenuItemColor = (icon: string) => {
+    if (['user', 'user-check', 'users', 'user-plus', 'credit-card'].includes(icon)) {
+      return { bg: isDark ? 'rgba(56, 189, 248, 0.15)' : '#EFF6FF', fg: isDark ? '#38BDF8' : '#2563EB' }; // Royal/Azure
+    }
+    if (['shopping-cart', 'tool', 'package', 'box', 'shopping-bag'].includes(icon)) {
+      return { bg: isDark ? 'rgba(245, 158, 11, 0.15)' : '#FEF3C7', fg: isDark ? '#FBBF24' : '#D97706' }; // Amber
+    }
+    if (['activity', 'book-open', 'calendar', 'edit-3'].includes(icon)) {
+      return { bg: isDark ? 'rgba(16, 185, 129, 0.15)' : '#ECFDF5', fg: isDark ? '#34D399' : '#059669' }; // Emerald
+    }
+    if (['truck', 'clipboard', 'map-pin'].includes(icon)) {
+      return { bg: isDark ? 'rgba(34, 211, 238, 0.15)' : '#ECFEFF', fg: isDark ? '#22D3EE' : '#0891B2' }; // Cyan
+    }
+    if (['shield', 'check-square'].includes(icon)) {
+      return { bg: isDark ? 'rgba(16, 185, 129, 0.15)' : '#ECFDF5', fg: isDark ? '#10B981' : '#0D9488' }; // Teal
+    }
+    if (['alert-octagon', 'bell'].includes(icon)) {
+      return { bg: isDark ? 'rgba(251, 113, 133, 0.15)' : '#FFE4E6', fg: isDark ? '#FB7185' : '#E11D48' }; // Rose
+    }
+    if (['bar-chart-2', 'pie-chart', 'radio', 'video', 'message-square', 'message-circle'].includes(icon)) {
+      return { bg: isDark ? 'rgba(167, 139, 250, 0.15)' : '#F5F3FF', fg: isDark ? '#A78BFA' : '#7C3AED' }; // Violet
+    }
+    return { bg: isDark ? 'rgba(245, 158, 11, 0.15)' : '#EBF3FC', fg: isDark ? colors.gold : colors.primary };
+  };
+
+  const renderTile = (item: MenuItem) => {
+    const itemTheme = getMenuItemColor(item.icon);
+    return (
+      <Pressable
+        key={item.key}
+        onPress={() => navigation.navigate(item.key)}
+        style={({ pressed }) => [
+          styles.tileCard,
+          { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.lg, ...shadow.card },
+          pressed && { opacity: 0.82, transform: [{ scale: 0.97 }] },
+        ]}
+      >
+        <View style={[styles.tileIconWrap, { backgroundColor: itemTheme.bg }]}>
+          {item.key === 'Anggaran' ? (
+            <RpIcon size={22} color={itemTheme.fg} bgColor={itemTheme.bg} />
+          ) : (
+            <Feather name={item.icon} size={20} color={itemTheme.fg} strokeWidth={iconStrokeWidth} />
+          )}
+        </View>
+        <Text style={[styles.tileTitle, { color: colors.text, fontSize: fontSize.sm, fontWeight: '800' }]} numberOfLines={1}>
+          {item.label}
+        </Text>
+        <Text style={[styles.tileDesc, { color: colors.textMuted }]} numberOfLines={2}>
+          {item.desc}
+        </Text>
+      </Pressable>
+    );
+  };
+
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       <SyncStatusBadge pendingCount={pendingCount} onSyncPress={handleSync} syncing={syncing} />
@@ -157,27 +211,7 @@ export default function MoreMenuScreen({ navigation }: any) {
       {/* Group 1: Akun & Kehadiran Pribadi */}
       <SectionTitle style={{ marginTop: spacing.xs }}>Akun & Kehadiran Pribadi</SectionTitle>
       <View style={styles.tileGrid}>
-        {personalItems.map((item) => (
-          <Pressable
-            key={item.key}
-            onPress={() => navigation.navigate(item.key)}
-            style={({ pressed }) => [
-              styles.tileCard,
-              { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.lg, ...shadow.card },
-              pressed && { opacity: 0.82, transform: [{ scale: 0.97 }] },
-            ]}
-          >
-            <View style={[styles.tileIconWrap, { backgroundColor: colors.primaryLight }]}>
-              <Feather name={item.icon} size={20} color={isDark ? colors.gold : colors.primary} strokeWidth={iconStrokeWidth} />
-            </View>
-            <Text style={[styles.tileTitle, { color: colors.text, fontSize: fontSize.sm }]} numberOfLines={1}>
-              {item.label}
-            </Text>
-            <Text style={[styles.tileDesc, { color: colors.textMuted }]} numberOfLines={2}>
-              {item.desc}
-            </Text>
-          </Pressable>
-        ))}
+        {personalItems.map(renderTile)}
       </View>
 
       {/* Group 2: Manajemen SDM & Tim SPPG */}
@@ -185,27 +219,7 @@ export default function MoreMenuScreen({ navigation }: any) {
         <>
           <SectionTitle style={{ marginTop: spacing.md }}>Manajemen SDM & Tim SPPG</SectionTitle>
           <View style={styles.tileGrid}>
-            {sdmItems.map((item) => (
-              <Pressable
-                key={item.key}
-                onPress={() => navigation.navigate(item.key)}
-                style={({ pressed }) => [
-                  styles.tileCard,
-                  { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.lg, ...shadow.card },
-                  pressed && { opacity: 0.82, transform: [{ scale: 0.97 }] },
-                ]}
-              >
-                <View style={[styles.tileIconWrap, { backgroundColor: colors.primaryLight }]}>
-                  <Feather name={item.icon} size={20} color={isDark ? colors.gold : colors.primary} strokeWidth={iconStrokeWidth} />
-                </View>
-                <Text style={[styles.tileTitle, { color: colors.text, fontSize: fontSize.sm }]} numberOfLines={1}>
-                  {item.label}
-                </Text>
-                <Text style={[styles.tileDesc, { color: colors.textMuted }]} numberOfLines={2}>
-                  {item.desc}
-                </Text>
-              </Pressable>
-            ))}
+            {sdmItems.map(renderTile)}
           </View>
         </>
       )}
@@ -213,53 +227,13 @@ export default function MoreMenuScreen({ navigation }: any) {
       {/* Group 3: Modul Operasional SPPG */}
       <SectionTitle style={{ marginTop: spacing.md }}>Modul Operasional SPPG</SectionTitle>
       <View style={styles.tileGrid}>
-        {operasionalItems.map((item) => (
-          <Pressable
-            key={item.key}
-            onPress={() => navigation.navigate(item.key)}
-            style={({ pressed }) => [
-              styles.tileCard,
-              { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.lg, ...shadow.card },
-              pressed && { opacity: 0.82, transform: [{ scale: 0.97 }] },
-            ]}
-          >
-            <View style={[styles.tileIconWrap, { backgroundColor: colors.primaryLight }]}>
-              <Feather name={item.icon} size={20} color={isDark ? colors.gold : colors.primary} strokeWidth={iconStrokeWidth} />
-            </View>
-            <Text style={[styles.tileTitle, { color: colors.text, fontSize: fontSize.sm }]} numberOfLines={1}>
-              {item.label}
-            </Text>
-            <Text style={[styles.tileDesc, { color: colors.textMuted }]} numberOfLines={2}>
-              {item.desc}
-            </Text>
-          </Pressable>
-        ))}
+        {operasionalItems.map(renderTile)}
       </View>
 
       {/* Group 4: Monitoring & Sensor Dapur */}
       <SectionTitle style={{ marginTop: spacing.md }}>Monitoring & Sensor Dapur</SectionTitle>
       <View style={styles.tileGrid}>
-        {phase2Items.map((item) => (
-          <Pressable
-            key={item.key}
-            onPress={() => navigation.navigate(item.key)}
-            style={({ pressed }) => [
-              styles.tileCard,
-              { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.lg, ...shadow.card },
-              pressed && { opacity: 0.82, transform: [{ scale: 0.97 }] },
-            ]}
-          >
-            <View style={[styles.tileIconWrap, { backgroundColor: colors.primaryLight }]}>
-              <Feather name={item.icon} size={20} color={isDark ? colors.gold : colors.primary} strokeWidth={iconStrokeWidth} />
-            </View>
-            <Text style={[styles.tileTitle, { color: colors.text, fontSize: fontSize.sm }]} numberOfLines={1}>
-              {item.label}
-            </Text>
-            <Text style={[styles.tileDesc, { color: colors.textMuted }]} numberOfLines={2}>
-              {item.desc}
-            </Text>
-          </Pressable>
-        ))}
+        {phase2Items.map(renderTile)}
       </View>
 
       {/* Group 3: Pengaturan Sistem */}
@@ -304,25 +278,26 @@ export default function MoreMenuScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 12, paddingBottom: 90 },
+  content: { padding: 16, gap: 16, paddingBottom: 110 },
   tileGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between' },
   tileCard: {
     width: '48.5%',
-    padding: 14,
+    padding: 16,
     borderWidth: 1,
+    borderRadius: 18,
     gap: 8,
-    minHeight: 115,
+    minHeight: 120,
     justifyContent: 'flex-start',
   },
   tileIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     alignItems: 'center',
     justifyContent: 'center',
   },
   tileTitle: { fontWeight: '800' },
   tileDesc: { fontSize: 11, lineHeight: 15 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, padding: 14, minHeight: 60 },
-  iconWrap: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderRadius: 18, padding: 16, minHeight: 64 },
+  iconWrap: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },
 });

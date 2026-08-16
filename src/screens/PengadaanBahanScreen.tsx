@@ -61,7 +61,7 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
     updatePermintaanStatus,
   } = useApp();
 
-  const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark } = useTheme();
+  const { colors, spacing, fontSize, iconStrokeWidth, radius } = useTheme();
   const { anggaranInScope, sppgInScope } = useScopedData();
 
   // Tab State: 'beli' | 'ajuin' | 'terima'
@@ -311,29 +311,33 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       {/* 1. Header Banner & Segment Tabs */}
-      <View style={[styles.headerBanner, { backgroundColor: colors.primaryLight, borderRadius: radius.lg }]}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Feather name="layers" size={20} color={colors.primary} />
-          <Text style={{ fontSize: fontSize.sm, fontWeight: '900', color: colors.primary }}>
-            PUSAT PENGADAAN & LOGISTIK BAHAN
-          </Text>
+      <Card style={styles.headerBanner}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <View style={[styles.headerIconWrap, { backgroundColor: colors.primaryLight }]}>
+            <Feather name="layers" size={18} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: fontSize.sm + 1, fontWeight: '900', color: colors.text }}>
+              Pusat Pengadaan & Logistik Bahan
+            </Text>
+            <Text style={{ fontSize: 11, color: colors.textMuted, marginTop: 1 }}>
+              Belanja mandiri ber-nota, pasokan pusat & scan penerimaan DO
+            </Text>
+          </View>
         </View>
-        <Text style={{ fontSize: fontSize.xs, color: colors.text }}>
-          Kelola seluruh siklus bahan pokok dapur SPPG: belanja mandiri ber-nota, pengajuan pasokan ke pusat, dan scan penerimaan barang.
-        </Text>
 
         {/* 3 Unified Tabs */}
-        <View style={[styles.segmentContainer, { backgroundColor: colors.surface, borderRadius: radius.md }]}>
+        <View style={[styles.segmentContainer, { backgroundColor: colors.background, borderRadius: radius.md }]}>
           <Pressable
             onPress={() => setActiveTab('beli')}
             style={[
               styles.segmentBtn,
-              { backgroundColor: activeTab === 'beli' ? colors.primary : 'transparent', borderRadius: radius.sm },
+              { backgroundColor: activeTab === 'beli' ? (colors.accent || colors.primary) : 'transparent', borderRadius: radius.sm },
             ]}
           >
-            <Feather name="shopping-cart" size={14} color={activeTab === 'beli' ? '#FFF' : colors.text} />
-            <Text style={{ fontSize: 11, fontWeight: '800', color: activeTab === 'beli' ? '#FFF' : colors.text }}>
-              1. Beli Bahan
+            <Feather name="shopping-cart" size={13} color={activeTab === 'beli' ? '#FFFFFF' : colors.textMuted} />
+            <Text style={{ fontSize: 11.5, fontWeight: activeTab === 'beli' ? '800' : '600', color: activeTab === 'beli' ? '#FFFFFF' : colors.text }}>
+              Beli Bahan
             </Text>
           </Pressable>
 
@@ -341,12 +345,12 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
             onPress={() => setActiveTab('ajuin')}
             style={[
               styles.segmentBtn,
-              { backgroundColor: activeTab === 'ajuin' ? colors.primary : 'transparent', borderRadius: radius.sm },
+              { backgroundColor: activeTab === 'ajuin' ? (colors.accent || colors.primary) : 'transparent', borderRadius: radius.sm },
             ]}
           >
-            <Feather name="send" size={14} color={activeTab === 'ajuin' ? '#FFF' : colors.text} />
-            <Text style={{ fontSize: 11, fontWeight: '800', color: activeTab === 'ajuin' ? '#FFF' : colors.text }}>
-              2. Minta ke Pusat
+            <Feather name="send" size={13} color={activeTab === 'ajuin' ? '#FFFFFF' : colors.textMuted} />
+            <Text style={{ fontSize: 11.5, fontWeight: activeTab === 'ajuin' ? '800' : '600', color: activeTab === 'ajuin' ? '#FFFFFF' : colors.text }}>
+              Minta ke Pusat
             </Text>
           </Pressable>
 
@@ -354,16 +358,16 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
             onPress={() => setActiveTab('terima')}
             style={[
               styles.segmentBtn,
-              { backgroundColor: activeTab === 'terima' ? colors.primary : 'transparent', borderRadius: radius.sm },
+              { backgroundColor: activeTab === 'terima' ? (colors.accent || colors.primary) : 'transparent', borderRadius: radius.sm },
             ]}
           >
-            <Feather name="camera" size={14} color={activeTab === 'terima' ? '#FFF' : colors.text} />
-            <Text style={{ fontSize: 11, fontWeight: '800', color: activeTab === 'terima' ? '#FFF' : colors.text }}>
-              3. Scan Terima
+            <Feather name="camera" size={13} color={activeTab === 'terima' ? '#FFFFFF' : colors.textMuted} />
+            <Text style={{ fontSize: 11.5, fontWeight: activeTab === 'terima' ? '800' : '600', color: activeTab === 'terima' ? '#FFFFFF' : colors.text }}>
+              Scan Terima
             </Text>
           </Pressable>
         </View>
-      </View>
+      </Card>
 
       {/* ========================================================================= */}
       {/* TAB 1: BELANJA BAHAN MANDIRI & LOG ANGGARAN                               */}
@@ -371,7 +375,7 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
       {activeTab === 'beli' && (
         <View style={{ gap: spacing.md }}>
           {/* Overview Saldo Belanja */}
-          <Card style={{ gap: spacing.xs, borderColor: colors.primary, borderWidth: 1.5 }}>
+          <Card style={{ gap: spacing.xs, borderColor: colors.primary, borderWidth: 1 }}>
             <View style={styles.rowBetween}>
               <Text style={{ color: colors.textMuted, fontSize: fontSize.xs, fontWeight: '700' }}>
                 SALDO ANGGARAN OPERASIONAL SPPG
@@ -595,7 +599,7 @@ export default function PengadaanBahanScreen({ route, navigation }: any) {
 
           {/* Prompt to Open Camera if Camera Inactive */}
           {!scannedCode && (!isCameraActive || !permission?.granted) && (
-            <Card style={{ alignItems: 'center', padding: spacing.lg, gap: spacing.sm, backgroundColor: colors.surface }}>
+            <Card style={{ alignItems: 'center', padding: spacing.lg, gap: spacing.sm }}>
               <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
                 <Feather name="camera" size={26} color={colors.primary} />
               </View>
@@ -973,6 +977,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: { padding: 16, gap: 14, paddingBottom: 110 },
   headerBanner: { padding: 14, gap: 10 },
+  headerIconWrap: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
   segmentContainer: { flexDirection: 'row', padding: 4, gap: 4 },
   segmentBtn: {
     flex: 1,

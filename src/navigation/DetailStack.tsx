@@ -133,8 +133,10 @@ export function buildDetailStack(homeName: string, HomeComponent: React.Componen
         backgroundColor: colors.surface,
       },
       headerTintColor: colors.text,
-      headerTitleStyle: { fontWeight: '800' as const, color: colors.text },
+      headerTitleStyle: { fontWeight: '800' as const, color: colors.text, fontSize: 16 },
       headerShadowVisible: true,
+      headerTopInsetEnabled: true,
+      headerTitleAlign: 'left' as const,
       contentStyle: { backgroundColor: colors.background },
       headerRight: () => (
         <Pressable
@@ -166,7 +168,7 @@ export function buildDetailStack(homeName: string, HomeComponent: React.Componen
           component={HomeComponent}
           options={{
             headerTitle: () => (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexShrink: 1, maxWidth: 240 }}>
                 <View
                   style={{
                     width: 28,
@@ -185,13 +187,22 @@ export function buildDetailStack(homeName: string, HomeComponent: React.Componen
                 <Text style={{ fontSize: 15, fontWeight: '900', color: isDark ? colors.gold : colors.primary, letterSpacing: 0.5 }}>
                   SIGAP SPPG
                 </Text>
-                <Text style={{ fontSize: 11.5, fontWeight: '600', color: colors.textMuted }}>· {homeTitle}</Text>
+                <Text style={{ fontSize: 11.5, fontWeight: '600', color: colors.textMuted }} numberOfLines={1}>
+                  · {homeTitle}
+                </Text>
               </View>
             ),
           }}
         />
         {DETAIL_SCREENS.filter((s) => s.name !== homeName).map((s) => (
-          <Stack.Screen key={s.name} name={s.name} component={s.component} options={{ title: s.title }} />
+          <Stack.Screen
+            key={s.name}
+            name={s.name}
+            component={s.component}
+            options={{
+              title: s.title,
+            }}
+          />
         ))}
       </Stack.Navigator>
     );

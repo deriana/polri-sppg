@@ -1060,7 +1060,8 @@ function TimeField({
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 16, paddingBottom: 40 },
+  content: { padding: 16, gap: 16, paddingBottom: 110 },
+  warnBanner: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 10 },
   testItemRow: {
     flexDirection: 'row',
     alignItems: 'center',

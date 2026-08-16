@@ -138,7 +138,16 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   if (keyboardVisible) return null;
 
   return (
-    <View style={[styles.bottomBarWrapper, { backgroundColor: colors.surface, borderTopColor: colors.border, paddingBottom: Math.max(insets.bottom, 4) }]}>
+    <View
+      style={[
+        styles.bottomBarWrapper,
+        {
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
+          paddingBottom: Math.max(insets.bottom, 6),
+        },
+      ]}
+    >
       <View style={styles.tabBarContainer}>
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
@@ -149,8 +158,13 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             if (!isFocused && !event.defaultPrevented) navigation.navigate(route.name);
           };
 
-          const label = options.tabBarLabel !== undefined ? (options.tabBarLabel as string) : options.title !== undefined ? options.title : route.name;
-          const activeColor = isDark ? colors.gold : colors.primary;
+          const label =
+            options.tabBarLabel !== undefined
+              ? (options.tabBarLabel as string)
+              : options.title !== undefined
+              ? options.title
+              : route.name;
+          const activeColor = isDark ? colors.gold : (colors.accent || colors.primary);
           const inactiveColor = colors.textMuted;
           const color = isFocused ? activeColor : inactiveColor;
 
@@ -160,10 +174,29 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               accessibilityRole="button"
               accessibilityState={isFocused ? { selected: true } : {}}
               onPress={onPress}
-              style={({ pressed }) => [styles.tabItem, isFocused && { backgroundColor: colors.primaryLight }, pressed && { opacity: 0.7 }]}
+              style={({ pressed }) => [
+                styles.tabItem,
+                isFocused && {
+                  backgroundColor: isDark
+                    ? 'rgba(245, 158, 11, 0.15)'
+                    : colors.accentLight || colors.primaryLight,
+                  borderColor: isDark ? 'rgba(245, 158, 11, 0.25)' : colors.border,
+                  borderWidth: 1,
+                },
+                pressed && { opacity: 0.75 },
+              ]}
             >
               {options.tabBarIcon ? options.tabBarIcon({ focused: isFocused, color, size: 19 }) : null}
-              <Text style={[styles.tabLabel, { color, fontWeight: isFocused ? '800' : '500' }]} numberOfLines={1}>
+              <Text
+                style={[
+                  styles.tabLabel,
+                  {
+                    color,
+                    fontWeight: isFocused ? '800' : '600',
+                  },
+                ]}
+                numberOfLines={1}
+              >
                 {label}
               </Text>
             </Pressable>

@@ -23,7 +23,7 @@ const DEMO_CODE_HINT = 'PMB-002';
 
 export default function QrScanScreen() {
   const { role, permintaanBahanList, bahanBakuList, updatePermintaanStatus, mitraList, peralatanList, sppgList } = useApp();
-  const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark } = useTheme();
+  const { colors, spacing, fontSize, iconStrokeWidth, radius } = useTheme();
   const navigation = useNavigation<any>();
   const [permission, requestPermission] = useCameraPermissions();
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -153,7 +153,7 @@ export default function QrScanScreen() {
 
         {/* Prompt to Open Camera if Camera Inactive */}
         {!scannedCode && (!isCameraActive || !permission?.granted) && (
-          <Card style={{ alignItems: 'center', padding: spacing.lg, gap: spacing.sm, backgroundColor: colors.surface }}>
+          <Card style={{ alignItems: 'center', padding: spacing.lg, gap: spacing.sm }}>
             <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
               <Feather name="camera" size={26} color={colors.primary} />
             </View>

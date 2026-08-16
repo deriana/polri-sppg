@@ -85,7 +85,7 @@ export default function MutasiStokFormScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
+  content: { padding: 16, gap: 12, paddingBottom: 110 },
   segment: { flexDirection: 'row', borderWidth: 1, padding: 4, gap: 4 },
   segmentItem: { flex: 1, alignItems: 'center', paddingVertical: 8 },
 });

@@ -231,13 +231,13 @@ export default function NotifikasiScreen({ navigation }: any) {
               style={[
                 styles.filterBtn,
                 {
-                  backgroundColor: active ? colors.primary : colors.surface,
-                  borderColor: active ? colors.primary : colors.border,
+                  backgroundColor: active ? (isDark ? colors.gold : (colors.accent || colors.primary)) : colors.surface,
+                  borderColor: active ? (isDark ? colors.gold : (colors.accent || colors.primary)) : colors.border,
                   borderRadius: radius.pill,
                 },
               ]}
             >
-              <Text style={{ fontSize: 11, fontWeight: '800', color: active ? colors.textInverse : colors.text }}>
+              <Text style={{ fontSize: 11.5, fontWeight: '800', color: active ? (isDark ? '#07101E' : '#FFFFFF') : colors.text }}>
                 {KIND_LABEL[k]} ({counts[k]})
               </Text>
             </Pressable>

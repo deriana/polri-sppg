@@ -259,11 +259,11 @@ export default function PresensiScreen({ navigation }: any) {
           </Card>
 
           {/* Live Realtime Clock Card */}
-          <Card variant="accent" style={{ alignItems: 'center', gap: 6, paddingVertical: 18 }}>
+          <Card style={{ alignItems: 'center', gap: 6, paddingVertical: 18 }}>
             <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: '800', letterSpacing: 0.5 }}>
               {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase()}
             </Text>
-            <Text style={{ fontSize: 32, fontWeight: '900', color: isDark ? colors.gold : colors.primary, letterSpacing: 1 }}>
+            <Text style={{ fontSize: 32, fontWeight: '900', color: colors.text, letterSpacing: 1 }}>
               {formatTimeWithSeconds(currentTime)}
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
@@ -435,12 +435,12 @@ export default function PresensiScreen({ navigation }: any) {
                 <Text style={{ fontSize: 10, color: colors.textMuted, fontWeight: '700' }}>Total Staf</Text>
               </View>
 
-              <View style={[styles.kpiBox, { backgroundColor: isDark ? 'rgba(13,148,136,0.15)' : '#F0FDF4', borderColor: colors.success }]}>
+              <View style={[styles.kpiBox, { backgroundColor: colors.successBg, borderColor: colors.success }]}>
                 <Text style={{ fontSize: 20, fontWeight: '900', color: colors.success }}>{hadirCount}</Text>
                 <Text style={{ fontSize: 10, color: colors.success, fontWeight: '800' }}>Hadir ({pctHadir}%)</Text>
               </View>
 
-              <View style={[styles.kpiBox, { backgroundColor: isDark ? 'rgba(217,119,6,0.15)' : '#FFFBEB', borderColor: colors.warning }]}>
+              <View style={[styles.kpiBox, { backgroundColor: colors.warningBg, borderColor: colors.warning }]}>
                 <Text style={{ fontSize: 20, fontWeight: '900', color: colors.warning }}>{belumCount}</Text>
                 <Text style={{ fontSize: 10, color: colors.warning, fontWeight: '800' }}>Belum Hadir</Text>
               </View>
@@ -483,13 +483,13 @@ export default function PresensiScreen({ navigation }: any) {
                     style={[
                       styles.filterTabBtn,
                       {
-                        backgroundColor: isActive ? colors.primary : colors.surface,
-                        borderColor: isActive ? colors.primary : colors.border,
+                        backgroundColor: isActive ? (isDark ? colors.gold : (colors.accent || colors.primary)) : colors.surface,
+                        borderColor: isActive ? (isDark ? colors.gold : (colors.accent || colors.primary)) : colors.border,
                         borderRadius: radius.pill,
                       },
                     ]}
                   >
-                    <Text style={{ fontSize: 11, fontWeight: '700', color: isActive ? colors.textInverse : colors.text }}>
+                    <Text style={{ fontSize: 11.5, fontWeight: '800', color: isActive ? (isDark ? '#07101E' : '#FFFFFF') : colors.text }}>
                       {label}
                     </Text>
                   </Pressable>
@@ -558,14 +558,14 @@ export default function PresensiScreen({ navigation }: any) {
 
                   <View style={styles.compactStaffRight}>
                     {isHadir ? (
-                      <View style={[styles.compactTimeChip, { backgroundColor: isDark ? 'rgba(13,148,136,0.15)' : '#F0FDF4', borderColor: colors.success }]}>
+                      <View style={[styles.compactTimeChip, { backgroundColor: colors.successBg, borderColor: colors.success }]}>
                         <Feather name="check" size={11} color={colors.success} strokeWidth={2.4} />
                         <Text style={{ fontSize: 11, fontWeight: '800', color: colors.success }}>
                           {presensi?.jamMasuk || 'Hadir'}
                         </Text>
                       </View>
                     ) : (
-                      <View style={[styles.compactTimeChip, { backgroundColor: isDark ? 'rgba(217,119,6,0.15)' : '#FFFBEB', borderColor: colors.warning }]}>
+                      <View style={[styles.compactTimeChip, { backgroundColor: colors.warningBg, borderColor: colors.warning }]}>
                         <Feather name="clock" size={11} color={colors.warning} strokeWidth={2.4} />
                         <Text style={{ fontSize: 10.5, fontWeight: '700', color: colors.warning }}>
                           Belum
@@ -602,7 +602,7 @@ export default function PresensiScreen({ navigation }: any) {
           return (
             <ScrollView style={{ maxHeight: 500 }} contentContainerStyle={{ gap: spacing.md, paddingBottom: 16 }}>
               {/* Identitas Staf */}
-              <View style={[styles.detailHero, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
+              <View style={[styles.detailHero, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.md }]}>
                 {selectedStaff.fotoProfil ? (
                   <Image source={{ uri: selectedStaff.fotoProfil }} style={{ width: 60, height: 60, borderRadius: 30 }} />
                 ) : (
@@ -710,7 +710,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: { padding: 16, gap: 14, paddingBottom: 120 },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  profileAvatar: { width: 50, height: 50, borderRadius: 25, borderWidth: 2, borderColor: '#FFFFFF' },
+  profileAvatar: { width: 50, height: 50, borderRadius: 25, borderWidth: 1, borderColor: '#FFFFFF' },
   badgePill: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
   attendColumn: { flex: 1, padding: 12, borderRadius: 12, borderWidth: 1, alignItems: 'center' },
   miniDot: { width: 6, height: 6, borderRadius: 3 },
@@ -730,7 +730,7 @@ const styles = StyleSheet.create({
   timeRow: { flexDirection: 'row', borderTopWidth: 1, paddingTop: 8 },
   timeCol: { flex: 1, gap: 2 },
   tapHint: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, paddingTop: 8 },
-  detailHero: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12 },
+  detailHero: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderWidth: 1 },
   // Modern Compact Staff Card Styles
   compactStaffCard: {
     flexDirection: 'row',
@@ -770,7 +770,7 @@ const styles = StyleSheet.create({
     width: 11,
     height: 11,
     borderRadius: 6,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#FFFFFF',
   },
   compactStaffName: {

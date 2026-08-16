@@ -155,7 +155,7 @@ export default function PengadaanPeralatanScreen({ navigation }: any) {
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       {/* Header + pemilihan jalur */}
-      <View style={[styles.banner, { backgroundColor: colors.primaryLight, borderRadius: radius.lg }]}>
+      <Card style={styles.banner}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Feather name="tool" size={20} color={colors.primary} strokeWidth={iconStrokeWidth} />
           <Text style={{ fontSize: fontSize.sm, fontWeight: '900', color: colors.primary }}>
@@ -167,28 +167,28 @@ export default function PengadaanPeralatanScreen({ navigation }: any) {
           aset bernilai besar yang di luar plafon belanja unit.
         </Text>
 
-        <View style={[styles.segment, { backgroundColor: colors.surface, borderRadius: radius.md }]}>
+        <View style={[styles.segment, { backgroundColor: colors.background, borderRadius: radius.md }]}>
           {(['mandiri', 'pusat'] as JalurPengadaanAset[]).map((j) => {
             const active = jalur === j;
             return (
               <Pressable
                 key={j}
                 onPress={() => setJalur(j)}
-                style={[styles.segmentBtn, { backgroundColor: active ? colors.primary : 'transparent', borderRadius: radius.sm }]}
+                style={[styles.segmentBtn, { backgroundColor: active ? (isDark ? colors.gold : colors.accent) : 'transparent', borderRadius: radius.sm }]}
               >
-                <Feather name={j === 'mandiri' ? 'credit-card' : 'send'} size={14} color={active ? '#FFF' : colors.text} />
-                <Text style={{ fontSize: 11, fontWeight: '800', color: active ? '#FFF' : colors.text }}>
-                  {j === 'mandiri' ? 'Beli Mandiri (Potong Anggaran)' : 'Ajukan ke BGN Pusat'}
+                <Feather name={j === 'mandiri' ? 'credit-card' : 'send'} size={14} color={active ? (isDark ? '#07101E' : '#FFF') : colors.text} />
+                <Text style={{ fontSize: 11.5, fontWeight: '800', color: active ? (isDark ? '#07101E' : '#FFF') : colors.text }}>
+                  {j === 'mandiri' ? 'Beli Mandiri (Unit)' : 'Ajukan ke BGN Pusat'}
                 </Text>
               </Pressable>
             );
           })}
         </View>
-      </View>
+      </Card>
 
       {/* Ringkasan dampak anggaran */}
       {jalur === 'mandiri' ? (
-        <Card style={{ gap: 6, borderColor: colors.primary, borderWidth: 1.5 }}>
+        <Card style={{ gap: 6, borderColor: colors.primary }}>
           <View style={styles.rowBetween}>
             <Text style={{ color: colors.textMuted, fontSize: fontSize.xs, fontWeight: '700' }}>
               SISA SALDO ANGGARAN UNIT
@@ -202,7 +202,7 @@ export default function PengadaanPeralatanScreen({ navigation }: any) {
           </Text>
         </Card>
       ) : (
-        <Card style={{ gap: 6, borderColor: colors.info, borderWidth: 1.5 }}>
+        <Card style={{ gap: 6, borderColor: colors.info }}>
           <View style={styles.rowBetween}>
             <Text style={{ color: colors.textMuted, fontSize: fontSize.xs, fontWeight: '700' }}>
               JALUR PENGADAAN BGN PUSAT
@@ -416,7 +416,7 @@ export default function PengadaanPeralatanScreen({ navigation }: any) {
           )}
 
           {/* Ringkasan dampak */}
-          <View style={[styles.totalBar, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
+          <View style={[styles.totalBar, { backgroundColor: colors.background, borderColor: colors.border, borderRadius: radius.md }]}>
             <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.primary }}>TOTAL PENGADAAN:</Text>
             <Text style={{ fontSize: fontSize.lg, fontWeight: '900', color: colors.primary }}>{rupiah(totalHarga)}</Text>
           </View>
@@ -474,7 +474,7 @@ export default function PengadaanPeralatanScreen({ navigation }: any) {
       {detail && (
         <Modal visible={!!detail} onClose={() => setDetail(null)} title={`Detail Pengadaan ${detail.id}`}>
           <ScrollView style={{ maxHeight: 520 }} contentContainerStyle={{ gap: spacing.md, paddingBottom: 24 }}>
-            <View style={[styles.detailHero, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
+            <View style={[styles.detailHero, { backgroundColor: colors.background, borderColor: colors.border, borderRadius: radius.md }]}>
               <Text style={{ fontSize: 11, fontWeight: '700', color: colors.primary }}>
                 {detail.jalur === 'mandiri' ? 'BELANJA MANDIRI — POTONG ANGGARAN' : 'PENGAJUAN KE BGN PUSAT'}
               </Text>
@@ -579,11 +579,11 @@ const styles = StyleSheet.create({
   segmentBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 8 },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
   sealRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 8, paddingVertical: 5 },
-  urgensiBtn: { flex: 1, padding: 10, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center', gap: 2 },
-  totalBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12 },
+  urgensiBtn: { flex: 1, padding: 10, borderWidth: 1, alignItems: 'center', justifyContent: 'center', gap: 2 },
+  totalBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, borderWidth: 1 },
   infoBox: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10 },
   notaPreview: { width: '100%', height: 160, resizeMode: 'cover' },
   notaDetail: { width: '100%', height: 220, resizeMode: 'cover' },
-  detailHero: { padding: 12, alignItems: 'center', gap: 4 },
+  detailHero: { padding: 12, alignItems: 'center', gap: 4, borderWidth: 1 },
   infoCard: { padding: 10, borderWidth: 1, gap: 4 },
 });

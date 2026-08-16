@@ -115,7 +115,7 @@ export default function DaftarSppgScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
+  content: { padding: 16, gap: 12, paddingBottom: 110 },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   rowTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   rowBottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 2 },

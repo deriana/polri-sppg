@@ -195,17 +195,13 @@ export default function MenuKalenderScreen() {
                   style={[
                     styles.cellInner,
                     isSelected && {
-                      backgroundColor: colors.primary,
-                      shadowColor: colors.primary,
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.35,
-                      shadowRadius: 4,
-                      elevation: 3,
+                      backgroundColor: isDark ? colors.gold : (colors.accent || colors.primary),
+                      borderWidth: 0,
                     },
                     !isSelected && isToday && {
                       borderWidth: 1.5,
-                      borderColor: colors.primary,
-                      backgroundColor: colors.primaryLight,
+                      borderColor: isDark ? colors.gold : (colors.accent || colors.primary),
+                      backgroundColor: isDark ? 'rgba(245, 158, 11, 0.15)' : (colors.accentLight || colors.primaryLight),
                     },
                     !isSelected && !isToday && isWeekendCell && {
                       backgroundColor: isDark ? 'rgba(239, 68, 68, 0.12)' : 'rgba(239, 68, 68, 0.06)',
@@ -215,11 +211,11 @@ export default function MenuKalenderScreen() {
                   <Text
                     style={{
                       color: isSelected
-                        ? '#FFFFFF'
+                        ? (isDark ? '#07101E' : '#FFFFFF')
                         : isWeekendCell
                         ? '#EF4444'
                         : isToday
-                        ? colors.primary
+                        ? (isDark ? colors.gold : (colors.accent || colors.primary))
                         : colors.text,
                       fontWeight: isSelected || isToday ? '900' : '600',
                       fontSize: fontSize.sm,
@@ -231,7 +227,7 @@ export default function MenuKalenderScreen() {
                     <View
                       style={[
                         styles.menuDot,
-                        { backgroundColor: isSelected ? '#FFFFFF' : colors.success },
+                        { backgroundColor: isSelected ? (isDark ? '#07101E' : '#FFFFFF') : colors.success },
                       ]}
                     />
                   )}
@@ -277,7 +273,7 @@ export default function MenuKalenderScreen() {
 
         {/* Weekend Informational Banner (If selected date is Saturday or Sunday) */}
         {isSelectedWeekend && !planForSelected && !editing && (
-          <View style={[styles.weekendBanner, { backgroundColor: isDark ? 'rgba(239, 68, 68, 0.15)' : 'rgba(239, 68, 68, 0.08)', borderRadius: radius.md, borderColor: isDark ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.2)' }]}>
+          <View style={[styles.weekendBanner, { backgroundColor: colors.surface, borderRadius: radius.md, borderColor: colors.border }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Feather name="coffee" size={16} color="#EF4444" />
               <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: '#EF4444' }}>
@@ -451,7 +447,7 @@ export default function MenuKalenderScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
+  content: { padding: 16, gap: 12, paddingBottom: 110 },
   monthHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   weekdayRow: { flexDirection: 'row', paddingVertical: 4 },
   weekdayCol: { width: '14.2857%', alignItems: 'center', justifyContent: 'center' },

@@ -145,26 +145,26 @@ export default function MasterMenuScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView contentContainerStyle={{ padding: spacing.md, gap: spacing.md, paddingBottom: 64 }}>
+      <ScrollView contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: 110 }}>
         {/* Banner Header */}
-        <Card style={{ backgroundColor: colors.primary, gap: spacing.xs, borderRadius: radius.xl }}>
+        <Card style={{ backgroundColor: colors.surface, borderColor: isDark ? colors.border : '#BFDBFE', borderWidth: 1.5, gap: spacing.xs, borderRadius: radius.xl }}>
           <View style={styles.rowBetween}>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: fontSize.lg, fontWeight: '900', color: colors.textInverse }}>
+              <Text style={{ fontSize: fontSize.lg, fontWeight: '900', color: colors.text }}>
                 Master Katalog Menu & Resep Gizi
               </Text>
-              <Text style={{ fontSize: fontSize.xs, color: colors.primaryLight, marginTop: 2 }}>
+              <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, marginTop: 2 }}>
                 Standar AKG (Angka Kecukupan Gizi) Badan Gizi Nasional (BGN)
               </Text>
             </View>
-            <View style={[styles.iconBox, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-              <Feather name="book-open" size={24} color={colors.textInverse} strokeWidth={iconStrokeWidth} />
+            <View style={[styles.iconBox, { backgroundColor: isDark ? 'rgba(56, 189, 248, 0.15)' : colors.primaryLight }]}>
+              <Feather name="book-open" size={22} color={colors.primary} strokeWidth={iconStrokeWidth} />
             </View>
           </View>
 
-          <View style={[styles.demoBadge, { backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: radius.sm }]}>
-            <Feather name="check-circle" size={12} color="#FDE047" strokeWidth={2} />
-            <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.textInverse }}>
+          <View style={[styles.demoBadge, { backgroundColor: isDark ? 'rgba(16, 185, 129, 0.15)' : '#ECFDF5', borderRadius: radius.sm }]}>
+            <Feather name="check-circle" size={12} color={colors.success} strokeWidth={2} />
+            <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.success }}>
               {masterMenuList.length} Resep Terdaftar • Standar Target 500–650 kkal / porsi
             </Text>
           </View>
@@ -211,13 +211,13 @@ export default function MasterMenuScreen() {
                 style={[
                   styles.tabChip,
                   {
-                    backgroundColor: active ? colors.primary : colors.surface,
-                    borderColor: active ? colors.primary : colors.border,
+                    backgroundColor: active ? (colors.accent || colors.primary) : colors.surface,
+                    borderColor: active ? (colors.accent || colors.primary) : colors.border,
                     borderRadius: radius.pill,
                   },
                 ]}
               >
-                <Text style={{ fontSize: fontSize.xs, fontWeight: active ? '800' : '600', color: active ? colors.textInverse : colors.text }}>
+                <Text style={{ fontSize: fontSize.xs, fontWeight: active ? '800' : '600', color: active ? '#FFFFFF' : colors.text }}>
                   {tab.label}
                 </Text>
               </Pressable>
@@ -265,7 +265,7 @@ export default function MasterMenuScreen() {
             </View>
 
             {/* Macro Badges */}
-            <View style={[styles.macroRow, { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : colors.background, borderRadius: radius.md, padding: spacing.sm, borderWidth: 1, borderColor: colors.border }]}>
+            <View style={[styles.macroRow, { backgroundColor: colors.background, borderRadius: radius.md, padding: spacing.sm, borderWidth: 1, borderColor: colors.border }]}>
               <View style={styles.macroItem}>
                 <Text style={{ fontSize: 9.5, color: colors.textMuted, fontWeight: '700' }}>KALORI</Text>
                 <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.primary }}>{menu.kalori} kkal</Text>
@@ -284,9 +284,7 @@ export default function MasterMenuScreen() {
               </View>
             </View>
 
-            <View style={{ gap: 6, marginTop: 2 }}>
-              <HppBadge info={hppFromMenu(menu, costPerMeal)} />
-            </View>
+            <HppBadge info={hppFromMenu(menu, costPerMeal)} />
 
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 2 }}>
               <Text style={{ fontSize: 11, color: colors.textMuted }}>Porsi: {menu.porsiGram || 380} gram / siswa</Text>
@@ -294,7 +292,7 @@ export default function MasterMenuScreen() {
                 {canManage && (
                   <Pressable
                     onPress={() => openEditModal(menu)}
-                    style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, backgroundColor: isDark ? 'rgba(59,130,246,0.15)' : '#EFF6FF' }}
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, backgroundColor: colors.primaryLight }}
                   >
                     <Feather name="edit-2" size={12} color={colors.primary} />
                     <Text style={{ fontSize: 11, fontWeight: '800', color: colors.primary }}>Ubah</Text>
@@ -333,7 +331,7 @@ export default function MasterMenuScreen() {
                 <Text style={{ fontSize: fontSize.xs, color: colors.text, lineHeight: 20 }}>{selectedMenu.deskripsi}</Text>
 
                 {/* Macro Nutrition Box */}
-                <View style={[styles.macroRow, { backgroundColor: isDark ? 'rgba(59,130,246,0.15)' : '#EFF6FF', borderRadius: radius.md, padding: 12, borderWidth: 1, borderColor: colors.primary }]}>
+                <View style={[styles.macroRow, { backgroundColor: colors.background, borderRadius: radius.md, padding: 12, borderWidth: 1, borderColor: colors.border }]}>
                   <View style={styles.macroItem}>
                     <Text style={{ fontSize: 10, color: colors.primary, fontWeight: '800' }}>KALORI</Text>
                     <Text style={{ fontSize: fontSize.sm, fontWeight: '900', color: colors.primary }}>{selectedMenu.kalori} kkal</Text>

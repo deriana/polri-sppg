@@ -170,6 +170,6 @@ export default function BroadcastScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 14, paddingBottom: 90 },
+  content: { padding: 16, gap: 14, paddingBottom: 110 },
   bcFooter: { flexDirection: 'row', alignItems: 'center', gap: 6, borderTopWidth: 1, paddingTop: 8, marginTop: 4 },
 });

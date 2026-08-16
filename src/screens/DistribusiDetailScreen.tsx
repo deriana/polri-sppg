@@ -528,13 +528,13 @@ function QrRow({ label, value, colors, fontSize }: { label: string; value: strin
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 14, paddingBottom: 90 },
+  content: { padding: 16, gap: 14, paddingBottom: 110 },
   truckImg: { width: 56, height: 56 },
   qrSummary: { padding: 12, borderWidth: 1, gap: 6 },
   trackingTimeline: { gap: 12, paddingLeft: 6, marginVertical: 4 },
   trackItem: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   trackDot: { width: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center', marginTop: 2 },
-  buktiThumbWrap: { width: '100%', height: 92, borderWidth: 1.5, overflow: 'hidden' },
+  buktiThumbWrap: { width: '100%', height: 92, borderWidth: 1, overflow: 'hidden' },
   buktiThumb: { width: '100%', height: '100%' },
   buktiVideoStub: { width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', gap: 2 },
   removeBadge: {

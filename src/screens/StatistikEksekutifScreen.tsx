@@ -13,7 +13,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { Card, Pill, PrimaryButton, SecondaryButton, SectionTitle } from '../components/ui';
+import { Card, Pill, SectionTitle } from '../components/ui';
 import { useScopedData } from '../hooks';
 import { initialIncidentList } from '../mock/incidents';
 import { publicReportList } from '../mock/publicReports';
@@ -370,7 +370,7 @@ export default function StatistikEksekutifScreen({ navigation }: any) {
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       {/* Header Summary */}
-      <Card style={{ backgroundColor: colors.primary, gap: spacing.xs }}>
+      <Card style={{ backgroundColor: colors.surface, borderColor: isDark ? colors.border : '#BFDBFE', borderWidth: 1.5, gap: spacing.xs, borderRadius: radius.xl }}>
         <View style={styles.rowBetween}>
           <View style={{ flex: 1, gap: 2 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -379,15 +379,15 @@ export default function StatistikEksekutifScreen({ navigation }: any) {
                 EXECUTIVE INTELLIGENCE DASHBOARD
               </Text>
             </View>
-            <Text style={{ fontSize: fontSize.lg, fontWeight: '900', color: colors.textInverse }}>
+            <Text style={{ fontSize: fontSize.lg, fontWeight: '900', color: colors.text }}>
               Laporan Statistik & Rekap Berkala
             </Text>
-            <Text style={{ fontSize: fontSize.xs, color: colors.primaryLight }}>
+            <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>
               {sppg?.nama ?? 'SPPG Unit Bandung'} • Komando {currentUser.nama}
             </Text>
           </View>
-          <View style={[styles.iconBox, { backgroundColor: 'rgba(255,255,255,0.18)' }]}>
-            <Feather name="trending-up" size={24} color={colors.textInverse} strokeWidth={iconStrokeWidth} />
+          <View style={[styles.iconBox, { backgroundColor: isDark ? 'rgba(56, 189, 248, 0.15)' : colors.primaryLight }]}>
+            <Feather name="trending-up" size={22} color={colors.primary} strokeWidth={iconStrokeWidth} />
           </View>
         </View>
 
@@ -426,8 +426,8 @@ export default function StatistikEksekutifScreen({ navigation }: any) {
                 style={[
                   styles.periodBtn,
                   {
-                    backgroundColor: isActive ? colors.primary : colors.surface,
-                    borderColor: isActive ? colors.primary : colors.border,
+                    backgroundColor: isActive ? (isDark ? colors.gold : colors.accent) : colors.surface,
+                    borderColor: isActive ? (isDark ? colors.gold : colors.accent) : colors.border,
                     borderRadius: radius.pill,
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -438,10 +438,10 @@ export default function StatistikEksekutifScreen({ navigation }: any) {
                 <Feather
                   name={p.icon}
                   size={12}
-                  color={isActive ? colors.textInverse : colors.primary}
+                  color={isActive ? (isDark ? '#07101E' : '#FFFFFF') : (isDark ? colors.gold : colors.primary)}
                   strokeWidth={iconStrokeWidth}
                 />
-                <Text style={{ fontSize: 11, fontWeight: '700', color: isActive ? colors.textInverse : colors.text }}>
+                <Text style={{ fontSize: 11.5, fontWeight: '800', color: isActive ? (isDark ? '#07101E' : '#FFFFFF') : colors.text }}>
                   {p.label}
                 </Text>
               </Pressable>
@@ -551,7 +551,7 @@ export default function StatistikEksekutifScreen({ navigation }: any) {
             <Text style={{ fontSize: 10, color: colors.textMuted, fontWeight: '700' }}>Total Porsi MBG</Text>
           </View>
 
-          <View style={[styles.kpiBox, { backgroundColor: colors.successBg, borderColor: colors.success }]}>
+          <View style={[styles.kpiBox, { backgroundColor: colors.background, borderColor: colors.success }]}>
             <Text style={{ fontSize: 18, fontWeight: '900', color: colors.success }}>
               {attendanceStats.avgAttendancePct}%
             </Text>
@@ -565,7 +565,7 @@ export default function StatistikEksekutifScreen({ navigation }: any) {
             <Text style={{ fontSize: 10, color: colors.textMuted, fontWeight: '700' }}>Insiden Tuntas</Text>
           </View>
 
-          <View style={[styles.kpiBox, { backgroundColor: colors.infoBg, borderColor: colors.info }]}>
+          <View style={[styles.kpiBox, { backgroundColor: colors.background, borderColor: colors.info }]}>
             <Text style={{ fontSize: 18, fontWeight: '900', color: colors.info }}>
               {formatRupiah(financialStats.totalHemat)}
             </Text>
@@ -654,7 +654,7 @@ export default function StatistikEksekutifScreen({ navigation }: any) {
               key={top.staf.id}
               style={[
                 styles.staffHighlightRow,
-                { backgroundColor: colors.successBg, borderColor: colors.success, borderRadius: radius.md },
+                { backgroundColor: colors.background, borderColor: colors.success, borderRadius: radius.md },
               ]}
             >
               <View style={[styles.rankBadge, { backgroundColor: colors.success }]}>
@@ -682,7 +682,7 @@ export default function StatistikEksekutifScreen({ navigation }: any) {
                   key={att.staf.id}
                   style={[
                     styles.staffHighlightRow,
-                    { backgroundColor: colors.warningBg, borderColor: colors.warning, borderRadius: radius.md },
+                    { backgroundColor: colors.background, borderColor: colors.warning, borderRadius: radius.md },
                   ]}
                 >
                   <Feather name="alert-circle" size={16} color={colors.warning} />
@@ -720,7 +720,7 @@ export default function StatistikEksekutifScreen({ navigation }: any) {
               style={[
                 styles.incidentBox,
                 {
-                  backgroundColor: inc.status === 'RESOLVED' ? colors.background : colors.warningBg,
+                  backgroundColor: colors.background,
                   borderColor: inc.status === 'RESOLVED' ? colors.border : colors.warning,
                   borderRadius: radius.md,
                 },
@@ -745,7 +745,7 @@ export default function StatistikEksekutifScreen({ navigation }: any) {
           ))}
         </View>
 
-        <View style={[styles.aduanCard, { backgroundColor: colors.infoBg, borderRadius: radius.md }]}>
+        <View style={[styles.aduanCard, { backgroundColor: colors.background, borderRadius: radius.md, borderWidth: 1, borderColor: colors.info }]}>
           <Feather name="message-square" size={16} color={colors.info} />
           <Text style={{ fontSize: 11, color: colors.info, flex: 1, fontWeight: '700' }}>
             Aduan Publik & Sekolah: {incidentStats.totalAduan} laporan diterima — 100% telah direspon & ditindaklanjuti.
@@ -778,7 +778,7 @@ export default function StatistikEksekutifScreen({ navigation }: any) {
           </View>
         </View>
 
-        <View style={[styles.savingBanner, { backgroundColor: colors.successBg, borderRadius: radius.md }]}>
+        <View style={[styles.savingBanner, { backgroundColor: colors.background, borderRadius: radius.md, borderWidth: 1, borderColor: colors.success }]}>
           <Feather name="trending-down" size={18} color={colors.success} strokeWidth={iconStrokeWidth} />
           <View style={{ flex: 1 }}>
             <Text style={{ color: colors.success, fontSize: fontSize.xs, fontWeight: '800' }}>
@@ -900,7 +900,7 @@ export default function StatistikEksekutifScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 14 },
+  content: { padding: 16, gap: 14, paddingBottom: 110 },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   iconBox: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   exportHeaderBtn: {
@@ -931,7 +931,7 @@ const styles = StyleSheet.create({
   },
   customRangeCard: {
     padding: 12,
-    borderWidth: 1.5,
+    borderWidth: 1,
     gap: 8,
     marginTop: 4,
   },

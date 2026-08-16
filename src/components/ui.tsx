@@ -36,7 +36,7 @@ export interface ScreenProps {
 export function Screen({
   children,
   style,
-  safe = true,
+  safe = false,
   backgroundColor,
   statusBarStyle,
 }: ScreenProps) {
@@ -48,7 +48,7 @@ export function Screen({
 
   return (
     <Container style={[styles.screenContainer, { backgroundColor: bg }, style]}>
-      <StatusBar style={barStyle} backgroundColor={bg} animated />
+      <StatusBar style={barStyle} backgroundColor={colors.surface} animated />
       {children}
     </Container>
   );
@@ -101,9 +101,8 @@ export function Card({
         return {
           backgroundColor: isDark ? colors.surface : '#FFFFFF',
           borderWidth: 1,
-          borderColor: isDark ? colors.border : 'rgba(224, 230, 237, 0.95)',
-          borderLeftWidth: 4.5,
-          borderLeftColor: colors.gold || colors.primary,
+          borderColor: isDark ? colors.border : '#E2E8F0',
+          borderRadius: radius.xl,
           ...shadow.card,
         };
       case 'default':
@@ -153,13 +152,13 @@ export interface SectionTitleProps {
 }
 
 export function SectionTitle({ children, style, action }: SectionTitleProps) {
-  const { colors, fontSize, spacing } = useTheme();
+  const { colors, isDark, fontSize, spacing } = useTheme();
 
   return (
-    <View style={[styles.sectionHeader, { marginBottom: spacing.sm + 2 }]}>
+    <View style={[styles.sectionHeader, { marginBottom: spacing.sm + 2, alignItems: 'center', justifyContent: 'space-between' }]}>
       <View style={styles.sectionTitleWrap}>
-        <View style={[styles.sectionAccentBar, { backgroundColor: colors.gold || colors.primary }]} />
-        <Text style={[styles.sectionTitleText, { color: colors.text, fontSize: fontSize.lg, flexShrink: 1 }, style]}>
+        <View style={[styles.sectionAccentBar, { backgroundColor: isDark ? colors.gold : colors.accent }]} />
+        <Text style={[styles.sectionTitleText, { color: colors.text, fontSize: fontSize.md + 1, fontWeight: '800', letterSpacing: -0.2, flexShrink: 1 }, style]}>
           {children}
         </Text>
       </View>
@@ -188,7 +187,7 @@ export function StatusBadge({ status, style }: StatusBadgeProps) {
       <View style={[styles.dotContainer, { backgroundColor: `${dotColor}25` }]}>
         <View style={[styles.dot, { backgroundColor: dotColor }]} />
       </View>
-      <Text style={[styles.badgeText, { color: colors.text, fontSize: fontSize.xs }]}>
+      <Text style={[styles.badgeText, { color: colors.text, fontSize: fontSize.xs, fontWeight: '700' }]}>
         {labelText}
       </Text>
     </View>
@@ -200,7 +199,7 @@ export const StatusDot = StatusBadge;
 
 export interface PillProps {
   label: string;
-  tone?: 'info' | 'success' | 'warning' | 'danger' | 'neutral' | 'primary';
+  tone?: 'info' | 'success' | 'warning' | 'danger' | 'neutral' | 'primary' | 'violet' | 'cyan' | 'emerald' | 'amber' | 'rose' | 'royal';
   icon?: keyof typeof Feather.glyphMap;
   dot?: boolean;
   onPress?: () => void;
@@ -208,24 +207,30 @@ export interface PillProps {
 }
 
 export function Pill({ label, tone = 'info', icon, dot, onPress, style }: PillProps) {
-  const { colors, fontSize, iconStrokeWidth, radius, spacing } = useTheme();
+  const { colors, isDark, fontSize, iconStrokeWidth, radius, spacing } = useTheme();
 
-  const toneMap = {
+  const toneMap: Record<string, { bg: string; fg: string; dot: string }> = {
     info: { bg: colors.infoBg, fg: colors.info, dot: colors.info },
+    royal: { bg: colors.accentLight || colors.infoBg, fg: colors.accent || colors.info, dot: colors.accent || colors.info },
     success: { bg: colors.successBg, fg: colors.success, dot: colors.success },
-    warning: { bg: colors.warningBg, fg: colors.text, dot: colors.warning },
+    emerald: { bg: colors.emeraldLight || colors.successBg, fg: colors.emerald || colors.success, dot: colors.emerald || colors.success },
+    warning: { bg: colors.warningBg, fg: colors.warning, dot: colors.warning },
+    amber: { bg: colors.goldLight || colors.warningBg, fg: colors.gold || colors.warning, dot: colors.gold || colors.warning },
     danger: { bg: colors.dangerBg, fg: colors.danger, dot: colors.danger },
-    neutral: { bg: colors.border, fg: colors.text, dot: colors.textMuted },
-    primary: { bg: colors.primaryLight, fg: colors.primary, dot: colors.primary },
-  } as const;
+    rose: { bg: colors.roseLight || colors.dangerBg, fg: colors.rose || colors.danger, dot: colors.rose || colors.danger },
+    violet: { bg: colors.violetLight || '#F5F3FF', fg: colors.violet || '#7C3AED', dot: colors.violet || '#7C3AED' },
+    cyan: { bg: colors.cyanLight || '#ECFEFF', fg: colors.cyan || '#0891B2', dot: colors.cyan || '#0891B2' },
+    neutral: { bg: colors.border, fg: colors.textMuted, dot: colors.textMuted },
+    primary: { bg: colors.primaryLight, fg: isDark ? colors.gold : colors.primary, dot: isDark ? colors.gold : colors.primary },
+  };
 
   const t = toneMap[tone] || toneMap.info;
 
   const content = (
-    <View style={[styles.badge, { backgroundColor: t.bg, borderRadius: radius.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.xs }, style]}>
+    <View style={[styles.badge, { backgroundColor: t.bg, borderRadius: radius.pill, paddingHorizontal: spacing.md - 2, paddingVertical: spacing.xs }, style]}>
       {dot && <View style={[styles.dot, { backgroundColor: t.dot }]} />}
-      {icon && <Feather name={icon} size={13} color={t.fg} strokeWidth={iconStrokeWidth} />}
-      <Text style={[styles.badgeText, { color: t.fg, fontSize: fontSize.xs, flexShrink: 1 }]}>{label}</Text>
+      {icon && <Feather name={icon} size={12} color={t.fg} strokeWidth={iconStrokeWidth} />}
+      <Text style={[styles.badgeText, { color: t.fg, fontSize: fontSize.xs, fontWeight: '700', flexShrink: 1 }]}>{label}</Text>
     </View>
   );
 
@@ -268,16 +273,17 @@ export function PrimaryButton({
   style,
   textStyle,
 }: PrimaryButtonProps) {
-  const { colors, fontSize, iconSize, iconStrokeWidth, radius } = useTheme();
+  const { colors, isDark, fontSize, iconSize, iconStrokeWidth, radius, shadow } = useTheme();
 
   const getVariantStyle = () => {
     switch (variant) {
       case 'secondary':
         return {
-          bg: colors.primaryLight,
-          text: colors.primary,
-          border: 'transparent',
-          spinner: colors.primary,
+          bg: isDark ? 'rgba(255,255,255,0.08)' : (colors.accentLight || colors.primaryLight),
+          text: isDark ? colors.text : (colors.accent || colors.primary),
+          border: isDark ? colors.border : 'transparent',
+          spinner: isDark ? colors.text : (colors.accent || colors.primary),
+          shadow: undefined,
         };
       case 'outline':
         return {
@@ -285,6 +291,7 @@ export function PrimaryButton({
           text: colors.text,
           border: colors.borderStrong,
           spinner: colors.text,
+          shadow: undefined,
         };
       case 'danger':
         return {
@@ -292,14 +299,16 @@ export function PrimaryButton({
           text: '#FFFFFF',
           border: 'transparent',
           spinner: '#FFFFFF',
+          shadow: shadow.sm,
         };
       case 'primary':
       default:
         return {
-          bg: colors.primary,
-          text: colors.textInverse,
+          bg: isDark ? colors.gold : (colors.accent || '#2563EB'),
+          text: isDark ? '#07101E' : '#FFFFFF',
           border: 'transparent',
-          spinner: colors.textInverse,
+          spinner: isDark ? '#07101E' : '#FFFFFF',
+          shadow: shadow.sm,
         };
     }
   };
@@ -320,6 +329,7 @@ export function PrimaryButton({
           borderRadius: radius.md,
           alignSelf: fullWidth ? 'stretch' : 'flex-start',
         },
+        v.shadow,
         isInteractionDisabled && styles.buttonDisabled,
         pressed && !isInteractionDisabled && { opacity: 0.88, transform: [{ scale: 0.98 }] },
         style,
@@ -332,7 +342,7 @@ export function PrimaryButton({
           {icon && (
             <Feather name={icon} size={iconSize.md} color={v.text} strokeWidth={iconStrokeWidth} />
           )}
-          <Text style={[styles.buttonText, { color: v.text, fontSize: fontSize.md }, textStyle]}>
+          <Text style={[styles.buttonText, { color: v.text, fontSize: fontSize.md, fontWeight: '800' }, textStyle]}>
             {label}
           </Text>
           {iconRight && (
@@ -677,14 +687,16 @@ export function KpiCard({
   style,
   onPress,
 }: KpiCardProps) {
-  const { colors, fontSize, iconStrokeWidth, spacing } = useTheme();
+  const { colors, isDark, fontSize, iconStrokeWidth, radius } = useTheme();
 
   const isLongValue = typeof value === 'string' && value.length > 7;
+  const iconBg = tone ? (isDark ? 'rgba(255,255,255,0.08)' : `${tone}15`) : (isDark ? 'rgba(255,255,255,0.08)' : (colors.accentLight || colors.primaryLight));
+  const iconColor = tone || (isDark ? colors.gold : (colors.accent || colors.primary));
 
   return (
     <Card onPress={onPress} style={[styles.kpiCard, style]}>
       <View style={styles.kpiHeaderRow}>
-        <Text style={[styles.kpiLabel, { color: colors.textMuted, fontSize: fontSize.xs }]} numberOfLines={1}>
+        <Text style={[styles.kpiLabel, { color: colors.textMuted, fontSize: fontSize.xs, fontWeight: '700' }]} numberOfLines={1}>
           {label}
         </Text>
 
@@ -693,8 +705,8 @@ export function KpiCard({
         )}
 
         {icon && !badge && (
-          <View style={[styles.kpiIconWrap, { backgroundColor: colors.primaryLight }]}>
-            <Feather name={icon} size={13} color={colors.primary} strokeWidth={iconStrokeWidth} />
+          <View style={[styles.kpiIconWrap, { backgroundColor: iconBg, borderRadius: radius.sm }]}>
+            <Feather name={icon} size={14} color={iconColor} strokeWidth={iconStrokeWidth} />
           </View>
         )}
       </View>
@@ -704,7 +716,8 @@ export function KpiCard({
           styles.kpiValue,
           {
             color: tone || colors.text,
-            fontSize: isLongValue ? 17 : 24,
+            fontSize: isLongValue ? 18 : 24,
+            fontWeight: '900',
             letterSpacing: -0.5,
           },
         ]}
@@ -714,10 +727,10 @@ export function KpiCard({
       </Text>
 
       {trend && (
-        <View style={styles.trendRow}>
+        <View style={[styles.trendRow, { backgroundColor: trend.isPositive !== false ? (isDark ? 'rgba(16,185,129,0.15)' : '#ECFDF5') : (isDark ? 'rgba(239,68,68,0.15)' : '#FFE4E6'), paddingHorizontal: 6, paddingVertical: 2, borderRadius: radius.pill, alignSelf: 'flex-start' }]}>
           <Feather
             name={trend.isPositive !== false ? 'trending-up' : 'trending-down'}
-            size={12}
+            size={11}
             color={trend.isPositive !== false ? colors.success : colors.danger}
             strokeWidth={iconStrokeWidth}
           />
@@ -726,7 +739,8 @@ export function KpiCard({
               styles.trendText,
               {
                 color: trend.isPositive !== false ? colors.success : colors.danger,
-                fontSize: fontSize.xs,
+                fontSize: 11,
+                fontWeight: '800',
               },
             ]}
           >
@@ -984,7 +998,6 @@ export function SyncStatusBadge({ pendingCount, onSyncPress, syncing, style }: S
 const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
-    padding: 16,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -1091,6 +1104,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
+    paddingTop: 40,
   },
   bottomSheetContainer: {
     width: '100%',
@@ -1099,12 +1113,15 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
     maxHeight: '85%',
+    paddingBottom: 28,
   },
   floatingModalContainer: {
     width: '90%',
     alignSelf: 'center',
     marginVertical: 'auto',
     maxHeight: '80%',
+    marginTop: 40,
+    marginBottom: 40,
   },
   handleContainer: {
     alignItems: 'center',
@@ -1196,6 +1213,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
     backgroundColor: 'rgba(0,0,0,0.5)',
+    paddingTop: 40,
   },
   dropdownScrim: { flex: 1 },
   dropdownModalContent: {
@@ -1309,25 +1327,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 14,
   },
-  ringContainer: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    borderWidth: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
+  gaugeTrack: {
+    height: 6,
+    width: '100%',
+    overflow: 'hidden',
   },
-  ringFill: {
-    position: 'absolute',
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    borderWidth: 6,
-  },
-  ringCenterText: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  gaugeTrackFill: {
+    height: '100%',
   },
   gaugeSubGrid: {
     flexDirection: 'row',
@@ -1375,13 +1381,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
     backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    paddingTop: 40,
   },
   sheetScrim: {
     flex: 1,
   },
   sheetContainer: {
     width: '100%',
-    paddingBottom: 24,
+    paddingBottom: 28,
     borderTopWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
   },
@@ -1598,22 +1605,24 @@ export function BentoCard({
 }: BentoCardProps) {
   const { colors, isDark, radius, spacing, fontSize, iconStrokeWidth, shadow } = useTheme();
 
+  // Kept as a plain surface + border across variants — status/emphasis now reads through
+  // the icon tint and badge color instead of flooding the whole card with a tinted background.
   const getVariantStyles = (): ViewStyle => {
     switch (variant) {
       case 'accent':
         return {
-          backgroundColor: isDark ? 'rgba(245, 158, 11, 0.08)' : '#FFFBEB',
-          borderColor: isDark ? 'rgba(245, 158, 11, 0.3)' : '#FDE68A',
+          backgroundColor: colors.surface,
+          borderColor: colors.warning,
         };
       case 'glass':
         return {
-          backgroundColor: isDark ? 'rgba(11, 30, 56, 0.75)' : 'rgba(255, 255, 255, 0.85)',
-          borderColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(15, 23, 42, 0.08)',
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
         };
       case 'highlight':
         return {
-          backgroundColor: isDark ? 'rgba(13, 148, 136, 0.08)' : '#F0FDF4',
-          borderColor: isDark ? 'rgba(13, 148, 136, 0.3)' : '#BBF7D0',
+          backgroundColor: colors.surface,
+          borderColor: colors.success,
         };
       default:
         return {
@@ -1645,15 +1654,19 @@ export function BentoCard({
               style={[
                 styles.bentoIconBadge,
                 {
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : colors.primaryLight,
+                  backgroundColor: isDark
+                    ? 'rgba(255,255,255,0.08)'
+                    : iconColor
+                    ? `${iconColor}18`
+                    : colors.accentLight || colors.primaryLight,
                   borderRadius: radius.md,
                 },
               ]}
             >
               <Feather
                 name={icon}
-                size={15}
-                color={iconColor || (isDark ? colors.gold : colors.primary)}
+                size={16}
+                color={iconColor || (isDark ? colors.gold : colors.accent || colors.primary)}
                 strokeWidth={iconStrokeWidth}
               />
             </View>
@@ -1664,7 +1677,7 @@ export function BentoCard({
             <Pill
               label={badge}
               tone={badgeTone}
-              style={{ paddingHorizontal: 7, paddingVertical: 2 }}
+              style={{ paddingHorizontal: 8, paddingVertical: 2 }}
             />
           )}
         </View>
@@ -1799,8 +1812,9 @@ export function CircularProgressGauge({
   subScores = [],
   onPress,
 }: CircularProgressGaugeProps) {
-  const { colors, isDark, radius, spacing, fontSize } = useTheme();
+  const { colors, radius, spacing, fontSize } = useTheme();
   const pct = Math.min(100, Math.round((score / maxScore) * 100));
+  const barColor = pct >= 85 ? colors.success : pct >= 70 ? colors.warning : colors.danger;
 
   return (
     <Pressable
@@ -1809,8 +1823,9 @@ export function CircularProgressGauge({
       style={({ pressed }) => [
         styles.gaugeContainer,
         {
-          backgroundColor: isDark ? 'rgba(11, 30, 56, 0.85)' : '#FFFFFF',
-          borderColor: isDark ? 'rgba(245, 158, 11, 0.4)' : '#FDE68A',
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+          borderWidth: 1,
           borderRadius: radius.xl,
           padding: spacing.md,
         },
@@ -1819,8 +1834,8 @@ export function CircularProgressGauge({
     >
       <View style={styles.gaugeHeader}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <View style={[styles.gaugeShieldIcon, { backgroundColor: isDark ? 'rgba(245,158,11,0.2)' : '#FEF3C7' }]}>
-            <Feather name="shield" size={14} color="#D97706" />
+          <View style={[styles.gaugeShieldIcon, { backgroundColor: colors.primaryLight }]}>
+            <Feather name="shield" size={14} color={colors.primary} />
           </View>
           <Text style={{ fontSize: 11, fontWeight: '900', color: colors.text, letterSpacing: 0.6 }}>
             SPPG KITCHEN READINESS INDEX
@@ -1830,30 +1845,21 @@ export function CircularProgressGauge({
       </View>
 
       <View style={styles.gaugeCenterRow}>
-        {/* Visual Progress Arc Ring Simulation */}
-        <View style={[styles.ringContainer, { borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0' }]}>
-          <View
-            style={[
-              styles.ringFill,
-              {
-                borderColor: pct >= 85 ? colors.success : pct >= 70 ? colors.warning : colors.danger,
-                borderTopColor: 'transparent',
-                borderLeftColor: 'transparent',
-                transform: [{ rotate: `${(pct / 100) * 360}deg` }],
-              },
-            ]}
-          />
-          <View style={styles.ringCenterText}>
-            <Text style={{ fontSize: 26, fontWeight: '900', color: colors.text }}>{score}</Text>
-            <Text style={{ fontSize: 9.5, fontWeight: '800', color: colors.textMuted }}>/ {maxScore}</Text>
-          </View>
+        <View style={{ alignItems: 'center', width: 64 }}>
+          <Text style={{ fontSize: 26, fontWeight: '900', color: colors.text }}>{score}</Text>
+          <Text style={{ fontSize: 9.5, fontWeight: '800', color: colors.textMuted }}>/ {maxScore}</Text>
         </View>
 
         <View style={{ flex: 1, gap: 4 }}>
           <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.text }}>{label}</Text>
-          <Text style={{ fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>
-            Terverifikasi IoT suhu, SOP masak 5 tahap, dan inspeksi HACCP aktif.
-          </Text>
+          <View style={[styles.gaugeTrack, { backgroundColor: colors.border, borderRadius: radius.pill }]}>
+            <View
+              style={[
+                styles.gaugeTrackFill,
+                { width: `${pct}%`, backgroundColor: barColor, borderRadius: radius.pill },
+              ]}
+            />
+          </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
             <Feather name="check-circle" size={12} color={colors.success} />
             <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.success }}>

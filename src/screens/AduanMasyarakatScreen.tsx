@@ -68,26 +68,26 @@ export default function AduanMasyarakatScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView contentContainerStyle={{ padding: spacing.md, gap: spacing.md }}>
+      <ScrollView contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: 110 }}>
         {/* Banner */}
-        <Card style={{ backgroundColor: colors.primary, gap: spacing.xs }}>
+        <Card style={{ backgroundColor: colors.surface, borderColor: isDark ? colors.border : '#BFDBFE', borderWidth: 1.5, gap: spacing.xs, borderRadius: radius.xl }}>
           <View style={styles.rowBetween}>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: fontSize.lg, fontWeight: '800', color: colors.textInverse }}>
+              <Text style={{ fontSize: fontSize.lg, fontWeight: '900', color: colors.text }}>
                 MBG Citizen Feedback & Aduan
               </Text>
-              <Text style={{ fontSize: fontSize.xs, color: colors.primaryLight, marginTop: 2 }}>
+              <Text style={{ fontSize: fontSize.xs, color: colors.textMuted, marginTop: 2 }}>
                 Layanan feedback publik & AI Topic Clustering program Makan Bergizi Gratis
               </Text>
             </View>
-            <View style={[styles.iconBox, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-              <Feather name="message-square" size={24} color={colors.textInverse} strokeWidth={iconStrokeWidth} />
+            <View style={[styles.iconBox, { backgroundColor: isDark ? 'rgba(56, 189, 248, 0.15)' : colors.primaryLight }]}>
+              <Feather name="message-square" size={22} color={colors.primary} strokeWidth={iconStrokeWidth} />
             </View>
           </View>
 
-          <View style={[styles.demoBadge, { backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: radius.sm }]}>
-            <Feather name="cpu" size={12} color="#FDE047" strokeWidth={2} />
-            <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.textInverse }}>
+          <View style={[styles.demoBadge, { backgroundColor: isDark ? 'rgba(56, 189, 248, 0.15)' : colors.primaryLight, borderRadius: radius.sm }]}>
+            <Feather name="cpu" size={12} color={colors.primary} strokeWidth={2} />
+            <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: colors.primary }}>
               AI NLP Sentiment & Clustering Engine Active
             </Text>
           </View>
@@ -196,7 +196,7 @@ export default function AduanMasyarakatScreen() {
             { id: 'ditindaklanjuti', label: 'Ditindaklanjuti' },
             { id: 'selesai', label: 'Selesai' },
           ].map((tab) => {
-            const active = activeTab === tab.id;
+            const isActive = activeTab === tab.id;
             return (
               <Pressable
                 key={tab.id}
@@ -204,13 +204,13 @@ export default function AduanMasyarakatScreen() {
                 style={[
                   styles.tabChip,
                   {
-                    backgroundColor: active ? colors.primary : colors.surface,
-                    borderColor: active ? colors.primary : colors.border,
+                    backgroundColor: isActive ? (colors.accent || colors.primary) : colors.surface,
+                    borderColor: isActive ? (colors.accent || colors.primary) : colors.border,
                     borderRadius: radius.pill,
                   },
                 ]}
               >
-                <Text style={{ fontSize: fontSize.xs, fontWeight: active ? '700' : '500', color: active ? colors.textInverse : colors.text }}>
+                <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: isActive ? '#FFFFFF' : colors.text }}>
                   {tab.label}
                 </Text>
               </Pressable>
@@ -429,7 +429,7 @@ const styles = StyleSheet.create({
   tabChip: { paddingHorizontal: 14, paddingVertical: 8, borderWidth: 1 },
   imageWrapper: { width: '100%', marginTop: 4 },
   reporterBar: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  tanggapanBox: { borderLeftWidth: 3, borderLeftColor: '#0284C7' },
+  tanggapanBox: { borderWidth: 1, borderColor: '#BAE6FD', borderRadius: 14, padding: 12 },
   responseForm: { borderTopWidth: 1 },
   statusChip: { flex: 1, paddingVertical: 6, alignItems: 'center', borderWidth: 1 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 16 },

@@ -31,7 +31,7 @@ function daysUntil(tanggal: string): number {
 export default function GudangScreen({ navigation }: any) {
   const { role, bahanBakuList, mitraList, mutasiStokList } = useApp();
   const { sppgInScope } = useScopedData();
-  const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark, shadow } = useTheme();
+  const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark } = useTheme();
 
   // Terpisah: Filter Status / FEFO vs Filter Kategori
   const [statusFilter, setStatusFilter] = useState<'semua' | 'fefo' | 'kritis' | 'aman'>('semua');
@@ -134,15 +134,17 @@ export default function GudangScreen({ navigation }: any) {
 
       {/* 2. FEFO Priority Warning Banner */}
       {expiringSoonList.length > 0 && (
-        <Card variant="accent" style={{ gap: 6, borderColor: colors.warning, backgroundColor: isDark ? 'rgba(217, 119, 6, 0.15)' : '#FFFBEB' }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <Feather name="clock" size={16} color={colors.warning} />
+        <Card style={{ gap: 8 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <View style={[styles.miniIconWrap, { backgroundColor: colors.warningBg }]}>
+              <Feather name="clock" size={15} color={colors.warning} />
+            </View>
             <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.warning, flex: 1 }}>
               REKOMENDASI FEFO (FIRST-EXPIRED, FIRST-OUT)
             </Text>
-            <Pill label={`${expiringSoonList.length} Bahan Prioritas`} tone="warning" />
+            <Pill label={`${expiringSoonList.length} Prioritas`} tone="warning" />
           </View>
-          <Text style={{ fontSize: fontSize.xs, color: colors.text, fontWeight: '700' }}>
+          <Text style={{ fontSize: 11.5, color: colors.text, fontWeight: '700' }}>
             Bahan berikut wajib diprioritaskan untuk dimasak hari ini sebelum kadaluarsa:
           </Text>
           <Text style={{ fontSize: 11, color: colors.textMuted }}>
@@ -152,29 +154,23 @@ export default function GudangScreen({ navigation }: any) {
       )}
 
       {/* Quick IoT Cold Storage & Freezer Telemetry Card */}
-      <Card
-        onPress={() => navigation.navigate('GudangKondisi')}
-        style={{
-          gap: 10,
-          borderWidth: 1.5,
-          borderColor: colors.primary,
-          backgroundColor: isDark ? 'rgba(30, 41, 59, 0.4)' : '#F0FDF4',
-        }}
-      >
+      <Card onPress={() => navigation.navigate('GudangKondisi')} style={{ gap: 12 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <Feather name="cpu" size={16} color={colors.primary} />
-            <Text style={{ fontSize: fontSize.xs, fontWeight: '900', color: colors.text }}>
-              KONTROL IoT RUANG PENDINGIN & FREEZER
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <View style={[styles.miniIconWrap, { backgroundColor: colors.successBg }]}>
+              <Feather name="cpu" size={16} color={colors.success} />
+            </View>
+            <Text style={{ fontSize: 13, fontWeight: '900', color: colors.text }}>
+              KONTROL IoT PENDINGIN & FREEZER
             </Text>
           </View>
-          <Pill label="Buka Panel IoT >" tone="primary" icon="sliders" />
+          <Pill label="Buka Panel IoT >" tone="success" icon="sliders" />
         </View>
 
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <View style={{ flex: 1, padding: 8, backgroundColor: colors.surface, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, alignItems: 'center' }}>
-            <Text style={{ fontSize: 10, color: colors.textMuted, fontWeight: '700' }}>CHILLER DAGING</Text>
-            <Text style={{ fontSize: 16, fontWeight: '900', color: colors.success }}>
+          <View style={[styles.telemetryBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
+            <Text style={{ fontSize: 9.5, color: colors.textMuted, fontWeight: '800' }}>CHILLER DAGING</Text>
+            <Text style={{ fontSize: 16, fontWeight: '900', color: colors.success, marginTop: 2 }}>
               {telemetry.chillerDaging > 0 ? `+${telemetry.chillerDaging.toFixed(1)}` : telemetry.chillerDaging.toFixed(1)}°C
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 }}>
@@ -182,9 +178,9 @@ export default function GudangScreen({ navigation }: any) {
               <Text style={{ fontSize: 9.5, color: colors.success, fontWeight: '700' }}>Terkunci</Text>
             </View>
           </View>
-          <View style={{ flex: 1, padding: 8, backgroundColor: colors.surface, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, alignItems: 'center' }}>
-            <Text style={{ fontSize: 10, color: colors.textMuted, fontWeight: '700' }}>DEEP FREEZER</Text>
-            <Text style={{ fontSize: 16, fontWeight: '900', color: colors.primary }}>
+          <View style={[styles.telemetryBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
+            <Text style={{ fontSize: 9.5, color: colors.textMuted, fontWeight: '800' }}>DEEP FREEZER</Text>
+            <Text style={{ fontSize: 16, fontWeight: '900', color: colors.info, marginTop: 2 }}>
               {telemetry.deepFreezer.toFixed(1)}°C
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 }}>
@@ -192,9 +188,9 @@ export default function GudangScreen({ navigation }: any) {
               <Text style={{ fontSize: 9.5, color: colors.success, fontWeight: '700' }}>Terkunci</Text>
             </View>
           </View>
-          <View style={{ flex: 1, padding: 8, backgroundColor: colors.surface, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, alignItems: 'center' }}>
-            <Text style={{ fontSize: 10, color: colors.textMuted, fontWeight: '700' }}>CHILLER SAYUR</Text>
-            <Text style={{ fontSize: 16, fontWeight: '900', color: colors.success }}>
+          <View style={[styles.telemetryBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
+            <Text style={{ fontSize: 9.5, color: colors.textMuted, fontWeight: '800' }}>CHILLER SAYUR</Text>
+            <Text style={{ fontSize: 16, fontWeight: '900', color: colors.success, marginTop: 2 }}>
               {telemetry.chillerSayur > 0 ? `+${telemetry.chillerSayur.toFixed(1)}` : telemetry.chillerSayur.toFixed(1)}°C
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 }}>
@@ -207,9 +203,6 @@ export default function GudangScreen({ navigation }: any) {
 
       {/* 3. FILTER GROUP 1: Status & Prioritas Stok */}
       <View style={{ gap: 6 }}>
-        <Text style={[styles.filterGroupLabel, { color: colors.textMuted }]}>
-          1. STATUS & PRIORITAS KELAYAKAN
-        </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
           {statusFilterOptions.map((opt) => {
             const isSelected = statusFilter === opt.key;
@@ -220,15 +213,15 @@ export default function GudangScreen({ navigation }: any) {
                 style={[
                   styles.chip,
                   {
-                    borderColor: isSelected ? colors.primary : colors.border,
+                    borderColor: isSelected ? (isDark ? colors.gold : colors.primary) : colors.border,
                     borderRadius: radius.pill,
-                    backgroundColor: isSelected ? colors.primary : colors.surface,
+                    backgroundColor: isSelected ? (isDark ? colors.gold : colors.primary) : colors.surface,
                   },
                 ]}
               >
                 <Text
                   style={{
-                    color: isSelected ? colors.textInverse : colors.text,
+                    color: isSelected ? (isDark ? '#07101E' : '#FFFFFF') : colors.text,
                     fontWeight: isSelected ? '800' : '600',
                     fontSize: fontSize.xs,
                   }}
@@ -243,9 +236,6 @@ export default function GudangScreen({ navigation }: any) {
 
       {/* 4. FILTER GROUP 2: Kategori Bahan Baku */}
       <View style={{ gap: 6 }}>
-        <Text style={[styles.filterGroupLabel, { color: colors.textMuted }]}>
-          2. KATEGORI BAHAN POKOK & GIZI
-        </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
           {KATEGORI_LIST.map((k) => {
             const isSelected = kategoriFilter === k;
@@ -256,15 +246,15 @@ export default function GudangScreen({ navigation }: any) {
                 style={[
                   styles.chip,
                   {
-                    borderColor: isSelected ? (isDark ? colors.gold : colors.primary) : colors.border,
+                    borderColor: isSelected ? (isDark ? colors.gold : colors.accent) : colors.border,
                     borderRadius: radius.pill,
-                    backgroundColor: isSelected ? (isDark ? colors.primary : colors.primaryLight) : colors.surface,
+                    backgroundColor: isSelected ? (isDark ? colors.gold : colors.accent) : colors.surface,
                   },
                 ]}
               >
                 <Text
                   style={{
-                    color: isSelected ? (isDark ? colors.textInverse : colors.primary) : colors.text,
+                    color: isSelected ? (isDark ? '#07101E' : '#FFFFFF') : colors.text,
                     fontWeight: isSelected ? '800' : '600',
                     fontSize: fontSize.xs,
                   }}
@@ -310,7 +300,7 @@ export default function GudangScreen({ navigation }: any) {
                 style={{
                   gap: 10,
                   borderColor: isUrgentFefo ? colors.danger : isExpiringSoon ? colors.warning : colors.border,
-                  borderWidth: isUrgentFefo || isExpiringSoon ? 1.5 : 1,
+                  borderWidth: 1,
                 }}
               >
                 {/* Header Row: Foto/Icon + Nama Bahan + Kategori & Rak */}
@@ -375,7 +365,7 @@ export default function GudangScreen({ navigation }: any) {
                 )}
 
                 {/* Supplier Dedicated Panel */}
-                <View style={[styles.supplierPanel, { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC', borderColor: colors.border, borderRadius: radius.md }]}>
+                <View style={[styles.supplierPanel, { backgroundColor: colors.background, borderColor: colors.border, borderRadius: radius.md }]}>
                   <View style={[styles.supplierIconBox, { backgroundColor: colors.primaryLight }]}>
                     <Feather name="truck" size={16} color={colors.primary} />
                   </View>
@@ -498,6 +488,8 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   iconWrap: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
+  miniIconWrap: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  telemetryBox: { flex: 1, padding: 10, borderRadius: 14, borderWidth: 1, alignItems: 'center' },
   filterGroupLabel: { fontSize: 10.5, fontWeight: '800', letterSpacing: 0.5 },
   chipRow: { gap: 8, paddingBottom: 4 },
   chip: { borderWidth: 1, paddingHorizontal: 14, paddingVertical: 8 },

@@ -186,13 +186,13 @@ export default function ChecklistHarianScreen() {
                 style={[
                   styles.divisionTab,
                   {
-                    backgroundColor: isActive ? colors.primary : colors.surface,
-                    borderColor: isActive ? colors.primary : colors.border,
+                    backgroundColor: isActive ? (isDark ? colors.gold : colors.accent) : colors.surface,
+                    borderColor: isActive ? (isDark ? colors.gold : colors.accent) : colors.border,
                     borderRadius: radius.pill,
                   },
                 ]}
               >
-                <Text style={{ fontSize: 11, fontWeight: '700', color: isActive ? colors.textInverse : colors.text }}>
+                <Text style={{ fontSize: 11.5, fontWeight: '800', color: isActive ? (isDark ? '#07101E' : '#FFFFFF') : colors.text }}>
                   {div.label}
                 </Text>
               </Pressable>
@@ -212,14 +212,14 @@ export default function ChecklistHarianScreen() {
               style={[
                 styles.dateChip,
                 {
-                  backgroundColor: isSelected ? colors.primary : colors.surface,
-                  borderColor: isSelected ? colors.primary : colors.border,
+                  backgroundColor: isSelected ? (isDark ? colors.gold : colors.primary) : colors.surface,
+                  borderColor: isSelected ? (isDark ? colors.gold : colors.primary) : colors.border,
                   borderRadius: radius.pill,
                 },
               ]}
             >
-              <Feather name="calendar" size={13} color={isSelected ? colors.textInverse : colors.textMuted} />
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: isSelected ? colors.textInverse : colors.text }}>
+              <Feather name="calendar" size={13} color={isSelected ? (isDark ? '#07101E' : '#FFFFFF') : colors.textMuted} />
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: isSelected ? (isDark ? '#07101E' : '#FFFFFF') : colors.text }}>
                 {opt.label} ({opt.dateStr.slice(8)})
               </Text>
             </Pressable>
@@ -253,8 +253,8 @@ export default function ChecklistHarianScreen() {
                   key={item.id}
                   style={[
                     styles.todoCard,
-                    isDone && { borderColor: colors.success, backgroundColor: isDark ? 'rgba(13,148,136,0.08)' : '#F0FDF4' },
-                    isFailed && { borderColor: colors.danger, backgroundColor: isDark ? 'rgba(225,29,72,0.08)' : '#FFF1F2' },
+                    isDone && { borderColor: colors.success },
+                    isFailed && { borderColor: colors.danger },
                   ]}
                 >
                   <View style={styles.todoRow}>

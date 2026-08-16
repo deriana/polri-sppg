@@ -63,7 +63,7 @@ function AppContent() {
   return (
     <NavigationContainer theme={navigationTheme}>
       <RootNavigator />
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.surface} />
     </NavigationContainer>
   );
 }

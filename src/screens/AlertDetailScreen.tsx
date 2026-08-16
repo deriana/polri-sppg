@@ -155,7 +155,7 @@ function DetailRow({ icon, label, value }: { icon: keyof typeof Feather.glyphMap
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
+  content: { padding: 16, gap: 12, paddingBottom: 110 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   title: { fontWeight: '800' },
   detailRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },

@@ -11,7 +11,7 @@ import { computePayroll, currentPeriode, formatRupiah } from '../utils/payroll';
 
 export default function PayrollScreen({ navigation }: any) {
   const { role } = useApp();
-  const { colors, spacing, fontSize, iconStrokeWidth, radius } = useTheme();
+  const { colors, spacing, fontSize, iconStrokeWidth, radius, isDark, shadow } = useTheme();
   const { usersInScope } = useScopedData();
 
   if (!role || !ROLE_PERMISSIONS[role].canManageStaff) {
@@ -27,7 +27,7 @@ export default function PayrollScreen({ navigation }: any) {
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
-      <View style={[styles.disclaimer, { backgroundColor: colors.primaryLight, borderRadius: radius.md }]}>
+      <View style={[styles.disclaimer, { backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border }]}>
         <Feather name="info" size={16} color={colors.primary} strokeWidth={iconStrokeWidth} />
         <Text style={{ color: colors.text, fontSize: fontSize.xs, flex: 1 }}>
           Simulasi payroll — gaji pokok mengikuti kisaran umum posisi SPPG program MBG, bukan data riil sistem penggajian.
@@ -36,9 +36,9 @@ export default function PayrollScreen({ navigation }: any) {
 
       <SectionTitle>Payroll Periode {currentPeriode()}</SectionTitle>
 
-      <Card style={{ gap: spacing.xs }}>
-        <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>Total Payroll {staff.length} Pegawai</Text>
-        <Text style={{ color: colors.primary, fontWeight: '800', fontSize: fontSize.lg }}>{formatRupiah(totalPayroll)}</Text>
+      <Card style={{ gap: spacing.xs, borderRadius: radius.xl, ...shadow.card }}>
+        <Text style={{ color: colors.textMuted, fontSize: fontSize.xs, fontWeight: '700' }}>Total Payroll {staff.length} Pegawai</Text>
+        <Text style={{ color: isDark ? colors.gold : colors.primary, fontWeight: '900', fontSize: 24 }}>{formatRupiah(totalPayroll)}</Text>
       </Card>
 
       {staff.length === 0 ? (
@@ -47,13 +47,13 @@ export default function PayrollScreen({ navigation }: any) {
         staff.map((u) => {
           const payroll = computePayroll(u);
           return (
-            <Card key={u.id} style={{ gap: spacing.xs }} onPress={() => navigation.navigate('PayrollDetail', { userId: u.id })}>
-              <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+            <Card key={u.id} style={{ gap: spacing.xs, borderRadius: radius.lg, ...shadow.card }} onPress={() => navigation.navigate('PayrollDetail', { userId: u.id })}>
+              <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
                 {u.fotoProfil ? (
                   <Image source={{ uri: u.fotoProfil }} style={{ width: 44, height: 44, borderRadius: 22 }} />
                 ) : (
-                  <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
-                    <Feather name={u.jobdesk ? JOBDESK_ICON[u.jobdesk] : 'user'} size={20} color={colors.primary} />
+                  <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: isDark ? 'rgba(56, 189, 248, 0.15)' : colors.accentLight, alignItems: 'center', justifyContent: 'center' }}>
+                    <Feather name={u.jobdesk ? JOBDESK_ICON[u.jobdesk] : 'user'} size={20} color={isDark ? '#38BDF8' : colors.accent} />
                   </View>
                 )}
                 <View style={{ flex: 1 }}>
@@ -61,8 +61,8 @@ export default function PayrollScreen({ navigation }: any) {
                   <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }} numberOfLines={1}>{payroll.jabatanLabel}</Text>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
-                  <Pill label={formatRupiah(payroll.totalGaji)} tone="success" />
-                  <Text style={{ color: colors.primary, fontSize: 10, fontWeight: '700', marginTop: 4 }}>Lihat Slip ➔</Text>
+                  <Pill label={formatRupiah(payroll.totalGaji)} tone="emerald" />
+                  <Text style={{ color: isDark ? colors.gold : colors.accent, fontSize: 10.5, fontWeight: '800', marginTop: 4 }}>Lihat Slip ➔</Text>
                 </View>
               </View>
             </Card>
@@ -75,6 +75,6 @@ export default function PayrollScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
+  content: { padding: 16, gap: 12, paddingBottom: 110 },
   disclaimer: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 10 },
 });

@@ -171,7 +171,7 @@ export default function RiwayatPermintaanScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
+  content: { padding: 16, gap: 12, paddingBottom: 110 },
   rowTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   chip: { borderWidth: 1, paddingHorizontal: 12, paddingVertical: 6 },
   stepBar: { flexDirection: 'row', alignItems: 'center', padding: 10, marginVertical: 4, justifyContent: 'space-between' },

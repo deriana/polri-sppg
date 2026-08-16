@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   severityBtn: {
     flex: 1,
     padding: 10,
-    borderWidth: 1.5,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 2,
