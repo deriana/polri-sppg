@@ -453,14 +453,14 @@ export default function PeralatanScreen({ route }: any) {
                 style={[
                   styles.chip,
                   {
-                    backgroundColor: isActive ? (isDark ? colors.gold : colors.primary) : colors.surface,
-                    borderColor: isActive ? (isDark ? colors.gold : colors.primary) : colors.border,
+                    backgroundColor: isActive ? colors.primary : colors.surface,
+                    borderColor: isActive ? colors.primary : colors.border,
                     borderRadius: radius.pill,
                   },
                 ]}
               >
-                <Feather name={kat.icon as any} size={14} color={isActive ? '#000000' : colors.textMuted} strokeWidth={iconStrokeWidth} />
-                <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: isActive ? '#000000' : colors.text }}>
+                <Feather name={kat.icon as any} size={14} color={isActive ? '#FFFFFF' : colors.textMuted} strokeWidth={iconStrokeWidth} />
+                <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: isActive ? '#FFFFFF' : colors.text }}>
                   {kat.label}
                 </Text>
               </Pressable>
