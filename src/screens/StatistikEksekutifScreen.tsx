@@ -247,19 +247,19 @@ export default function StatistikEksekutifScreen({ navigation }: any) {
           <title>Laporan Statistik Eksekutif SPPG</title>
           <style>
             body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 28px; color: #0F172A; line-height: 1.5; }
-            .header { border-bottom: 3px solid #0B2240; padding-bottom: 12px; margin-bottom: 20px; }
-            .badge { display: inline-block; padding: 4px 10px; background: #0B2240; color: #FFF; font-weight: bold; border-radius: 4px; font-size: 11px; }
-            .title { font-size: 22px; font-weight: 800; color: #0B2240; margin: 6px 0 2px 0; }
+            .header { border-bottom: 3px solid #2563EB; padding-bottom: 12px; margin-bottom: 20px; }
+            .badge { display: inline-block; padding: 4px 10px; background: #2563EB; color: #FFF; font-weight: bold; border-radius: 4px; font-size: 11px; }
+            .title { font-size: 22px; font-weight: 800; color: #2563EB; margin: 6px 0 2px 0; }
             .subtitle { font-size: 13px; color: #64748B; margin: 0; }
             .kpi-grid { display: flex; gap: 12px; margin: 16px 0; }
             .kpi-card { flex: 1; border: 1px solid #CBD5E1; border-radius: 8px; padding: 12px; background: #F8FAFC; text-align: center; }
-            .kpi-val { font-size: 20px; font-weight: 800; color: #0B2240; }
+            .kpi-val { font-size: 20px; font-weight: 800; color: #2563EB; }
             .kpi-lbl { font-size: 11px; color: #64748B; font-weight: bold; margin-top: 2px; }
-            h3 { color: #0B2240; border-bottom: 1px solid #E2E8F0; padding-bottom: 6px; margin-top: 22px; font-size: 15px; }
+            h3 { color: #2563EB; border-bottom: 1px solid #E2E8F0; padding-bottom: 6px; margin-top: 22px; font-size: 15px; }
             table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
-            th { background: #0B2240; color: #FFF; text-align: left; padding: 8px; font-weight: 600; }
+            th { background: #2563EB; color: #FFF; text-align: left; padding: 8px; font-weight: 600; }
             td { padding: 8px; border-bottom: 1px solid #E2E8F0; }
-            .success { color: #0D9488; font-weight: bold; }
+            .success { color: #059669; font-weight: bold; }
             .warning { color: #D97706; font-weight: bold; }
             .footer { margin-top: 36px; padding-top: 16px; border-top: 1px solid #CBD5E1; display: flex; justify-content: space-between; font-size: 11px; color: #64748B; }
           </style>

@@ -229,31 +229,31 @@ export default function PresensiScreen({ navigation }: any) {
       {mainTab === 'personal' && (
         <>
           {/* Header Profile & Unit */}
-          <Card style={{ backgroundColor: colors.primary, gap: spacing.xs }}>
+          <Card style={{ backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, gap: spacing.xs, borderRadius: radius.xl }}>
             <View style={styles.rowBetween}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
                 {currentUser.fotoProfil ? (
                   <Image source={{ uri: currentUser.fotoProfil }} style={styles.profileAvatar} />
                 ) : (
-                  <View style={[styles.profileAvatar, { backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }]}>
-                    <Feather name="user" size={24} color="#FFFFFF" />
+                  <View style={[styles.profileAvatar, { backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' }]}>
+                    <Feather name="user" size={24} color={colors.primary} />
                   </View>
                 )}
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: fontSize.md, fontWeight: '900', color: colors.textInverse }}>
+                  <Text style={{ fontSize: fontSize.md, fontWeight: '900', color: colors.text }}>
                     {currentUser.nama}
                   </Text>
-                  <Text style={{ fontSize: fontSize.xs, color: colors.primaryLight, fontWeight: '700', marginTop: 1 }}>
+                  <Text style={{ fontSize: fontSize.xs, color: colors.primary, fontWeight: '700', marginTop: 1 }}>
                     {ROLE_LABEL[role] || 'Staf Operasional SPPG'}
                   </Text>
-                  <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>
+                  <Text style={{ fontSize: 11, color: colors.textMuted, marginTop: 2 }}>
                     Unit: {currentSppg?.nama || 'SPPG Bandung'}
                   </Text>
                 </View>
               </View>
-              <View style={[styles.badgePill, { backgroundColor: 'rgba(255,255,255,0.18)' }]}>
-                <Feather name="shield" size={14} color="#FFFFFF" />
-                <Text style={{ fontSize: 10.5, fontWeight: '800', color: '#FFFFFF' }}>Shift Pagi</Text>
+              <View style={[styles.badgePill, { backgroundColor: colors.primaryLight, borderColor: colors.border, borderWidth: 1 }]}>
+                <Feather name="shield" size={13} color={colors.primary} />
+                <Text style={{ fontSize: 10.5, fontWeight: '800', color: colors.primary }}>Shift Pagi</Text>
               </View>
             </View>
           </Card>

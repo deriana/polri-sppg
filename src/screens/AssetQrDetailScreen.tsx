@@ -131,24 +131,24 @@ export default function AssetQrDetailScreen({ route }: AssetQrDetailScreenProps)
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       {/* Header Card */}
-      <Card style={{ backgroundColor: isDark ? '#0F1D33' : '#0A2342', borderColor: isDark ? '#1E3250' : '#1E293B', borderWidth: 1, gap: spacing.xs, borderRadius: radius.xl }}>
+      <Card style={{ backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, gap: spacing.xs, borderRadius: radius.xl }}>
         <View style={styles.rowBetween}>
           <View style={{ flex: 1, gap: 2 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#F59E0B' }} />
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: '#FBBF24', letterSpacing: 0.5 }}>
+              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.gold }} />
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.gold, letterSpacing: 0.5 }}>
                 PASPOR ASET BER-QR
               </Text>
             </View>
-            <Text style={{ fontSize: fontSize.lg, fontWeight: '900', color: '#FFFFFF' }}>
+            <Text style={{ fontSize: fontSize.lg, fontWeight: '900', color: colors.text }}>
               Detail Aset Peralatan
             </Text>
-            <Text style={{ fontSize: fontSize.xs, color: '#94A3B8' }}>
+            <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>
               Informasi lengkap peralatan SPPG berdasarkan QR Code terverifikasi
             </Text>
           </View>
-          <View style={[styles.iconBox, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
-            <Feather name="clipboard" size={22} color="#FBBF24" strokeWidth={iconStrokeWidth} />
+          <View style={[styles.iconBox, { backgroundColor: colors.primaryLight }]}>
+            <Feather name="clipboard" size={22} color={colors.primary} strokeWidth={iconStrokeWidth} />
           </View>
         </View>
       </Card>

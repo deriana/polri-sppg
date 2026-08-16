@@ -164,45 +164,45 @@ export default function PeralatanScreen({ route }: any) {
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       {/* Header Summary */}
-      <Card style={{ backgroundColor: isDark ? '#0F1D33' : '#0A2342', borderColor: isDark ? '#1E3250' : '#1E293B', borderWidth: 1, gap: spacing.sm, borderRadius: radius.xl }}>
+      <Card style={{ backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, gap: spacing.sm, borderRadius: radius.xl }}>
         <View style={styles.rowBetween}>
           <View style={{ flex: 1, gap: 2 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#F59E0B' }} />
-              <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: '#FBBF24', letterSpacing: 0.5 }}>
+              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.gold }} />
+              <Text style={{ fontSize: fontSize.xs, fontWeight: '800', color: colors.gold, letterSpacing: 0.5 }}>
                 INVENTARIS PRESISI SPPG
               </Text>
             </View>
-            <Text style={{ fontSize: fontSize.lg, fontWeight: '900', color: '#FFFFFF' }}>
+            <Text style={{ fontSize: fontSize.lg, fontWeight: '900', color: colors.text }}>
               Aset & Peralatan Dapur
             </Text>
-            <Text style={{ fontSize: fontSize.xs, color: '#94A3B8' }}>
+            <Text style={{ fontSize: fontSize.xs, color: colors.textMuted }}>
               Manajemen Armada, Ompreng Stainless, & Alat Produksi Ber-QR
             </Text>
           </View>
-          <View style={[styles.iconBox, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
-            <Feather name="truck" size={22} color="#FBBF24" strokeWidth={iconStrokeWidth} />
+          <View style={[styles.iconBox, { backgroundColor: colors.primaryLight }]}>
+            <Feather name="truck" size={22} color={colors.primary} strokeWidth={iconStrokeWidth} />
           </View>
         </View>
 
         <View style={[styles.statRow, { marginTop: 2, gap: 8 }]}>
-          <View style={[styles.statColBox, { backgroundColor: 'rgba(255,255,255,0.06)' }]}>
-            <Text style={{ color: '#FFFFFF', fontSize: fontSize.lg, fontWeight: '900' }}>
+          <View style={[styles.statColBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', borderColor: colors.border, borderWidth: 1 }]}>
+            <Text style={{ color: colors.text, fontSize: fontSize.lg, fontWeight: '900' }}>
               {peralatanInScope.length}
             </Text>
-            <Text style={{ color: '#94A3B8', fontSize: 10.5, fontWeight: '600' }}>Kategori Unit</Text>
+            <Text style={{ color: colors.textMuted, fontSize: 10.5, fontWeight: '600' }}>Kategori Unit</Text>
           </View>
-          <View style={[styles.statColBox, { backgroundColor: 'rgba(16, 185, 129, 0.12)' }]}>
-            <Text style={{ color: '#34D399', fontSize: fontSize.lg, fontWeight: '900' }}>
+          <View style={[styles.statColBox, { backgroundColor: colors.successBg, borderColor: colors.success, borderWidth: 1 }]}>
+            <Text style={{ color: colors.success, fontSize: fontSize.lg, fontWeight: '900' }}>
               {totalReady.toLocaleString('id-ID')}
             </Text>
-            <Text style={{ color: '#A7F3D0', fontSize: 10.5, fontWeight: '600' }}>Unit Ready</Text>
+            <Text style={{ color: colors.success, fontSize: 10.5, fontWeight: '700' }}>Unit Ready</Text>
           </View>
-          <View style={[styles.statColBox, { backgroundColor: totalBermasalah > 0 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(255,255,255,0.06)' }]}>
-            <Text style={{ color: totalBermasalah > 0 ? '#F87171' : '#94A3B8', fontSize: fontSize.lg, fontWeight: '900' }}>
+          <View style={[styles.statColBox, { backgroundColor: totalBermasalah > 0 ? colors.dangerBg : colors.surface, borderColor: totalBermasalah > 0 ? colors.danger : colors.border, borderWidth: 1 }]}>
+            <Text style={{ color: totalBermasalah > 0 ? colors.danger : colors.textMuted, fontSize: fontSize.lg, fontWeight: '900' }}>
               {totalBermasalah}
             </Text>
-            <Text style={{ color: totalBermasalah > 0 ? '#FECACA' : '#94A3B8', fontSize: 10.5, fontWeight: '600' }}>Bermasalah</Text>
+            <Text style={{ color: totalBermasalah > 0 ? colors.danger : colors.textMuted, fontSize: 10.5, fontWeight: '700' }}>Bermasalah</Text>
           </View>
         </View>
 
@@ -211,12 +211,12 @@ export default function PeralatanScreen({ route }: any) {
           onPress={() => navigation.navigate('QrScan')}
           style={({ pressed }) => [
             styles.scanHeaderBtn,
-            { backgroundColor: '#F59E0B' },
+            { backgroundColor: colors.primary },
             pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
           ]}
         >
-          <Feather name="camera" size={16} color="#0A2342" strokeWidth={2.2} />
-          <Text style={styles.scanHeaderBtnText}>Pindai QR Aset / Peralatan</Text>
+          <Feather name="camera" size={16} color="#FFFFFF" strokeWidth={2.2} />
+          <Text style={[styles.scanHeaderBtnText, { color: '#FFFFFF' }]}>Pindai QR Aset / Peralatan</Text>
         </Pressable>
       </Card>
 
@@ -724,7 +724,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   scanHeaderBtnText: {
-    color: '#0A2342',
+    color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '900',
     letterSpacing: 0.2,

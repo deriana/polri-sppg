@@ -36,13 +36,13 @@ export default function SppgDetailScreen({ route }: any) {
 
   return (
     <ScrollView style={[styles.screen, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
-      <View style={[styles.headerCard, { backgroundColor: isDark ? '#0F1D33' : '#0A2342', borderColor: isDark ? '#1E3250' : '#1E293B', borderWidth: 1 }]}>
+      <View style={[styles.headerCard, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: radius.xl }]}>
         {sppg.fotoDapur && (
           <Image source={{ uri: sppg.fotoDapur }} style={{ width: '100%', height: 160, borderRadius: radius.md, marginBottom: 8 }} />
         )}
-        <Text style={{ color: '#FFFFFF', fontWeight: '900', fontSize: fontSize.lg }}>{sppg.nama}</Text>
-        <Text style={{ color: '#CBD5E1', fontSize: fontSize.xs }}>{sppg.alamat}</Text>
-        <Text style={{ color: '#94A3B8', fontSize: fontSize.xs }}>{sppg.wilayahPolres} • {sppg.wilayahPolda}</Text>
+        <Text style={{ color: colors.text, fontWeight: '900', fontSize: fontSize.lg }}>{sppg.nama}</Text>
+        <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>{sppg.alamat}</Text>
+        <Text style={{ color: colors.textMuted, fontSize: fontSize.xs }}>{sppg.wilayahPolres} • {sppg.wilayahPolda}</Text>
         <View style={styles.headerRow}>
           <Pill label={sppg.status === 'aktif' ? 'Aktif' : 'Nonaktif'} tone={sppg.status === 'aktif' ? 'success' : 'neutral'} />
           <Pill label={`${sppg.kapasitasProduksi} porsi/hari`} tone="info" />

@@ -88,15 +88,15 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
           style={({ pressed }) => [
             styles.tabBtn,
             {
-              backgroundColor: activeTab === 'ringkasan' ? (isDark ? colors.gold : '#0A2342') : colors.surface,
-              borderColor: activeTab === 'ringkasan' ? (isDark ? colors.gold : '#0A2342') : colors.border,
+              backgroundColor: activeTab === 'ringkasan' ? (isDark ? colors.gold : colors.primary) : colors.surface,
+              borderColor: activeTab === 'ringkasan' ? (isDark ? colors.gold : colors.primary) : colors.border,
               borderWidth: 1,
             },
             pressed && { opacity: 0.85 },
           ]}
         >
-          <Feather name="info" size={14} color={activeTab === 'ringkasan' ? (isDark ? '#07101E' : '#FFF') : colors.text} />
-          <Text style={{ fontSize: 12, fontWeight: '800', color: activeTab === 'ringkasan' ? (isDark ? '#07101E' : '#FFF') : colors.text }}>
+          <Feather name="info" size={14} color={activeTab === 'ringkasan' ? (isDark ? colors.textInverse : '#FFF') : colors.text} />
+          <Text style={{ fontSize: 12, fontWeight: '800', color: activeTab === 'ringkasan' ? (isDark ? colors.textInverse : '#FFF') : colors.text }}>
             Profil Sekolah
           </Text>
         </Pressable>
@@ -106,15 +106,15 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
           style={({ pressed }) => [
             styles.tabBtn,
             {
-              backgroundColor: activeTab === 'beneficiary' ? (isDark ? colors.gold : '#0A2342') : colors.surface,
-              borderColor: activeTab === 'beneficiary' ? (isDark ? colors.gold : '#0A2342') : colors.border,
+              backgroundColor: activeTab === 'beneficiary' ? (isDark ? colors.gold : colors.primary) : colors.surface,
+              borderColor: activeTab === 'beneficiary' ? (isDark ? colors.gold : colors.primary) : colors.border,
               borderWidth: 1,
             },
             pressed && { opacity: 0.85 },
           ]}
         >
-          <Feather name="bar-chart-2" size={14} color={activeTab === 'beneficiary' ? (isDark ? '#07101E' : '#FFF') : colors.text} />
-          <Text style={{ fontSize: 12, fontWeight: '800', color: activeTab === 'beneficiary' ? (isDark ? '#07101E' : '#FFF') : colors.text }}>
+          <Feather name="bar-chart-2" size={14} color={activeTab === 'beneficiary' ? (isDark ? colors.textInverse : '#FFF') : colors.text} />
+          <Text style={{ fontSize: 12, fontWeight: '800', color: activeTab === 'beneficiary' ? (isDark ? colors.textInverse : '#FFF') : colors.text }}>
             Summary MBG & Presensi
           </Text>
         </Pressable>
@@ -300,13 +300,13 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
                     style={[
                       styles.allergyChip,
                       {
-                        backgroundColor: active ? (isDark ? colors.gold : '#0A2342') : isDark ? colors.surface : '#F1F5F9',
-                        borderColor: active ? (isDark ? colors.gold : '#0A2342') : colors.border,
+                        backgroundColor: active ? (isDark ? colors.gold : colors.primary) : isDark ? colors.surface : '#F1F5F9',
+                        borderColor: active ? (isDark ? colors.gold : colors.primary) : colors.border,
                         borderWidth: 1,
                       },
                     ]}
                   >
-                    <Text style={{ fontSize: 11, fontWeight: '800', color: active ? (isDark ? '#07101E' : '#FFF') : colors.text }}>
+                    <Text style={{ fontSize: 11, fontWeight: '800', color: active ? (isDark ? colors.textInverse : '#FFF') : colors.text }}>
                       {chip.label}
                     </Text>
                   </Pressable>
@@ -333,8 +333,8 @@ export default function SekolahDetailScreen({ navigation, route }: any) {
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, minWidth: 120 }}>
-                      <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: isDark ? '#1E3250' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
-                        <Feather name="user" size={12} color={isDark ? '#FBBF24' : '#0A2342'} />
+                      <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: isDark ? '#1E3250' : colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
+                        <Feather name="user" size={12} color={isDark ? colors.gold : colors.primary} />
                       </View>
                       <Text style={{ fontSize: 12, fontWeight: '800', color: colors.text }}>
                         {item.namaInisial}
